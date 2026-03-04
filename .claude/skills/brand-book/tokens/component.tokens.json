@@ -1,0 +1,784 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Component design tokens -- UI component specs with full state coverage. ~440 tokens across 13 component types. All values reference semantic or primitive tokens.",
+
+  "button": {
+    "$description": "Button component tokens. 3 variants x 5 states x 8 properties = 120 tokens.",
+
+    "primary": {
+      "$description": "Primary action button. Filled style (DE default).",
+      "default": {
+        "background":   { "$value": "{color.brand.primary}", "$type": "color" },
+        "text":         { "$value": "{color.white}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "hover": {
+        "background":   { "$value": "{color.primary.800}", "$type": "color" },
+        "text":         { "$value": "{color.white}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "{shadow.sm}", "$type": "shadow" }
+      },
+      "active": {
+        "background":   { "$value": "{color.primary.900}", "$type": "color" },
+        "text":         { "$value": "{color.white}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "disabled": {
+        "background":   { "$value": "{color.neutral.200}", "$type": "color" },
+        "text":         { "$value": "{color.neutral.400}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "focus": {
+        "background":   { "$value": "{color.brand.primary}", "$type": "color" },
+        "text":         { "$value": "{color.white}", "$type": "color" },
+        "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.medium}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "{color.focus.ring}", "$type": "shadow", "$extensions": { "implementation": "box-shadow: 0 0 0 3px rgba({color.focus.ring}, 0.3)" } }
+      }
+    },
+
+    "secondary": {
+      "$description": "Secondary action button. Outlined style.",
+      "default": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.primary.800}", "$type": "color", "$extensions": { "a11y": "WCAG: text must be >= 4.5:1 on transparent/white bg. primary.800 (#142945) passes at 13.2:1. Never use white text on secondary background." } },
+        "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "hover": {
+        "background":   { "$value": "{color.primary.50}", "$type": "color" },
+        "text":         { "$value": "{color.primary.800}", "$type": "color" },
+        "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "active": {
+        "background":   { "$value": "{color.primary.100}", "$type": "color" },
+        "text":         { "$value": "{color.primary.800}", "$type": "color" },
+        "border":       { "$value": "{color.primary.800}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "disabled": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.neutral.300}", "$type": "color" },
+        "border":       { "$value": "{color.neutral.200}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "focus": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.primary.800}", "$type": "color" },
+        "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.medium}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+        "shadow":       { "$value": "{color.focus.ring}", "$type": "shadow", "$extensions": { "implementation": "box-shadow: 0 0 0 3px rgba({color.focus.ring}, 0.3)" } }
+      }
+    },
+
+    "ghost": {
+      "$description": "Ghost/text button. No background or border.",
+      "default": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.brand.primary}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "0px", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.2}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "hover": {
+        "background":   { "$value": "{color.primary.50}", "$type": "color" },
+        "text":         { "$value": "{color.brand.primary}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "0px", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.2}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "active": {
+        "background":   { "$value": "{color.primary.100}", "$type": "color" },
+        "text":         { "$value": "{color.primary.800}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "0px", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.2}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "disabled": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.neutral.300}", "$type": "color" },
+        "border":       { "$value": "transparent", "$type": "color" },
+        "borderWidth":  { "$value": "0px", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.2}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+        "shadow":       { "$value": "none", "$type": "shadow" }
+      },
+      "focus": {
+        "background":   { "$value": "transparent", "$type": "color" },
+        "text":         { "$value": "{color.brand.primary}", "$type": "color" },
+        "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+        "borderWidth":  { "$value": "{borderWidth.medium}", "$type": "dimension" },
+        "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+        "paddingX":     { "$value": "{space.2}", "$type": "dimension" },
+        "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+        "shadow":       { "$value": "{color.focus.ring}", "$type": "shadow", "$extensions": { "implementation": "box-shadow: 0 0 0 3px rgba({color.focus.ring}, 0.3)" } }
+      }
+    }
+  },
+
+  "card": {
+    "$description": "Card component tokens. 5 variants.",
+
+    "default": {
+      "background":   { "$value": "{color.surface.default}", "$type": "color" },
+      "border":       { "$value": "{color.border.default}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" },
+      "shadow":       { "$value": "none", "$type": "shadow" },
+      "gap":          { "$value": "{spacing.content.md}", "$type": "dimension" }
+    },
+    "elevated": {
+      "background":   { "$value": "{color.surface.default}", "$type": "color" },
+      "border":       { "$value": "transparent", "$type": "color" },
+      "borderWidth":  { "$value": "0px", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" },
+      "shadow":       { "$value": "{shadow.sm}", "$type": "shadow" },
+      "gap":          { "$value": "{spacing.content.md}", "$type": "dimension" }
+    },
+    "outlined": {
+      "background":   { "$value": "transparent", "$type": "color" },
+      "border":       { "$value": "{color.border.default}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" },
+      "shadow":       { "$value": "none", "$type": "shadow" },
+      "gap":          { "$value": "{spacing.content.md}", "$type": "dimension" }
+    },
+    "metric": {
+      "$description": "Metric/KPI display card. For key numbers.",
+      "background":   { "$value": "{color.surface.subtle}", "$type": "color" },
+      "border":       { "$value": "transparent", "$type": "color" },
+      "borderWidth":  { "$value": "0px", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.lg}", "$type": "dimension" },
+      "shadow":       { "$value": "{shadow.sm}", "$type": "shadow" },
+      "gap":          { "$value": "{spacing.content.sm}", "$type": "dimension" },
+      "numberSize":   { "$value": "{font.size.4xl}", "$type": "dimension", "$description": "Size for the metric number." },
+      "numberWeight": { "$value": "{font.weight.bold}", "$type": "fontWeight" },
+      "numberFont":   { "$value": "{font.family.mono}", "$type": "fontFamily" },
+      "labelSize":    { "$value": "{font.size.sm}", "$type": "dimension" },
+      "labelColor":   { "$value": "{color.text.secondary}", "$type": "color" }
+    },
+    "comparison": {
+      "$description": "Side-by-side comparison card. For feature matrices.",
+      "background":   { "$value": "{color.surface.default}", "$type": "color" },
+      "border":       { "$value": "{color.border.default}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" },
+      "shadow":       { "$value": "none", "$type": "shadow" },
+      "headerBg":     { "$value": "{color.primary.50}", "$type": "color" },
+      "highlightBg":  { "$value": "{color.secondary.50}", "$type": "color", "$description": "Highlighted column background." }
+    }
+  },
+
+  "table": {
+    "$description": "Table component tokens. Minimal borders style (DE default).",
+
+    "header": {
+      "background":   { "$value": "{color.neutral.100}", "$type": "color" },
+      "text":         { "$value": "{color.text.heading}", "$type": "color" },
+      "fontWeight":   { "$value": "{font.weight.semibold}", "$type": "fontWeight" },
+      "fontSize":     { "$value": "{font.size.sm}", "$type": "dimension" },
+      "borderBottom": { "$value": "{color.neutral.300}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.medium}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.3}", "$type": "dimension" }
+    },
+    "row": {
+      "background":   { "$value": "transparent", "$type": "color" },
+      "text":         { "$value": "{color.text.primary}", "$type": "color" },
+      "fontSize":     { "$value": "{font.size.sm}", "$type": "dimension" },
+      "borderBottom": { "$value": "{color.neutral.200}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.4}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.3}", "$type": "dimension" }
+    },
+    "rowAlt": {
+      "background":   { "$value": "{color.neutral.50}", "$type": "color", "$description": "Alternating row background." },
+      "text":         { "$value": "{color.text.primary}", "$type": "color" }
+    },
+    "rowHover": {
+      "background":   { "$value": "{color.primary.50}", "$type": "color" }
+    },
+    "cellNumeric": {
+      "fontFamily":   { "$value": "{font.family.mono}", "$type": "fontFamily" },
+      "fontSize":     { "$value": "{font.size.sm}", "$type": "dimension" },
+      "textAlign":    { "$value": "right", "$type": "string" },
+      "fontVariant":  { "$value": "tabular-nums", "$type": "string" }
+    }
+  },
+
+  "callout": {
+    "$description": "Callout/alert component. 5 semantic variants. Left accent border style (DE default).",
+
+    "info": {
+      "background":   { "$value": "{color.feedback.info.bg}", "$type": "color" },
+      "border":       { "$value": "{color.info.500}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "text":         { "$value": "{color.feedback.info.fg}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" }
+    },
+    "success": {
+      "background":   { "$value": "{color.feedback.success.bg}", "$type": "color" },
+      "border":       { "$value": "{color.success.500}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "text":         { "$value": "{color.feedback.success.fg}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" }
+    },
+    "warning": {
+      "background":   { "$value": "{color.feedback.warning.bg}", "$type": "color" },
+      "border":       { "$value": "{color.accent.500}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "text":         { "$value": "{color.feedback.warning.fg}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" }
+    },
+    "error": {
+      "background":   { "$value": "{color.feedback.error.bg}", "$type": "color" },
+      "border":       { "$value": "{color.error.500}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "text":         { "$value": "{color.feedback.error.fg}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" }
+    },
+    "brand": {
+      "background":   { "$value": "{color.primary.50}", "$type": "color" },
+      "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "text":         { "$value": "{color.primary.800}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" }
+    }
+  },
+
+  "badge": {
+    "$description": "Badge/tag component. Rounded pill style (DE default).",
+
+    "default": {
+      "background":   { "$value": "{color.neutral.100}", "$type": "color" },
+      "text":         { "$value": "{color.neutral.700}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "primary": {
+      "background":   { "$value": "{color.primary.100}", "$type": "color" },
+      "text":         { "$value": "{color.primary.700}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "secondary": {
+      "background":   { "$value": "{color.secondary.100}", "$type": "color" },
+      "text":         { "$value": "{color.secondary.700}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "success": {
+      "background":   { "$value": "{color.success.100}", "$type": "color" },
+      "text":         { "$value": "{color.success.700}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "error": {
+      "background":   { "$value": "{color.error.100}", "$type": "color" },
+      "text":         { "$value": "{color.error.700}", "$type": "color" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    }
+  },
+
+  "header": {
+    "$description": "Header components for slides and documents.",
+
+    "slide": {
+      "$description": "Slide header with progress indicator.",
+      "background":    { "$value": "transparent", "$type": "color" },
+      "height":        { "$value": "{space.12}", "$type": "dimension" },
+      "paddingX":      { "$value": "{spacing.layout.margin}", "$type": "dimension" },
+      "logoPosition":  { "$value": "left", "$type": "string", "$description": "Logo alignment: left | right" },
+      "logoMaxHeight": { "$value": "32px", "$type": "dimension" },
+      "progressBar": {
+        "height":      { "$value": "3px", "$type": "dimension" },
+        "background":  { "$value": "{color.neutral.200}", "$type": "color" },
+        "fill":        { "$value": "{color.brand.primary}", "$type": "color" },
+        "position":    { "$value": "top", "$type": "string" }
+      },
+      "sectionTitle": {
+        "fontSize":    { "$value": "{font.size.xs}", "$type": "dimension" },
+        "fontWeight":  { "$value": "{font.weight.medium}", "$type": "fontWeight" },
+        "color":       { "$value": "{color.text.secondary}", "$type": "color" },
+        "position":    { "$value": "right", "$type": "string" }
+      }
+    },
+    "document": {
+      "$description": "Document header.",
+      "background":    { "$value": "transparent", "$type": "color" },
+      "height":        { "$value": "{space.10}", "$type": "dimension" },
+      "paddingX":      { "$value": "{spacing.layout.margin}", "$type": "dimension" },
+      "borderBottom":  { "$value": "{color.neutral.200}", "$type": "color" },
+      "logoMaxHeight": { "$value": "28px", "$type": "dimension" },
+      "$extensions": {
+        "responsive": "On mobile-width contexts (<640px): logo stacks above title, paddingX reduces to 50%, height increases to accommodate stacking."
+      }
+    }
+  },
+
+  "footer": {
+    "$description": "Footer components for slides and documents.",
+
+    "slide": {
+      "background":   { "$value": "transparent", "$type": "color" },
+      "height":       { "$value": "{space.8}", "$type": "dimension" },
+      "paddingX":     { "$value": "{spacing.layout.margin}", "$type": "dimension" },
+      "text":         { "$value": "{color.text.caption}", "$type": "color" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "pageNumber": {
+        "position":   { "$value": "right", "$type": "string" },
+        "format":     { "$value": "{current} / {total}", "$type": "string" }
+      },
+      "confidentiality": {
+        "position":   { "$value": "left", "$type": "string" },
+        "text":       { "$value": "Confidential", "$type": "string" },
+        "fontSize":   { "$value": "{font.size.xs}", "$type": "dimension" }
+      }
+    },
+    "document": {
+      "background":   { "$value": "transparent", "$type": "color" },
+      "height":       { "$value": "{space.8}", "$type": "dimension" },
+      "paddingX":     { "$value": "{spacing.layout.margin}", "$type": "dimension" },
+      "borderTop":    { "$value": "{color.neutral.200}", "$type": "color" },
+      "text":         { "$value": "{color.text.caption}", "$type": "color" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "citationZone": {
+        "position":   { "$value": "left", "$type": "string" },
+        "maxWidth":   { "$value": "60%", "$type": "string" }
+      },
+      "$extensions": {
+        "responsive": "On mobile-width contexts (<640px): paddingX reduces to 50%, citation zone goes full-width above page number."
+      }
+    }
+  },
+
+  "chart": {
+    "$description": "Chart/data visualization component tokens.",
+
+    "axis": {
+      "lineColor":    { "$value": "{color.neutral.300}", "$type": "color" },
+      "lineWidth":    { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "tickColor":    { "$value": "{color.neutral.300}", "$type": "color" },
+      "tickLength":   { "$value": "6px", "$type": "dimension" },
+      "labelColor":   { "$value": "{color.text.secondary}", "$type": "color" },
+      "labelSize":    { "$value": "{font.size.xs}", "$type": "dimension" },
+      "labelFont":    { "$value": "{font.family.mono}", "$type": "fontFamily" },
+      "titleColor":   { "$value": "{color.text.primary}", "$type": "color" },
+      "titleSize":    { "$value": "{font.size.sm}", "$type": "dimension" },
+      "titleWeight":  { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "grid": {
+      "lineColor":    { "$value": "{color.neutral.100}", "$type": "color" },
+      "lineWidth":    { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "lineStyle":    { "$value": "solid", "$type": "string" }
+    },
+    "tooltip": {
+      "background":   { "$value": "{color.neutral.900}", "$type": "color" },
+      "text":         { "$value": "{color.white}", "$type": "color" },
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "padding":      { "$value": "{space.2}", "$type": "dimension" },
+      "shadow":       { "$value": "{shadow.md}", "$type": "shadow" }
+    },
+    "legend": {
+      "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.regular}", "$type": "fontWeight" },
+      "color":        { "$value": "{color.text.secondary}", "$type": "color" },
+      "swatchSize":   { "$value": "12px", "$type": "dimension" },
+      "swatchRadius": { "$value": "{radius.sm}", "$type": "dimension" },
+      "gap":          { "$value": "{space.4}", "$type": "dimension" },
+      "position":     { "$value": "bottom", "$type": "string", "$extensions": { "variants": ["bottom", "right", "top"], "guidance": "bottom = default for most charts. right = when legend items > 6 or chart is wide. top = when chart is below a title and legend needs to be first." } }
+    }
+  },
+
+  "divider": {
+    "$description": "Content divider/separator. 3 variants.",
+
+    "default": {
+      "color":     { "$value": "{color.neutral.200}", "$type": "color" },
+      "width":     { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "style":     { "$value": "solid", "$type": "string" },
+      "marginY":   { "$value": "{spacing.content.lg}", "$type": "dimension" }
+    },
+    "thick": {
+      "$description": "Heavy divider for major section breaks.",
+      "color":     { "$value": "{color.brand.secondary}", "$type": "color" },
+      "width":     { "$value": "{borderWidth.thick}", "$type": "dimension" },
+      "style":     { "$value": "solid", "$type": "string" },
+      "marginY":   { "$value": "{spacing.content.xl}", "$type": "dimension" }
+    },
+    "accent": {
+      "$description": "Branded accent divider for visual emphasis.",
+      "color":     { "$value": "{color.brand.accent}", "$type": "color" },
+      "width":     { "$value": "{borderWidth.medium}", "$type": "dimension" },
+      "style":     { "$value": "solid", "$type": "string" },
+      "marginY":   { "$value": "{spacing.content.lg}", "$type": "dimension" }
+    }
+  },
+
+  "badge-audience": {
+    "$description": "Audience-specific badge variant. References audience accent tokens from semantic layer.",
+    "background":   { "$value": "{color.audience.{segment}.accent}", "$type": "color", "$description": "Replace {segment} with audience ID from brand-config (e.g., grower, neocloud)." },
+    "text":         { "$value": "{color.white}", "$type": "color" },
+    "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+    "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+    "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+    "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+    "fontWeight":   { "$value": "{font.weight.medium}", "$type": "fontWeight" },
+    "$extensions": {
+      "usage": "Use to visually tag content targeted at a specific audience segment. Resolve {segment} at build time from audience_segments in brand-config.",
+      "a11y": "Ensure white text passes 4.5:1 contrast on each audience accent color. All DE defaults pass."
+    }
+  },
+
+  "callout-audience": {
+    "$description": "Audience-specific callout variant. Left accent border uses audience color.",
+    "background":   { "$value": "{color.surface.subtle}", "$type": "color" },
+    "border":       { "$value": "{color.audience.{segment}.accent}", "$type": "color", "$description": "Replace {segment} with audience ID." },
+    "borderWidth":  { "$value": "{borderWidth.thick}", "$type": "dimension" },
+    "text":         { "$value": "{color.text.primary}", "$type": "color" },
+    "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+    "padding":      { "$value": "{spacing.component.md}", "$type": "dimension" },
+    "$extensions": {
+      "usage": "Use for audience-specific insights, recommendations, or notes within mixed-audience documents."
+    }
+  },
+
+  "input": {
+    "$description": "Form input field component. 5 states. Style selected by Q4.11 (outlined/filled/underlined). DE default: outlined.",
+
+    "default": {
+      "background":   { "$value": "{color.white}", "$type": "color" },
+      "border":       { "$value": "{color.border.default}", "$type": "color" },
+      "borderWidth":  { "$value": "{borderWidth.thin}", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+      "text":         { "$value": "{color.text.primary}", "$type": "color" },
+      "placeholder":  { "$value": "{color.neutral.400}", "$type": "color" },
+      "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+      "paddingY":     { "$value": "{space.2}", "$type": "dimension" },
+      "fontSize":     { "$value": "{font.size.base}", "$type": "dimension" },
+      "label":        { "$value": "{color.text.primary}", "$type": "color", "$description": "Label text above input." },
+      "labelSize":    { "$value": "{font.size.sm}", "$type": "dimension" },
+      "labelWeight":  { "$value": "{font.weight.medium}", "$type": "fontWeight" }
+    },
+    "hover": {
+      "border":       { "$value": "{color.border.strong}", "$type": "color" }
+    },
+    "focus": {
+      "border":       { "$value": "{color.brand.primary}", "$type": "color" },
+      "outline":      { "$value": "{color.focus.ring}", "$type": "color" },
+      "outlineWidth": { "$value": "{borderWidth.medium}", "$type": "dimension" },
+      "outlineOffset": { "$value": "2px", "$type": "dimension" }
+    },
+    "error": {
+      "border":       { "$value": "{color.feedback.error.fg}", "$type": "color" },
+      "text":         { "$value": "{color.feedback.error.fg}", "$type": "color" },
+      "helpText":     { "$value": "{color.feedback.error.fg}", "$type": "color", "$description": "Error message below input." }
+    },
+    "disabled": {
+      "background":   { "$value": "{color.neutral.100}", "$type": "color" },
+      "border":       { "$value": "{color.neutral.200}", "$type": "color" },
+      "text":         { "$value": "{color.neutral.400}", "$type": "color" },
+      "cursor":       { "$value": "not-allowed", "$type": "string" },
+      "opacity":      { "$value": "0.6", "$type": "number" }
+    },
+
+    "$extensions": {
+      "variants": {
+        "outlined": "Default. Border all around, white bg.",
+        "filled": "Subtle bg fill (neutral-100), lighter border. Modern look.",
+        "underlined": "Bottom border only, no bg. Material Design style."
+      },
+      "related": ["component.checkbox", "component.radio", "component.select"],
+      "a11y": "Always associate label with for/id. Required fields use asterisk (*) in error color. Validate on blur, not keystroke."
+    }
+  },
+
+  "checkbox": {
+    "$description": "Checkbox input component.",
+    "size":         { "$value": "16px", "$type": "dimension" },
+    "borderRadius": { "$value": "{radius.sm}", "$type": "dimension" },
+    "off": {
+      "border":     { "$value": "{color.border.default}", "$type": "color" },
+      "background": { "$value": "{color.white}", "$type": "color" }
+    },
+    "on": {
+      "background": { "$value": "{color.brand.primary}", "$type": "color" },
+      "check":      { "$value": "{color.white}", "$type": "color" }
+    },
+    "focus": {
+      "outline":    { "$value": "{color.focus.ring}", "$type": "color" }
+    }
+  },
+
+  "radio": {
+    "$description": "Radio button input component.",
+    "size":         { "$value": "16px", "$type": "dimension" },
+    "off": {
+      "border":     { "$value": "{color.border.default}", "$type": "color" },
+      "background": { "$value": "{color.white}", "$type": "color" }
+    },
+    "on": {
+      "border":     { "$value": "{color.brand.primary}", "$type": "color" },
+      "dot":        { "$value": "{color.brand.primary}", "$type": "color" },
+      "dotSize":    { "$value": "6px", "$type": "dimension" }
+    },
+    "focus": {
+      "outline":    { "$value": "{color.focus.ring}", "$type": "color" }
+    }
+  },
+
+  "select": {
+    "$description": "Select/dropdown input component. Inherits base input styles, adds chevron and dropdown panel.",
+    "chevron":      { "$value": "{color.neutral.400}", "$type": "color" },
+    "dropdown": {
+      "background": { "$value": "{color.white}", "$type": "color" },
+      "border":     { "$value": "{color.border.default}", "$type": "color" },
+      "shadow":     { "$value": "{shadow.md}", "$type": "shadow" },
+      "maxHeight":  { "$value": "240px", "$type": "dimension" },
+      "zIndex":     { "$value": "{elevation.zindex.dropdown}", "$type": "number" }
+    },
+    "option": {
+      "hover":      { "$value": "{color.surface.subtle}", "$type": "color" },
+      "selected":   { "$value": "{color.brand.primary}", "$type": "color" },
+      "selectedBg": { "$value": "{color.primary.50}", "$type": "color" }
+    }
+  },
+
+  "modal": {
+    "$description": "Modal/dialog component. Style selected by Q4.12 (centered/adaptive/slide-in). DE default: centered.",
+
+    "backdrop": {
+      "background": { "$value": "{color.black}", "$type": "color" },
+      "opacity":    { "$value": "0.5", "$type": "number" },
+      "zIndex":     { "$value": "{elevation.zindex.overlay}", "$type": "number" }
+    },
+    "container": {
+      "background":   { "$value": "{color.surface.default}", "$type": "color" },
+      "maxWidth":     { "$value": "600px", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.lg}", "$type": "dimension" },
+      "shadow":       { "$value": "{shadow.xl}", "$type": "shadow" },
+      "padding":      { "$value": "{space.8}", "$type": "dimension" },
+      "zIndex":       { "$value": "{elevation.zindex.modal}", "$type": "number" }
+    },
+    "header": {
+      "fontSize":     { "$value": "{font.size.lg}", "$type": "dimension" },
+      "fontWeight":   { "$value": "{font.weight.semibold}", "$type": "fontWeight" },
+      "marginBottom": { "$value": "{space.4}", "$type": "dimension" }
+    },
+    "footer": {
+      "marginTop":    { "$value": "{space.6}", "$type": "dimension" },
+      "gap":          { "$value": "{space.3}", "$type": "dimension", "$description": "Gap between footer action buttons." },
+      "alignment":    { "$value": "right", "$type": "string" }
+    },
+    "animation": {
+      "duration":     { "$value": "{duration.moderate.default}", "$type": "duration" },
+      "easing":       { "$value": "{easing.out}", "$type": "cubicBezier" }
+    },
+    "$extensions": {
+      "variants": {
+        "centered": "Centered card with backdrop. Desktop and mobile.",
+        "adaptive": "Centered on desktop, full-screen on mobile (<768px).",
+        "slide-in": "Slides from right edge. Drawer/panel style."
+      },
+      "a11y": "Trap focus inside modal. Escape closes. aria-modal=true. Return focus to trigger on close."
+    }
+  },
+
+  "toast": {
+    "$description": "Toast notification component. Ephemeral feedback messages.",
+
+    "position":     { "$value": "top-right", "$type": "string", "$description": "Screen position. Options: top-right, top-center, bottom-right, bottom-center." },
+    "maxVisible":   { "$value": 3, "$type": "number", "$description": "Maximum simultaneous visible toasts." },
+    "maxWidth":     { "$value": "400px", "$type": "dimension" },
+    "padding":      { "$value": "{space.3} {space.4}", "$type": "string" },
+    "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+    "shadow":       { "$value": "{shadow.lg}", "$type": "shadow" },
+    "zIndex":       { "$value": "{elevation.zindex.notification}", "$type": "number" },
+    "duration":     { "$value": "5000", "$type": "duration", "$description": "Auto-dismiss time in ms. 10000ms if contains undo action." },
+    "animation": {
+      "enter":    { "$value": "slide-in", "$type": "string" },
+      "exit":     { "$value": "fade-out", "$type": "string" },
+      "duration": { "$value": "{duration.moderate.fast}", "$type": "duration" }
+    },
+    "variants": {
+      "success": {
+        "background": { "$value": "{color.feedback.success.bg}", "$type": "color" },
+        "border":     { "$value": "{color.success.200}", "$type": "color" },
+        "icon":       { "$value": "{color.feedback.success.fg}", "$type": "color" }
+      },
+      "error": {
+        "background": { "$value": "{color.feedback.error.bg}", "$type": "color" },
+        "border":     { "$value": "{color.error.200}", "$type": "color" },
+        "icon":       { "$value": "{color.feedback.error.fg}", "$type": "color" }
+      },
+      "warning": {
+        "background": { "$value": "{color.feedback.warning.bg}", "$type": "color" },
+        "border":     { "$value": "{color.accent.200}", "$type": "color" },
+        "icon":       { "$value": "{color.feedback.warning.fg}", "$type": "color" }
+      },
+      "info": {
+        "background": { "$value": "{color.feedback.info.bg}", "$type": "color" },
+        "border":     { "$value": "{color.info.200}", "$type": "color" },
+        "icon":       { "$value": "{color.feedback.info.fg}", "$type": "color" }
+      }
+    }
+  },
+
+  "tooltip": {
+    "$description": "Tooltip component for contextual help.",
+    "background":   { "$value": "{color.neutral.800}", "$type": "color" },
+    "text":         { "$value": "{color.neutral.50}", "$type": "color" },
+    "paddingX":     { "$value": "{space.3}", "$type": "dimension" },
+    "paddingY":     { "$value": "{space.1}", "$type": "dimension" },
+    "borderRadius": { "$value": "{radius.sm}", "$type": "dimension" },
+    "maxWidth":     { "$value": "200px", "$type": "dimension" },
+    "fontSize":     { "$value": "{font.size.xs}", "$type": "dimension" },
+    "delay":        { "$value": "300", "$type": "duration", "$description": "Hover delay before showing (ms)." },
+    "shadow":       { "$value": "{shadow.md}", "$type": "shadow" },
+    "zIndex":       { "$value": "{elevation.zindex.tooltip}", "$type": "number" },
+    "$extensions": {
+      "position": "Prefer above target. Auto-flip if clipped. Arrow/caret points to trigger.",
+      "a11y": "Use role=tooltip, aria-describedby on trigger. Include keyboard shortcut if available."
+    }
+  },
+
+  "toggle": {
+    "$description": "Toggle/switch component for binary choices.",
+    "track": {
+      "width":        { "$value": "44px", "$type": "dimension" },
+      "height":       { "$value": "24px", "$type": "dimension" },
+      "borderRadius": { "$value": "{radius.full}", "$type": "dimension" },
+      "off": {
+        "background": { "$value": "{color.neutral.300}", "$type": "color" }
+      },
+      "on": {
+        "background": { "$value": "{color.brand.primary}", "$type": "color" }
+      }
+    },
+    "thumb": {
+      "size":       { "$value": "20px", "$type": "dimension" },
+      "background": { "$value": "{color.white}", "$type": "color" },
+      "shadow":     { "$value": "{shadow.sm}", "$type": "shadow" },
+      "offset":     { "$value": "2px", "$type": "dimension", "$description": "Inset from track edge." }
+    },
+    "focus": {
+      "outline":    { "$value": "{color.focus.ring}", "$type": "color" }
+    },
+    "disabled": {
+      "opacity":    { "$value": "0.5", "$type": "number" }
+    },
+    "$extensions": {
+      "animation": "Thumb slides from left to right on toggle. Use duration.moderate.fast + easing.default.",
+      "a11y": "Use role=switch, aria-checked. Must be keyboard-operable (Space to toggle)."
+    }
+  },
+
+  "skeleton": {
+    "$description": "Loading skeleton/placeholder component. Style selected by Q4.13 (shimmer/pulse/spinner). DE default: shimmer.",
+    "background":   { "$value": "{color.neutral.200}", "$type": "color" },
+    "borderRadius": { "$value": "{radius.md}", "$type": "dimension" },
+
+    "shimmer": {
+      "$description": "Animated gradient sweep effect.",
+      "highlight":  { "$value": "{color.neutral.100}", "$type": "color" },
+      "duration":   { "$value": "1500", "$type": "duration", "$description": "One shimmer cycle in ms." },
+      "direction":  { "$value": "left-to-right", "$type": "string" }
+    },
+    "pulse": {
+      "$description": "Subtle opacity fade effect.",
+      "minOpacity": { "$value": "0.4", "$type": "number" },
+      "maxOpacity": { "$value": "1.0", "$type": "number" },
+      "duration":   { "$value": "2000", "$type": "duration" }
+    },
+    "shapes": {
+      "$description": "Common skeleton placeholder shapes.",
+      "text":   { "height": { "$value": "16px", "$type": "dimension" }, "borderRadius": { "$value": "{radius.sm}", "$type": "dimension" } },
+      "heading": { "height": { "$value": "24px", "$type": "dimension" }, "borderRadius": { "$value": "{radius.sm}", "$type": "dimension" } },
+      "avatar": { "size": { "$value": "40px", "$type": "dimension" }, "borderRadius": { "$value": "{radius.full}", "$type": "dimension" } },
+      "image":  { "height": { "$value": "200px", "$type": "dimension" }, "borderRadius": { "$value": "{radius.md}", "$type": "dimension" } }
+    },
+    "$extensions": {
+      "reduced-motion": "When prefers-reduced-motion: reduce, show static skeleton without animation.",
+      "a11y": "Use aria-busy=true on container. aria-hidden=true on skeleton elements."
+    }
+  }
+}

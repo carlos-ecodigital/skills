@@ -1,0 +1,412 @@
+# _retrieval-rules.yaml
+# Centralized task-to-chunk mappings for brand reference retrieval
+# Digital Energy Brand System v1.0
+#
+# PURPOSE: Tells downstream skills which brand reference chunks to load
+# for each task type. Prevents loading entire files when only a section
+# is needed. Enforces token budget discipline.
+#
+# USAGE: Before producing any external content, the executing skill should:
+#   1. Identify the task_type from the list below
+#   2. Load all chunks in always_load
+#   3. Evaluate load_if_relevant based on context
+#   4. Stay within token_budget for brand context
+#
+# CHUNK LOCATIONS:
+#   de-brand-bible/references/ — verbal identity chunks
+#   brand-book/tokens/          — visual design tokens
+#   brand-book/exports/         — tool-specific exports
+
+# ============================================================
+# CONTENT ENGINE TASKS
+# ============================================================
+
+task_profiles:
+
+  linkedin_post_ceo:
+    description: "LinkedIn post from CEO/founder personal account"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"  # LinkedIn (executive) row
+    load_if_relevant:
+      - "de-brand-bible/references/proof-points.md"          # if making quantified claims
+      - "de-brand-bible/references/terminology-standards.md"  # if using DE-specific terms
+      - "de-brand-bible/references/buyer-personas.md"         # if targeting a specific segment
+    token_budget: 1400
+
+  linkedin_post_company:
+    description: "LinkedIn post from DE company page"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"  # LinkedIn (company) row
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/terminology-standards.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+    token_budget: 1400
+
+  cold_email:
+    description: "Cold outreach email to prospect"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"  # Cold email row
+      - "de-brand-bible/references/buyer-personas.md"        # must identify segment
+    load_if_relevant:
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/language-policy.md"       # NL vs EN decision
+      - "de-brand-bible/references/terminology-standards.md"
+    token_budget: 1600
+
+  blog_article:
+    description: "Blog post or thought leadership article"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/brand-identity.md"        # mission/vision for positioning
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    token_budget: 2000
+
+  press_release:
+    description: "Press release or media pitch"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"  # Press releases row
+      - "de-brand-bible/references/brand-identity.md"        # mission/vision for boilerplate
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/terminology-standards.md"
+      - "de-brand-bible/references/language-policy.md"       # NL vs EN versions
+    token_budget: 1800
+
+  event_invitation:
+    description: "Event, conference, or webinar invitation"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+    load_if_relevant:
+      - "de-brand-bible/references/channel-adaptations.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/language-policy.md"
+    token_budget: 1000
+
+  ad_copy:
+    description: "LinkedIn or digital ad copy"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+    token_budget: 1000
+
+  website_copy:
+    description: "Website page copy or landing page"
+    consuming_skill: "content-engine"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/brand-identity.md"
+      - "de-brand-bible/references/terminology-standards.md"
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "brand-book/tokens/semantic.tokens.json"              # color/font references for web
+    token_budget: 2200
+
+# ============================================================
+# COLLATERAL STUDIO TASKS
+# ============================================================
+
+  pitch_deck:
+    description: "Pitch deck or presentation for a specific buyer segment"
+    consuming_skill: "collateral-studio"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    load_if_relevant:
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "de-brand-bible/references/deal-economics.md"
+      - "brand-book/templates/presentation/slide-masters.md"
+      - "brand-book/tokens/semantic.tokens.json"
+    token_budget: 2500
+
+  one_pager:
+    description: "One-page summary, teaser, or leave-behind"
+    consuming_skill: "collateral-studio"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    load_if_relevant:
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/deal-economics.md"
+      - "brand-book/tokens/semantic.tokens.json"
+    token_budget: 1600
+
+  whitepaper:
+    description: "Technical whitepaper or deep-dive document"
+    consuming_skill: "collateral-studio"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/brand-identity.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    load_if_relevant:
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "de-brand-bible/references/deal-economics.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "brand-book/templates/document/page-masters.md"
+    token_budget: 2500
+
+  proposal:
+    description: "Formal project proposal or RFP/RFI response"
+    consuming_skill: "collateral-studio"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/terminology-standards.md"
+      - "de-brand-bible/references/deal-economics.md"
+    load_if_relevant:
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "brand-book/templates/document/page-masters.md"
+    token_budget: 2500
+
+  investor_material:
+    description: "Investor teaser, update, or IR-grade document"
+    consuming_skill: "collateral-studio"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"   # Investor materials row
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/deal-economics.md"
+      - "de-brand-bible/references/brand-identity.md"
+    load_if_relevant:
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    token_budget: 2200
+
+# ============================================================
+# OPS TASKS (external-facing)
+# ============================================================
+
+  outreach_email:
+    description: "Outbound email via ops-outreachops"
+    consuming_skill: "ops-outreachops"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"   # Cold email row
+      - "de-brand-bible/references/buyer-personas.md"
+    load_if_relevant:
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/language-policy.md"
+    token_budget: 1400
+
+  investor_update:
+    description: "Monthly investor update via ops-irops"
+    consuming_skill: "ops-irops"
+    always_load:
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/channel-adaptations.md"   # Investor materials row
+      - "de-brand-bible/references/brand-identity.md"
+    load_if_relevant:
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    token_budget: 1600
+
+# ============================================================
+# POSITIONING & STRATEGY TASKS
+# ============================================================
+
+  positioning_canvas:
+    description: "Positioning or messaging framework work"
+    consuming_skill: "positioning-expert"
+    always_load:
+      - "de-brand-bible/references/brand-identity.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+    load_if_relevant:
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/deal-economics.md"
+      - "de-brand-bible/references/voice-rules.md"
+    token_budget: 2000
+
+  campaign_strategy:
+    description: "Marketing campaign or channel strategy"
+    consuming_skill: "marketing-strategist"
+    always_load:
+      - "de-brand-bible/references/brand-identity.md"
+      - "de-brand-bible/references/buyer-personas.md"
+      - "de-brand-bible/references/proof-points.md"
+    load_if_relevant:
+      - "de-brand-bible/references/competitive-positioning.md"
+      - "de-brand-bible/references/channel-adaptations.md"
+      - "de-brand-bible/references/deal-economics.md"
+    token_budget: 2000
+
+# ============================================================
+# NARRATIVE & STORY TASKS
+# ============================================================
+
+  narrative_check:
+    description: "Narrative consistency check via ops-storyops"
+    consuming_skill: "ops-storyops"
+    always_load:
+      - "de-brand-bible/references/brand-identity.md"
+      - "de-brand-bible/references/voice-rules.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    load_if_relevant:
+      - "de-brand-bible/references/banned-phrases.md"
+      - "de-brand-bible/references/proof-points.md"
+      - "de-brand-bible/references/competitive-positioning.md"
+    token_budget: 1600
+
+# ============================================================
+# VISUAL OUTPUT TASKS
+# ============================================================
+
+  branded_document:
+    description: "Any branded PDF, DOCX, or formatted document"
+    consuming_skill: "brand-book"
+    always_load:
+      - "brand-book/tokens/semantic.tokens.json"
+      - "brand-book/templates/document/page-masters.md"
+      - "de-brand-bible/references/terminology-standards.md"
+    load_if_relevant:
+      - "brand-book/tokens/component.tokens.json"
+      - "brand-book/exports/docx-spec.md"
+      - "brand-book/exports/pdf-spec.md"
+    token_budget: 2000
+
+  branded_presentation:
+    description: "Branded slide deck with design tokens"
+    consuming_skill: "brand-book"
+    always_load:
+      - "brand-book/tokens/semantic.tokens.json"
+      - "brand-book/templates/presentation/slide-masters.md"
+      - "brand-book/templates/presentation/slide-components.md"
+    load_if_relevant:
+      - "brand-book/tokens/component.tokens.json"
+      - "de-brand-bible/references/terminology-standards.md"
+    token_budget: 2500
+
+  branded_web:
+    description: "Branded HTML, React, or Tailwind output"
+    consuming_skill: "brand-book"
+    always_load:
+      - "brand-book/tokens/semantic.tokens.json"
+      - "brand-book/exports/tailwind-config.js"
+      - "brand-book/exports/css-variables.css"
+    load_if_relevant:
+      - "brand-book/tokens/component.tokens.json"
+      - "brand-book/exports/html-spec.md"
+    token_budget: 2000
+
+  branded_video:
+    description: "Remotion video composition"
+    consuming_skill: "brand-book"
+    always_load:
+      - "brand-book/tokens/semantic.tokens.json"
+      - "brand-book/exports/remotion-theme.ts"
+      - "brand-book/templates/video/remotion-compositions.md"
+    load_if_relevant:
+      - "brand-book/tokens/component.tokens.json"
+    token_budget: 2000
+
+  branded_image:
+    description: "Social card, OG image, banner, or icon"
+    consuming_skill: "brand-book"
+    always_load:
+      - "brand-book/tokens/semantic.tokens.json"
+      - "brand-book/exports/image-spec.md"
+    load_if_relevant:
+      - "brand-book/tokens/component.tokens.json"
+      - "de-brand-bible/references/terminology-standards.md"  # logo usage rules
+    token_budget: 1200
+
+# ============================================================
+# ORGANIZATIONAL CONTEXT TASKS
+# ============================================================
+
+  weekly_brief:
+    description: "Weekly priority brief, sprint planning, or standup"
+    consuming_skill: "ops-chiefops"
+    always_load:
+      - "_shared/org/TEAMS.md"                    # team codes, decision rights
+      - "_shared/org/WAYS-OF-WORKING.md"          # BLUF format, quality standards
+    load_if_relevant:
+      - "_shared/org/OKR-GUIDELINES.md"           # if OKR review week
+      - "_shared/org/OKR-PROJECT-MANAGEMENT.md"   # if gate review or sprint rhythm
+    token_budget: 2000
+
+  okr_review:
+    description: "Monthly OKR scorecard review or quarterly scoring"
+    consuming_skill: "ops-chiefops"
+    always_load:
+      - "_shared/org/OKR-GUIDELINES.md"           # scoring, cadence, failure protocol
+      - "_shared/org/OKR-GLOSSARY.md"             # terms
+    load_if_relevant:
+      - "_shared/org/OKR-PROJECT-MANAGEMENT.md"   # if gate-level review
+      - "_shared/org/TEAMS.md"                    # if RACI questions
+    token_budget: 3000
+
+  gate_review:
+    description: "Project stage-gate decision (G0-G5)"
+    consuming_skill: "ops-chiefops"
+    always_load:
+      - "_shared/org/OKR-PROJECT-MANAGEMENT.md"   # gate deliverables, Go/No-Go
+      - "_shared/org/TEAMS.md"                    # decision maker per gate
+    token_budget: 2500
+
+  decision_log:
+    description: "Logging a decision or escalation"
+    consuming_skill: "ops-chiefops"
+    always_load:
+      - "_shared/org/WAYS-OF-WORKING.md"          # two-way/one-way doors, BLUF
+      - "_shared/org/TEAMS.md"                    # decision rights, RACI
+    token_budget: 1500
+
+  meeting_recurring:
+    description: "Agenda for a recurring DE meeting"
+    consuming_skill: "ops-meetingops"
+    always_load:
+      - "_shared/org/TEAMS.md"                    # meeting cadences (Section 6)
+    load_if_relevant:
+      - "_shared/org/OKR-GUIDELINES.md"           # if OKR review meeting
+      - "_shared/org/OKR-PROJECT-MANAGEMENT.md"   # if gate review meeting
+    token_budget: 1500
+
+  deal_pipeline:
+    description: "Deal status, pipeline review, or project milestone tracking"
+    consuming_skill: "ops-dealops"
+    always_load:
+      - "_shared/org/OKR-PROJECT-MANAGEMENT.md"   # stage-gate, project codes
+    load_if_relevant:
+      - "_shared/org/TEAMS.md"                    # handoff protocols
+    token_budget: 1500

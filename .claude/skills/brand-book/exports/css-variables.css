@@ -1,0 +1,197 @@
+/**
+ * Brand Book CSS Custom Properties
+ *
+ * Auto-derived from tokens/semantic.tokens.json and tokens/primitives.tokens.json.
+ * Pre-filled with Digital Energy defaults. Override per brand-config after intake.
+ *
+ * Usage: Include this file, then reference variables:
+ *   color: var(--color-text-primary);
+ *   background: var(--color-surface-default);
+ */
+
+:root {
+  /* ======================================================
+   * BRAND COLORS (semantic.color.brand.*)
+   * ====================================================== */
+  --color-brand-primary: #1B365D;
+  --color-brand-secondary: #22C55E;
+  --color-brand-accent: #F59E0B;
+
+  /* ======================================================
+   * SURFACE COLORS (semantic.color.surface.*)
+   * ====================================================== */
+  --color-surface-default: #F8FAFC;
+  --color-surface-subtle: #F1F5F9;
+  --color-surface-strong: #E2E8F0;
+  --color-surface-inverse: #0D1F30;
+  --color-surface-brand: #1B365D;
+
+  /* ======================================================
+   * TEXT COLORS (semantic.color.text.*)
+   * ====================================================== */
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #64748B;
+  --color-text-heading: #142945;
+  --color-text-link: #243B53;
+  --color-text-inverse: #FFFFFF;
+  --color-text-caption: #94A3B8;
+
+  /* ======================================================
+   * BORDER COLORS (semantic.color.border.*)
+   * ====================================================== */
+  --color-border-default: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-border-brand: #334E68;
+
+  /* ======================================================
+   * FEEDBACK COLORS (semantic.color.feedback.*)
+   * ====================================================== */
+  --color-feedback-error-fg: #B91C1C;
+  --color-feedback-error-bg: #FEF2F2;
+  --color-feedback-success-fg: #15803D;
+  --color-feedback-success-bg: #F0FDF4;
+  --color-feedback-warning-fg: #B45309;
+  --color-feedback-warning-bg: #FFFBEB;
+  --color-feedback-info-fg: #1D4ED8;
+  --color-feedback-info-bg: #EFF6FF;
+
+  /* ======================================================
+   * DATA VISUALIZATION (semantic.color.data.*)
+   * ====================================================== */
+  --color-data-series-1: #334E68;
+  --color-data-series-2: #22C55E;
+  --color-data-series-3: #3B82F6;
+  --color-data-series-4: #F59E0B;
+  --color-data-series-5: #8B5CF6;
+  --color-data-series-6: #EC4899;
+  --color-data-positive: #22C55E;
+  --color-data-negative: #EF4444;
+  --color-data-neutral: #94A3B8;
+
+  /* ======================================================
+   * AUDIENCE ACCENTS (semantic.color.audience.*)
+   * ====================================================== */
+  --color-audience-grower: #65A30D;
+  --color-audience-district-heat: #EA580C;
+  --color-audience-industrial-heat: #B45309;
+  --color-audience-neocloud: #2563EB;
+  --color-audience-enterprise: #4338CA;
+  --color-audience-institution: #0F766E;
+
+  /* ======================================================
+   * TYPOGRAPHY (primitives.font.*)
+   * ====================================================== */
+  --font-family-heading: 'Inter', system-ui, sans-serif;
+  --font-family-body: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-md: 18px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 30px;
+  --font-size-3xl: 36px;
+  --font-size-4xl: 42px;
+  --font-size-5xl: 48px;
+
+  --line-height-tight: 1.1;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.05em;
+
+  /* ======================================================
+   * SPACING (primitives.space.*)
+   * ====================================================== */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ======================================================
+   * BORDER RADIUS (primitives.radius.*)
+   * ====================================================== */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ======================================================
+   * SHADOWS (primitives.shadow.*)
+   * ====================================================== */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* ======================================================
+   * MOTION (primitives.duration.* + primitives.easing.*)
+   * ====================================================== */
+  --duration-fast: 150ms;
+  --duration-default: 300ms;
+  --duration-slow: 500ms;
+  --duration-enter: 350ms;
+  --duration-exit: 250ms;
+
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ======================================================
+   * Z-INDEX (primitives.elevation.zindex.*)
+   * ====================================================== */
+  --z-base: 0;
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-fixed: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-popover: 100;
+  --z-tooltip: 200;
+  --z-notification: 500;
+  --z-max: 9999;
+
+  /* ======================================================
+   * BREAKPOINTS (primitives.breakpoint.*)
+   * ====================================================== */
+  --breakpoint-mobile: 320px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1440px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-default: 0ms;
+    --duration-slow: 0ms;
+    --duration-enter: 0ms;
+    --duration-exit: 0ms;
+    --easing-bounce: var(--easing-default);
+  }
+}

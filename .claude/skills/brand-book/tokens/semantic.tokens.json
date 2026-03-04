@@ -1,0 +1,442 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Semantic design tokens -- purpose-mapped, referencing primitives. Every token has $description and $extensions with pairing rules, do/don't guidance, and accessibility metadata.",
+
+  "color": {
+    "$description": "Semantic color roles. 42+ tokens.",
+
+    "brand": {
+      "$description": "Core brand identity colors.",
+      "primary": {
+        "$value": "{color.primary.700}",
+        "$type": "color",
+        "$description": "The brand's primary identity color. Used for primary buttons, links, and key brand elements.",
+        "$extensions": {
+          "pairing": "Use with white text or neutral-50 backgrounds",
+          "do": "Use for primary CTAs, navigation active states, brand header bars",
+          "dont": "Do not use for large background areas (too dark). Use primary-50 to primary-200 for backgrounds.",
+          "a11y": "WCAG AA: white text on this color passes at 10.2:1"
+        }
+      },
+      "secondary": {
+        "$value": "{color.secondary.500}",
+        "$type": "color",
+        "$description": "Action/accent color for CTAs, highlights, and interactive elements.",
+        "$extensions": {
+          "pairing": "Use with primary-700 text (not white -- fails WCAG). Or use secondary-600/700 for white text.",
+          "do": "Use for secondary buttons, success indicators, growth metrics, accent borders",
+          "dont": "Do not use as button background with white text (fails WCAG at 2.8:1). Use secondary-600 instead.",
+          "a11y": "WCAG AA: white text FAILS. Use primary-700 text or darken to secondary-600 for white text."
+        }
+      },
+      "accent": {
+        "$value": "{color.accent.500}",
+        "$type": "color",
+        "$description": "Domain-specific accent color. DE: warm amber for heat-recovery contexts.",
+        "$extensions": {
+          "pairing": "Use with neutral-900 text",
+          "do": "Use for domain-specific callouts, specialized data viz, context indicators",
+          "dont": "Do not overuse -- accent should appear in max 10% of visual area"
+        }
+      }
+    },
+
+    "surface": {
+      "$description": "Background/surface colors.",
+      "default": {
+        "$value": "{color.neutral.50}",
+        "$type": "color",
+        "$description": "Default page/slide background. Lightest surface."
+      },
+      "subtle": {
+        "$value": "{color.neutral.100}",
+        "$type": "color",
+        "$description": "Subtle surface for cards, alternating table rows, secondary containers."
+      },
+      "strong": {
+        "$value": "{color.neutral.200}",
+        "$type": "color",
+        "$description": "Strong surface for active states, selected items."
+      },
+      "inverse": {
+        "$value": "{color.primary.900}",
+        "$type": "color",
+        "$description": "Dark surface for hero sections, key reveals, dark slides.",
+        "$extensions": {
+          "pairing": "Use with text.inverse tokens only",
+          "do": "Use for cover pages, hero sections, dramatic reveal slides, video backgrounds",
+          "dont": "Do not use for more than 30% of a document. Reserve for high-impact moments."
+        }
+      },
+      "brand": {
+        "$value": "{color.primary.700}",
+        "$type": "color",
+        "$description": "Brand-colored surface. Used for branded sections, banners."
+      },
+      "inverse-subtle": {
+        "$value": "{color.primary.800}",
+        "$type": "color",
+        "$description": "Subtle surface on dark/inverse backgrounds. Cards on dark sections.",
+        "$extensions": {
+          "pairing": "Use with text.inverse and text.inverse-secondary tokens"
+        }
+      }
+    },
+
+    "text-inverse": {
+      "$description": "Text colors for use on dark/inverse surfaces only.",
+      "primary": {
+        "$value": "{color.white}",
+        "$type": "color",
+        "$description": "Primary text on inverse surfaces.",
+        "$extensions": { "a11y": "Contrast on primary-900: 15.4:1 (passes AAA)" }
+      },
+      "secondary": {
+        "$value": "{color.neutral.200}",
+        "$type": "color",
+        "$description": "Secondary text on inverse surfaces.",
+        "$extensions": { "a11y": "Contrast on primary-900: 10.8:1 (passes AAA)" }
+      }
+    },
+
+    "text": {
+      "$description": "Text foreground colors.",
+      "primary": {
+        "$value": "{color.neutral.800}",
+        "$type": "color",
+        "$description": "Primary body text on light surfaces.",
+        "$extensions": { "a11y": "Contrast on neutral-50: 12.4:1 (passes AAA)" }
+      },
+      "secondary": {
+        "$value": "{color.neutral.500}",
+        "$type": "color",
+        "$description": "Secondary text, captions, metadata on light surfaces.",
+        "$extensions": { "a11y": "Contrast on neutral-50: 4.7:1 (passes AA)" }
+      },
+      "heading": {
+        "$value": "{color.primary.800}",
+        "$type": "color",
+        "$description": "Heading text. Uses brand primary family for brand reinforcement.",
+        "$extensions": { "a11y": "Contrast on neutral-50: 13.2:1 (passes AAA)" }
+      },
+      "link": {
+        "$value": "{color.primary.600}",
+        "$type": "color",
+        "$description": "Link text on light surfaces.",
+        "$extensions": {
+          "a11y": "Contrast on neutral-50: 8.1:1 (passes AAA)",
+          "do": "Underline on hover for additional affordance"
+        }
+      },
+      "inverse": {
+        "$value": "{color.white}",
+        "$type": "color",
+        "$description": "Text on dark/inverse surfaces.",
+        "$extensions": { "a11y": "Contrast on primary-900: 15.4:1 (passes AAA)" }
+      },
+      "caption": {
+        "$value": "{color.neutral.400}",
+        "$type": "color",
+        "$description": "Source citations, footnotes, timestamps. Smallest text elements.",
+        "$extensions": { "a11y": "Contrast on neutral-50: 3.1:1 (passes AA for large text only, use ≥12px at this contrast ratio per WCAG 2.1 AA)" }
+      }
+    },
+
+    "border": {
+      "$description": "Border and divider colors.",
+      "default": {
+        "$value": "{color.neutral.200}",
+        "$type": "color",
+        "$description": "Default borders for cards, tables, inputs."
+      },
+      "strong": {
+        "$value": "{color.neutral.300}",
+        "$type": "color",
+        "$description": "Emphasized borders, active input focus (inner)."
+      },
+      "brand": {
+        "$value": "{color.primary.500}",
+        "$type": "color",
+        "$description": "Brand-colored borders for accent elements, active tabs."
+      },
+      "on-inverse": {
+        "$value": "{color.neutral.600}",
+        "$type": "color",
+        "$description": "Border color on dark/inverse surfaces."
+      }
+    },
+
+    "focus": {
+      "$description": "Focus state tokens for keyboard navigation.",
+      "ring": {
+        "$value": "{color.primary.700}",
+        "$type": "color",
+        "$description": "Focus ring color. Apply as outline or box-shadow with 30% opacity.",
+        "$extensions": {
+          "implementation": "box-shadow: 0 0 0 3px rgba({this}, 0.3) or outline: 2px solid {this} with 2px offset",
+          "a11y": "Focus indicator must be visible on both light and dark backgrounds. Minimum 3:1 contrast against adjacent colors."
+        }
+      }
+    },
+
+    "feedback": {
+      "$description": "Semantic feedback colors. 4 states x foreground + background = 8 tokens.",
+      "error": {
+        "fg": { "$value": "{color.error.700}", "$type": "color", "$description": "Error text and icons." },
+        "bg": { "$value": "{color.error.50}",  "$type": "color", "$description": "Error callout/alert background." }
+      },
+      "success": {
+        "fg": { "$value": "{color.success.700}", "$type": "color", "$description": "Success text and icons." },
+        "bg": { "$value": "{color.success.50}",  "$type": "color", "$description": "Success callout/alert background." }
+      },
+      "warning": {
+        "fg": { "$value": "{color.accent.700}",  "$type": "color", "$description": "Warning text and icons. Uses accent hue." },
+        "bg": { "$value": "{color.accent.50}",   "$type": "color", "$description": "Warning callout/alert background." }
+      },
+      "info": {
+        "fg": { "$value": "{color.info.700}", "$type": "color", "$description": "Info text and icons." },
+        "bg": { "$value": "{color.info.50}",  "$type": "color", "$description": "Info callout/alert background." }
+      }
+    },
+
+    "data": {
+      "$description": "Data visualization colors. 9 tokens: 6 series + positive + negative + neutral.",
+      "series-1": { "$value": "{color.primary.500}",   "$type": "color", "$description": "First data series. Primary hue." },
+      "series-2": { "$value": "{color.secondary.500}", "$type": "color", "$description": "Second data series. Secondary hue." },
+      "series-3": { "$value": "{color.tertiary.500}",  "$type": "color", "$description": "Third data series. Tertiary hue." },
+      "series-4": { "$value": "{color.accent.500}",    "$type": "color", "$description": "Fourth data series. Accent hue." },
+      "series-5": { "$value": "{color.chart-purple.500}", "$type": "color", "$description": "Fifth data series. Purple (generated complementary)." },
+      "series-6": { "$value": "{color.chart-pink.500}",  "$type": "color", "$description": "Sixth data series. Pink (generated split-complementary)." },
+      "positive":  { "$value": "{color.success.500}",  "$type": "color", "$description": "Positive values in charts (growth, profit, above target)." },
+      "negative":  { "$value": "{color.error.500}",    "$type": "color", "$description": "Negative values in charts (loss, decline, below target)." },
+      "neutral":   { "$value": "{color.neutral.400}",  "$type": "color", "$description": "Neutral/baseline values in charts." }
+    },
+
+    "audience": {
+      "$description": "Audience-specific accent colors. Dynamic count from brand-config audience_segments. DE default: 6 segments.",
+      "grower":          {
+        "$value": "{color.audience.grower}", "$type": "color", "$description": "Grower audience accent. Earthy green.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      },
+      "district-heat":   {
+        "$value": "{color.audience.district-heat}", "$type": "color", "$description": "District heating audience accent. Warm orange.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      },
+      "industrial-heat": {
+        "$value": "{color.audience.industrial-heat}", "$type": "color", "$description": "Industrial heat buyer accent. Deep amber.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      },
+      "neocloud":        {
+        "$value": "{color.audience.neocloud}", "$type": "color", "$description": "Neocloud buyer accent. Tech blue.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      },
+      "enterprise":      {
+        "$value": "{color.audience.enterprise}", "$type": "color", "$description": "Enterprise buyer accent. Deep indigo.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      },
+      "institution":     {
+        "$value": "{color.audience.institution}", "$type": "color", "$description": "Institution/research accent. Teal.",
+        "$extensions": { "usage": "Badge backgrounds, chart series overrides, section accent borders, callout left borders when content targets this audience" }
+      }
+    }
+  },
+
+  "color-mode": {
+    "$description": "Light/dark mode token mappings. The default tokens above are light-mode. This section provides dark-mode inversions. Apply by swapping CSS custom properties based on prefers-color-scheme or a user toggle.",
+
+    "dark": {
+      "$description": "Dark mode overrides. Apply these when color scheme is 'dark'.",
+      "surface-default":   { "$value": "{color.neutral.900}", "$type": "color", "$description": "Dark mode page background." },
+      "surface-subtle":    { "$value": "{color.neutral.800}", "$type": "color", "$description": "Dark mode card/container background." },
+      "surface-strong":    { "$value": "{color.neutral.700}", "$type": "color", "$description": "Dark mode active/selected surface." },
+      "text-primary":      { "$value": "{color.neutral.50}",  "$type": "color", "$description": "Dark mode primary text." },
+      "text-secondary":    { "$value": "{color.neutral.400}", "$type": "color", "$description": "Dark mode secondary text." },
+      "text-heading":      { "$value": "{color.neutral.100}", "$type": "color", "$description": "Dark mode heading text." },
+      "border-default":    { "$value": "{color.neutral.700}", "$type": "color", "$description": "Dark mode default borders." },
+      "border-subtle":     { "$value": "{color.neutral.800}", "$type": "color", "$description": "Dark mode subtle borders." },
+      "$extensions": {
+        "implementation": "In CSS: use @media (prefers-color-scheme: dark) to swap --color-surface-default etc. In HTML design system: toggle body class 'dark' to swap CSS custom properties.",
+        "brand-colors": "Brand primary, secondary, accent, and feedback colors remain unchanged in dark mode. Only surface, text, and border tokens invert."
+      }
+    }
+  },
+
+  "typography": {
+    "$description": "Typography composites. 15 tokens combining font family, size, weight, line-height, and letter-spacing.",
+
+    "display": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.5xl}", "fontWeight": "{font.weight.bold}", "lineHeight": "{font.lineHeight.tight}", "letterSpacing": "{font.letterSpacing.tight}" },
+      "$type": "typography",
+      "$description": "Display/hero text. Impact numbers, hero statements. Largest text in the system."
+    },
+    "hero": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.4xl}", "fontWeight": "{font.weight.bold}", "lineHeight": "{font.lineHeight.tight}", "letterSpacing": "{font.letterSpacing.tight}" },
+      "$type": "typography",
+      "$description": "Hero text. Section openers, key metric callouts."
+    },
+    "h1": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.3xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.tight}" },
+      "$type": "typography",
+      "$description": "H1 heading. Page/slide titles."
+    },
+    "h2": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.2xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "H2 heading. Section titles."
+    },
+    "h3": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "H3 heading. Subsection titles."
+    },
+    "h4": {
+      "$value": { "fontFamily": "{font.family.heading}", "fontSize": "{font.size.lg}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "H4 heading. Component titles, card headers."
+    },
+    "body-lg": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.md}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.lineHeight.normal}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Large body text. Lead paragraphs, introductions."
+    },
+    "body": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.lineHeight.normal}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Standard body text. Paragraphs, lists, descriptions."
+    },
+    "body-sm": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.lineHeight.normal}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Small body text. Secondary information, metadata."
+    },
+    "caption": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.xs}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.lineHeight.normal}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Caption text. Source citations, footnotes, timestamps."
+    },
+    "overline": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.xs}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.wide}" },
+      "$type": "typography",
+      "$description": "Overline text. Category labels, section indicators. ALL CAPS."
+    },
+    "data": {
+      "$value": { "fontFamily": "{font.family.mono}", "fontSize": "{font.size.base}", "fontWeight": "{font.weight.regular}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Data text. Table cells, technical values, metrics in body context.",
+      "$extensions": { "fontVariantNumeric": "tabular-nums" }
+    },
+    "data-lg": {
+      "$value": { "fontFamily": "{font.family.mono}", "fontSize": "{font.size.xl}", "fontWeight": "{font.weight.semibold}", "lineHeight": "{font.lineHeight.tight}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Large data text. Metric cards, key numbers, KPI displays.",
+      "$extensions": { "fontVariantNumeric": "tabular-nums" }
+    },
+    "button": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Button text. CTAs, navigation items."
+    },
+    "label": {
+      "$value": { "fontFamily": "{font.family.body}", "fontSize": "{font.size.sm}", "fontWeight": "{font.weight.medium}", "lineHeight": "{font.lineHeight.snug}", "letterSpacing": "{font.letterSpacing.normal}" },
+      "$type": "typography",
+      "$description": "Form labels, tag text, badge text."
+    }
+  },
+
+  "spacing": {
+    "$description": "Purpose-mapped spacing roles. 11 tokens.",
+
+    "content": {
+      "$description": "Gaps between content elements.",
+      "sm": { "$value": "{space.2}",  "$type": "dimension", "$description": "Tight content gap. Between label and input, icon and text." },
+      "md": { "$value": "{space.4}",  "$type": "dimension", "$description": "Standard content gap. Between paragraphs, list items." },
+      "lg": { "$value": "{space.6}",  "$type": "dimension", "$description": "Large content gap. Between content groups." },
+      "xl": { "$value": "{space.8}",  "$type": "dimension", "$description": "Section gap. Between major content sections." }
+    },
+
+    "layout": {
+      "$description": "Page/slide-level spacing.",
+      "margin":      { "$value": "{space.16}", "$type": "dimension", "$description": "Page/slide outer margin. Content safe zone." },
+      "section-gap": { "$value": "{space.12}", "$type": "dimension", "$description": "Gap between major sections on a page/slide." },
+      "gutter":      { "$value": "{space.6}",  "$type": "dimension", "$description": "Grid column gutter width." }
+    },
+
+    "component": {
+      "$description": "Internal component spacing.",
+      "xs": { "$value": "{space.1}",  "$type": "dimension", "$description": "Minimal padding. Badge, small tag." },
+      "sm": { "$value": "{space.2}",  "$type": "dimension", "$description": "Tight padding. Compact buttons, input." },
+      "md": { "$value": "{space.4}",  "$type": "dimension", "$description": "Standard padding. Cards, callouts." },
+      "lg": { "$value": "{space.6}",  "$type": "dimension", "$description": "Generous padding. Large cards, hero containers." }
+    }
+  },
+
+  "pattern": {
+    "$description": "Background pattern tokens. Default: subtle geometric based on DE personality (minimal_expressive=4). Status: default-pending-confirmation via Q7.6.",
+    "style": {
+      "$value": "subtle-geometric",
+      "$type": "string",
+      "$description": "Pattern style. Options: none | subtle-geometric | brand-pattern | gradient.",
+      "$extensions": { "status": "default-pending-confirmation", "question": "Q7.6" }
+    },
+    "opacity": {
+      "$value": "0.04",
+      "$type": "number",
+      "$description": "Pattern overlay opacity. Low for minimal personality.",
+      "$extensions": { "status": "default-pending-confirmation", "question": "Q7.6" }
+    },
+    "color": {
+      "$value": "{color.primary.200}",
+      "$type": "color",
+      "$description": "Pattern stroke/fill color. Light primary tint for subtle effect."
+    },
+    "scale": {
+      "$value": "24",
+      "$type": "dimension",
+      "$description": "Pattern repeat unit size in px."
+    },
+    "type": {
+      "$value": "dot-grid",
+      "$type": "string",
+      "$description": "Geometric pattern type. Options: dot-grid | line-grid | isometric | hex. Dot-grid is cleanest for data-forward personality.",
+      "$extensions": { "status": "default-pending-confirmation", "question": "Q7.6" }
+    }
+  },
+
+  "gradient": {
+    "$description": "Color gradient tokens for background treatments. Status: default-pending-confirmation via Q7.6.",
+    "brand": {
+      "$value": "linear-gradient(135deg, {color.primary.700} 0%, {color.primary.900} 100%)",
+      "$type": "gradient",
+      "$description": "Primary brand gradient. Navy to dark navy. Hero sections, cover slides.",
+      "$extensions": {
+        "status": "default-pending-confirmation",
+        "question": "Q7.6",
+        "css": "linear-gradient(135deg, #1B365D 0%, #0D1F30 100%)"
+      }
+    },
+    "surface": {
+      "$value": "linear-gradient(180deg, {color.neutral.50} 0%, {color.neutral.100} 100%)",
+      "$type": "gradient",
+      "$description": "Subtle surface gradient. Adds depth to large background areas.",
+      "$extensions": {
+        "css": "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)"
+      }
+    },
+    "accent": {
+      "$value": "linear-gradient(135deg, {color.secondary.500} 0%, {color.secondary.700} 100%)",
+      "$type": "gradient",
+      "$description": "Accent gradient for CTA highlights and callouts.",
+      "$extensions": {
+        "css": "linear-gradient(135deg, #22C55E 0%, #15803D 100%)"
+      }
+    },
+    "data-overlay": {
+      "$value": "linear-gradient(180deg, transparent 0%, {color.primary.900} 80%)",
+      "$type": "gradient",
+      "$description": "Dark overlay gradient for text on images. Bottom-heavy fade.",
+      "$extensions": {
+        "css": "linear-gradient(180deg, transparent 0%, #0D1F30 80%)"
+      }
+    }
+  }
+}

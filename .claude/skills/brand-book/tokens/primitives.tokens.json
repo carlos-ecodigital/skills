@@ -1,0 +1,377 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Primitive design tokens -- raw values, never used directly in components. Generic hue naming with brand-config providing the semantic mapping. Pre-filled with Digital Energy defaults.",
+
+  "color": {
+    "$description": "Color primitives. 8 hue families x 10 shades + white + black = 82 tokens.",
+
+    "primary": {
+      "$description": "Core brand identity color. DE default: deep navy (#1B365D).",
+      "50":  { "$value": "#F0F4F8", "$type": "color", "$description": "Lightest primary tint. Use for subtle backgrounds." },
+      "100": { "$value": "#D9E2EC", "$type": "color", "$description": "Light primary tint. Use for hover states, selected rows." },
+      "200": { "$value": "#BCCCDC", "$type": "color", "$description": "Light primary. Use for borders, dividers." },
+      "300": { "$value": "#9FB3C8", "$type": "color", "$description": "Medium-light primary. Use for disabled states." },
+      "400": { "$value": "#627D98", "$type": "color", "$description": "Medium primary. Use for secondary text on light bg." },
+      "500": { "$value": "#334E68", "$type": "color", "$description": "Base primary shade. Use for headings, strong text." },
+      "600": { "$value": "#243B53", "$type": "color", "$description": "Dark primary. Use for primary buttons, links." },
+      "700": { "$value": "#1B365D", "$type": "color", "$description": "Brand primary. The core brand color value." },
+      "800": { "$value": "#142945", "$type": "color", "$description": "Darker primary. Use for dark surfaces, footers." },
+      "900": { "$value": "#0D1F30", "$type": "color", "$description": "Darkest primary. Use for inverse surfaces." },
+      "950": { "$value": "#091620", "$type": "color", "$description": "Near-black primary. Use for maximum contrast." }
+    },
+
+    "secondary": {
+      "$description": "Action/accent color. DE default: energy green (#22C55E).",
+      "50":  { "$value": "#F0FDF4", "$type": "color", "$description": "Lightest secondary tint." },
+      "100": { "$value": "#DCFCE7", "$type": "color", "$description": "Light secondary. Callout backgrounds." },
+      "200": { "$value": "#BBF7D0", "$type": "color", "$description": "Light secondary. Hover states." },
+      "300": { "$value": "#86EFAC", "$type": "color", "$description": "Medium-light secondary." },
+      "400": { "$value": "#4ADE80", "$type": "color", "$description": "Medium secondary. Accent elements." },
+      "500": { "$value": "#22C55E", "$type": "color", "$description": "Base secondary. CTAs, highlights." },
+      "600": { "$value": "#16A34A", "$type": "color", "$description": "Dark secondary. Button backgrounds (WCAG safe for white text)." },
+      "700": { "$value": "#15803D", "$type": "color", "$description": "Darker secondary. Text-safe button bg." },
+      "800": { "$value": "#166534", "$type": "color", "$description": "Dark secondary. Strong accents." },
+      "900": { "$value": "#14532D", "$type": "color", "$description": "Darkest secondary." },
+      "950": { "$value": "#0A3318", "$type": "color", "$description": "Near-black secondary." }
+    },
+
+    "neutral": {
+      "$description": "Background, border, and body text grays. DE default: cool grays (blue-tinted).",
+      "50":  { "$value": "#F8FAFC", "$type": "color", "$description": "Page background, lightest surface." },
+      "100": { "$value": "#F1F5F9", "$type": "color", "$description": "Subtle surface, card backgrounds." },
+      "200": { "$value": "#E2E8F0", "$type": "color", "$description": "Borders, dividers, table lines." },
+      "300": { "$value": "#CBD5E1", "$type": "color", "$description": "Disabled borders, placeholder text." },
+      "400": { "$value": "#94A3B8", "$type": "color", "$description": "Placeholder text, disabled text." },
+      "500": { "$value": "#64748B", "$type": "color", "$description": "Secondary body text, captions." },
+      "600": { "$value": "#475569", "$type": "color", "$description": "Body text on light backgrounds." },
+      "700": { "$value": "#334155", "$type": "color", "$description": "Strong body text." },
+      "800": { "$value": "#1E293B", "$type": "color", "$description": "Headings on light backgrounds." },
+      "900": { "$value": "#0F172A", "$type": "color", "$description": "Maximum contrast text, dark surfaces." },
+      "950": { "$value": "#020617", "$type": "color", "$description": "Near-black, darkest neutral." }
+    },
+
+    "accent": {
+      "$description": "Domain-specific accent. DE default: warm amber for heat-recovery context.",
+      "50":  { "$value": "#FFFBEB", "$type": "color", "$description": "Lightest accent." },
+      "100": { "$value": "#FEF3C7", "$type": "color", "$description": "Light accent background." },
+      "200": { "$value": "#FDE68A", "$type": "color", "$description": "Accent highlight." },
+      "300": { "$value": "#FCD34D", "$type": "color", "$description": "Medium accent." },
+      "400": { "$value": "#FBBF24", "$type": "color", "$description": "Strong accent." },
+      "500": { "$value": "#F59E0B", "$type": "color", "$description": "Base accent." },
+      "600": { "$value": "#D97706", "$type": "color", "$description": "Dark accent. Text-safe." },
+      "700": { "$value": "#B45309", "$type": "color", "$description": "Darker accent." },
+      "800": { "$value": "#92400E", "$type": "color", "$description": "Deep accent." },
+      "900": { "$value": "#78350F", "$type": "color", "$description": "Darkest accent." },
+      "950": { "$value": "#451A03", "$type": "color", "$description": "Near-black accent." }
+    },
+
+    "error": {
+      "$description": "Error, danger, risk states. Universal red-based.",
+      "50":  { "$value": "#FEF2F2", "$type": "color", "$description": "Error background tint." },
+      "100": { "$value": "#FEE2E2", "$type": "color", "$description": "Error callout background." },
+      "200": { "$value": "#FECACA", "$type": "color", "$description": "Error border light." },
+      "300": { "$value": "#FCA5A5", "$type": "color", "$description": "Error accent light." },
+      "400": { "$value": "#F87171", "$type": "color", "$description": "Error accent." },
+      "500": { "$value": "#EF4444", "$type": "color", "$description": "Base error." },
+      "600": { "$value": "#DC2626", "$type": "color", "$description": "Error text, strong error." },
+      "700": { "$value": "#B91C1C", "$type": "color", "$description": "Dark error." },
+      "800": { "$value": "#991B1B", "$type": "color", "$description": "Deep error." },
+      "900": { "$value": "#7F1D1D", "$type": "color", "$description": "Darkest error." },
+      "950": { "$value": "#450A0A", "$type": "color", "$description": "Near-black error." }
+    },
+
+    "tertiary": {
+      "$description": "Third brand hue. DE default: tech blue for compute/AI contexts.",
+      "50":  { "$value": "#EFF6FF", "$type": "color", "$description": "Lightest tertiary." },
+      "100": { "$value": "#DBEAFE", "$type": "color", "$description": "Light tertiary." },
+      "200": { "$value": "#BFDBFE", "$type": "color", "$description": "Tertiary border." },
+      "300": { "$value": "#93C5FD", "$type": "color", "$description": "Medium-light tertiary." },
+      "400": { "$value": "#60A5FA", "$type": "color", "$description": "Medium tertiary." },
+      "500": { "$value": "#3B82F6", "$type": "color", "$description": "Base tertiary." },
+      "600": { "$value": "#2563EB", "$type": "color", "$description": "Dark tertiary." },
+      "700": { "$value": "#1D4ED8", "$type": "color", "$description": "Darker tertiary." },
+      "800": { "$value": "#1E40AF", "$type": "color", "$description": "Deep tertiary." },
+      "900": { "$value": "#1E3A8A", "$type": "color", "$description": "Darkest tertiary." },
+      "950": { "$value": "#172554", "$type": "color", "$description": "Near-black tertiary." }
+    },
+
+    "info": {
+      "$description": "Informational states. Blue-based.",
+      "50":  { "$value": "#EFF6FF", "$type": "color", "$description": "Info background tint." },
+      "100": { "$value": "#DBEAFE", "$type": "color", "$description": "Info callout background." },
+      "200": { "$value": "#BFDBFE", "$type": "color", "$description": "Info border." },
+      "300": { "$value": "#93C5FD", "$type": "color", "$description": "Info accent light." },
+      "400": { "$value": "#60A5FA", "$type": "color", "$description": "Info accent." },
+      "500": { "$value": "#3B82F6", "$type": "color", "$description": "Base info." },
+      "600": { "$value": "#2563EB", "$type": "color", "$description": "Info text." },
+      "700": { "$value": "#1D4ED8", "$type": "color", "$description": "Dark info." },
+      "800": { "$value": "#1E40AF", "$type": "color", "$description": "Deep info." },
+      "900": { "$value": "#1E3A8A", "$type": "color", "$description": "Darkest info." },
+      "950": { "$value": "#172554", "$type": "color", "$description": "Near-black info." }
+    },
+
+    "success": {
+      "$description": "Success, positive, growth states. Green-based.",
+      "50":  { "$value": "#F0FDF4", "$type": "color", "$description": "Success background tint." },
+      "100": { "$value": "#DCFCE7", "$type": "color", "$description": "Success callout background." },
+      "200": { "$value": "#BBF7D0", "$type": "color", "$description": "Success border." },
+      "300": { "$value": "#86EFAC", "$type": "color", "$description": "Success accent light." },
+      "400": { "$value": "#4ADE80", "$type": "color", "$description": "Success accent." },
+      "500": { "$value": "#22C55E", "$type": "color", "$description": "Base success." },
+      "600": { "$value": "#16A34A", "$type": "color", "$description": "Success text." },
+      "700": { "$value": "#15803D", "$type": "color", "$description": "Dark success." },
+      "800": { "$value": "#166534", "$type": "color", "$description": "Deep success." },
+      "900": { "$value": "#14532D", "$type": "color", "$description": "Darkest success." },
+      "950": { "$value": "#0A3318", "$type": "color", "$description": "Near-black success." }
+    },
+
+    "chart-purple": {
+      "$description": "Chart-only hue. Purple for data series-5. Not a brand color.",
+      "500": { "$value": "#8B5CF6", "$type": "color", "$description": "Base chart purple. Data series 5." },
+      "600": { "$value": "#7C3AED", "$type": "color", "$description": "Dark chart purple." },
+      "700": { "$value": "#6D28D9", "$type": "color", "$description": "Darker chart purple." }
+    },
+
+    "chart-pink": {
+      "$description": "Chart-only hue. Pink for data series-6. Not a brand color.",
+      "500": { "$value": "#EC4899", "$type": "color", "$description": "Base chart pink. Data series 6." },
+      "600": { "$value": "#DB2777", "$type": "color", "$description": "Dark chart pink." },
+      "700": { "$value": "#BE185D", "$type": "color", "$description": "Darker chart pink." }
+    },
+
+    "audience": {
+      "$description": "Audience-specific accent primitives. Dynamic count from brand-config audience_segments. DE default: 6 segments. These are standalone hues — not derived from the 8 brand hue families.",
+      "grower":          { "$value": "#65A30D", "$type": "color", "$description": "Lime green. Grower/agricultural audience." },
+      "district-heat":   { "$value": "#EA580C", "$type": "color", "$description": "Warm orange. District heating audience." },
+      "industrial-heat": { "$value": "#B45309", "$type": "color", "$description": "Deep amber. Industrial heat buyer audience." },
+      "neocloud":        { "$value": "#2563EB", "$type": "color", "$description": "Tech blue. Neocloud buyer audience." },
+      "enterprise":      { "$value": "#4338CA", "$type": "color", "$description": "Deep indigo. Enterprise buyer audience." },
+      "institution":     { "$value": "#0F766E", "$type": "color", "$description": "Teal. Institution/research audience." }
+    },
+
+    "white": { "$value": "#FFFFFF", "$type": "color", "$description": "Pure white." },
+    "black": { "$value": "#000000", "$type": "color", "$description": "Pure black." }
+  },
+
+  "font": {
+    "$description": "Typography primitives. 25 tokens total.",
+
+    "family": {
+      "heading": { "$value": "Inter", "$type": "fontFamily", "$description": "Heading font family. Must be Google Fonts or bundled." },
+      "body":    { "$value": "Inter", "$type": "fontFamily", "$description": "Body text font family." },
+      "mono":    { "$value": "JetBrains Mono", "$type": "fontFamily", "$description": "Monospace font for data contexts." }
+    },
+
+    "weight": {
+      "light":    { "$value": 300, "$type": "fontWeight", "$description": "Light weight. Use sparingly for large display text." },
+      "regular":  { "$value": 400, "$type": "fontWeight", "$description": "Regular weight. Default body text." },
+      "medium":   { "$value": 500, "$type": "fontWeight", "$description": "Medium weight. Labels, emphasis." },
+      "semibold": { "$value": 600, "$type": "fontWeight", "$description": "Semibold. Headings, strong text." },
+      "bold":     { "$value": 700, "$type": "fontWeight", "$description": "Bold. Maximum emphasis." }
+    },
+
+    "size": {
+      "$description": "Font size scales. 3 sets selected by Q2.8: compact (data-dense), standard (DE default), dramatic (editorial). Standard = 10 steps, 12-48px.",
+
+      "xs":   { "$value": "12px", "$type": "dimension", "$description": "Footnotes, legal, source citations." },
+      "sm":   { "$value": "14px", "$type": "dimension", "$description": "Captions, labels, small text." },
+      "base": { "$value": "16px", "$type": "dimension", "$description": "Body text. Minimum for screen readability." },
+      "md":   { "$value": "18px", "$type": "dimension", "$description": "Lead text, large body." },
+      "lg":   { "$value": "20px", "$type": "dimension", "$description": "H4 headings." },
+      "xl":   { "$value": "24px", "$type": "dimension", "$description": "H3 headings." },
+      "2xl":  { "$value": "30px", "$type": "dimension", "$description": "H2 headings." },
+      "3xl":  { "$value": "36px", "$type": "dimension", "$description": "H1 headings." },
+      "4xl":  { "$value": "42px", "$type": "dimension", "$description": "Display text." },
+      "5xl":  { "$value": "48px", "$type": "dimension", "$description": "Hero text, impact numbers." },
+
+      "compact": {
+        "$description": "Compact scale — data-dense layouts. 8 steps, 12-36px. Select when Q2.8 = compact.",
+        "xs":   { "$value": "12px", "$type": "dimension" },
+        "sm":   { "$value": "13px", "$type": "dimension" },
+        "base": { "$value": "14px", "$type": "dimension" },
+        "md":   { "$value": "16px", "$type": "dimension" },
+        "lg":   { "$value": "18px", "$type": "dimension" },
+        "xl":   { "$value": "22px", "$type": "dimension" },
+        "2xl":  { "$value": "28px", "$type": "dimension" },
+        "3xl":  { "$value": "36px", "$type": "dimension" }
+      },
+      "dramatic": {
+        "$description": "Dramatic scale — editorial, high-impact layouts. 10 steps, 12-60px. Select when Q2.8 = dramatic.",
+        "xs":   { "$value": "12px", "$type": "dimension" },
+        "sm":   { "$value": "14px", "$type": "dimension" },
+        "base": { "$value": "18px", "$type": "dimension" },
+        "md":   { "$value": "22px", "$type": "dimension" },
+        "lg":   { "$value": "26px", "$type": "dimension" },
+        "xl":   { "$value": "32px", "$type": "dimension" },
+        "2xl":  { "$value": "40px", "$type": "dimension" },
+        "3xl":  { "$value": "48px", "$type": "dimension" },
+        "4xl":  { "$value": "54px", "$type": "dimension" },
+        "5xl":  { "$value": "60px", "$type": "dimension" }
+      }
+    },
+
+    "lineHeight": {
+      "tight":   { "$value": "1.1",  "$type": "number", "$description": "Display text, hero. Minimal leading." },
+      "snug":    { "$value": "1.25", "$type": "number", "$description": "Headings. Compact but readable." },
+      "normal":  { "$value": "1.5",  "$type": "number", "$description": "Body text. Standard reading comfort." },
+      "relaxed": { "$value": "1.75", "$type": "number", "$description": "Airy body text. Premium feel." }
+    },
+
+    "letterSpacing": {
+      "tight":   { "$value": "-0.025em", "$type": "dimension", "$description": "Display/hero text tightening." },
+      "normal":  { "$value": "0em",      "$type": "dimension", "$description": "Default letter spacing." },
+      "wide":    { "$value": "0.05em",   "$type": "dimension", "$description": "Overline, all-caps text." }
+    },
+
+    "textTransform": {
+      "uppercase":  { "$value": "uppercase",  "$type": "string", "$description": "ALL CAPS. Use with wide letter-spacing." },
+      "capitalize": { "$value": "capitalize", "$type": "string", "$description": "Title Case." },
+      "none":       { "$value": "none",       "$type": "string", "$description": "No transform (default)." }
+    }
+  },
+
+  "space": {
+    "$description": "Spacing scale. 4px base, harmonic progression. 16 tokens.",
+    "0":   { "$value": "0px",   "$type": "dimension", "$description": "No space." },
+    "1":   { "$value": "4px",   "$type": "dimension", "$description": "Base unit. Minimum gap." },
+    "2":   { "$value": "8px",   "$type": "dimension", "$description": "2x base. Tight internal padding." },
+    "3":   { "$value": "12px",  "$type": "dimension", "$description": "3x base. Compact component padding." },
+    "4":   { "$value": "16px",  "$type": "dimension", "$description": "4x base. Standard component padding." },
+    "5":   { "$value": "20px",  "$type": "dimension", "$description": "5x base." },
+    "6":   { "$value": "24px",  "$type": "dimension", "$description": "6x base. Standard content gap." },
+    "8":   { "$value": "32px",  "$type": "dimension", "$description": "8x base. Section spacing." },
+    "10":  { "$value": "40px",  "$type": "dimension", "$description": "10x base." },
+    "12":  { "$value": "48px",  "$type": "dimension", "$description": "12x base. Large section gap." },
+    "16":  { "$value": "64px",  "$type": "dimension", "$description": "16x base. Layout margin." },
+    "20":  { "$value": "80px",  "$type": "dimension", "$description": "20x base." },
+    "24":  { "$value": "96px",  "$type": "dimension", "$description": "24x base. Maximum spacing." },
+    "32":  { "$value": "128px", "$type": "dimension", "$description": "32x base. Hero section padding." },
+    "40":  { "$value": "160px", "$type": "dimension", "$description": "40x base." },
+    "48":  { "$value": "192px", "$type": "dimension", "$description": "48x base. Maximum layout spacing." }
+  },
+
+  "radius": {
+    "$description": "Border radius scale. 6 tokens.",
+    "none": { "$value": "0px",    "$type": "dimension", "$description": "Sharp corners." },
+    "sm":   { "$value": "2px",    "$type": "dimension", "$description": "Subtle rounding." },
+    "md":   { "$value": "4px",    "$type": "dimension", "$description": "Standard rounding. DE default for buttons." },
+    "lg":   { "$value": "8px",    "$type": "dimension", "$description": "Moderate rounding. Cards, containers." },
+    "xl":   { "$value": "12px",   "$type": "dimension", "$description": "Pronounced rounding." },
+    "full": { "$value": "9999px", "$type": "dimension", "$description": "Fully rounded. Pills, avatars, circular elements." }
+  },
+
+  "borderWidth": {
+    "$description": "Border width scale. 3 tokens.",
+    "thin":    { "$value": "1px", "$type": "dimension", "$description": "Default borders, table lines, dividers." },
+    "medium":  { "$value": "2px", "$type": "dimension", "$description": "Focus rings, emphasis borders." },
+    "thick":   { "$value": "4px", "$type": "dimension", "$description": "Accent borders, callout left bars." }
+  },
+
+  "shadow": {
+    "$description": "Elevation shadows. 5 levels.",
+    "xs": {
+      "$value": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "$type": "shadow",
+      "$description": "Minimal elevation. Subtle lift."
+    },
+    "sm": {
+      "$value": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+      "$type": "shadow",
+      "$description": "Small elevation. Cards, dropdowns."
+    },
+    "md": {
+      "$value": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+      "$type": "shadow",
+      "$description": "Medium elevation. Metric cards, popovers."
+    },
+    "lg": {
+      "$value": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+      "$type": "shadow",
+      "$description": "Large elevation. Modals, hover states."
+    },
+    "xl": {
+      "$value": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+      "$type": "shadow",
+      "$description": "Maximum elevation. Overlays."
+    }
+  },
+
+  "duration": {
+    "$description": "Animation duration tokens. 3 personality sets (minimal / moderate / dynamic) selected by Q5.2. DE default: moderate.",
+
+    "minimal": {
+      "$description": "Minimal personality — fast, efficient motion. 50% of moderate values.",
+      "fast":    { "$value": "75ms",  "$type": "duration", "$description": "Hover states, toggles." },
+      "default": { "$value": "150ms", "$type": "duration", "$description": "Standard transitions." },
+      "slow":    { "$value": "250ms", "$type": "duration", "$description": "Page transitions." },
+      "enter":   { "$value": "175ms", "$type": "duration", "$description": "Element entrances." },
+      "exit":    { "$value": "125ms", "$type": "duration", "$description": "Element exits." }
+    },
+    "moderate": {
+      "$description": "Moderate personality — balanced motion. DE default.",
+      "fast":    { "$value": "150ms", "$type": "duration", "$description": "Hover states, toggles, micro-interactions." },
+      "default": { "$value": "300ms", "$type": "duration", "$description": "Standard transitions, dropdowns, tooltips." },
+      "slow":    { "$value": "500ms", "$type": "duration", "$description": "Page transitions, complex animations." },
+      "enter":   { "$value": "350ms", "$type": "duration", "$description": "Element entrance animations." },
+      "exit":    { "$value": "250ms", "$type": "duration", "$description": "Element exit animations. Faster than enter." }
+    },
+    "dynamic": {
+      "$description": "Dynamic personality — expressive, energetic motion. 150% of moderate values.",
+      "fast":    { "$value": "225ms", "$type": "duration", "$description": "Hover states, toggles." },
+      "default": { "$value": "450ms", "$type": "duration", "$description": "Standard transitions." },
+      "slow":    { "$value": "750ms", "$type": "duration", "$description": "Page transitions." },
+      "enter":   { "$value": "525ms", "$type": "duration", "$description": "Element entrances." },
+      "exit":    { "$value": "375ms", "$type": "duration", "$description": "Element exits." }
+    },
+    "reduced": {
+      "$description": "Reduced-motion fallbacks. All 0ms for prefers-reduced-motion users.",
+      "fast":    { "$value": "0ms", "$type": "duration", "$description": "No animation." },
+      "default": { "$value": "0ms", "$type": "duration", "$description": "No animation." },
+      "slow":    { "$value": "0ms", "$type": "duration", "$description": "No animation." },
+      "enter":   { "$value": "0ms", "$type": "duration", "$description": "No animation." },
+      "exit":    { "$value": "0ms", "$type": "duration", "$description": "No animation." }
+    },
+
+    "$extensions": {
+      "selection": "Q5.2 personality axis 'traditional_modern' maps: 1-2 = minimal, 3 = moderate, 4-5 = dynamic",
+      "reduced-motion": "Always switch to duration.reduced.* when prefers-reduced-motion: reduce is active"
+    }
+  },
+
+  "elevation": {
+    "$description": "Z-index stacking context and elevation philosophy. 10 levels define all layering relationships.",
+    "zindex": {
+      "base":         { "$value": 0,    "$type": "number", "$description": "Default document flow." },
+      "dropdown":     { "$value": 10,   "$type": "number", "$description": "Dropdowns, select menus, popovers." },
+      "sticky":       { "$value": 20,   "$type": "number", "$description": "Sticky headers, footers, navigation bars." },
+      "fixed":        { "$value": 30,   "$type": "number", "$description": "Fixed positioned elements (FABs, persistent UI)." },
+      "overlay":      { "$value": 40,   "$type": "number", "$description": "Backdrop overlays behind modals/drawers." },
+      "modal":        { "$value": 50,   "$type": "number", "$description": "Modal dialogs, drawers, bottom sheets." },
+      "popover":      { "$value": 100,  "$type": "number", "$description": "Popovers that may appear over modals." },
+      "tooltip":      { "$value": 200,  "$type": "number", "$description": "Tooltips — always on top of interactive UI." },
+      "notification": { "$value": 500,  "$type": "number", "$description": "Toast notifications — visible above all content." },
+      "max":          { "$value": 9999, "$type": "number", "$description": "Reserved for critical system messages." }
+    },
+    "philosophy": {
+      "$value": "shadow-based",
+      "$type": "string",
+      "$description": "Elevation strategy. Options: 'shadow-based' (box-shadow creates depth — DE default), 'background-based' (darker bg = higher elevation, Carbon style), 'hybrid' (shadows for floating elements, bg-color for sections). Selected by Q3.12."
+    }
+  },
+
+  "breakpoint": {
+    "$description": "Responsive design breakpoints. Used in HTML exports, Tailwind config, and responsive templates. Selected by Q3.11.",
+    "mobile":  { "$value": "320px",  "$type": "dimension", "$description": "Mobile phones (portrait). Min width." },
+    "tablet":  { "$value": "768px",  "$type": "dimension", "$description": "Tablets (portrait), large phones (landscape)." },
+    "desktop": { "$value": "1024px", "$type": "dimension", "$description": "Desktop and laptop screens." },
+    "wide":    { "$value": "1440px", "$type": "dimension", "$description": "Wide desktop displays, external monitors." }
+  },
+
+  "easing": {
+    "$description": "Easing curve tokens. 4 curves.",
+    "default": { "$value": "cubic-bezier(0.4, 0, 0.2, 1)", "$type": "cubicBezier", "$description": "Standard easing. Starts fast, decelerates." },
+    "in":      { "$value": "cubic-bezier(0.4, 0, 1, 1)",   "$type": "cubicBezier", "$description": "Ease-in. Accelerating exit." },
+    "out":     { "$value": "cubic-bezier(0, 0, 0.2, 1)",   "$type": "cubicBezier", "$description": "Ease-out. Decelerating entrance." },
+    "bounce":  { "$value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "$type": "cubicBezier", "$description": "Overshoot bounce. Use sparingly for emphasis." }
+  }
+}
