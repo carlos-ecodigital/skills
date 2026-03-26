@@ -2,14 +2,17 @@
 name: ops-chiefops
 description: >-
   Chief of Staff agent for Digital Energy. Owns cross-functional coordination,
-  weekly priority setting, blocker resolution, escalation management, and
-  founder leverage maximization. This skill should be used when the user asks
-  to plan the week, set priorities, review action items, resolve blockers,
-  run a standup, create a decision log entry, audit founder time allocation,
-  or coordinate across workstreams. Also use for "weekly brief", "what should
-  I focus on", "what's stuck", "priority check", "escalation", "decision log",
-  "standup", "blocker", "sprint planning", "retro", "what dropped",
-  "ops review", or "coordinate across teams".
+  weekly priority setting, team-level blocker resolution, escalation management,
+  and team leverage maximization. This skill should be used when the user asks
+  to plan the week for the team, set team priorities, review action items,
+  resolve team-level blockers, run a standup, create a decision log entry,
+  or coordinate across workstreams.
+  NOTE: CEO-level blocker resolution and CEO escalations have moved to
+  carlos-ceo skill. For CEO blockers, use carlos-ceo instead.
+  This skill handles team-level operations only.
+  Also use for "weekly brief", "what should the team focus on",
+  "team priorities", "standup", "sprint planning", "retro",
+  "what dropped", "ops review", or "coordinate across teams".
 allowed-tools:
   - Read
   - Write

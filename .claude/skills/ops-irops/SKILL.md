@@ -1,7 +1,12 @@
 ---
 name: ops-irops
 description: >-
-  Investor relations and post-investment communications agent for Digital
+  DEPRECATED: This skill has been absorbed into carlos-ceo.
+  All investor relations, monthly updates, relationship health tracking,
+  and ask management now live in carlos-ceo. Use carlos-ceo instead.
+  Redirect triggers: "investor update", "monthly update", "investor relations",
+  "relationship health", "investor asks".
+  Original description: Investor relations and post-investment communications agent for Digital
   Energy. Owns monthly investor updates, relationship health tracking,
   ask management, and ongoing investor engagement. This skill should be
   used when the user asks to write an investor update, track investor

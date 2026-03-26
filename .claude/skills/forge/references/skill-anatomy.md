@@ -62,6 +62,8 @@ allowed-tools:                      # Optional. Whitelist of tools the skill can
 ├── references/                 # Domain knowledge files
 │   ├── {topic-1}.md
 │   └── {topic-2}.md
+├── workflows/                  # Step-by-step operational procedures (SOPs)
+│   └── {workflow-name}.md
 ├── examples/                   # Templates, sample outputs
 │   ├── {example-1}.md
 │   └── {example-2}.md
@@ -82,12 +84,26 @@ allowed-tools:                      # Optional. Whitelist of tools the skill can
 | Directory | When to Use | Example |
 |-----------|------------|---------|
 | `references/` | Default for all domain knowledge | Most skills |
+| `workflows/` | Step-by-step operational procedures anyone can follow | carlos-ceo (WBR, daily scan) |
 | `examples/` | Sample outputs, templates, worked examples | content-engine, collateral-studio |
 | `core/` | Foundational files shared across specializations | legal-counsel |
 | `specializations/` | When skill has 3+ distinct sub-domains with own reference files | legal-counsel (10 specs) |
 | `jurisdictions/` | When skill spans multiple legal/regulatory jurisdictions | legal-counsel (4 jurisdictions) |
 
 **Rule:** Use `references/` unless the skill has combinatorial complexity (specialization x jurisdiction). Most skills only need `references/` and optionally `examples/`.
+
+### Workflows vs References
+
+| Aspect | `references/` | `workflows/` |
+|--------|--------------|-------------|
+| Contains | Knowledge, frameworks, data | Step-by-step procedures |
+| Loaded when | Contextually, based on request type | When a specific process is triggered |
+| Executable by | AI (for context) | Human OR AI (as a procedure) |
+| Self-contained | No (needs SKILL.md context) | Yes (executable without SKILL.md) |
+| Cross-skill reusable | By reference | By path: `{skill}/workflows/{name}.md` |
+| Version-tracked | Implicitly (git) | Explicitly (semver in frontmatter) |
+
+**Workflow frontmatter schema:** See `forge/templates/workflow.md` for the standard template.
 
 ## File Naming Conventions
 

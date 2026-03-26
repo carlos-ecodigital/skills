@@ -1,7 +1,7 @@
 # Ecosystem Registry
 
 > Living inventory of all Digital Energy skills. Updated by forge after every build, audit, or upgrade.
-> Last updated: 2026-02-24
+> Last updated: 2026-03-25
 
 ## Skill Inventory
 
@@ -13,11 +13,11 @@
 | `ops-meetingops` | Ops Orchestrator | — | — | Active | — | Fireflies, Calendar, HubSpot, ClickUp |
 | `ops-contextops` | Ops Orchestrator | — | — | Active | — | WhatsApp (manual), voice notes |
 | `ops-dealops` | Ops Orchestrator | — | — | Active | — | HubSpot (read/write), ClickUp |
-| `ops-storyops` | Ops Orchestrator | — | — | Active | `de-brand-bible` | Routes to: content-engine, collateral-studio, seed-fundraising, positioning-expert, marketing-strategist |
+| `ops-storyops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | `de-brand-bible` | Absorbed into carlos-ceo (narrative-architecture ref) |
 | `ops-targetops` | Ops Orchestrator | — | — | Active | — | HubSpot (read/write), WebSearch |
 | `ops-outreachops` | Ops Orchestrator | — | — | Active | — | Gmail, HubSpot |
 | `ops-dataroomops` | Ops Orchestrator | — | — | Active | — | Google Drive, HubSpot |
-| `ops-irops` | Ops Orchestrator | — | — | Active | — | Gmail, HubSpot |
+| `ops-irops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | — | Absorbed into carlos-ceo (investor-relations-playbook ref) |
 
 ### Domain Executors (7 skills)
 
@@ -55,6 +55,20 @@
 | `sales-intake` | Domain Executor | — | — | Active | ops-dealops, ops-targetops |
 | `humanizer` | Domain Executor | — | — | Active | ops-outreachops, ops-irops |
 
+### CEO Operating System (1 skill)
+
+| Skill | Type | Score | Hrs/wk | Status | Dependencies | Absorbs |
+|-------|------|-------|--------|--------|-------------|---------|
+| `carlos-ceo` | Domain Executor + Orchestrator | — | — | Active | `ops-weeklyops`, `ops-contextops`, `delegation-engine` | `ops-storyops`, `ops-irops`, `carlos-thought-leadership`, CEO portion of `executive-comms` and `ops-chiefops` |
+
+### Deprecated Skills (3 skills — absorbed into carlos-ceo)
+
+| Skill | Status | Absorbed Into | Date |
+|-------|--------|-------------|------|
+| `ops-storyops` | Deprecated | `carlos-ceo` (narrative-architecture ref) | 2026-03-25 |
+| `ops-irops` | Deprecated | `carlos-ceo` (investor-relations-playbook ref) | 2026-03-25 |
+| `carlos-thought-leadership` | Deprecated | `carlos-ceo` (social-strategy ref + social-content workflow) | 2026-03-25 |
+
 ### Meta Skills (1 skill)
 
 | Skill | Type | Score | Hrs/wk | Status | Purpose |
@@ -81,12 +95,14 @@
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total skills | 26 | Max 30 | OK |
-| Ops orchestrators | 9 | — | OK |
-| Domain executors | 8 | — | OK |
+| Total skills (active) | 24 | Max 30 | OK (was 26, -3 deprecated +1 new) |
+| Ops orchestrators | 7 | — | OK (was 9, -2 deprecated) |
+| Domain executors | 7 | — | OK |
+| CEO operating system | 1 | — | NEW |
 | Panel of Experts | 4 | — | OK |
 | Passive foundations | 2 | — | OK |
 | Specialized | 2 | — | OK |
+| Deprecated | 3 | — | Absorbed into carlos-ceo |
 | Meta skills | 1 | — | OK |
 | Skills with scores | 5 | — | Needs audit |
 | Average score (scored only) | 89.4 | ≥75 | OK |

@@ -1,7 +1,13 @@
 ---
 name: ops-storyops
 description: >-
-  Unified narrative and story agent for Digital Energy. Owns all storytelling
+  DEPRECATED: This skill has been absorbed into carlos-ceo.
+  All narrative architecture, story consistency, and messaging strategy
+  functions now live in carlos-ceo. Use carlos-ceo instead.
+  Redirect triggers: "what's our story", "narrative check",
+  "story for [audience]", "how should we frame this",
+  "narrative architecture", "story consistency".
+  Original description: Unified narrative and story agent for Digital Energy. Owns all storytelling
   across investor, buyer, and partner audiences -- pitch decks, messaging,
   positioning, content strategy, and narrative consistency. Acts as
   orchestrator across content-engine, collateral-studio, seed-fundraising,

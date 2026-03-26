@@ -1,7 +1,12 @@
 ---
 name: carlos-thought-leadership
 description: >-
-  Proactive thought leadership strategist for Carlos's personal brand on LinkedIn
+  DEPRECATED: This skill has been absorbed into carlos-ceo as "Carlos Social" mode.
+  All LinkedIn/X content strategy, personal brand, and social posting
+  now live in carlos-ceo. Use carlos-ceo instead.
+  Redirect triggers: "what should Carlos post", "LinkedIn post",
+  "social content", "LinkedIn strategy", "X strategy", "CEO social media".
+  Original description: Proactive thought leadership strategist for Carlos's personal brand on LinkedIn
   and X (Twitter). Owns the CEO's personal content strategy, topic selection,
   platform-specific post drafting, engagement playbook, and cross-posting strategy.
   Goes beyond passive voice guidance to actively suggest what to post, when, and

@@ -160,6 +160,22 @@ Runs inside W1-W7. Draws from ADAS (ICLR 2025), Tessl.io, OpenAI Self-Evolving A
 
 **Version tracking:** If template update degrades subsequent scores → rollback.
 
+### W9: Build Workflow
+
+**Triggers:** "create a workflow", "new workflow", "document this process", "workflow for [X]"
+
+1. **Intake:** Gather purpose, owner skill, triggers, tools, output, frequency, duration (7 questions)
+2. **Collision check:** Search `_shared/workflow-library.md` for trigger phrase overlaps
+3. Load `forge/templates/workflow.md` as scaffold
+4. Draft workflow with Who/Tool/Input/Action/Output/If-blocked per step
+5. Quality check: every step complete, quality gate ≥3 criteria, ≥2 failure modes, no trigger collisions
+6. Write file to `{owner-skill}/workflows/{workflow-name}.md`
+7. Register in `_shared/workflow-library.md`
+8. Update owner skill's SKILL.md workflow table
+9. Present completed workflow for user review
+
+**Full workflow:** `forge/workflows/build-workflow.md`
+
 ## What You Do NOT Own
 
 - Domain content writing (that's the skills forge builds)
@@ -199,3 +215,4 @@ Runs inside W1-W7. Draws from ADAS (ICLR 2025), Tessl.io, OpenAI Self-Evolving A
 | `workflow-automation.md` | Reusable automation chain patterns | W6 |
 | `automation-playbook.md` | Browser recipes, MCP recipes, manual bridges | W6 |
 | `forge-learnings.md` | Self-improvement journal | W8 (automatic) |
+| `_shared/workflow-library.md` | Living index of all ecosystem workflows | W9, W7 |

@@ -2,14 +2,17 @@
 name: executive-comms
 description: >-
   Executive email and communication drafting agent for Digital Energy. Writes
-  in the style of Carlos Reuven (CEO) and Jelmer Ten Wolde (CPO). Handles
-  vendor negotiations (InfraPartners, Vertiv, NVIDIA), grower deal structuring
-  (SDE++ splits, HoT terms), investor positioning, technical partner coordination,
-  and stakeholder management. Produces emails that are concise, structured,
-  persuasive, and action-oriented. Auto-pulls recipient context from contacts/.
-  Trigger phrases: "draft email", "write email", "compose email", "reply to",
-  "email to [name]", "write to [name]", "respond to", "draft reply",
-  "vendor email", "grower email", "investor email", "partner email".
+  in the style of Jelmer Ten Wolde (CPO) and team members. Handles vendor
+  negotiations, grower deal structuring (SDE++ splits, HoT terms), technical
+  partner coordination, and stakeholder management. Produces emails that are
+  concise, structured, persuasive, and action-oriented. Auto-pulls recipient
+  context from contacts/.
+  NOTE: Carlos (CEO) email drafting has moved to carlos-ceo skill.
+  For CEO emails, use carlos-ceo instead.
+  This skill handles Jelmer and team email drafting only.
+  Trigger phrases: "draft email for Jelmer", "Jelmer email", "team email",
+  "write email", "compose email", "reply to", "vendor email", "grower email",
+  "partner email".
 allowed-tools:
   - Read
   - Write
