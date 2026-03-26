@@ -1,7 +1,7 @@
 # Ecosystem Registry
 
 > Living inventory of all Digital Energy skills. Updated by forge after every build, audit, or upgrade.
-> Last updated: 2026-03-25
+> Last updated: 2026-03-26
 
 ## Skill Inventory
 
@@ -19,7 +19,7 @@
 | `ops-dataroomops` | Ops Orchestrator | — | — | Active | — | Google Drive, HubSpot |
 | `ops-irops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | — | Absorbed into carlos-ceo (investor-relations-playbook ref) |
 
-### Domain Executors (7 skills)
+### Domain Executors (8 skills)
 
 | Skill | Type | Score | Hrs/wk | Status | Dependencies | Referenced By |
 |-------|------|-------|--------|--------|-------------|--------------|
@@ -31,6 +31,7 @@
 | `marketing-strategist` | Domain Executor | — | — | Active | `de-brand-bible` | ops-storyops |
 | `positioning-expert` | Domain Executor | — | — | Active | `de-brand-bible` | ops-storyops |
 | `research-engine` | Domain Executor | 88 | — | Active | — | seed-fundraising, project-financing, ops-dealops, marketing-strategist, content-engine, collateral-studio, legal-counsel, ops-targetops |
+| `lead-generation` | Domain Executor | ~89 | — | Active | — | ops-targetops (warm paths), ops-outreachops (sequences), sales-intake (qualification), ops-dealops (CRM), counter-party-intel (deep profiling) |
 
 ### Panel of Experts (4 skills)
 
@@ -47,6 +48,12 @@
 |-------|------|-------|--------|--------|--------------|
 | `de-brand-bible` | Passive Foundation | 86 | — | Active | marketing-strategist, positioning-expert, content-engine, collateral-studio, seed-fundraising, ops-storyops |
 | `brand-book` | Passive Foundation | — | — | Active | Visual design system (design tokens, templates) |
+
+### Workflow Skills (1 skill)
+
+| Skill | Type | Score | Hrs/wk | Status | Dependencies | Referenced By |
+|-------|------|-------|--------|--------|-------------|--------------|
+| `Intake_IM_institutional` | Intake Orchestrator | — | — | Active | `investor-memo-writer`, `project-financing`, `financial-model-interpreter` | ops-dataroomops, seed-fundraising |
 
 ### Specialized Skills (2 skills)
 

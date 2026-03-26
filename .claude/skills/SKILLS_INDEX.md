@@ -1,7 +1,7 @@
 # SKILLS INDEX — Digital Energy SSOT
 
 > Central discovery file for all domain skills. Use this to find the right skill by keyword, audience, domain, or trigger phrase.
-> Last updated: 2026-03-05 | Total skills: 60
+> Last updated: 2026-03-26 | Total skills: 61
 
 ## Quick Lookup Table
 
@@ -67,6 +67,7 @@
 | 58 | `task-executioner` | The Orchestrator | 1 | meta | internal | orchestration | decompose task, RISE, WBS, multi-agent, execution plan |
 | 59 | `prompt-engineer` | The Architect | 2 | meta | internal | generation | generate prompt, prompt template, agent instruction |
 | 60 | `_ssot-ingestion` | — | 0 | meta | internal | task-execution | document upload, format extraction, migration, ingestion |
+| 61 | `lead-generation` | The Prospector | 3 | commercial | internal | research, generation | lead gen, prospect list, top 100, buying committee, enterprise leads, contact enrichment, GPU buyers, B2B, vertical prospecting, Benelux |
 
 ---
 

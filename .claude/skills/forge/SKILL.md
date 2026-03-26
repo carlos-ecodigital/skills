@@ -83,9 +83,10 @@ These 11 principles govern every decision forge makes. Read `references/` files 
 10. **Cooperative refinement (P5):** Self-critique: weakest section? Domain expert pushback? Likely failure modes? Refine.
 11. Score against `references/quality-rubric.md` (must score ≥75)
 12. Update `references/ecosystem-registry.md`
-13. Log in `references/forge-learnings.md`
+13. **Sync workflow library:** If skill has workflows, add/update each in `_shared/workflow-library.md`
+14. Log in `references/forge-learnings.md`
 
-**Quality gate:** Score ≥75 AND eval scenarios included.
+**Quality gate:** Score ≥75 AND eval scenarios included AND workflow library synced (if skill has workflows).
 
 ### W2: Convert Blueprint
 
@@ -93,11 +94,11 @@ These 11 principles govern every decision forge makes. Read `references/` files 
 
 1. Read the blueprint document fully
 2. For each agent: check if existing skill covers it (POINTER = skip, STUB/FULL = build)
-3. Map each to a composition pattern → build via W1 process
+3. Map each to a composition pattern → build via W1 process (includes workflow library sync)
 4. Max 3 skills per session (quality over speed)
 5. Create any needed `_shared/` resources
 6. Produce activation sequence (which skills to test first)
-7. Update registry
+7. Update registry + verify workflow library is synced for all new skills
 
 ### W3: Audit & Score
 
@@ -117,6 +118,7 @@ These 11 principles govern every decision forge makes. Read `references/` files 
 3. Draft fixes → present to user → implement
 4. Re-score after upgrades
 5. Update registry and learnings
+6. **Sync workflow library:** If workflows changed, update `_shared/workflow-library.md`
 
 ### W5: Design Architecture
 
@@ -147,8 +149,9 @@ These 11 principles govern every decision forge makes. Read `references/` files 
 1. Glob all skills, read all SKILL.md files
 2. Run lightweight audit per skill
 3. Detect: overlap, orphans, stale skills, missing integrations, governance violations
-4. Produce health report: scorecard, kill/merge/upgrade recommendations, missing gaps
-5. Coordinate with `ops-chiefops` for quarterly review
+4. **Full workflow library rebuild:** Glob all `*/workflows/*.md`, diff against `_shared/workflow-library.md`, fix any drift (missing entries, stale entries, wrong metadata)
+5. Produce health report: scorecard, kill/merge/upgrade recommendations, missing gaps, workflow library health
+6. Coordinate with `ops-chiefops` for quarterly review
 
 ### W8: Self-Improvement (automatic)
 
