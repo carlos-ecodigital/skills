@@ -57,15 +57,64 @@ Skill count: 25 → 26. No overlap with existing skills. Under 30 threshold.
 
 ---
 
+## 2026-03-25 -- built + upgraded carlos-ceo
+
+### What the user asked for
+"Create a new skill only for me called carlos-ceo" — CEO operating system with daily/weekly/monthly scans, email drafting, blocker resolution, social media, investor relations, unified narrative. Also: workflow library, workflow builder (forge W9), redundancy audit.
+
+### What forge delivered
+- **Skill:** carlos-ceo (Domain Executor + Ops Orchestrator hybrid)
+- **Initial score:** 77.9/100 (Grade B) — then upgraded to ~85+ same session
+- **Files:** 1 SKILL.md + 6 workflows + 9 references + 3 examples + 1 eval = 20 files
+- **Absorbed:** ops-storyops, ops-irops, carlos-thought-leadership, CEO portions of executive-comms and ops-chiefops
+- **Context budget:** ~14.5K tokens across 9 references (under 15K limit)
+- **Upgrades applied same session:** Safety header, integration map fixes, reverse mapping, expanded investor-relations-playbook (4 engagement archetypes, ask funnel, escalation criteria), expanded social-strategy (5 engagement archetypes, pillar-to-trigger map), WBR enhancement (competitive-intel + financial-model-interpreter wired in, explicit ops-weeklyops fallback), 5 eval test scenarios
+- **Bonus deliverables:** _shared/workflow-library.md (35 workflows cataloged), forge W9 Build Workflow
+
+### What the user changed after delivery
+- Directed carlos-ceo to personal repo (CRMG-Personal), NOT shared skills repo. CEO skill is personal, not team-wide.
+- Skills repo gets shared infra only (workflow library, forge W9, deprecation notices).
+
+### Pattern observations
+- **Personal vs team skill separation matters.** CEO operating systems contain personal voice, growth areas, blind spots — not appropriate for team repos. Design for this split from the start.
+- **Audit-then-upgrade is faster than build-from-scratch.** Running W3 (audit) before W4 (upgrade) in the same session produced targeted fixes. The audit identified eval scaffolding (4/10) as the bottleneck — one file fixed the biggest gap.
+- **Background agents hit permission issues.** Agents spawned in background couldn't get Write/Bash permissions. Workaround: main thread creates directories and writes files directly. Consider designing around this limitation.
+- **Subagent-driven development confirmed.** Second build using parallel agents. Same pattern: effective but permission-constrained. Main thread as fallback writer is reliable.
+- **"Plan self-critique" confirmed.** Audit found 5 gaps; all fixed in the upgrade pass. Without the audit, these would have shipped as technical debt.
+
+### Registry impact
+Skill count: 26 → 27 (carlos-ceo). 5 skills deprecated/partially absorbed. Net active skills: ~24. Forge gains W9. _shared/ gains workflow-library.md.
+
+---
+
+## 2026-03-25 -- built forge W9 (Build Workflow)
+
+### What the user asked for
+"Create new type of skill file, called workflows, to help anyone create new workflows on the DE team."
+
+### What forge delivered
+- **New workflow:** forge/workflows/build-workflow.md (W9)
+- **Simplicity gate:** NOT a new skill — added as workflow inside forge (P1: can this be a sub-function of an existing skill? Yes.)
+- **9-step process:** Intake → collision check → template → draft → quality check → write → register → update owner → present
+- **Auto-registers** in _shared/workflow-library.md
+
+### Pattern observations
+- **Simplicity gate works.** User asked for "a new skill file type." Forge correctly identified this as a forge workflow, not a standalone skill. Prevented unnecessary skill proliferation.
+- **Workflow library as shared infrastructure is a new pattern.** First _shared/ resource that isn't domain content — it's ecosystem metadata. May need more of these.
+
+---
+
 ## Active Patterns (confirmed across multiple builds)
 
-*No patterns logged yet. This section will be populated as forge builds, audits, and upgrades skills.*
+- **Subagent-driven development:** Effective for skills with 5+ reference files. Confirmed in research-engine and carlos-ceo builds. Permission-constrained — main thread as fallback writer.
+- **Plan self-critique is mandatory:** Confirmed in both builds. Always audit/critique before finalizing. Plan v1 is a draft.
+- **Personal vs team separation:** CEO/personal skills belong in personal repos. Team skills in team repos. Design for this from intake.
 
 ## Pending Observations (single occurrence — needs confirmation)
 
-- **Subagent-driven development:** Effective for skills with 5+ reference files. Each agent gets one file with full spec. Parallel dispatch maximizes speed. Needs confirmation from next build.
 - **"Research finds, then compares" principle:** Research/intelligence skills should not anchor to existing data. Discover independently, compare post-synthesis. Needs confirmation from next intelligence-type skill.
-- **Plan self-critique is mandatory:** Always ask "what's missing?" before presenting the plan. Plan v1 is a draft, not a proposal.
+- **Audit-then-upgrade workflow:** Running W3 → W4 in same session is efficient. One more confirmation needed.
+- **_shared/ as ecosystem metadata:** workflow-library.md is the first non-domain shared resource. If more emerge, may need a shared resource governance pattern.
 
 ## Template Version History
 
@@ -93,10 +142,12 @@ Skill count: 25 → 26. No overlap with existing skills. Under 30 threshold.
 
 | Metric | Value |
 |--------|-------|
-| Total skills built by forge | 1 |
-| Total skills audited | 0 |
-| Total skills upgraded | 0 |
-| Average build score | 88 |
+| Total skills built by forge | 2 |
+| Total skills audited | 1 |
+| Total skills upgraded | 1 |
+| Average build score | 83 |
 | Most common composition pattern | Domain Executor |
-| Most common user modification type | Data approach correction |
+| Most common user modification type | Repo separation (personal vs team) |
 | Template updates triggered | 0 |
+| Workflows built (W9) | 1 (forge W9 itself) |
+| Shared resources created | 1 (_shared/workflow-library.md) |
