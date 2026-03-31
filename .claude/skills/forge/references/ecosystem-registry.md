@@ -5,7 +5,7 @@
 
 ## Skill Inventory
 
-### Ops Orchestrators (9 skills)
+### Ops Orchestrators (10 skills)
 
 | Skill | Type | Score | Hrs/wk | Status | Dependencies | Key Integrations |
 |-------|------|-------|--------|--------|-------------|-----------------|
@@ -18,6 +18,7 @@
 | `ops-outreachops` | Ops Orchestrator | — | — | Active | — | Gmail, HubSpot |
 | `ops-dataroomops` | Ops Orchestrator | — | — | Active | — | Google Drive, HubSpot |
 | `ops-irops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | — | Absorbed into carlos-ceo (investor-relations-playbook ref) |
+| `contact-intake` | Ops Orchestrator | — | — | Active | — | HubSpot (via sales-intake), ClickUp (via delegation-engine), Gmail (via ops-outreachops), Calendar, Claude vision. Delegates to: counter-party-intel, sales-intake, ops-outreachops, ops-contextops, delegation-engine, vendor-lifecycle, competitive-intel, ops-targetops |
 
 ### Domain Executors (8 skills)
 
@@ -102,7 +103,7 @@
 
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
-| Total skills (active) | 24 | Max 30 | OK (was 26, -3 deprecated +1 new) |
+| Total skills (active) | 25 | Max 30 | OK (was 24, +1 contact-intake) |
 | Ops orchestrators | 7 | — | OK (was 9, -2 deprecated) |
 | Domain executors | 7 | — | OK |
 | CEO operating system | 1 | — | NEW |
@@ -122,6 +123,7 @@
 | Brand/visual identity | `de-brand-bible` + `brand-book` | Intentional: de-brand-bible = content/messaging; brand-book = visual/design tokens |
 | Investor materials | `seed-fundraising` + `ops-irops` + `ops-dataroomops` | Intentional: seed-fundraising = strategy; irops = ongoing relations; dataroomops = DD |
 | CRM/pipeline | `ops-dealops` + `ops-targetops` | Intentional: dealops = active deal management; targetops = prospecting pipeline |
+| Contact ingestion | `contact-intake` + `sales-intake` + `ops-contextops` | Intentional: contact-intake = orchestrator (bulk multi-format intake + scoring + routing); sales-intake = deep ICP qualification (called by contact-intake); ops-contextops = relationship intelligence storage (called by contact-intake) |
 | Content/outreach | `content-engine` + `ops-outreachops` | Intentional: content-engine = writing; outreachops = orchestration + sequencing |
 
 ## Governance Notes
