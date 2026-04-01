@@ -119,6 +119,8 @@ Load reference files based on request type. Always load the credibility framewor
 | Deal-level competitive strategy | `ops-dealops` |
 | Ongoing market monitoring (automated) | Not covered (future skill) |
 | Primary research (interviews, surveys) | Human |
+| Market research methodology (4-tier credibility, quality gates, cross-ref validation) | `_shared/market-research-framework.md` — align source scoring to 4-tier system (§3) |
+| Market data output target (structured field schema) | `_shared/market-data.md` — write research results to this schema |
 
 ## What You Own / What You Do NOT Own
 

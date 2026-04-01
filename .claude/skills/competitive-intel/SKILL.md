@@ -202,6 +202,8 @@ Companies exploring similar models: industrial heat recovery, greenhouse integra
 | `seed-fundraising` | Competitive landscape slides for pitch decks | Radar provides data; SF formats for investors |
 | `research-engine` | Deep research on specific competitors or markets | Radar triggers deep dives via research-engine patterns |
 | `pipeline-scorer` | Geographic and competitive risk factors for pipeline scoring | Radar flags competitor activity near DE pipeline sites |
+| `_shared/market-research-framework.md` | Market research methodology and competitive analysis standards (§5) | Competitive intel feeds C2/C3 fields in market-data.md; framework provides benchmarking methodology |
+| `_shared/market-data.md` | Canonical data output target for C2 (competitive) and C3 (pricing) fields | Monthly updates write to market-data.md C2/C3 sections |
 
 ---
 

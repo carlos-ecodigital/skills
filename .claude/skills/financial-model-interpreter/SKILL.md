@@ -218,6 +218,8 @@ Following `project-financing` principles, every scenario analysis must include:
 | **LLCR minimum** | 1.20x | Below this: debt not fully covered | Lender will reduce debt quantum |
 | **Equity hurdle** | TBD (8-12% typical) | Below this: equity investors walk | Project not investable at target terms |
 
+**Market Validation:** When assessing thresholds, cross-reference `_shared/market-research-framework.md` §8 (FM Assumptions & Value Creation) for sector benchmarks on hurdle rates, DSCR requirements, and value creation bridge decomposition. For DE-specific assumption validation: `Market_Research_v3/02_FM_Assumptions/assumption-register.md`.
+
 ---
 
 ## Investor-Facing Narrative Framework

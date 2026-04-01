@@ -275,6 +275,9 @@ When the user selects a single archetype mode, apply that archetype's voice to t
 | Brand voice, proof points, buyer personas | `de-brand-bible` | When producing ANY external-facing materials for Digital Energy |
 | Narrative consistency across deliverables | `ops-storyops` | After producing any deliverable, run consistency check |
 | Shared equity structures, investor landscape, market data | `_shared/` directory | For canonical reference data used across multiple skills |
+| **Bottoms-up UoP methodology** | **`_shared/bottoms-up-uop-guide.md`** | **For pitch deck Slide 11, IM Section 11, intake Q5.4. DevCo recycling model, SH expense/loan classification, per-site S&U, capital deployment schedule** |
+| **Market research methodology** | **`_shared/market-research-framework.md`** | **For Phase 3 TAM/SAM/SOM sizing (dual methodology), competitive positioning, source credibility (4-tier), quality gates, and cross-reference validation** |
+| **Market research intake** | **`_shared/intake-modules/m-market-research.md`** | **For structured market research questions (Seed track: 49 Qs across 7 categories) with gap analysis output** |
 
 ## 6. Jurisdiction Guidance
 

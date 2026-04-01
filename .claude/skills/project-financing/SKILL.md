@@ -69,6 +69,8 @@ Provide authoritative, practical project finance guidance for energy and digital
 | Bouwperiode (construction) | 18--30 maanden | 18--36 maanden | 6--12 maanden |
 | Referentiebestand (reference file) | [references/ai-factories.md](references/ai-factories.md) | [references/colocation-data-centers.md](references/colocation-data-centers.md) | [references/bess-projects.md](references/bess-projects.md) |
 
+**Market Research & Benchmarking:** For sector-specific market spreads, comparable transaction multiples, cost curves, and regulatory impact, see `_shared/market-research-framework.md` (§7 comps, §8 FM assumptions, §9 regulatory). For DE-specific populated data: `Market_Research_v3/02_FM_Assumptions/debt-terms.md` (spreads), `02/cost-benchmarks.md` (CAPEX), `04/*` (pricing).
+
 ## Nederlandse SPV-structuren / Dutch SPV Structures -- Overzicht
 
 - **Besloten Vennootschap (BV):** Standard SPV vehicle for Dutch project finance. Flex-BV since 1 Oct 2012; minimum kapitaal (capital) EUR 0.01; oprichtingskosten (incorporation cost) EUR 500--1,500 notaris + EUR 82.25 KvK [Firm24/KvK.nl]. Notariele akte van oprichting (notarial deed) required. UBO-registratie verplicht (mandatory); public access restricted since 15 Jul 2025 (CJEU privacy ruling) [Projective Group]. Fiscale eenheid (fiscal unity) possible with 95%+ ownership.
@@ -209,6 +211,7 @@ When `seed-fundraising` Mode C triggers IM production, this skill produces:
 | `drafting-service-agreements` | Service agreements, EPC contracts, O&M agreements |
 | `netherlands-permitting` | Omgevingswet, DC permitting, BESS safety (PGS 37), grid connection, MER |
 | `de-brand-bible` | Brand voice, messaging pillars, buyer personas for Digital Energy external materials |
+| `_shared/bottoms-up-uop-guide.md` | Bottoms-up UoP methodology for seed rounds: DevCo recycling model, SH expense/loan classification, per-site sources & uses templates, capital deployment schedule. Used by seed-fundraising for IM Section 11 and pitch deck Slide 11. |
 
 ## Belangrijke disclaimers / Important Disclaimers
 
