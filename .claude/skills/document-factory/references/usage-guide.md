@@ -1,4 +1,4 @@
-# Document Templates -- Usage Guide
+# Document Factory -- Usage Guide
 
 ## For Non-Technical Users (Google Drive)
 
@@ -48,7 +48,7 @@ Examples:
 pip install python-docx
 
 # Navigate to the skill
-cd ~/skills/.claude/skills/document-templates
+cd ~/skills/.claude/skills/document-factory
 
 # Test
 python3 generate.py --profile letter

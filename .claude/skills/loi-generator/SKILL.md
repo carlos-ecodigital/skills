@@ -37,16 +37,16 @@ You produce complete, ready-to-sign LOI/NCNDA documents for Digital Energy. Any 
 ## Source Files
 
 All templates and the generation script live at:
-`~/Documents/Obsidian/digital-energy-ceo/loi-ncnda-v3/`
+`This skill's directory (`.claude/skills/loi-generator/`):`
 
 Key files:
-- `DE-LOI-Distributor-v3.0_TEMPLATE.md` — Distributor template (Mode A: Combined / Mode B: Referral)
-- `DE-LOI-Wholesale-v3.0_TEMPLATE.md` — Wholesale template
-- `DE-LOI-EndUser-v3.0_TEMPLATE.md` — End User template
+- `templates/DE-LOI-Distributor-v3.0_TEMPLATE.md` — Distributor template (Mode A: Combined / Mode B: Referral)
+- `templates/DE-LOI-Wholesale-v3.0_TEMPLATE.md` — Wholesale template
+- `templates/DE-LOI-EndUser-v3.0_TEMPLATE.md` — End User template
 - `ASSEMBLY_GUIDE.md` — Type selection logic, bespoke examples, defaults, red-line protocol
 - `FEATURE_MATRIX.md` — What goes into each type
-- `generate_loi.py` — YAML intake → .docx generation script
-- `intake_example_*.yaml` — Example intake files for each type
+- `generate_loi.py` — YAML intake → .docx generation script (DE branding integrated)
+- `examples/intake_example_*.yaml` — Example intake files for each type
 
 ## Workflow
 
@@ -135,8 +135,8 @@ Fill all fields. Use defaults from `ASSEMBLY_GUIDE.md` for protection parameters
 
 Run the generation script:
 ```bash
-cd ~/Documents/Obsidian/digital-energy-ceo/loi-ncnda-v3
-python3 generate_loi.py intake.yaml --output /path/to/output.docx
+cd /path/to/skills/.claude/skills/loi-generator
+python3 generate_loi.py examples/intake.yaml --output /path/to/output.docx
 ```
 
 ### Step 7: Quality Check (MANDATORY)

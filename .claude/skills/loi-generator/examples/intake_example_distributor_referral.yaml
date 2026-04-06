@@ -1,0 +1,66 @@
+# LOI Generation Intake — Distributor Example (Mode B: Introduction/Referral)
+# Fill all fields, then run: python generate_loi.py intake_ds_referral.yaml
+
+type: Distributor
+
+# --- Provider (pre-filled defaults) ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Jelmer ten Wolde"
+  signatory_title: "Chief Platform Officer"
+
+# --- Counterparty ---
+counterparty:
+  name: "Nordic Advisors Ltd"
+  short: "Nordic Advisors"
+  address: "25 Finsbury Square, London EC2A 1PQ, United Kingdom"
+  jurisdiction: "England and Wales"
+  reg_type: "Company No."
+  reg_number: "12345678"
+  contact_name: "Erik Lindqvist"
+  contact_title: "Managing Partner"
+  salutation: "Mr Lindqvist"
+  signatory_name: "Erik Lindqvist"
+  signatory_title: "Managing Partner"
+  description: "is a London-based advisory firm specialising in AI infrastructure market access for European enterprise and institutional clients, with established relationships across the Nordic and Benelux enterprise market"
+
+# --- Distributor Mode ---
+partnership_mode: referral  # combined | referral
+
+# --- Commercial (bespoke text) ---
+commercial:
+  partner_core_capability: "enterprise advisory and market access services for AI infrastructure buyers across Northern Europe"
+  partner_contribution: "established enterprise client relationships, market credibility, and domain expertise in the Nordic and Benelux enterprise AI market"
+  combined_offering: ""       # Not used in referral mode
+  target_end_users: ""        # Not used in referral mode
+  partner_service_scope: ""   # Not used in referral mode
+  territory: "United Kingdom, Netherlands, Belgium, and Nordic countries"
+  target_segments: "enterprise AI/ML, financial services, pharmaceutical R&D"
+  indicative_mw: "3.6"
+
+# --- Choices ---
+choices:
+  pricing: false    # Referral economics in separate Referral Agreement
+  exclusivity: false
+  existing_nda: false
+  bespoke_closing: ""
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+
+# --- Protection ---
+protection:
+  nc_duration: "24 months"
+  pbi_survival: "10 years"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "10 April 2026"
+  validity_date: "10 April 2027"

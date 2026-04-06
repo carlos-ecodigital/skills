@@ -1,0 +1,66 @@
+# LOI Generation Intake — Distributor Example (Mode A: Combined Offering)
+# Fill all fields, then run: python generate_loi.py intake_ds.yaml
+
+type: Distributor
+
+# --- Provider (pre-filled defaults) ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"  # Update with NL registered address
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Jelmer ten Wolde"
+  signatory_title: "Chief Platform Officer"
+
+# --- Counterparty ---
+counterparty:
+  name: "TechForce Solutions B.V."
+  short: "TechForce"
+  address: "Herengracht 100, 1015 AA Amsterdam, Netherlands"
+  jurisdiction: "the Netherlands"
+  reg_type: "KvK"
+  reg_number: "12345678"
+  contact_name: "Jan de Vries"
+  contact_title: "Chief Executive Officer"
+  salutation: "Mr de Vries"
+  signatory_name: "Jan de Vries"
+  signatory_title: "Chief Executive Officer"
+  description: "is a Netherlands-based AI system integrator specialising in the design, deployment, and management of GPU compute infrastructure for enterprise clients across the Benelux, with over 50 enterprise customers and annual revenues exceeding EUR 25 million"
+
+# --- Distributor Mode ---
+partnership_mode: combined  # combined | referral
+
+# --- Commercial (bespoke text — write fresh for each partner) ---
+commercial:
+  partner_core_capability: "AI system integration services, including the deployment and management of GPU infrastructure for enterprise clients across the Benelux"
+  partner_contribution: "enterprise customer relationships, system design capability, and implementation expertise"
+  combined_offering: "integrated AI infrastructure solutions — spanning facility capacity, hardware deployment, system integration, and operational management — as a unified end-to-end offering"
+  target_end_users: "enterprise and institutional end users in the Benelux"
+  partner_service_scope: "system design, hardware specification, deployment, software integration, and ongoing managed services"
+  territory: "The Netherlands and Belgium"
+  target_segments: "enterprise AI/ML, financial services, public sector"
+  indicative_mw: "4.8"
+
+# --- Choices ---
+choices:
+  pricing: false
+  exclusivity: false
+  existing_nda: false
+  bespoke_closing: ""
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+
+# --- Protection (defaults — override if negotiated) ---
+protection:
+  nc_duration: "24 months"
+  pbi_survival: "10 years"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "5 April 2026"
+  validity_date: "5 April 2027"

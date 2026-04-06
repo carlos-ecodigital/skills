@@ -1,0 +1,56 @@
+# LOI Generation Intake — End User Example
+# Fill all fields, then run: python generate_loi.py intake_eu.yaml
+
+type: EndUser
+
+# --- Provider (pre-filled defaults) ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Jelmer ten Wolde"
+  signatory_title: "Chief Platform Officer"
+
+# --- Counterparty ---
+counterparty:
+  name: "Meridian AI B.V."
+  short: "Meridian"
+  address: "Keizersgracht 500, 1017 EK Amsterdam, Netherlands"
+  jurisdiction: "the Netherlands"
+  reg_type: "KvK"
+  reg_number: "87654321"
+  contact_name: "Lisa Bakker"
+  contact_title: "Chief Technology Officer"
+  salutation: "Ms Bakker"
+  signatory_name: "Lisa Bakker"
+  signatory_title: "Chief Technology Officer"
+  description: "is a Netherlands-based AI startup developing large language models for the European legal and compliance market, currently serving 20+ enterprise clients"
+
+# --- Commercial ---
+commercial:
+  service_type:
+    - bare_metal
+  indicative_capacity: "120 kW (1 partial DEC Block)"
+  min_term: "12 months"
+
+# --- Choices ---
+choices:
+  pricing: false
+  existing_nda: false
+  bespoke_closing: ""
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+
+# --- Protection ---
+protection:
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "1 May 2026"
+  validity_date: "1 May 2027"

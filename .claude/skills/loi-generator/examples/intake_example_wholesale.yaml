@@ -1,0 +1,71 @@
+# LOI Generation Intake — Wholesale Example
+# Fill all fields, then run: python generate_loi.py intake_ws.yaml
+
+type: Wholesale
+
+# --- Provider (pre-filled defaults) ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Jelmer ten Wolde"
+  signatory_title: "Chief Platform Officer"
+
+# --- Counterparty ---
+counterparty:
+  name: "NeoScale Inc."
+  short: "NeoScale"
+  address: "100 Market Street, Suite 300, San Francisco, CA 94105, USA"
+  jurisdiction: "the State of Delaware, United States"
+  reg_type: "EIN"
+  reg_number: "XX-XXXXXXX"
+  contact_name: "Sarah Chen"
+  contact_title: "Vice President, Infrastructure"
+  salutation: "Ms Chen"
+  signatory_name: "Alex Park"
+  signatory_title: "Chief Executive Officer"
+  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers, backed by Series B funding of USD 150 million"
+
+# --- Commercial ---
+commercial:
+  dec_block_count: "9"
+  indicative_mw: "10.8"
+  expansion_mw: "21.6"
+  min_term: "5 years"
+
+# --- Choices ---
+choices:
+  pricing: true
+  phasing: true
+  existing_nda: false
+  bespoke_closing: ""
+
+  # Phasing details
+  phases:
+    - mw: "4.8"
+      timeline: "Q4 2026"
+    - mw: "6.0"
+      timeline: "Q2 2027"
+
+  # Pricing details (only if pricing: true)
+  base_price: "145"
+  term_years: "5"
+  target_rfs_date: "Q4 2026"
+  ramp_schedule: "50% at RFS, 100% within 90 days"
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+
+# --- Protection ---
+protection:
+  nc_duration: "24 months"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "15 April 2026"
+  validity_date: "15 April 2027"
