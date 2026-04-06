@@ -20,9 +20,13 @@ import sys
 import re
 from datetime import datetime, date
 
-from docx import Document
-from docx.shared import Mm, Pt, RGBColor, Inches
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+try:
+    from docx import Document
+    from docx.shared import Mm, Pt, RGBColor, Inches
+    from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+except ImportError:
+    print("Error: python-docx is required. Install with: pip install python-docx")
+    sys.exit(1)
 
 # ---------------------------------------------------------------------------
 # CONFIG
@@ -45,7 +49,10 @@ SLATE = RGBColor(0x64, 0x74, 0x8B)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-LOGO = os.path.join(SCRIPT_DIR, "DE_Logo_Black.png")
+LOGO = os.path.join(SCRIPT_DIR, "assets", "DE_Logo_Black.png")
+if not os.path.exists(LOGO):
+    # Fallback: check script directory root
+    LOGO = os.path.join(SCRIPT_DIR, "DE_Logo_Black.png")
 OUTPUT = os.path.join(SCRIPT_DIR, "output")
 
 PROFILE_CODES = {
@@ -590,7 +597,7 @@ def main():
         dt = datetime.strptime(args.date, "%Y-%m-%d").date()
     else:
         dt = date.today()
-    date_str = dt.strftime("%-d %B %Y")
+    date_str = dt.strftime("%d %B %Y").lstrip("0")  # Cross-platform (no %-d)
 
     os.makedirs(OUTPUT, exist_ok=True)
 
