@@ -29,6 +29,7 @@
 | 20 | `presentation-builder` | — | 2 | marketing | investor, grower, gemeente | generation | slides, deck, investor presentation, grower presentatie |
 | 21 | `document-writer` | — | 2 | marketing | internal | generation | summary, decision doc, board paper, RFQ, SOP |
 | 22 | `document-presenter` | The Typographer | 2 | marketing | all | transformation | branded HTML, A4, memo, report, visual formatting |
+| 22b | `document-templates` | — | 1 | marketing | all | generation | letterhead, agreement cover, seed memo, investor memo, exec summary, docx, dotx |
 | 23 | `investor-memo-writer` | — | 1 | finance | investor | generation | QA response, investment memo, DD response, Carlyle |
 | 24 | `marketing-strategist` | — | 2 | marketing | internal | strategy | campaigns, GTM, Hormozi, market positioning |
 | 25 | `positioning-expert` | — | 2 | marketing | internal | strategy | April Dunford, competitive differentiation, positioning |
@@ -38,6 +39,7 @@
 | 29 | `ops-chiefops` | The Chief | 1 | operations | internal | orchestration | weekly priorities, blockers, strategic coordination |
 | 30 | `ops-weeklyops` | — | 1 | operations | internal | generation | weekly brief, 26-domain scan, priority synthesis |
 | 31 | `ops-meetingops` | — | 1 | operations | internal | task-execution | meeting agenda, follow-up, action items, calendar |
+| 31b | `all-hands-engine` | — | 1 | operations | internal | task-execution | DE Weekly, Leadership Sync, pre-reads, CEO brief, accountability scorecard, meeting system governance |
 | 32 | `ops-dealops` | — | 1 | operations | internal | tracking | deal tracking, gate progression, multi-workstream |
 | 33 | `ops-contextops` | — | 2 | operations | internal | extraction | brain dump, knowledge capture, voice note processing |
 | 34 | `ops-dataroomops` | — | 2 | operations | investor | task-execution | VDR, data room, DD questions, investor access |
@@ -249,6 +251,10 @@ See `skills/_retrieval-rules.yaml` for token-budget-aware context loading.
 | Score a project's gate readiness | `pipeline-scorer` |
 | Check what competitors are doing | `competitive-intel` |
 | Create a branded A4 document | `document-presenter` |
+| Generate a letterhead or document template | `document-templates` |
+| Create an agreement cover page | `document-templates` |
+| Generate an investor memo template | `document-templates` |
+| Convert markdown to branded docx | `document-templates` |
 | Write a board paper | `document-writer` |
 | Research a new investor before meeting | `counter-party-intel` |
 | Generate weekly priorities brief | `ops-weeklyops` |
