@@ -29,7 +29,7 @@
 | 20 | `presentation-builder` | — | 2 | marketing | investor, grower, gemeente | generation | slides, deck, investor presentation, grower presentatie |
 | 21 | `document-writer` | — | 2 | marketing | internal | generation | summary, decision doc, board paper, RFQ, SOP |
 | 22 | `document-presenter` | The Typographer | 2 | marketing | all | transformation | branded HTML, A4, memo, report, visual formatting |
-| 22b | `document-templates` | — | 1 | marketing | all | generation | letterhead, agreement cover, seed memo, investor memo, exec summary, docx, dotx |
+| 22b | `document-factory` | — | 1 | marketing | all | generation | branded docx, letterhead, agreement cover, seed memo, investor memo, exec summary, dotx |
 | 23 | `investor-memo-writer` | — | 1 | finance | investor | generation | QA response, investment memo, DD response, Carlyle |
 | 24 | `marketing-strategist` | — | 2 | marketing | internal | strategy | campaigns, GTM, Hormozi, market positioning |
 | 25 | `positioning-expert` | — | 2 | marketing | internal | strategy | April Dunford, competitive differentiation, positioning |
@@ -251,10 +251,10 @@ See `skills/_retrieval-rules.yaml` for token-budget-aware context loading.
 | Score a project's gate readiness | `pipeline-scorer` |
 | Check what competitors are doing | `competitive-intel` |
 | Create a branded A4 document | `document-presenter` |
-| Generate a letterhead or document template | `document-templates` |
-| Create an agreement cover page | `document-templates` |
-| Generate an investor memo template | `document-templates` |
-| Convert markdown to branded docx | `document-templates` |
+| Generate a branded document | `document-factory` |
+| Create an agreement cover page | `document-factory` |
+| Generate an investor memo template | `document-factory` |
+| Convert markdown to branded docx | `document-factory` |
 | Write a board paper | `document-writer` |
 | Research a new investor before meeting | `counter-party-intel` |
 | Generate weekly priorities brief | `ops-weeklyops` |

@@ -416,20 +416,9 @@ The following are explicitly prohibited in all investor communications:
 | Data room narrative introductions per section | investor-memo-writer | ops-dataroomops | legal-counsel, project-financing | seed-fundraising |
 | Monthly investor update narrative sections | investor-memo-writer | ops-irops | financial-model-interpreter, pipeline-scorer | ops-chiefops |
 
-## Branded Output
-
-When producing final .docx deliverables, use the `document-templates` skill for consistent DE branding:
-
-- **Seed memo:** `python3 generate.py --profile seed_memo --client "[Fund]"` produces a branded 8-section template
-- **Institutional IM:** `python3 generate.py --profile investor_memo --client "[Fund]"` produces a branded 10-section template
-- **Markdown to branded docx:** `python3 generate.py --md content.md --title "Investment Memorandum" --client "[Fund]" --cover --output memo.docx`
-- **Word templates:** Team members can use `DE_Seed_Memo.dotx` or `DE_Investor_Memo.dotx` from Google Drive (`NEW_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`)
-
-All investor documents MUST include: DE logo in header, entity footer (DE Group AG, Zug, CHE-408.639.320), "Confidential" classification, and clean A4 formatting.
-
 ## Companion Skills
 
-- `document-templates`: Provides branded .docx/.dotx formatting for all investor document output
+- `document-factory`: Hand off final content for branded .docx output (profiles: `investor_memo`, `seed_memo`)
 - `seed-fundraising`: Provides fundraising strategy, pitch narrative, founder archetype voice, and sector thesis data that frame all investor communications
 - `financial-model-interpreter`: Provides FM outputs, scenario analyses, breakeven calculations, and investor-facing financial summaries for every document
 - `project-financing`: Provides project-level financials, DSCR analysis, debt sizing, and bankability assessments for capital structure narratives

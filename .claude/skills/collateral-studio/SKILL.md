@@ -92,8 +92,7 @@ See `references/presentation-frameworks.md` for slide-by-slide guidance for each
 - Positioning and messaging frameworks: `positioning-expert/`
 - Content writing (for text-heavy deliverables): `content-engine/`
 - Document formatting standards: `references/data-room-standards.md`
-- Branded .docx templates (letterhead, agreement cover, memos): `document-templates/generate.py`
-- Word templates for team (.dotx): `NEW_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`
+- Branded .docx output: `document-factory` — hand off content for final branded .docx production
 - Presentation structures: `references/presentation-frameworks.md`
 - Ready-to-use proof points: `references/proof-points-library.md`
 

@@ -273,7 +273,7 @@ When the user selects a single archetype mode, apply that archetype's voice to t
 | Contract drafting (EPC, O&M, MSA, SHA) | `drafting-service-agreements` or `legal-counsel` | When preparing contracts for data room or investor review |
 | Norwegian tax structuring | `norwegian-tax-law` | When Norwegian entities or investors are involved |
 | Brand voice, proof points, buyer personas | `de-brand-bible` | When producing ANY external-facing materials for Digital Energy |
-| Branded .docx output (seed memo, investor memo) | `document-templates` | When producing final .docx deliverables: `--profile seed_memo` or `--profile investor_memo` |
+| Branded .docx output (seed memo, investor memo) | `document-factory` | Hand off final content for branded .docx |
 | Narrative consistency across deliverables | `ops-storyops` | After producing any deliverable, run consistency check |
 | Shared equity structures, investor landscape, market data | `_shared/` directory | For canonical reference data used across multiple skills |
 | **Bottoms-up UoP methodology** | **`_shared/bottoms-up-uop-guide.md`** | **For pitch deck Slide 11, IM Section 11, intake Q5.4. DevCo recycling model, SH expense/loan classification, per-site S&U, capital deployment schedule** |

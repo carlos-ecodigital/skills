@@ -901,7 +901,7 @@ When Google Workspace MCP is connected:
 
 ## Companion Skills
 
-- `document-templates`: When emails need formal memo/letter format, use branded .docx output (letter or exec_summary profile)
+- `document-factory`: Hand off to document-factory when formal memo/letter .docx format is needed
 - `investor-memo-writer`: Provides institutional tone guidance and strategic framing rules for investor-facing emails
 - `grower-relationship-mgr`: Provides grower relationship context, sentiment data, and partnership health indicators before drafting grower emails
 - `vendor-negotiation`: Provides vendor evaluation context, benchmark data, and negotiation leverage points for vendor emails

@@ -979,15 +979,9 @@ Before any document is submitted, verify:
 | Brandveiligheid section drafting (Bbl compartimenteringsplicht) | permit-drafter | dc-engineering | netherlands-permitting | project-financing |
 | Gemeente-specific framing ("tuinbouwversterking", never "datacenter-toelating") | permit-drafter | executive-comms | netherlands-permitting, grower-relationship-mgr | ops-chiefops |
 
-## Branded Output
-
-When permit documents need branded .docx formatting for formal submission, use the `document-templates` skill:
-- `python3 generate.py --md onderbouwing.md --title "Onderbouwingsdocument [Project]" --cover --output doc.docx`
-- Cover page template: `DE_Agreement.dotx` from Google Drive (`NEW_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`)
-
 ## Companion Skills
 
-- `document-templates`: Provides branded .docx cover pages and formatting for formal permit submissions
+- `document-factory`: Hand off final content for branded .docx output (agreement cover or markdown mode)
 - `netherlands-permitting`: Strategic upstream -- provides permit strategy, route selection (binnenplans vs BOPA), regulatory analysis, and Omgevingswet interpretation that permit-drafter executes into actual documents
 - `dc-engineering`: Provides technical installation specifications (cooling, power, noise bronvermogen) and SiS topology data needed for omgevingsvergunning toelichting and milieumelding
 - `grower-relationship-mgr`: Provides warmtematch data, grower agreements, eigendomsstructuur, and meerwaarde tuinder narratives for onderbouwingsdocument sections

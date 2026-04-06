@@ -856,19 +856,9 @@ reporting-period: {{YYYY-MM-DD to YYYY-MM-DD}}
 | Pre-meeting briefing document production | document-writer | ops-meetingops | executive-comms, relevant domain expert | meeting participants |
 | Status report production (project and portfolio level) | document-writer | ops-chiefops | pipeline-scorer, ops-weeklyops | all stakeholders |
 
-## Branded Output
-
-When documents need to be delivered as branded .docx files (external-facing board papers, executive summaries, strategy memos), use the `document-templates` skill:
-
-- **Executive summary:** `python3 generate.py --profile exec_summary --title "[Title]"`
-- **Any document from markdown:** `python3 generate.py --md content.md --title "[Title]" --cover --output doc.docx`
-- **Word templates for team:** `.dotx` files in Google Drive at `NEW_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`
-
-Internal documents (SOPs, meeting briefs) do not require branded formatting.
-
 ## Companion Skills
 
-- `document-templates`: Provides branded .docx/.dotx formatting for external-facing document output
+- `document-factory`: Hand off final content for branded .docx output (profiles: `exec_summary`, or markdown mode)
 - `decision-tracker`: Receives decision document outputs after board or founder decisions are made; creates formal DEC records from document-writer recommendations
 - `executive-comms`: Drafts the emails that transmit documents produced by this skill to external recipients
 - `humanizer`: Strips AI writing patterns from external-facing documents before distribution

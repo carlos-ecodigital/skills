@@ -199,9 +199,9 @@ Tell the user:
 
 ## Branded Formatting
 
-All LOI .docx output MUST use the document-templates letterhead system for consistent branding. After generating the LOI content via `generate_loi.py`, apply the branded cover page and headers/footers:
+All LOI .docx output MUST use the document-factory letterhead system for consistent branding. After generating the LOI content via `generate_loi.py`, apply the branded cover page and headers/footers:
 
-1. The LOI .docx should use the `agreement` profile formatting from `document-templates`:
+1. The LOI .docx should use the `agreement` profile formatting from `document-factory`:
    - Cover page with DE logo, document title, counterparty name, date, "Confidential" classification
    - Header on continuation pages: small DE logo (left) + document title (right)
    - Footer on all pages: `Digital Energy Group AG | Baarerstrasse 43, 6300 Zug | CHE-408.639.320 | digital-energy.group`
@@ -209,9 +209,9 @@ All LOI .docx output MUST use the document-templates letterhead system for consi
 
 2. The `generate_loi.py` script handles this internally. If producing a manual LOI, use the branded .dotx template from:
    - **Google Drive:** `NEW_Marketing/DE_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/DE_Agreement.dotx`
-   - **Skills repo:** `.claude/skills/document-templates/generate.py --profile agreement`
+   - **Skills repo:** `.claude/skills/document-factory/generate.py --profile agreement`
 
-**Cross-reference:** See `document-templates` skill for the full template system, CLI reference, and entity configuration.
+**Cross-reference:** See `document-factory` skill for the full template system, CLI reference, and entity configuration.
 
 ## What This Skill Does NOT Do
 
