@@ -414,8 +414,19 @@ Wij bouwen het rekencentrum ín de kas, niet ernaast. De tuinder is geen afnemer
 | Print-ready formatting quality | `document-presenter` | `document-presenter` | `brand-book` | User |
 | Multi-page architecture decisions | `document-presenter` | `document-presenter` | `document-writer` | `presentation-builder` |
 
+## DOCX Output
+
+This skill renders to HTML. When .docx output is needed (for signing, editing, or distribution), use the `document-templates` skill:
+
+- Markdown content → branded .docx: `python3 generate.py --md content.md --title "[Title]" --cover --output doc.docx`
+- Available profiles: letter, agreement, seed_memo, investor_memo, exec_summary
+- Word templates for non-technical users: `NEW_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`
+
+The document-templates skill shares the same brand identity (DE logo, Cobalt accent, Inter font, entity footer) but outputs .docx instead of HTML.
+
 ## Companion Skills
 
+- `document-templates`: Provides .docx/.dotx output when Word format is required instead of HTML
 - `document-writer`: Creates the content that The Typographer renders — always upstream
 - `brand-book`: Owns the design token system that The Typographer consumes — visual authority
 - `investor-memo-writer`: Creates investor-grade content for rendering as branded documents
