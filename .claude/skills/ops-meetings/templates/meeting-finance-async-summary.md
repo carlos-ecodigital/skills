@@ -1,3 +1,5 @@
+> Async alternative to: Finance Review (Review pattern) | Delivered Monday morning
+
 # Finance Summary for CEO — Week of [YYYY-MM-DD]
 
 *Async delivery to Carlos every Monday morning. No meeting attendance required unless escalation flagged.*

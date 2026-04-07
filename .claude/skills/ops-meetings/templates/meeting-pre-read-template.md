@@ -1,3 +1,5 @@
+> Input for: DE Weekly (Broadcast) + Leadership Decisions (Decision) | Due Friday 17:00 CET
+
 # [Department] — Week of [YYYY-MM-DD]
 
 **Submitted by:** [Name]
