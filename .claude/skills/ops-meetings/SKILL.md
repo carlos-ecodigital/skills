@@ -51,16 +51,21 @@ Pre-meeting brief     ->                 ->   Update HubSpot (via ops-dealops)
 
 DE has a defined meeting rhythm (see `_shared/org/TEAMS.md` Section 6). When prepping agendas for recurring meetings, use the correct format:
 
-| Meeting | Cadence | Duration | Format |
-|---------|---------|----------|--------|
-| All Hands | Monthly | 30 min | Company updates, OKR status |
-| Leadership | Weekly | 60 min | Cross-team alignment, decisions |
-| OKR Review | Monthly (1st Monday) | 60 min | Scorecard + Red/Yellow deep-dive + Decisions |
-| Sprint Planning | Weekly (Mon) | 30 min | Backlog review, week priorities |
-| Sprint Review | Weekly (Fri) | 30 min | Demo, retro, preview next week |
-| Growth + Projects | Weekly | 30 min | Active project alignment |
-| Product + Growth | Weekly | 30 min | Product-market feedback |
-| Gate Review | As needed | 60 min | G0-G5 deliverables + Go/No-Go |
+| Meeting | Cadence | Duration | Format | Run-of-Show |
+|---------|---------|----------|--------|-------------|
+| **DE Weekly** | Weekly (Mon 09:00) | 30 min | CEO broadcast: mission, wins, risk, priorities. Pre-reads required. | `all-hands-engine/templates/run-of-show-weekly.md` |
+| **Leadership Sync** | Weekly (Mon 09:45) | 30 min | Core team decisions + blockers. Pre-identified from written updates. | `all-hands-engine/templates/run-of-show-leadership.md` |
+| **P1 Procurement** | Weekly | 60 min MAX | Vendor decisions, CAPEX gates. No 3-hour sessions. | `all-hands-engine/templates/run-of-show-procurement.md` |
+| **GTM Standup** | Weekly (Tue/Wed) | 30 min | Outreach execution only. No strategy re-discussion. | `all-hands-engine/templates/run-of-show-gtm.md` |
+| **Finance Weekly** | Weekly | 60 min | CEO gets async 5-line summary. Joins only on escalation. | `all-hands-engine/templates/finance-async-summary.md` |
+| OKR Review | Monthly (1st Monday) | 60 min | Scorecard + Red/Yellow deep-dive + Decisions | — |
+| Sprint Planning | Weekly (Mon) | 30 min | Backlog review, week priorities | — |
+| Sprint Review | Weekly (Fri) | 30 min | Demo, retro, preview next week | — |
+| Gate Review | As needed | 60 min | G0-G5 deliverables + Go/No-Go | — |
+
+**Meeting System SOP:** See `all-hands-engine/references/meeting-system-sop.md` for the full operating procedure.
+**Meeting Hygiene Rules:** See `all-hands-engine/templates/meeting-hygiene-rules.md` — applies to ALL meetings.
+**Pre-Read System:** Department pre-reads due Friday 17:00 CET. Template at `all-hands-engine/templates/pre-read-template.md`.
 
 For gate reviews, load `_shared/org/OKR-PROJECT-MANAGEMENT.md` for gate deliverables checklist.
 
