@@ -1,6 +1,8 @@
+> Used after: DE Weekly (Broadcast) + Leadership Decisions (Decision)
+
 # DE Weekly Summary — [YYYY-MM-DD]
 
-*Sent to full company after DE Weekly + Leadership Sync*
+*Sent to full company after DE Weekly + Leadership Decisions*
 
 ---
 
@@ -20,7 +22,7 @@
 
 ---
 
-## Decisions Made (Leadership Sync)
+## Decisions Made (Leadership Decisions)
 
 | # | Decision | Owner | Deadline | Context |
 |---|---------|-------|----------|---------|

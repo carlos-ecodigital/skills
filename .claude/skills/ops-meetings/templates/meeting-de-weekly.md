@@ -1,5 +1,7 @@
+> Pattern: Broadcast | See meeting-pattern-broadcast.md
+
 # DE Weekly — Run of Show
-**Monday 09:00 CET | 30 minutes | Full Team**
+**Monday 17:00 CET | 30 minutes | Full Team**
 
 ---
 
@@ -16,7 +18,7 @@
 
 - Company-level GREEN rate: [X]%
 - RED items by department (1 line each — no discussion, just visibility)
-- Rolled-over items (2+ weeks — flag only, discussion in Leadership Sync)
+- Rolled-over items (2+ weeks — flag only, discussion in Leadership Decisions)
 
 *Purpose: Everyone sees who delivered and who didn't. No lectures. The numbers speak.*
 
@@ -31,7 +33,7 @@ Option A: **Team Spotlight** (rotating weekly)
 Option B: **Open Q&A**
 - "What questions do you have about the pre-reads or this week's priorities?"
 - Max 3 questions, 2 min each
-- Complex questions → "Let's take that to Leadership Sync"
+- Complex questions → "Let's take that to Leadership Decisions"
 
 ---
 
@@ -54,7 +56,7 @@ Option B: **Open Q&A**
 
 ---
 
-## Post-Meeting (Yoni, by 10:30)
+## Post-Meeting (Yoni, by 18:30)
 
 - Process Fireflies transcript
 - Send 1-page summary to full company

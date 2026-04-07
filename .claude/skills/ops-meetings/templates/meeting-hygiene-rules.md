@@ -1,3 +1,5 @@
+> Applies to: All meeting patterns (Broadcast, Decision, Standup, Review, Workshop, 1:1)
+
 # Digital Energy Meeting Rules
 
 *Applies to ALL recurring internal meetings.*

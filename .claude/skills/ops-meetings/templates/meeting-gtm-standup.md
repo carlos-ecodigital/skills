@@ -1,8 +1,10 @@
+> Pattern: Standup | See meeting-pattern-standup.md
+
 # GTM Standup — Run of Show
 **Tue/Wed | 30 minutes | Execution Only**
 
 **Attendees:** Jonathan, Guy, Jochem, Jelmer, Jeroen, + Yoni/Carlos as needed
-**Purpose:** Outreach execution tracking. NOT strategy. Strategy decisions happen in Monday Leadership Sync.
+**Purpose:** Outreach execution tracking. NOT strategy. Strategy decisions happen in Monday Leadership Decisions.
 
 ---
 
@@ -39,14 +41,14 @@
 
 ## [0:25 - 0:30] BLOCKERS
 
-Items to escalate to next Monday's Leadership Sync:
+Items to escalate to next Monday's Leadership Decisions:
 - [blocker] — needs [what] — by [when]
 
 ---
 
 ## Rules
 
-- **No strategic pivots.** "Should we change our positioning?" goes to Leadership Sync.
+- **No strategic pivots.** "Should we change our positioning?" goes to Leadership Decisions.
 - **No product discussions.** "Should we add X feature for this client?" goes to Jelmer.
 - **Numbers first.** If you don't have numbers, you didn't do outreach.
 - **30 minutes max.** If the standup has nothing to discuss, end early. Short meetings are good meetings.

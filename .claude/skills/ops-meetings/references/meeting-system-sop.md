@@ -1,7 +1,7 @@
 # Digital Energy Meeting System — Standard Operating Procedure
 
-**Version:** 1.0
-**Effective:** 2026-04-07 (Week 1 transition)
+**Version:** 2.0
+**Effective:** 2026-04-14 (Week 2 — 2-meeting split live)
 **Owner:** Carlos Reuven (CEO) + Yoni Fishman (Engine Operator)
 
 ---
@@ -23,8 +23,8 @@ The system is designed to:
 
 | Day | Time (CET) | Meeting | Duration | Attendees | Purpose |
 |-----|-----------|---------|----------|-----------|---------|
-| Mon | 09:00 | DE Weekly | 30 min | Full team | CEO broadcast: mission, wins, risk, priorities |
-| Mon | 09:45 | Leadership Sync | 30 min | Core (5-7) | Decisions and blockers only |
+| Mon | 17:00 | DE Weekly | 30 min | Full team | CEO broadcast: mission, wins, risk, priorities |
+| Mon | 17:45 | Leadership Decisions | 30 min | Core (5-7) | Decisions and blockers only |
 | Tue/Wed | TBD | GTM Standup | 30 min | Growth team (7-8) | Outreach execution tracking |
 | Weekly | TBD | P1 Procurement | As needed | Procurement team (6) | Vendor decisions, CAPEX gates |
 | Weekly | TBD | Finance Weekly | As needed | Finance team (5-6) | CEO gets async summary only |
@@ -44,7 +44,7 @@ Written updates replace verbal status reporting. Meeting time is for decisions, 
 2. This week's top 3 deliverables (noun + verb + deadline)
 3. Blockers requiring cross-functional help
 4. One number that matters
-5. Decision needed from Leadership Sync? (Y/N + details)
+5. Decision needed from Leadership Decisions? (Y/N + details)
 
 ### Enforcement
 | Time | Action |
@@ -56,7 +56,7 @@ Written updates replace verbal status reporting. Meeting time is for decisions, 
 
 ---
 
-## 4. DE Weekly (Monday 09:00, 30 min, Full Team)
+## 4. DE Weekly (Monday 17:00, 30 min, Full Team)
 
 ### Owner: Carlos (CEO)
 ### Facilitator: Yoni (Engine Operator)
@@ -75,7 +75,7 @@ Written updates replace verbal status reporting. Meeting time is for decisions, 
 
 ---
 
-## 5. Leadership Sync (Monday 09:45, 30 min, Core Team)
+## 5. Leadership Decisions (Monday 17:45, 30 min, Core Team)
 
 ### Owner: Carlos (CEO)
 ### Facilitator: Yoni (Engine Operator)
@@ -113,7 +113,7 @@ Shared with full team as part of DE Weekly. No hiding, no softening.
 
 ## 7. AI Automation
 
-The all-hands-engine skill automates:
+The ops-meetings skill + carlos-ceo W11 workflow automate:
 1. Pre-read collection and compilation
 2. CEO Opening Brief generation (AI-drafted, Carlos reviews Sunday)
 3. Accountability Scorecard generation (week-over-week comparison)
@@ -131,7 +131,7 @@ The all-hands-engine skill automates:
 - All-hands still runs in old format but Carlos demonstrates the new standard
 
 ### Week 2 (April 14): 2-Meeting Split
-- DE Weekly (30 min, full team) + Leadership Sync (30 min, core)
+- DE Weekly (30 min, full team) + Leadership Decisions (30 min, core)
 - Carlos opens DE Weekly with mission/wins/risk for the first time
 - Pre-reads required; meeting does NOT cover written updates
 
@@ -146,9 +146,9 @@ The all-hands-engine skill automates:
 
 | Role | Person | Key Responsibility |
 |------|--------|--------------------|
-| CEO | Carlos | Opens/closes DE Weekly. Chairs Leadership Sync. Reviews AI brief Sunday. |
+| CEO | Carlos | Opens/closes DE Weekly. Chairs Leadership Decisions. Reviews AI brief Sunday. |
 | Engine Operator | Yoni | Collects pre-reads. Builds CEO brief (AI-assisted). Runs timer. Processes transcripts. Maintains scorecard. |
-| Department Heads | Jelmer, Jonathan, Halyna/Lucie, Santiago | Submit pre-reads Friday 17:00. Speak in Leadership Sync only when called for decision. |
+| Department Heads | Jelmer, Jonathan, Halyna/Lucie, Santiago | Submit pre-reads Friday 17:00. Speak in Leadership Decisions only when called for decision. |
 | Team Members | Everyone else | Read pre-reads. Attend DE Weekly. Ask questions. Get summary if absent. |
 
 ---
@@ -163,6 +163,18 @@ The all-hands-engine skill automates:
 6. No WhatsApp for meeting content — ClickUp or email only.
 7. Substance over clock — judge meetings by decisions/outputs produced, not minutes elapsed. Remote teams need real time together.
 8. If you're not adding value, leave. It's not rude.
+
+---
+
+---
+
+## 11. Future: Automation
+
+Pre-read reminders and compilation are manual for now. Automate after 3 successful weeks of consistent submission (target: W19+). Automation candidates:
+- Thursday auto-reminder via scheduled task
+- Friday compilation + missing-department flagging
+- Saturday CEO brief generation trigger
+- Monday post-meeting summary generation from Fireflies
 
 ---
 

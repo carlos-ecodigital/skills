@@ -8,7 +8,7 @@
 2. **Accounts receivable:** [amount] ([amount] overdue > 30 days)
 3. **Biggest expense this week:** [description] ([amount])
 4. **Restructuring status:** [1 sentence — e.g., "GSB transfer 95% complete, pending final signature"]
-5. **Escalation for Leadership Sync:** YES / NO
+5. **Escalation for Leadership Decisions:** YES / NO
    - If YES: **Topic:** [1 sentence] | **Decision needed by:** [date]
 
 ---

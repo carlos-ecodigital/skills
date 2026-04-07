@@ -1,5 +1,7 @@
-# Leadership Sync — Run of Show
-**Monday 09:45 CET | 30 minutes | Core Team Only**
+> Pattern: Decision | See meeting-pattern-decision.md
+
+# Leadership Decisions — Run of Show
+**Monday 17:45 CET | 30 minutes | Core Team Only**
 
 **Attendees:** Carlos, Yoni, Jelmer, Jonathan, Santiago, Halyna/Lucie (5-7 max)
 **Others:** Invited for specific items only. Join for their item, leave after.

@@ -45,7 +45,7 @@
 
 ---
 
-## Decision Needed from Leadership Sync? (Yes/No)
+## Decision Needed from Leadership Decisions? (Yes/No)
 
 If yes:
 - **Topic:** [1 sentence]

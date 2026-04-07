@@ -1,4 +1,6 @@
-# P1 Procurement & Realization — Run of Show
+> Pattern: Decision + Workshop | See meeting-pattern-decision.md, meeting-pattern-workshop.md
+
+# Procurement Decisions — Run of Show
 **Weekly | Structured agenda, duration as needed | 6 attendees**
 
 **Attendees:** Yoni, Jelmer, Jeroen, Jochem, DJ, + 1 as needed
