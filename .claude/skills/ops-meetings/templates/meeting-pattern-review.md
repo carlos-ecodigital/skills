@@ -45,6 +45,13 @@ Monthly, quarterly, or per-sprint. Match the review cadence to the target-settin
 5. **Kill things.** The hardest part of a review is stopping work that isn't delivering. If you never kill anything, your reviews aren't working.
 6. **Forward-looking targets are mandatory.** A review that only looks backward is an autopsy. Set the next period's targets before leaving.
 
+## When This Meeting Drifts
+
+- **Someone presents a GREEN item at length** → "That's great — one line in the scorecard. Let's get to the REDs."
+- **A RED item turns into a brainstorming session** → "We're in Workshop mode. Do we need a Workshop to fix this, or can we decide the intervention now?"
+- **The group debates targets instead of reviewing results** → "Targets come after we've graded. Let's finish scoring, then set next period."
+- **No one wants to grade honestly (everything AMBER)** → "AMBER means at risk. Is this genuinely at risk, or is it RED and we're being polite? Let's call it."
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |

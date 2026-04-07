@@ -43,6 +43,13 @@ Weekly. Never skip. Never cancel. If you must reschedule, reschedule — don't d
 5. **Notes are private.** What's discussed in a 1:1 stays between the two people unless explicitly agreed otherwise. Trust is the foundation.
 6. **Listen first, solve second.** The manager's instinct is to fix. Resist it. Often the report needs to be heard, not fixed. Ask: "Do you want advice or do you want me to listen?"
 
+## When This Meeting Drifts
+
+- **Manager starts assigning work** → Catch yourself. "Actually — what's on your agenda? Let's start there." Give the mic back.
+- **It becomes a status update** → "I can read your status async. What do you need from me that you can't get any other way?"
+- **A team-level problem surfaces** → "That sounds like a Decision meeting topic. Let's flag it for the leadership agenda. What do you need from me right now on this?"
+- **Feedback gets avoided** → Prompt directly: "What's one thing I could do better for you this week?" Don't let the moment pass.
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |

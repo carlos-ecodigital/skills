@@ -44,6 +44,13 @@ Daily or 2-3x per week. Daily during sprints or high-intensity execution. 2-3x/w
 5. **Standing up is optional, brevity is not.** The name is a metaphor for speed. Whether you physically stand is irrelevant.
 6. **Skip if nothing changed.** If someone has no updates and no blockers, they say "No changes" and pass. Don't fill time.
 
+## When This Meeting Drifts
+
+- **Someone starts problem-solving a blocker** → "Let's take that offline after standup. Who's joining? Good — next person."
+- **A strategic question surfaces** → "That's a Decision meeting topic. Note it for the agenda. Moving on."
+- **One person talks for 5+ minutes** → "I need to cut you off — give me the one-liner. We'll dig in offline."
+- **The meeting hits 15 minutes** → "Hard stop. Remaining updates go in the channel. Blockers flagged — owners, follow up by EOD."
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |

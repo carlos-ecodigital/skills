@@ -40,6 +40,13 @@ Weekly or monthly. Weekly for operational alignment. Monthly for strategic reset
 4. **One priority, stated twice.** Open with it, close with it. If the team leaves remembering one thing, it should be the priority.
 5. **Respect the clock.** Start on time. End early if you can. Never run over — it signals that your format is broken.
 
+## When This Meeting Drifts
+
+- **A debate breaks out** → "Good question. Let's take that to the Decision meeting." Don't resolve it here.
+- **Someone starts a verbal status update** → "That's in the pre-read. What's the one thing you need the room to know?" Redirect to one sentence.
+- **A technical topic takes over** → "That needs a Workshop. Who owns scheduling it?" Park and move on.
+- **Q&A turns into a group discussion** → "I hear the question. Let me answer it, then we'll move to close." Leader reclaims the mic.
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |

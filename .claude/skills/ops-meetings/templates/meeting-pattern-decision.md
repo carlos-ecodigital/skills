@@ -44,6 +44,13 @@ Weekly or as needed. Weekly for recurring decision backlogs. Ad-hoc for urgent d
 5. **No spectators.** Everyone in the room should have a stake in at least one decision. If you're just observing, read the minutes instead.
 6. **Pre-read required.** Decision briefs distributed 24+ hours before the meeting. If you haven't read the brief, you listen — you don't slow down the group.
 
+## When This Meeting Drifts
+
+- **Discussion exceeds 10 minutes on one item** → "This needs more pre-work. Let's schedule a Workshop and move to the next item."
+- **Someone raises a new topic without options** → "That's not ready for decision. Prepare options and bring it next week."
+- **The group starts exploring/brainstorming** → "We're in Workshop mode. This is a Decision meeting. Do we have enough to decide, or do we need a Workshop first?"
+- **Lobbying resumes after a decision was made** → "We decided this. Disagree and commit. Let's move forward."
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |

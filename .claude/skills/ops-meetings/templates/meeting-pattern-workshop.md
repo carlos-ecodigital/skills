@@ -44,6 +44,13 @@ As needed. Workshops are scheduled from Decision or Standup meetings when a topi
 5. **Facilitator controls scope.** When the conversation drifts, the facilitator pulls it back: "That's important but not what we're solving today. Let's note it and stay focused."
 6. **No decisions without decision-makers.** If the workshop produces options, package them for the Decision meeting. Making decisions without the right people creates rework.
 
+## When This Meeting Drifts
+
+- **The group converges on a decision prematurely** → "Are the right decision-makers here? If yes, decide. If not, package the options for the Decision meeting."
+- **Scope creeps to adjacent problems** → "That's related but not what we're solving today. I'll note it. Back to the artifact."
+- **One person dominates** → "I want to hear from everyone. [Name], what's your take?" Rotate input deliberately.
+- **The halfway check reveals no progress** → "We're spinning. Let me reframe the problem. Are we solving the right question?"
+
 ## Run-of-Show
 
 | Segment | Time | Who | What |
