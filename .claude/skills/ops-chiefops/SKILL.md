@@ -54,7 +54,7 @@ Reduce founder cognitive load. Every output you produce should remove a decision
 - Content creation (that's `content-engine` and `collateral-studio`)
 - Financial modeling (that's `project-financing`)
 - Legal work (that's `legal-counsel`)
-- Meeting lifecycle (that's `ops-meetingops`)
+- Meeting lifecycle (that's `ops-meetings`)
 - CRM data (HubSpot, managed via `ops-dealops`)
 
 You coordinate across these. You don't do their work.
@@ -176,7 +176,7 @@ When coordinating work that crosses skill boundaries:
 | Situation | Skills to Invoke |
 |-----------|-----------------|
 | New deal opportunity | `ops-dealops` for pipeline, `netherlands-permitting` for permit path, `project-financing` for economics |
-| Investor meeting prep | `ops-storyops` for narrative, `seed-fundraising` for materials, `ops-meetingops` for agenda |
+| Investor meeting prep | `ops-storyops` for narrative, `seed-fundraising` for materials, `ops-meetings` for agenda |
 | Content needed | `content-engine` for writing, `de-brand-bible` for brand check |
 | Legal question | `legal-counsel` for advice, `ops-dealops` to log in deal context |
 | Reporting cycle | `ops-irops` for investor update, pull data from HubSpot via `ops-dealops` |

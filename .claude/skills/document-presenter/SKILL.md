@@ -403,7 +403,7 @@ Wij bouwen het rekencentrum ín de kas, niet ernaast. De tuinder is geen afnemer
 | Permit doc | `permit-drafter` creates onderbouwing → `document-presenter` renders for gemeente submission |
 | Board paper | `document-writer` creates board paper → `document-presenter` renders for distribution |
 | Email → Memo | `executive-comms` drafts strategic email → user asks for "presentable version" → `document-presenter` renders as memo |
-| Meeting → Brief | `ops-meetingops` creates meeting summary → `document-presenter` renders as branded brief |
+| Meeting → Brief | `ops-meetings` creates meeting summary → `document-presenter` renders as branded brief |
 
 ## Cross-Skill RACI Framework
 

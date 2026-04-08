@@ -336,23 +336,23 @@ Before delivering a brief, verify:
 | Brief reveals gaps | Missing persona data | Suggest `research-engine` or `ops-outreachops` |
 | Brief reveals stale data | Last update >3 months | Suggest `meeting-to-ssot` reprocessing of recent transcripts |
 | Brief reveals unprocessed meetings | Fireflies has transcripts not in SSOT | Flag for `meeting-to-ssot` extraction |
-| Brief complete | Delivered to user | Suggest `ops-meetingops` for agenda creation if needed |
+| Brief complete | Delivered to user | Suggest `ops-meetings` for agenda creation if needed |
 
 ## Cross-Skill RACI Framework
 
 | Cross-Cutting Question | R (Responsible) | A (Accountable) | C (Consulted) | I (Informed) |
 |---|---|---|---|---|
-| Generate pre-meeting context brief | pre-meeting-brief | pre-meeting-brief | ops-meetingops (for agenda context) | -- |
+| Generate pre-meeting context brief | pre-meeting-brief | pre-meeting-brief | ops-meetings (for agenda context) | -- |
 | Assess relationship health (G/Y/R) | pre-meeting-brief | grower-relationship-mgr (growers), ops-dealops (investors/vendors) | ops-contextops | ops-chiefops |
 | Surface pending decisions for meetings | pre-meeting-brief | decision-tracker | relevant domain skill | ops-chiefops |
 | Identify SSOT data gaps before meetings | pre-meeting-brief | pre-meeting-brief | research-engine, ops-outreachops | ops-contextops |
 | Adapt brief language to meeting type (NL/EN) | pre-meeting-brief | pre-meeting-brief | -- | -- |
-| Feed brief insights back to post-meeting extraction | pre-meeting-brief | meeting-to-ssot | -- | ops-meetingops |
+| Feed brief insights back to post-meeting extraction | pre-meeting-brief | meeting-to-ssot | -- | ops-meetings |
 
 ## Companion Skills
 
 - `meeting-to-ssot`: The Extractor produces the data that The Briefer consumes. Last interaction summaries, action items, relationship signals, and decision records all flow from post-meeting extraction into future briefs. These two skills form a closed loop.
-- `ops-meetingops`: Owns the meeting lifecycle. The Briefer provides context; MeetingOps provides the agenda. For external meetings, The Briefer runs first, then MeetingOps uses brief insights to shape the agenda.
+- `ops-meetings`: Owns the meeting lifecycle. The Briefer provides context; MeetingOps provides the agenda. For external meetings, The Briefer runs first, then MeetingOps uses brief insights to shape the agenda.
 - `ops-chiefops`: Provides the action item tracking and weekly priorities that inform brief content. Receives flags when briefs reveal overdue items or unresolved blockers.
 - `ops-contextops`: The institutional memory that feeds persona data, relationship intelligence, and tribal knowledge into briefs. When a brief reveals a data gap, ContextOps is the skill that should fill it.
 - `decision-tracker`: Provides pending decision data for the "Pending Decisions" section. Receives flags when briefs surface decisions that need revisit-due status updates.

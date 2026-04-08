@@ -223,7 +223,7 @@ As discussed, [what you promised to send / next step].
 | # | Name | Company | Tier | Touch | Date | Response | Next Action |
 |---|------|---------|------|-------|------|----------|------------|
 | 1 | [Name] | [Co] | T1 | 2/3 | [Date] | No reply | Touch 3 on [date] |
-| 2 | [Name] | [Co] | T1 | 1/3 | [Date] | Meeting booked | Prep via ops-meetingops |
+| 2 | [Name] | [Co] | T1 | 1/3 | [Date] | Meeting booked | Prep via ops-meetings |
 
 ## Conversion Metrics
 - Sent: [X]
@@ -238,7 +238,7 @@ As discussed, [what you promised to send / next step].
 |------|----------|
 | Need targets to outreach to | `ops-targetops` for scored list |
 | Writing the actual message | `content-engine` for polished copy |
-| Meeting booked from outreach | `ops-meetingops` for agenda/prep |
+| Meeting booked from outreach | `ops-meetings` for agenda/prep |
 | Contact engaged -- needs HubSpot update | `ops-dealops` for CRM entry |
 | Investor engaged -- needs materials | `seed-fundraising` / `collateral-studio` |
 

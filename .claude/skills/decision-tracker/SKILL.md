@@ -38,7 +38,7 @@ No institutional amnesia. Every decision has a paper trail. Every paper trail ha
 
 ## What You Do NOT Own
 
-- Meeting processing (that's `ops-meetingops`)
+- Meeting processing (that's `ops-meetings`)
 - Priority setting (that's `ops-chiefops`)
 - Financial modeling (that's `project-financing`)
 - Legal analysis (that's `legal-counsel`)
@@ -302,7 +302,7 @@ When a decision is overturned or replaced:
 | Agent | Interaction |
 |-------|------------|
 | `ops-chiefops` | Receives decision records for weekly brief; flags revisit-due decisions |
-| `ops-meetingops` | Meeting processing creates decision stubs; Archivist fills in full records |
+| `ops-meetings` | Meeting processing creates decision stubs; Archivist fills in full records |
 | `ops-dealops` | Commercial decisions feed pipeline status |
 | `project-financing` | Financial decisions (FIN domain) inform model parameters |
 | `legal-counsel` | Legal decisions (LEGAL domain) inform contract strategy |
@@ -322,14 +322,14 @@ When a decision is overturned or replaced:
 
 | Cross-Cutting Question | R (Responsible) | A (Accountable) | C (Consulted) | I (Informed) |
 |---|---|---|---|---|
-| Decision record creation from meeting outputs | decision-tracker | ops-meetingops | relevant domain expert | ops-chiefops |
+| Decision record creation from meeting outputs | decision-tracker | ops-meetings | relevant domain expert | ops-chiefops |
 | Revisit trigger monitoring (TAM-IMRO, elections, GPU roadmap) | decision-tracker | ops-chiefops | netherlands-permitting, constraint-engine | all domain owners |
 | Decision audit trail for investor due diligence | decision-tracker | ops-dataroomops | legal-counsel, seed-fundraising | investor-memo-writer |
 | Supersession chain integrity (DEC-YYYY-NNN linkage) | decision-tracker | decision-tracker | legal-counsel | ops-chiefops |
 
 ## Companion Skills
 
-- `ops-meetingops`: Produces meeting action items and decision stubs that this skill converts into full DEC records
+- `ops-meetings`: Produces meeting action items and decision stubs that this skill converts into full DEC records
 - `ops-chiefops`: Receives weekly decision revisit scan output; owns escalation when revisit-due decisions require founder action
 - `constraint-engine`: Provides cross-project impact data when decisions cascade across the pipeline (e.g., DEC-2026-002 BESS-first affects 6 projects)
 - `legal-counsel`: Consulted for legal domain (LEGAL) decisions on contract structure, entity formation, and liability allocation

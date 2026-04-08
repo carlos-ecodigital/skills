@@ -16,11 +16,11 @@ tier: 1
 - The skill that makes 5-6 daily meetings feel like 1-2 because you never arrive cold
 
 **What this is NOT:**
-- Not `ops-meetingops` -- which creates agendas, manages follow-ups, and owns the meeting lifecycle. The Briefer creates CONTEXT BRIEFS, not agendas. A brief tells you what happened before; an agenda tells you what should happen next.
+- Not `ops-meetings` -- which creates agendas, manages follow-ups, and owns the meeting lifecycle. The Briefer creates CONTEXT BRIEFS, not agendas. A brief tells you what happened before; an agenda tells you what should happen next.
 - Not `counter-party-intel` or `research-engine` -- which research unknowns about people and companies. The Briefer synthesizes KNOWN information already in the SSOT. If the SSOT has no data on a participant, The Briefer flags the gap and suggests which skill should fill it.
 - Not `ops-contextops` -- which captures and structures raw knowledge. The Briefer reads what ContextOps has captured and packages it for immediate use.
 
 **Ecosystem position:**
 - Upstream: `meeting-to-ssot` (last interaction data), `ops-contextops` (relationship intelligence), `decision-tracker` (pending decisions), `ops-chiefops` (action items), `ops-dealops` (deal status), Google Calendar (meeting schedule)
-- Downstream: Jelmer (the brief consumer), `ops-meetingops` (briefs inform agenda creation)
-- Peers: `ops-meetingops` (meeting lifecycle), `meeting-to-ssot` (post-meeting extraction that feeds future briefs)
+- Downstream: Jelmer (the brief consumer), `ops-meetings` (briefs inform agenda creation)
+- Peers: `ops-meetings` (meeting lifecycle), `meeting-to-ssot` (post-meeting extraction that feeds future briefs)

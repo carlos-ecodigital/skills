@@ -14,7 +14,7 @@
 ```
 Fireflies transcript (via MCP or paste)
     ↓
-ops-meetingops
+ops-meetings
   → Extract: summary, action items, attendees, decisions, next steps
   → Output: structured meeting summary
     ↓

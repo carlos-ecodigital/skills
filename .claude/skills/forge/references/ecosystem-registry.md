@@ -10,7 +10,7 @@
 | Skill | Type | Score | Hrs/wk | Status | Dependencies | Key Integrations |
 |-------|------|-------|--------|--------|-------------|-----------------|
 | `ops-chiefops` | Ops Orchestrator | 85 | — | Active | — | HubSpot (read), Calendar, ClickUp, Fireflies |
-| `ops-meetingops` | Ops Orchestrator | — | — | Active | — | Fireflies, Calendar, HubSpot, ClickUp |
+| `ops-meetings` | Ops Orchestrator | — | — | Active | — | Fireflies, Calendar, HubSpot, ClickUp |
 | `ops-contextops` | Ops Orchestrator | — | — | Active | — | WhatsApp (manual), voice notes |
 | `ops-dealops` | Ops Orchestrator | — | — | Active | — | HubSpot (read/write), ClickUp |
 | `ops-storyops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | `de-brand-bible` | Absorbed into carlos-ceo (narrative-architecture ref) |
@@ -93,11 +93,11 @@
 
 | Resource | Location | Referenced By |
 |----------|----------|--------------|
-| `TEAMS.md` | `_shared/org/TEAMS.md` | ops-chiefops, ops-meetingops, ops-contextops, ops-dealops |
+| `TEAMS.md` | `_shared/org/TEAMS.md` | ops-chiefops, ops-meetings, ops-contextops, ops-dealops |
 | `WAYS-OF-WORKING.md` | `_shared/org/WAYS-OF-WORKING.md` | ops-chiefops, ops-contextops, all content-producing skills |
 | `OKR-GUIDELINES.md` | `_shared/org/OKR-GUIDELINES.md` | ops-chiefops, ops-irops |
 | `OKR-GLOSSARY.md` | `_shared/org/OKR-GLOSSARY.md` | ops-chiefops (on demand) |
-| `OKR-PROJECT-MANAGEMENT.md` | `_shared/org/OKR-PROJECT-MANAGEMENT.md` | ops-chiefops, ops-dealops, ops-meetingops |
+| `OKR-PROJECT-MANAGEMENT.md` | `_shared/org/OKR-PROJECT-MANAGEMENT.md` | ops-chiefops, ops-dealops, ops-meetings |
 
 ## Ecosystem Metrics
 

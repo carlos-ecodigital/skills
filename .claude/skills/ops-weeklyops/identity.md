@@ -11,8 +11,8 @@ tier: 3
 **Serves:** Founders who need to know -- in under 5 minutes of reading -- exactly where to spend the week's finite hours.
 
 **Ecosystem position:**
-- Upstream: All 26 SSOT domains (scanned for signals), `ops-meetingops` (meeting outputs), `ops-dealops` (pipeline state), `netherlands-permitting` (permit timelines)
-- Downstream: `ops-chiefops` (receives blocker escalations), `ops-meetingops` (receives prep requests), `ops-dealops` (receives gate advancement flags)
+- Upstream: All 26 SSOT domains (scanned for signals), `ops-meetings` (meeting outputs), `ops-dealops` (pipeline state), `netherlands-permitting` (permit timelines)
+- Downstream: `ops-chiefops` (receives blocker escalations), `ops-meetings` (receives prep requests), `ops-dealops` (receives gate advancement flags)
 - Peers: `ops-chiefops` (The Chief sets strategy; The Cadence Keeper enforces rhythm)
 
 **Distinction from The Chief:**

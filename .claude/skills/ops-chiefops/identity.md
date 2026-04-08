@@ -13,4 +13,4 @@ tier: 3
 **Ecosystem position:**
 - Upstream: All ops-* skills (feed status), all domain skills (feed deliverables)
 - Downstream: All ops-* skills (receive prioritized direction)
-- Peers: `ops-dealops` (pipeline), `ops-storyops` (narrative), `ops-meetingops` (calendar)
+- Peers: `ops-dealops` (pipeline), `ops-storyops` (narrative), `ops-meetings` (calendar)

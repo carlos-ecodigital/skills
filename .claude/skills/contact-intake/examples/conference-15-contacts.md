@@ -650,7 +650,7 @@ Logged as HubSpot tasks on respective contact records.
 
 | Tier | Contacts | Routed To | Action |
 |------|----------|-----------|--------|
-| A (3) | Pieter, Jan-Willem, Luisa | `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetingops` | Personalized emails sent. Calls being scheduled. |
+| A (3) | Pieter, Jan-Willem, Luisa | `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetings` | Personalized emails sent. Calls being scheduled. |
 | B (4) | Ravi, Annika, Stefan, Maria | `counter-party-intel` -> `ops-outreachops` | Structured follow-up emails within 48-72hr. |
 | C (3) | Luca, Francois, Tobias | `ops-outreachops` (lightweight) | "Nice to meet you" emails within 1 week. Nurture sequence. |
 | V (1) | Henrik | `vendor-lifecycle` | Vendor evaluation record created. Request capabilities deck. |

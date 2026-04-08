@@ -220,7 +220,7 @@ User forwards email to Claude or pastes email thread:
 
 "Process this email thread: [paste]"
 
-ops-meetingops or ops-contextops processes:
+ops-meetings or ops-contextops processes:
   → Extract: contacts (name, email, company), commitments, action items
   → Format as HubSpot update: contact properties + note text
   → If HubSpot MCP available: create/update directly
@@ -232,7 +232,7 @@ ops-meetingops or ops-contextops processes:
 ```
 User mentions: "I have a meeting with [person] tomorrow"
 
-ops-meetingops:
+ops-meetings:
   → If Calendar MCP available: pull meeting details
   → If not: ask user for attendee names, company, meeting purpose
   → ops-targetops: research attendees (WebSearch)

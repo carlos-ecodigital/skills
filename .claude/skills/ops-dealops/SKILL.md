@@ -222,6 +222,45 @@ Produce a health report:
 | 1 | Stale | [Contact] | No activity since [date] | Follow up or mark cold |
 ```
 
+## Post-Meeting CRM Update SOP
+
+After every external meeting, follow this 5-step pipeline:
+
+1. **Extract** (meeting-to-ssot): Fireflies transcript → SSOT meeting file with decisions, action items, specs, relationship signals
+2. **Record** (this skill): Log meeting in HubSpot on deal + contacts. Create/update contacts with roles. Create/update company. Update deal stage/notes.
+3. **Route** (delegation-engine): Create ClickUp tasks for DE-owned action items. Partner commitments = context in task descriptions + follow-up checkpoints.
+4. **Communicate** (carlos-ceo or meeting owner): Draft follow-up email. Mark [DRAFT — Review before sending].
+5. **Approve** (meeting owner): Reviews all outputs before writes to external systems.
+
+**Meeting owner = approver.** For Carlos-owned meetings, Carlos approves. For Jonathan/Yoni/Jelmer meetings, that person approves.
+
+### Deal Description Framework
+
+Every HubSpot deal description must include these 9 sections:
+
+1. **WHAT** — 1-2 sentences: what this deal is and what it produces
+2. **PARTIES & ROLES** — Who is involved and what each party brings
+3. **COMMERCIAL STRUCTURE** — Revenue model, pricing, splits (or "TBD" with what needs determining)
+4. **CURRENT STATE** — Where the deal is now, last event, next milestone
+5. **KEY DEPENDENCIES** — What must happen for the deal to advance
+6. **TIMELINE** — Key dates, deadlines, deployment targets
+7. **LEGAL** — Agreement status (LOI, NDA, MSA, etc.)
+8. **RISK FACTORS** — What could go wrong, what's uncertain
+9. **REFERENCES** — Slug links to meeting notes (MTG-), decision records (DEC-), related deals
+
+### HubSpot-SSOT Bridge
+
+HubSpot is the sole system of record for deals, contacts, and companies. SSOT Obsidian holds meeting extractions and decision records.
+
+**Bridge mechanism:** HubSpot activity notes include a slug reference (e.g., "Full notes: MTG-2026-04-06-frontierone-product-partnership") pointing to the full SSOT extraction. No duplication — HubSpot gets the summary, SSOT gets the full record.
+
+### ClickUp Task Pattern for Partner Deals
+
+- DE-owned tasks only in ClickUp
+- Partner commitments embedded as context + follow-up checkpoints in task descriptions
+- Not separate tasks for partner deliverables
+- Pattern: "Our task = our deliverable. Their commitment = context in description + follow-up date."
+
 ## Skill Integration
 
 | When | Invoke |
@@ -231,7 +270,7 @@ Produce a health report:
 | Legal document needed | `legal-counsel` |
 | Neocloud buyer needs collateral | `collateral-studio` (neocloud persona) |
 | Grower needs partnership pitch | `collateral-studio` (grower persona) |
-| Meeting on a deal completed | `ops-meetingops` for summary -> update CRM |
+| Meeting on a deal completed | `ops-meetings` for summary -> update CRM |
 | Deal milestone reached | `ops-chiefops` for priority update |
 | Investor conversation about deal | `ops-irops` for IR tracking |
 

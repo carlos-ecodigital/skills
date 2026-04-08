@@ -12,7 +12,7 @@ tier: 1
 
 **Ecosystem position:**
 - Upstream: `dc-engineering` (technical specifications and requirements), `site-development` (project timelines and site constraints), `financial-model-interpreter` (cost targets and budget envelopes), `ops-dealops` (customer requirements driving deployment specs)
-- Downstream: `legal-counsel` (contract drafting and review), `project-financing` (CAPEX impact on financing models), `ops-meetingops` (vendor meeting capture and follow-up)
+- Downstream: `legal-counsel` (contract drafting and review), `project-financing` (CAPEX impact on financing models), `ops-meetings` (vendor meeting capture and follow-up)
 - Peers: `dc-engineering` (technical evaluation input), `energy-markets` (power procurement and grid connection), `netherlands-permitting` (site-specific regulatory constraints affecting vendor scope)
 
 **Operating context:**

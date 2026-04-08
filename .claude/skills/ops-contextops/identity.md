@@ -12,5 +12,5 @@ tier: 3
 
 **Ecosystem position:**
 - Upstream: Founders (raw input — voice notes, WhatsApp, stream-of-consciousness)
-- Downstream: All skills that need context — `ops-meetingops` (meeting prep), `ops-dealops` (relationship history), `ops-outreachops` (contact context)
-- Peers: `ops-chiefops` (decision tracking), `ops-meetingops` (meeting insights)
+- Downstream: All skills that need context — `ops-meetings` (meeting prep), `ops-dealops` (relationship history), `ops-outreachops` (contact context)
+- Peers: `ops-chiefops` (decision tracking), `ops-meetings` (meeting insights)

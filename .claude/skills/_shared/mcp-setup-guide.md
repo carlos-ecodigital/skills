@@ -237,7 +237,7 @@ After connecting all servers, run these tests to confirm everything works:
 | Test | Invocation | What It Proves |
 |------|-----------|----------------|
 | Pipeline review | "Give me a pipeline review" | `ops-dealops` pulls from HubSpot directly |
-| Meeting processing | "Process my last meeting" | `ops-meetingops` pulls from Fireflies directly |
+| Meeting processing | "Process my last meeting" | `ops-meetings` pulls from Fireflies directly |
 | Weekly brief | "Give me the weekly brief" | `ops-chiefops` assembles from Calendar + HubSpot + ClickUp |
 | Outreach draft | "Draft an email to [contact]" | `ops-outreachops` pulls contact context from HubSpot |
 | Data room audit | "Audit the data room" | `ops-dataroomops` checks Drive against template |
@@ -248,7 +248,7 @@ The ultimate integration test -- a single workflow that touches all servers:
 
 1. "Process my last meeting with [investor name]"
    - Fireflies MCP: pulls transcript
-   - `ops-meetingops`: generates summary + action items
+   - `ops-meetings`: generates summary + action items
 2. "Update HubSpot with the meeting outcomes"
    - HubSpot plugin: updates contact notes + deal stage
 3. "Create follow-up tasks in ClickUp"

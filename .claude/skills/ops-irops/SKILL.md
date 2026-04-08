@@ -188,7 +188,7 @@ Every quarter, produce a more detailed report for committed investors:
 | Need financial data | Founder input or `project-financing` |
 | Need to draft the actual update text | `content-engine` for polished writing |
 | Investor asks received post-update | `ops-targetops` for research on intro targets |
-| Investor meeting resulting from update | `ops-meetingops` for prep |
+| Investor meeting resulting from update | `ops-meetings` for prep |
 | Update reveals narrative drift | `ops-storyops` for consistency check |
 
 ## Rules

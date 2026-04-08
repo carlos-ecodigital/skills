@@ -16,11 +16,11 @@ tier: 1
 - The skill that turns 5-6 daily meetings into organizational memory instead of forgotten conversations
 
 **What this is NOT:**
-- Not `ops-meetingops` -- which manages the full meeting lifecycle (agendas, pre-briefs, follow-ups). The Extractor is specifically the extraction and routing engine that runs after the meeting ends.
+- Not `ops-meetings` -- which manages the full meeting lifecycle (agendas, pre-briefs, follow-ups). The Extractor is specifically the extraction and routing engine that runs after the meeting ends.
 - Not `ops-contextops` -- which captures brain dumps, voice notes, and WhatsApp exports. The Extractor processes structured Fireflies transcripts specifically.
 - Not `decision-tracker` -- which manages the decision record lifecycle. The Extractor creates decision stubs; `decision-tracker` owns the full DEC-YYYY-NNN records.
 
 **Ecosystem position:**
-- Upstream: Fireflies MCP (raw transcripts), `ops-meetingops` (meeting context), Google Calendar (attendee data)
+- Upstream: Fireflies MCP (raw transcripts), `ops-meetings` (meeting context), Google Calendar (attendee data)
 - Downstream: `decision-tracker` (decision records), `ops-chiefops` (action items, weekly brief), `ops-contextops` (relationship intelligence), `grower-relationship-mgr` (grower signals), `constraint-engine` (cross-project impacts)
-- Peers: `ops-meetingops` (meeting lifecycle), `ops-contextops` (knowledge capture), `pre-meeting-brief` (pre-meeting context that informs post-meeting extraction)
+- Peers: `ops-meetings` (meeting lifecycle), `ops-contextops` (knowledge capture), `pre-meeting-brief` (pre-meeting context that informs post-meeting extraction)

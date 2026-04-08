@@ -35,7 +35,7 @@
 | Skill | Role | Primary Output |
 |-------|------|---------------|
 | `ops-chiefops` | Cross-functional coordination | Weekly brief, decision log, escalations |
-| `ops-meetingops` | Meeting lifecycle | Agendas, summaries, action items |
+| `ops-meetings` | Meeting lifecycle | Agendas, summaries, action items |
 | `ops-contextops` | Institutional memory | Decision journal, relationship intel, tribal knowledge |
 | `ops-dealops` | Deal/project lifecycle + HubSpot CRM | Deal dashboards, pipeline reviews, CRM hygiene |
 | `ops-storyops` | Unified narrative (all audiences) | Narrative architecture, consistency checks, routing |
@@ -76,8 +76,8 @@ Example: "Write investor update for this month"
 | Sunday evening | 15-min voice note: this week's priorities | Processed by `ops-chiefops` | 15 min |
 | Monday AM | Weekly brief delivered | `ops-chiefops` | 5 min read |
 | Monday | Pipeline review (async) | `ops-dealops` | 10 min review |
-| As needed | Meeting prep for external meetings | `ops-meetingops` | 0 (auto) |
-| As needed | Post-meeting processing | `ops-meetingops` + `ops-contextops` | 2 min voice note |
+| As needed | Meeting prep for external meetings | `ops-meetings` | 0 (auto) |
+| As needed | Post-meeting processing | `ops-meetings` + `ops-contextops` | 2 min voice note |
 | Friday PM | Action item reconciliation | `ops-chiefops` | 5 min review |
 
 **Total founder ops time: <45 minutes/week**
@@ -102,15 +102,15 @@ Example: "Write investor update for this month"
 ### Current Stack
 | Tool | Used For | Integrated With | MCP Status |
 |------|---------|----------------|------------|
-| **Gmail** | External comms | `ops-outreachops`, `ops-meetingops` | Google Workspace MCP (draft + send) |
-| **Google Calendar** | Scheduling | `ops-meetingops` (meeting prep triggers) | Google Workspace MCP (read events) |
+| **Gmail** | External comms | `ops-outreachops`, `ops-meetings` | Google Workspace MCP (draft + send) |
+| **Google Calendar** | Scheduling | `ops-meetings` (meeting prep triggers) | Google Workspace MCP (read events) |
 | **Google Drive** | File storage | `ops-dataroomops`, all skills | Google Workspace MCP (create/list files) |
 | **Google Sheets** | Financial models | `ops-dealops`, `project-financing` | Google Workspace MCP (read/write cells) |
-| **Fireflies** | Meeting transcription | `ops-meetingops` (post-meeting processing) | Fireflies MCP (search + pull transcripts) |
+| **Fireflies** | Meeting transcription | `ops-meetings` (post-meeting processing) | Fireflies MCP (search + pull transcripts) |
 | **WhatsApp** | Founder comms, voice notes | `ops-contextops` (brain dump, WhatsApp harvest) | No MCP -- manual export only |
 | **Claude Code** | Skill execution | All skills | N/A (host platform) |
 | **HubSpot** | CRM | `ops-dealops`, `ops-targetops` | Connected via Claude plugin |
-| **ClickUp** | Task management | `ops-chiefops`, `ops-meetingops` | ClickUp MCP (create/update tasks) |
+| **ClickUp** | Task management | `ops-chiefops`, `ops-meetings` | ClickUp MCP (create/update tasks) |
 | **GitHub** | Code | Engineering (not ops-managed) | N/A |
 
 ### MCP Server Configuration
@@ -119,10 +119,10 @@ Skills declare MCP tools in their `allowed-tools` frontmatter. When connected, t
 
 | MCP Server | Skills That Use It | Key Capabilities |
 |------------|-------------------|------------------|
-| Google Workspace | `ops-meetingops`, `ops-outreachops`, `ops-chiefops`, `ops-dataroomops`, `ops-dealops` | Gmail send/read, Calendar events, Drive files, Sheets data, Docs creation |
-| Fireflies | `ops-meetingops`, `ops-chiefops` | Search transcripts, pull full transcript, generate summary |
-| ClickUp | `ops-meetingops`, `ops-chiefops`, `ops-dealops` | Create tasks, update status, list tasks |
-| HubSpot | `ops-dealops`, `ops-outreachops`, `ops-targetops`, `ops-dataroomops`, `ops-chiefops`, `ops-meetingops` | Search/update contacts and deals, property discovery, pipeline queries |
+| Google Workspace | `ops-meetings`, `ops-outreachops`, `ops-chiefops`, `ops-dataroomops`, `ops-dealops` | Gmail send/read, Calendar events, Drive files, Sheets data, Docs creation |
+| Fireflies | `ops-meetings`, `ops-chiefops` | Search transcripts, pull full transcript, generate summary |
+| ClickUp | `ops-meetings`, `ops-chiefops`, `ops-dealops` | Create tasks, update status, list tasks |
+| HubSpot | `ops-dealops`, `ops-outreachops`, `ops-targetops`, `ops-dataroomops`, `ops-chiefops`, `ops-meetings` | Search/update contacts and deals, property discovery, pipeline queries |
 
 **Setup:** See `_shared/mcp-setup-guide.md` for installation and configuration instructions.
 
@@ -139,7 +139,7 @@ ops-dealops → HubSpot (direct via MCP: contacts, deals, pipeline)
 
 Fireflies transcript
     ↓ (pull directly via Fireflies MCP)
-ops-meetingops → Meeting Summary + Action Items
+ops-meetings → Meeting Summary + Action Items
     ↓
 ops-dealops → HubSpot update (direct via MCP)
     ↓
@@ -149,7 +149,7 @@ ClickUp → Action items assigned (direct via MCP)
 
 External meeting scheduled
     ↓ (detected via Calendar MCP)
-ops-meetingops → Agenda
+ops-meetings → Agenda
     ↓
 ops-targetops / seed-fundraising → Pre-meeting brief
 ```
@@ -213,12 +213,12 @@ Not all skills at once. Phase in based on where you are:
 | 5 | "Brain dump: [paste recent WhatsApp thread]" | `ops-contextops` |
 
 ### Phase 1: Weeks 1-2 (Kill the Admin)
-**Activate:** `ops-contextops` + `ops-meetingops`
+**Activate:** `ops-contextops` + `ops-meetings`
 **Goal:** Process every meeting and capture every decision. Reduce admin burden.
 
 **MCP setup:** Connect Google Workspace MCP and Fireflies MCP (see `_shared/mcp-setup-guide.md`). This eliminates the biggest friction point -- manual transcript paste and calendar checking.
 
-Habit to build: After every meeting, invoke `ops-meetingops` -- it pulls the Fireflies transcript directly via MCP. No paste needed.
+Habit to build: After every meeting, invoke `ops-meetings` -- it pulls the Fireflies transcript directly via MCP. No paste needed.
 
 ### Phase 2: Weeks 2-4 (Build the Narrative)
 **Activate:** `ops-storyops` + `ops-targetops`

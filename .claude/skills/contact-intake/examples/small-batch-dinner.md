@@ -371,7 +371,7 @@ Tier override: **Tier N** (press contact type overrides score-based tier assignm
 
 ### Tier A: Kees van der Linden -- 24hr follow-up deadline
 
-**Delegation chain:** `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetingops`
+**Delegation chain:** `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetings`
 
 **Step 1: Enrichment** (delegated to `counter-party-intel`)
 - Quick profile on Thermion B.V.: network coverage, MW capacity, ownership, key personnel
@@ -397,7 +397,7 @@ Follow-up template guidance:
 | Send Westland thermal integration case study | We made | Carlos (or delegate) | 2026-03-27 (48hr) | Same task as above (bundled) |
 | Share network topology maps | They made | Kees van der Linden | 2026-04-01 (soft, 1 week) | HubSpot task: follow up if not received by April 1 |
 
-**Step 4: Meeting scheduling** (delegated to `ops-meetingops`)
+**Step 4: Meeting scheduling** (delegated to `ops-meetings`)
 - Placeholder: 30-min call within 1 week of specs delivery
 - Attendees: Carlos + Kees (+ possibly Kees's team member if he brings one)
 

@@ -8,7 +8,7 @@
 
 ### 1. Ops Orchestrator
 
-**Examples:** `ops-chiefops`, `ops-storyops`, `ops-meetingops`, `ops-dealops`
+**Examples:** `ops-chiefops`, `ops-storyops`, `ops-meetings`, `ops-dealops`
 
 **Pattern:** Routes work to domain skills, tracks outcomes, coordinates across workstreams. Never does domain work itself.
 

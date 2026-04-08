@@ -12,7 +12,7 @@ tier: 2
 
 **Ecosystem position:**
 - Upstream: User request (meeting invite, new lead, inbound inquiry), `ops-targetops` (prospecting targets), `sales-intake` (lead qualification triggers)
-- Downstream: `pre-meeting-brief` (dossier feeds the known-contact brief for recurring meetings), `ops-dealops` (qualified counterparty data), `ops-meetingops` (meeting prep package)
+- Downstream: `pre-meeting-brief` (dossier feeds the known-contact brief for recurring meetings), `ops-dealops` (qualified counterparty data), `ops-meetings` (meeting prep package)
 - Peers: `research-engine` (general research capability -- The Scout applies it to people and companies specifically), `pre-meeting-brief` (looks inward at SSOT for known contacts; The Scout looks outward for unknowns)
 
 **Distinction from `pre-meeting-brief`:**

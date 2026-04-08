@@ -143,7 +143,7 @@ All remaining workflows are triggered on demand.
 These are multi-workflow chains that span multiple skills:
 
 ### 1. Meeting Processing Pipeline
-`Fireflies transcript` → `ops-meetingops` (extract) → `ops-contextops` (archive) → `delegation-engine` (route) → `carlos-ceo daily-scan` (surface CEO items)
+`Fireflies transcript` → `ops-meetings` (extract) → `ops-contextops` (archive) → `delegation-engine` (route) → `carlos-ceo daily-scan` (surface CEO items)
 
 ### 2. Brain Dump Pipeline
 `Voice note / raw input` → `ops-contextops` (structure) → `delegation-engine` (route tasks) → `carlos-ceo` (CEO decisions)

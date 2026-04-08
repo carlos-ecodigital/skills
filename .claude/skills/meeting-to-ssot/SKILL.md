@@ -201,7 +201,25 @@ When meetings discuss technical details (power capacity, rack density, cooling s
 | Relationship signals | `personas/` | Append to persona file | `grower-relationship-mgr`, `ops-dealops` |
 | Technical specs | `projects/[project]/` or `technical/` | Update existing docs | `dc-engineering`, `constraint-engine` |
 | Contradictions | Flag for user | Contradiction report | Relevant domain skill |
-| Follow-up items | `meetings/YYYY-MM/` | In summary file | `ops-meetingops` (for follow-up) |
+| Follow-up items | `meetings/YYYY-MM/` | In summary file | `ops-meetings` (for follow-up) |
+
+### Step 7: CRM Routing
+
+After routing to SSOT targets, produce a condensed HubSpot activity note (5-10 lines):
+
+```
+[Meeting Title]
+[Date] | [Duration] | [Platform]
+[DE attendees] | [External attendees]
+[3-5 lines: key outcomes, agreements, next steps]
+Full notes: [MTG-YYYY-MM-DD-slug]
+```
+
+**Rules:**
+- Every extraction produces BOTH an SSOT meeting file AND a HubSpot activity note
+- The HubSpot note is a summary + slug pointer, never a duplicate of the full extraction
+- Log the meeting as a MEETING_EVENT engagement type, associated to the relevant deal + attending contacts
+- If no deal exists, flag for deal creation before logging
 
 ## Output Templates
 
@@ -363,23 +381,23 @@ Before finalizing output, run these checks:
 | Relationship signal found | Tone/commitment detected | Update `personas/` -> notify `grower-relationship-mgr` if grower |
 | Technical spec found | Numbers/specs stated | Update `projects/` or `technical/` -> notify `dc-engineering` or `constraint-engine` |
 | Contradiction found | SSOT conflict detected | Flag for user with both data points |
-| Follow-up needed | Materials promised or next meeting discussed | Flag for `ops-meetingops` follow-up protocol |
+| Follow-up needed | Materials promised or next meeting discussed | Flag for `ops-meetings` follow-up protocol |
 | Deal-relevant outcome | Stage change, pricing discussed, term negotiation | Flag for `ops-dealops` HubSpot update |
 
 ## Cross-Skill RACI Framework
 
 | Cross-Cutting Question | R (Responsible) | A (Accountable) | C (Consulted) | I (Informed) |
 |---|---|---|---|---|
-| Extract structured data from Fireflies transcript | meeting-to-ssot | meeting-to-ssot | ops-meetingops (for context) | ops-chiefops |
+| Extract structured data from Fireflies transcript | meeting-to-ssot | meeting-to-ssot | ops-meetings (for context) | ops-chiefops |
 | Create DEC-YYYY-NNN decision stubs from meetings | meeting-to-ssot | decision-tracker | relevant domain skill | ops-chiefops |
 | Route action items to correct owners | meeting-to-ssot | ops-chiefops | -- | action item owners |
-| Update persona files with relationship signals | meeting-to-ssot | grower-relationship-mgr (growers), ops-dealops (investors/vendors) | ops-contextops | ops-meetingops |
+| Update persona files with relationship signals | meeting-to-ssot | grower-relationship-mgr (growers), ops-dealops (investors/vendors) | ops-contextops | ops-meetings |
 | Flag SSOT contradictions from meeting data | meeting-to-ssot | ops-chiefops | constraint-engine | relevant domain skill |
 | Identify cross-project impacts from meeting outcomes | meeting-to-ssot | constraint-engine | project-financing, site-development | ops-chiefops |
 
 ## Companion Skills
 
-- `ops-meetingops`: Owns the full meeting lifecycle. The Extractor processes what MeetingOps manages. MeetingOps provides pre-meeting context (agenda, brief) that informs extraction priorities.
+- `ops-meetings`: Owns the full meeting lifecycle. The Extractor processes what MeetingOps manages. MeetingOps provides pre-meeting context (agenda, brief) that informs extraction priorities.
 - `decision-tracker`: Receives decision stubs from The Extractor and expands them into full DEC-YYYY-NNN records with options-considered analysis and revisit conditions.
 - `ops-chiefops`: Receives extracted action items for the weekly priority brief and blocker log. Gets notified of any SSOT contradictions that require founder attention.
 - `ops-contextops`: Receives relationship intelligence and tribal knowledge that emerges from meetings. Complements The Extractor by processing non-Fireflies inputs (brain dumps, WhatsApp).

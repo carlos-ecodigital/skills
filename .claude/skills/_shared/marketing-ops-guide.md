@@ -359,7 +359,7 @@ When explaining DE's AI marketing capabilities externally (to partners, advisors
 | 7 | **Lead Generation Strategy** | Campaign design, offer creation, lead magnet ideation, funnel architecture (Hormozi) | `marketing-strategist` |
 | 8 | **Sales Collateral** | Pitch decks, one-pagers, capability summaries, proposals — audience-specific templates | `collateral-studio` |
 | 9 | **Narrative Consistency** | Ensures all materials tell the same story to different audiences; detects narrative drift | `ops-storyops` |
-| 10 | **Growth Operations** | Pipeline tracking, CRM hygiene, meeting processing, investor relations, target prospecting | `ops-dealops`, `ops-targetops`, `ops-irops`, `ops-meetingops` |
+| 10 | **Growth Operations** | Pipeline tracking, CRM hygiene, meeting processing, investor relations, target prospecting | `ops-dealops`, `ops-targetops`, `ops-irops`, `ops-meetings` |
 
 ### How to Use This Framing
 

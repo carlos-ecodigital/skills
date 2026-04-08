@@ -358,7 +358,7 @@ Process raw contacts from any source into scored, tiered, CRM-resident records w
    - Delegate to `counter-party-intel` for deep profile enrichment.
    - Delegate to `sales-intake` for lead qualification (Mode A).
    - Delegate to `ops-outreachops` for personalized follow-up email (24-hour deadline).
-   - Delegate to `ops-meetingops` for meeting scheduling.
+   - Delegate to `ops-meetings` for meeting scheduling.
    - Flag for Carlos review.
 
    **Tier B (2.5-3.9):**
@@ -552,7 +552,7 @@ Process raw contacts from any source into scored, tiered, CRM-resident records w
 | Follow-up emails | Gmail | `ops-outreachops` |
 | Relationship intelligence (A/B) | Context archive | `ops-contextops` |
 | Deep enrichment requests (A/B) | Intel profiles | `counter-party-intel` |
-| Meeting scheduling (A) | Calendar | `ops-meetingops` |
+| Meeting scheduling (A) | Calendar | `ops-meetings` |
 | Review CSV | Google Drive | Team / Carlos |
 | Batch ROI baseline | ROI tracking | `contact-intake` (W6 input) |
 

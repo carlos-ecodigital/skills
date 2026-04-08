@@ -38,8 +38,7 @@
 | 28 | `executive-comms` | — | 1 | communication | grower, investor, supplier, gemeente | generation | email draft, stakeholder email, vendor email, grower email |
 | 29 | `ops-chiefops` | The Chief | 1 | operations | internal | orchestration | weekly priorities, blockers, strategic coordination |
 | 30 | `ops-weeklyops` | — | 1 | operations | internal | generation | weekly brief, 26-domain scan, priority synthesis |
-| 31 | `ops-meetingops` | — | 1 | operations | internal | task-execution | meeting agenda, follow-up, action items, calendar |
-| 31b | `all-hands-engine` | — | 1 | operations | internal | task-execution | DE Weekly, Leadership Sync, pre-reads, CEO brief, accountability scorecard, meeting system governance |
+| 31 | `ops-meetings` | The Cadence Keeper | 1 | operations | internal | task-execution | meeting types, meeting objects, weekly cadence, pre-reads, run-of-show, post-meeting summary |
 | 32 | `ops-dealops` | — | 1 | operations | internal | tracking | deal tracking, gate progression, multi-workstream |
 | 33 | `ops-contextops` | — | 2 | operations | internal | extraction | brain dump, knowledge capture, voice note processing |
 | 34 | `ops-dataroomops` | — | 2 | operations | investor | task-execution | VDR, data room, DD questions, investor access |
@@ -115,7 +114,7 @@
 | `transformation` | Convert between formats | document-presenter, content-atomizer, humanizer |
 | `negotiation` | Objection handling, deal support | hot-negotiation, vendor-negotiation |
 | `orchestration` | Multi-skill coordination | task-executioner, ops-chiefops |
-| `task-execution` | Direct task completion | ops-meetingops, delegation-engine, forge |
+| `task-execution` | Direct task completion | ops-meetings, delegation-engine, forge |
 | `research` | Information gathering | counter-party-intel, competitive-intel, research-engine |
 | `communication` | Stakeholder comms and updates | ops-irops, permit-portfolio-tracker |
 | `reference` | Static reference material | brand-book, de-brand-bible |

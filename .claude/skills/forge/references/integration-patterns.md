@@ -8,11 +8,11 @@
 
 | Channel | Status | Capabilities | Skills Using It |
 |---------|--------|-------------|----------------|
-| HubSpot MCP | Live (Claude plugin) | Search/create/update contacts, deals, tickets; search properties; search owners | `ops-dealops`, `ops-targetops`, `ops-outreachops`, `ops-dataroomops`, `ops-chiefops`, `ops-meetingops` |
+| HubSpot MCP | Live (Claude plugin) | Search/create/update contacts, deals, tickets; search properties; search owners | `ops-dealops`, `ops-targetops`, `ops-outreachops`, `ops-dataroomops`, `ops-chiefops`, `ops-meetings` |
 | Chrome Browser MCP | Live | Navigate, click, type, screenshot, read page, find elements, fill forms, read console/network | Any skill needing browser automation |
-| Google Workspace MCP | Planned/Partial | Gmail send/read, Calendar events, Drive files, Sheets data, Docs creation | `ops-meetingops`, `ops-outreachops`, `ops-chiefops`, `ops-dataroomops`, `ops-dealops` |
-| Fireflies MCP | Planned/Partial | Search transcripts, pull full transcript, generate summary | `ops-meetingops`, `ops-chiefops` |
-| ClickUp MCP | Planned/Partial | Create tasks, update status, list tasks | `ops-meetingops`, `ops-chiefops`, `ops-dealops` |
+| Google Workspace MCP | Planned/Partial | Gmail send/read, Calendar events, Drive files, Sheets data, Docs creation | `ops-meetings`, `ops-outreachops`, `ops-chiefops`, `ops-dataroomops`, `ops-dealops` |
+| Fireflies MCP | Planned/Partial | Search transcripts, pull full transcript, generate summary | `ops-meetings`, `ops-chiefops` |
+| ClickUp MCP | Planned/Partial | Create tasks, update status, list tasks | `ops-meetings`, `ops-chiefops`, `ops-dealops` |
 | WhatsApp | No MCP | Manual export only — paste into Claude | `ops-contextops` |
 
 ## HubSpot MCP Patterns

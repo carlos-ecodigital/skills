@@ -82,7 +82,7 @@ Geen rode vlaggen. Sterke partner-fit: juiste schaal, juiste locatie, juiste mot
 ## 10. Recommended Next Actions
 
 1. **Site visit plannen** -- Pieter uitnodigen op [referentielocatie] of DE bezoekt de kwekerij. Owner: Christian. Deadline: 2025-03-27.
-   Route to: `ops-meetingops` (agenda NL)
+   Route to: `ops-meetings` (agenda NL)
 
 2. **Grid assessment** -- Stedin netaansluiting 12 MVA verifiëren, congestiesituatie Westland checken.
    Route to: `netherlands-permitting` (grid assessment)

@@ -13,7 +13,7 @@ tier: 2
 **Ecosystem position:**
 - Upstream: `projects/` (project context), `financial/` (model data), `technical/` (engineering specs), `contracts/` (deal terms), `decisions/` (decision history), `contacts/` (stakeholder profiles), `procurement/` (vendor evaluations)
 - Downstream: `decision-tracker` (decision documents feed formal DEC records), `executive-comms` (documents may be transmitted via email), `collateral-studio` (documents may become presentations), `humanizer` (external documents get AI-pattern stripping)
-- Peers: `executive-comms` (emails -- clear boundary), `permit-drafter` (permit documents -- clear boundary), `collateral-studio` (marketing collateral -- clear boundary), `decision-tracker` (decision records -- clear boundary), `ops-meetingops` (post-meeting notes -- clear boundary)
+- Peers: `executive-comms` (emails -- clear boundary), `permit-drafter` (permit documents -- clear boundary), `collateral-studio` (marketing collateral -- clear boundary), `decision-tracker` (decision records -- clear boundary), `ops-meetings` (post-meeting notes -- clear boundary)
 
 **Codename rationale:** A scribe produces the official record. Not the decision-maker, not the strategist -- the one who transforms thinking into structured, permanent, referenceable documents. The Scribe ensures that every analysis is rigorous, every recommendation is grounded, and every document stands on its own when read six months later by someone who was not in the room.
 

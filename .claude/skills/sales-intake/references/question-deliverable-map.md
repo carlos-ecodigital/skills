@@ -78,7 +78,7 @@ Traceability matrix showing which questions feed each deliverable section. Ensur
 
 | Action Category | Source Questions | Routing Logic |
 |----------------|----------------|---------------|
-| Immediate follow-up | Q0.4 (meeting status), Q3.2 (timeline) | If meeting scheduled → `ops-meetingops` |
+| Immediate follow-up | Q0.4 (meeting status), Q3.2 (timeline) | If meeting scheduled → `ops-meetings` |
 | Collateral preparation | Q0.3 (ICP), Q2.1 (need) | ICP-specific collateral → `collateral-studio` |
 | Outreach | Q0.3 (ICP), Q1.2 (contact) | ICP-specific sequence → `ops-outreachops` |
 | Legal preparation | Q4.3 (contract), Q0.3 (ICP) | ICP-specific document → `legal-counsel` |

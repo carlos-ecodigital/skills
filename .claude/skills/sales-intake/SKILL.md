@@ -532,7 +532,7 @@ When a lead scores below 2.0:
 |------|-------|
 | Deep research on prospect | `ops-targetops` (research dossier) |
 | CRM tracking/updates | `ops-dealops` |
-| Meeting lifecycle (post-intake) | `ops-meetingops` |
+| Meeting lifecycle (post-intake) | `ops-meetings` |
 | Narrative consistency check | `ops-storyops` |
 | Competitive positioning analysis | `positioning-expert` |
 | Objection handling strategy | `marketing-strategist` |

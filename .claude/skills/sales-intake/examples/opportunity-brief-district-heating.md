@@ -78,7 +78,7 @@ Red flag: No existing site near Arnhem. This deal requires DE to develop a new l
 ## 10. Recommended Next Actions
 
 1. **Technical meeting with Marloes + Frank** -- Present DC waste heat capabilities, discuss temperature profile, baseload allocation, and connection point options. Owner: Christian. Deadline: 2025-04-15.
-   Route to: `ops-meetingops` (agenda prep)
+   Route to: `ops-meetings` (agenda prep)
 
 2. **Site identification near Arnhem** -- Identify potential locations for DC development near the Arnhem-Zuid network. Grid connection availability, land, zoning.
    Route to: `netherlands-permitting` (site assessment) + `dc-engineering` (feasibility)

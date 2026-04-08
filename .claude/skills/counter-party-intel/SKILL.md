@@ -210,7 +210,7 @@ Load reference files based on profile type and urgency.
 | `ops-targetops` | Prospecting and target identification | Scout profiles targets identified by TargetOps |
 | `sales-intake` | Lead qualification | Scout provides counterparty intel for lead scoring |
 | `ops-dealops` | Deal pipeline management | Scout qualifies counterparties entering the deal pipeline |
-| `ops-meetingops` | Meeting preparation workflow | Scout's dossier is a key input to meeting prep packages |
+| `ops-meetings` | Meeting preparation workflow | Scout's dossier is a key input to meeting prep packages |
 
 ---
 
@@ -221,7 +221,7 @@ Load reference files based on profile type and urgency.
 | New investor due diligence before first meeting | counter-party-intel | ops-dealops | seed-fundraising, project-financing | pre-meeting-brief |
 | Vendor background check before procurement engagement | counter-party-intel | vendor-lifecycle | procurement evaluations, ops-dealops | vendor-negotiation |
 | Grower profile for new site prospect | counter-party-intel | ops-targetops | grower-relationship-mgr, site-development | pipeline-scorer |
-| Gemeente official profiling for permit strategy | counter-party-intel | netherlands-permitting | legal-counsel, ops-meetingops | decision-tracker |
+| Gemeente official profiling for permit strategy | counter-party-intel | netherlands-permitting | legal-counsel, ops-meetings | decision-tracker |
 | Partner due diligence for strategic engagement | counter-party-intel | ops-dealops | legal-counsel, positioning-expert | executive-comms |
 
 ## Companion Skills
@@ -231,7 +231,7 @@ Load reference files based on profile type and urgency.
 - `ops-targetops`: Identifies prospecting targets; The Scout profiles them before engagement
 - `sales-intake`: Qualifies inbound leads; The Scout provides counterparty intelligence for scoring
 - `ops-dealops`: Tracks deal pipeline; The Scout qualifies counterparties entering the pipeline
-- `ops-meetingops`: Prepares meeting packages; The Scout's dossier is a core component
+- `ops-meetings`: Prepares meeting packages; The Scout's dossier is a core component
 - `vendor-lifecycle`: Manages vendor relationships; The Scout provides initial vendor due diligence
 
 ## Reference Files

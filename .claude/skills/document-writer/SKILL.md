@@ -58,7 +58,7 @@ All structured business documents that are not covered by a specialist skill:
 | Marketing collateral (decks, one-pagers, whitepapers, case studies) | `collateral-studio` | If the primary audience is an external buyer or investor being sold to |
 | Decision records (DEC-YYYY-NNN) | `decision-tracker` | If it is a formal decision log entry with revisit triggers |
 | Presentations (slide decks) | `collateral-studio` | If the output format is slides, not a document |
-| Meeting notes (post-meeting records) | `ops-meetingops` | Post-meeting processing goes to meetingops; pre-meeting briefs stay here |
+| Meeting notes (post-meeting records) | `ops-meetings` | Post-meeting processing goes to meetingops; pre-meeting briefs stay here |
 | Weekly briefs | `ops-chiefops` / `ops-weeklyops` | Recurring operational briefs are ops territory |
 
 **Grey zone rule:** If a document combines elements from multiple categories, route to the skill that owns the primary purpose. A board paper that includes a decision recommendation stays here; the decision record is created separately by `decision-tracker` after the board decides.
@@ -853,7 +853,7 @@ reporting-period: {{YYYY-MM-DD to YYYY-MM-DD}}
 | Board paper production for Eco-Digital AG governance | document-writer | ops-chiefops | project-financing, legal-counsel | seed-fundraising |
 | Technical RFQ drafting for vendor procurement | document-writer | vendor-negotiation | dc-engineering, project-financing | procurement team |
 | Strategy memo for permitting route decisions | document-writer | netherlands-permitting | permit-drafter, constraint-engine | decision-tracker |
-| Pre-meeting briefing document production | document-writer | ops-meetingops | executive-comms, relevant domain expert | meeting participants |
+| Pre-meeting briefing document production | document-writer | ops-meetings | executive-comms, relevant domain expert | meeting participants |
 | Status report production (project and portfolio level) | document-writer | ops-chiefops | pipeline-scorer, ops-weeklyops | all stakeholders |
 
 ## Companion Skills
@@ -863,7 +863,7 @@ reporting-period: {{YYYY-MM-DD to YYYY-MM-DD}}
 - `executive-comms`: Drafts the emails that transmit documents produced by this skill to external recipients
 - `humanizer`: Strips AI writing patterns from external-facing documents before distribution
 - `vendor-negotiation`: Provides procurement context, benchmark data, and evaluation criteria for Technical RFQ production
-- `ops-meetingops`: Provides meeting context data for pre-meeting briefing document production
+- `ops-meetings`: Provides meeting context data for pre-meeting briefing document production
 - `legal-counsel`: Reviews board papers and decision documents that touch contractual commitments or legal structures
 
 ## Reference Files

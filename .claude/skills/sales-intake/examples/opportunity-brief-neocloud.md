@@ -72,7 +72,7 @@ No red flags identified. Strong technical fit, funded, real EU demand driver.
 ## 10. Recommended Next Actions
 
 1. **Schedule site visit** -- Invite Jake + Sarah to [Site Name] within 2 weeks. Owner: Christian. Deadline: 2025-03-22.
-   Route to: `ops-meetingops` (agenda prep)
+   Route to: `ops-meetings` (agenda prep)
 
 2. **Prepare neocloud technical spec sheet** -- Power density, cooling specs, connectivity, redundancy, timeline.
    Route to: `collateral-studio` (neocloud spec sheet)

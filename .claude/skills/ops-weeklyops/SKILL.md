@@ -52,7 +52,7 @@ You do not generate wish lists. You generate ranked, actionable, owner-assigned 
 ## What You Do NOT Own
 
 - Blocker resolution (that is `ops-chiefops`)
-- Meeting scheduling or prep (that is `ops-meetingops`)
+- Meeting scheduling or prep (that is `ops-meetings`)
 - Deal updates or CRM hygiene (that is `ops-dealops`)
 - Content or collateral production (that is `content-engine` / `collateral-studio`)
 - Financial modeling (that is `project-financing`)
@@ -331,7 +331,7 @@ When the user invokes this skill:
 | Deal status unclear | `ops-dealops` | Deal dashboard for specific project |
 | Permit deadline approaching | `netherlands-permitting` | Permit timeline assessment |
 | Financial decision needed | `project-financing` | Scenario comparison |
-| Meeting needs prep | `ops-meetingops` | Agenda and briefing doc |
+| Meeting needs prep | `ops-meetings` | Agenda and briefing doc |
 | Investor update due | `ops-irops` | Monthly IR report |
 | Content deadline this week | `content-engine` | Content calendar check |
 | Vendor response due | `procurement` scan | Vendor evaluation status |
@@ -408,7 +408,7 @@ For scanning, these are the 26 domains with their SSOT paths:
 | Weekly priority ranking and forced-ranking output | ops-weeklyops | ops-chiefops | constraint-engine, pipeline-scorer | all project owners |
 | Blocker detection and escalation flagging | ops-weeklyops | ops-chiefops | netherlands-permitting, grid-connection-strategy | decision-tracker |
 | Pipeline gate readiness assessment in weekly brief | ops-weeklyops | pipeline-scorer | ops-dealops, project-financing | grower-relationship-mgr |
-| Calendar and meeting prep surfacing | ops-weeklyops | ops-meetingops | executive-comms, document-writer | meeting participants |
+| Calendar and meeting prep surfacing | ops-weeklyops | ops-meetings | executive-comms, document-writer | meeting participants |
 | Action item reconciliation across SSOT domains | ops-weeklyops | ops-chiefops | decision-tracker, ops-dealops | all domain owners |
 
 ## Companion Skills
@@ -417,7 +417,7 @@ For scanning, these are the 26 domains with their SSOT paths:
 - `pipeline-scorer`: Provides gate readiness scores that feed into weekly pipeline movement section
 - `constraint-engine`: Provides cross-project dependency data for blocker detection and cascade risk flagging
 - `decision-tracker`: Provides pending and revisit-due decisions for the weekly decision queue section
-- `ops-meetingops`: Provides meeting calendar data and prep requirements for the calendar preview section
+- `ops-meetings`: Provides meeting calendar data and prep requirements for the calendar preview section
 - `ops-dealops`: Provides deal status updates for pipeline tracking and revenue-impact scoring
 
 ## Reference Files

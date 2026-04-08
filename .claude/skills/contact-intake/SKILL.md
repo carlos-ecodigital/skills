@@ -152,7 +152,7 @@ Present consolidated contacts for review before HubSpot push:
 
 | Tier | Score | Follow-up | Delegation Chain |
 |------|-------|-----------|-----------------|
-| **A** | 4.0-5.0 | 24hr | `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetingops` |
+| **A** | 4.0-5.0 | 24hr | `counter-party-intel` -> `sales-intake` -> `ops-outreachops` -> `ops-meetings` |
 | **B** | 2.5-3.9 | 48-72hr | `counter-party-intel` -> `ops-outreachops` |
 | **C** | 1.0-2.4 | 1 week | `ops-outreachops` (lightweight) -> nurture |
 | **V** | vendor | 1 week | `vendor-lifecycle` |
