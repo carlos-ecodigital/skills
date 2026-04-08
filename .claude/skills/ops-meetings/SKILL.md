@@ -1,17 +1,19 @@
 ---
-name: ops-meetingops
+name: ops-meetings
 description: >-
   Meeting lifecycle manager for Digital Energy. Owns the full meeting cycle:
-  agenda creation, pre-meeting prep, post-meeting summary, action item
-  extraction, and follow-up tracking. Integrates with Fireflies transcripts,
-  Google Calendar, and HubSpot. This skill should be used when the user asks
-  to prepare an agenda, write meeting notes, extract action items from a
-  meeting, summarize a transcript, prep for a call, create a pre-meeting
-  brief, follow up after a meeting, or review meeting load. Also use for
-  "agenda for", "meeting prep", "meeting notes", "action items from",
-  "summarize this meeting", "follow up on", "prep for call with",
-  "meeting summary", "what happened in the meeting", "Fireflies transcript",
-  or "calendar review".
+  6 meeting type patterns (Broadcast, Decision, Standup, Review, Workshop, 1:1),
+  6 recurring meeting objects, the weekly cadence (pre-reads → compilation →
+  CEO brief → meetings → summary → carry-forward), agenda creation, post-meeting
+  summary, and meeting hygiene rules. Defers external meeting prep to
+  pre-meeting-brief, transcript extraction to meeting-to-ssot, CEO artifacts
+  to carlos-ceo Weekly Meeting Brief, action item routing to delegation-engine.
+  This skill should be used when the user asks to prepare an agenda, create a
+  run-of-show, prep for a recurring meeting, manage pre-reads, generate a
+  post-meeting summary, review meeting load, or enforce meeting standards.
+  Also use for "agenda for", "meeting prep", "meeting notes", "pre-read",
+  "meeting summary", "run-of-show", "weekly cadence", "meeting format",
+  "meeting hygiene", "calendar review".
 allowed-tools:
   - Read
   - Write
@@ -26,9 +28,10 @@ allowed-tools:
   - mcp__hubspot__search_crm_objects
   - mcp__hubspot__get_crm_objects
   - mcp__clickup__*
+  - mcp__gcal__*
 ---
 
-# MEETINGOPS -- Meeting Lifecycle Manager
+# OPS-MEETINGS — Meeting Lifecycle Manager
 
 ## Personality
 
@@ -36,55 +39,107 @@ See [identity.md](identity.md), [soul.md](soul.md), [principles.md](principles.m
 
 You own the full meeting lifecycle for Digital Energy. No meeting happens without an agenda. No meeting ends without written outcomes. Your goal: make every meeting produce a clear decision or clear next step.
 
+---
+
+## Meeting Types
+
+Six reusable patterns. Every meeting at Digital Energy is one of these types. When a meeting starts drifting, anyone can name the pattern and redirect.
+
+| Type | Purpose | Duration | Template |
+|------|---------|----------|----------|
+| **Broadcast** | One-to-many. Leader speaks, team listens. Alignment and energy. | 15-30 min | `templates/meeting-pattern-broadcast.md` |
+| **Decision** | Small group makes pre-identified choices with pre-prepared options. | 30-60 min | `templates/meeting-pattern-decision.md` |
+| **Standup** | Rapid execution tracking. Done/doing/blocked. No rabbit holes. | 15 min max | `templates/meeting-pattern-standup.md` |
+| **Review** | Evaluate past performance. RED/AMBER/GREEN. Kill what's not working. | 30-90 min | `templates/meeting-pattern-review.md` |
+| **Workshop** | Deep collaborative work. Max 6 people. Output artifact required. | 60+ min | `templates/meeting-pattern-workshop.md` |
+| **1:1** | Manager + report. Report's agenda. Never skip, never cancel. | 30-60 min | `templates/meeting-pattern-one-on-one.md` |
+
+When creating a new meeting, pick a pattern and customize it. When an existing meeting drifts, name the pattern it's drifting into and redirect.
+
+---
+
+## Meeting Objects
+
+DE's recurring meetings, each tagged by type with a dedicated run-of-show template.
+
+| Meeting | Type | Cadence | Duration | Attendees | Template |
+|---------|------|---------|----------|-----------|----------|
+| **DE Weekly** | Broadcast | Mon 17:00 CET | 30 min | Full team | `templates/meeting-de-weekly.md` |
+| **Leadership Decisions** | Decision | Mon 17:45 CET | 30 min | CEO + dept heads (5-7) | `templates/meeting-leadership-decisions.md` |
+| **Procurement Decisions** | Decision | Weekly | 30-60 min | Procurement team (6) | `templates/meeting-procurement-decisions.md` |
+| **GTM Standup** | Standup | Tue/Wed | 30 min | Growth team (7-8) | `templates/meeting-gtm-standup.md` |
+| **Finance Review** | Review (async) | Weekly | — | CEO gets async summary | `templates/meeting-finance-async-summary.md` |
+| **OKR Review** | Review | Monthly 1st week | 60 min | All dept heads | — |
+
+**Supporting templates:**
+- Pre-read: `templates/meeting-pre-read-template.md`
+- Post-meeting summary: `templates/meeting-post-summary.md`
+- Hygiene rules: `templates/meeting-hygiene-rules.md`
+
+**Meeting System SOP:** `references/meeting-system-sop.md`
+
+---
+
+## Weekly Cadence
+
+DE Weekly and Leadership Decisions are paired — they run back-to-back on Monday and share common inputs (pre-reads) and outputs (post-meeting summary). This workflow connects the two meeting objects.
+
+```
+THURSDAY 17:00    Remind dept heads: pre-read due Friday 17:00
+FRIDAY 17:00      Collect pre-reads → compile package → flag missing
+SATURDAY          Package sent to carlos-ceo for CEO brief generation (WMB workflow)
+SUNDAY            Carlos reviews brief as part of WBR cycle
+SUNDAY EVENING    Pre-read package + CEO brief distributed to team
+MONDAY 17:00      DE Weekly runs (format from meeting-de-weekly.md, content from CEO brief)
+MONDAY 17:45      Leadership Decisions runs (agenda from CEO brief decision agenda)
+MONDAY 18:30      Post-meeting summary sent to team + action items routed
+```
+
+### This workflow owns:
+- Pre-read template and enforcement schedule
+- Pre-read compilation and missing-department flagging
+- Post-meeting summary generation and distribution
+- Carry-forward of incomplete items to next week
+- Absent department head protocol (pre-read still required; Yoni reads their items)
+- Sprint kickoff pattern (CEO declares a company-wide sprint — see carlos-ceo WMB workflow)
+
+### This workflow does NOT own:
+- CEO Opening Brief generation → `carlos-ceo` WMB workflow
+- Accountability Scorecard → `carlos-ceo` WMB workflow
+- Decision Agenda → `carlos-ceo` WMB workflow
+- Transcript extraction → `meeting-to-ssot`
+
+### Pre-Read Enforcement
+
+| Time | Action |
+|------|--------|
+| Thu 17:00 | Auto-reminder sent to dept heads |
+| Fri 12:00 | Warning to non-submitters: "Will be listed as MISSING" |
+| Fri 17:00 | Deadline. Missing = "No update submitted by [name]" in CEO brief |
+| Sat | AI generates CEO brief. Missing departments = RED in scorecard |
+
+**Future: Automation** — Pre-read reminders and compilation are manual for now. Automate after 3 successful weeks of consistent submission (target: W19+).
+
+---
+
 ## The Meeting Lifecycle
 
 ```
 BEFORE                    DURING              AFTER
-Calendar scan         ->  (human meets)  ->   Process notes/transcript
-Prep agenda           ->                 ->   Extract action items
-Pre-meeting brief     ->                 ->   Update HubSpot (via ops-dealops)
-(for external)                           ->   Send follow-up (via content-engine)
-                                         ->   Route action items to ClickUp
+Calendar scan         ->  (human meets)  ->   Post-meeting summary (this skill)
+Agenda creation       ->                 ->   Transcript extraction (meeting-to-ssot)
+Approval gate         ->                 ->   Decision logging (decision-tracker)
+  (external only)                        ->   Action item routing (delegation-engine)
+Pre-meeting brief     ->                 ->   Follow-up email (carlos-ceo W7 or executive-comms)
+  (pre-meeting-brief)                    ->   HubSpot updates (ops-dealops)
 ```
 
-## Recurring Meeting Cadence
-
-DE has a defined meeting rhythm (see `_shared/org/TEAMS.md` Section 6). When prepping agendas for recurring meetings, use the correct format:
-
-| Meeting | Cadence | Duration | Format | Run-of-Show |
-|---------|---------|----------|--------|-------------|
-| **DE Weekly** | Weekly (Mon 09:00) | 30 min | CEO broadcast: mission, wins, risk, priorities. Pre-reads required. | `all-hands-engine/templates/run-of-show-weekly.md` |
-| **Leadership Sync** | Weekly (Mon 09:45) | 30 min | Core team decisions + blockers. Pre-identified from written updates. | `all-hands-engine/templates/run-of-show-leadership.md` |
-| **P1 Procurement** | Weekly | 60 min MAX | Vendor decisions, CAPEX gates. No 3-hour sessions. | `all-hands-engine/templates/run-of-show-procurement.md` |
-| **GTM Standup** | Weekly (Tue/Wed) | 30 min | Outreach execution only. No strategy re-discussion. | `all-hands-engine/templates/run-of-show-gtm.md` |
-| **Finance Weekly** | Weekly | 60 min | CEO gets async 5-line summary. Joins only on escalation. | `all-hands-engine/templates/finance-async-summary.md` |
-| OKR Review | Monthly (1st Monday) | 60 min | Scorecard + Red/Yellow deep-dive + Decisions | — |
-| Sprint Planning | Weekly (Mon) | 30 min | Backlog review, week priorities | — |
-| Sprint Review | Weekly (Fri) | 30 min | Demo, retro, preview next week | — |
-| Gate Review | As needed | 60 min | G0-G5 deliverables + Go/No-Go | — |
-
-**Meeting System SOP:** See `all-hands-engine/references/meeting-system-sop.md` for the full operating procedure.
-**Meeting Hygiene Rules:** See `all-hands-engine/templates/meeting-hygiene-rules.md` — applies to ALL meetings.
-**Pre-Read System:** Department pre-reads due Friday 17:00 CET. Template at `all-hands-engine/templates/pre-read-template.md`.
-
-For gate reviews, load `_shared/org/OKR-PROJECT-MANAGEMENT.md` for gate deliverables checklist.
-
-### Calendar Integration (MCP)
-
-When Google Workspace MCP is connected, pull calendar data directly:
-- **Upcoming meetings**: List calendar events for the next 24-48 hours.
-- **Attendee lookup**: Pull attendee lists to auto-populate pre-meeting briefs.
-- **External detection**: Identify external attendees (non-DE domains) to trigger full pre-meeting brief workflow.
-- **Fallback**: If Calendar MCP unavailable, ask user what meetings are coming up.
-
-## Before the Meeting
-
-### Agenda Template
+### Agenda Creation
 
 When asked to prep an agenda:
 
 ```markdown
-# [Meeting Title] -- [Date, Time]
+# [Meeting Title] — [Date, Time]
 **Attendees:** [names]
 **Duration:** [X] min
 **Goal:** [One sentence: what does success look like for this meeting?]
@@ -96,7 +151,6 @@ When asked to prep an agenda:
 | # | Topic | Owner | Time | Type |
 |---|-------|-------|------|------|
 | 1 | [Topic] | [Name] | [X min] | Decision / Update / Input needed |
-| 2 | ... | ... | ... | ... |
 
 ## Pre-read
 - [Document or data to review before meeting, if any]
@@ -106,142 +160,74 @@ When asked to prep an agenda:
 - Next meeting date/time
 ```
 
-### Pre-Meeting Brief (External Meetings)
+### Approval Gate (External Meetings)
 
-For meetings with external parties (investors, partners, neocloud buyers, growers):
+Agendas for external meetings are DRAFT until the meeting owner approves. Never auto-send agendas to external attendees. Flow:
+1. Generate agenda draft
+2. Present to meeting owner for review
+3. Owner approves → share with external attendees
+4. Owner edits → incorporate changes → re-present
 
-```markdown
-# Pre-Meeting Brief: [Person/Company] -- [Date]
+### Calendar Integration (MCP)
 
-## Who
-| Name | Role | Company | Relationship | Last Interaction |
-|------|------|---------|-------------|-----------------|
-| [Name] | [Title] | [Company] | [How we know them] | [Date + summary] |
+When Google Calendar MCP is connected:
+- **Upcoming meetings**: List calendar events for the next 24-48 hours
+- **Attendee lookup**: Pull attendee lists to auto-populate briefs
+- **External detection**: Identify external attendees (non-DE domains) to trigger pre-meeting brief
+- **Fallback**: If Calendar MCP unavailable, ask user what meetings are coming up
 
-## Context
-- **Why this meeting:** [1 sentence]
-- **Their likely agenda:** [What they want]
-- **Our agenda:** [What we want]
+---
 
-## Talking Points
-1. [Point + supporting data from de-brand-bible proof points]
-2. [Point]
+## Skill Boundaries (Defers To)
 
-## Watch-outs
-- [Sensitive topics or risks]
+| Function | Defers To | Why |
+|----------|-----------|-----|
+| External meeting prep | `pre-meeting-brief` | Richer template, persona profiling, relationship health |
+| Transcript extraction | `meeting-to-ssot` | 6-step pipeline, SSOT routing, domain classification |
+| CEO brief + scorecard + decision agenda | `carlos-ceo` WMB workflow | CEO-only artifacts |
+| Action item routing | `delegation-engine` | Single company-wide routing point |
+| Decision logging | `decision-tracker` | Single format (DEC-YYYY-NNN) |
+| CEO follow-up emails | `carlos-ceo` W7 | CEO voice |
+| Team follow-up emails | `executive-comms` | Team member voice |
 
-## Ideal Outcome
-- [Specific: "Verbal agreement to site visit" not "Good conversation"]
-```
-
-**For investor meetings:** Also pull data from `seed-fundraising` references and `_shared/investor-landscape.md`.
-
-**For neocloud buyer meetings:** Also pull buyer persona from `de-brand-bible/references/buyer-personas.md` (neocloud segment).
-
-**For grower meetings:** Also pull from `de-brand-bible` (grower segment) and `netherlands-permitting` if permit topics expected.
-
-## After the Meeting
-
-### Processing Fireflies Transcripts
-
-When processing a meeting:
-
-1. **If Fireflies MCP is connected**: Use `fireflies_search_transcripts` to find the meeting by date or participant. Then use `fireflies_get_transcript_details` for the full transcript. Use `fireflies_generate_summary` for an initial summary, then apply the DE-specific template below.
-2. **If transcript is pasted directly**: Read the full transcript as provided.
-3. **Extract using this template:**
-
-```markdown
-# Meeting Summary: [Title] -- [Date]
-**Attendees:** [names]
-**Duration:** [actual]
-
-## Decisions Made
-1. [Decision]: [Rationale if given]
-
-## Action Items
-| # | Action | Owner | Deadline | Context |
-|---|--------|-------|----------|---------|
-| 1 | [Specific action] | [Name] | [Date] | [Why this matters] |
-
-## Key Information Learned
-- [Fact or insight that should be recorded]
-- [New information about the contact/company]
-
-## Quotes Worth Noting
-- "[Exact quote]" -- [Speaker] (re: [topic])
-
-## Sentiment / Relationship Status
-- [How did the meeting go? Warm/neutral/cool? Engaged/distracted?]
-
-## Next Steps
-- [Next meeting? Follow-up materials? Intro requested?]
-
-## HubSpot Updates Needed
-- Contact: [updates to contact properties or notes]
-- Deal: [stage change, next step update]
-```
-
-### Follow-Up Protocol
-
-After extracting meeting summary:
-
-1. **Internal action items** -> If ClickUp MCP connected, offer to create tasks directly. Otherwise, list for user to add.
-2. **HubSpot updates** -> If HubSpot MCP connected, use `manage_crm_objects` to update contact notes and deal stages (confirm with user first). Otherwise, flag for `ops-dealops`.
-3. **Follow-up email** -> If Gmail MCP connected, offer to draft and stage the email (do NOT send without explicit user approval). Otherwise, draft via `content-engine` for manual sending.
-4. **Materials promised** -> List what needs to be sent and by when.
-5. **Next meeting** -> If Calendar MCP connected, offer to check availability. Otherwise, suggest scheduling.
-
-### Follow-Up Email Template
-
-```
-Subject: [Specific to what was discussed, not "Follow-up from our meeting"]
-
-Hi [Name],
-
-[1 sentence referencing a specific point from the conversation -- shows you listened]
-
-As discussed, here's [what you promised: deck, one-pager, data, intro]:
-- [Item with link or attachment note]
-
-[1 sentence on next step: "I'll send the site analysis by Friday" or "Would Thursday work for a follow-up?"]
-
-Best,
-[Founder name]
-```
-
-**Before sending any follow-up email:** Apply the 3-pass SOP from `carlos-voice.md`:
-1. Draft the substance
-2. Run `/humanizer` to catch AI patterns
-3. Apply carlos-voice.md rules + red flags checklist
+---
 
 ## Meeting Types and How to Handle Each
 
 | Type | Agenda Style | Brief Needed? | Summary Depth | Follow-up |
 |------|-------------|---------------|---------------|-----------|
 | Founder sync | Lean (3 bullets) | No | Action items only | ClickUp update |
-| Team standup | Async format OK | No | Blockers + items | Slack/ClickUp |
-| Investor meeting | Full agenda | Full investor brief | Comprehensive | Email + HubSpot |
-| Neocloud buyer | Full agenda | Buyer brief | Comprehensive | Email + HubSpot + materials |
-| Grower/partner | Full agenda | Partner brief | Comprehensive | Email + HubSpot |
+| Team standup | Async format OK | No | Blockers + items | ClickUp |
+| Investor meeting | Full agenda | Full investor brief (via `pre-meeting-brief`) | Comprehensive (via `meeting-to-ssot`) | Email + HubSpot |
+| Neocloud buyer | Full agenda | Buyer brief (via `pre-meeting-brief`) | Comprehensive (via `meeting-to-ssot`) | Email + HubSpot + materials |
+| Grower/partner | Full agenda | Partner brief (via `pre-meeting-brief`) | Comprehensive (via `meeting-to-ssot`) | Email + HubSpot |
 | Advisor call | Topic-focused | Light | Key advice + actions | Thank-you + actions |
 | Board meeting | Formal | Board pack | Formal minutes | Board minutes distribution |
 
+---
+
 ## Meeting Hygiene Rules
 
-- No meeting without a stated goal ("The meeting is successful if we leave with X")
+See `templates/meeting-hygiene-rules.md` for the full set. Summary:
+
+- No meeting without a stated goal
 - Default duration: 25 min (not 30), 50 min (not 60)
-- No meeting that could be a 3-sentence Slack message
-- Recurring meetings get a monthly usefulness check: "Is this still earning its time slot?"
-- External meetings always get a pre-meeting brief
-- Action items from meetings must have owners and deadlines before the meeting ends
+- No meeting that could be a 3-sentence message
+- Recurring meetings get a monthly usefulness check
+- External meetings always get a pre-meeting brief (via `pre-meeting-brief`)
+- Action items must have owners and deadlines before the meeting ends
+- Camera ON for <20 people, mute when not speaking, join 1 min early
+
+---
 
 ## Integration Points
 
-| When | Trigger | Invoke |
-|------|---------|--------|
-| External meeting on calendar | 24h before | Generate pre-meeting brief |
-| Meeting completed | Transcript available | Generate summary + action items |
-| Follow-up email needed | After summary | `content-engine` for email draft |
+| When | Trigger | Route To |
+|------|---------|----------|
+| External meeting on calendar | 24h before | `pre-meeting-brief` for context brief |
+| Meeting completed | Transcript available | `meeting-to-ssot` for extraction |
+| CEO follow-up email needed | After summary | `carlos-ceo` W7 for drafting |
+| Team follow-up email needed | After summary | `executive-comms` for drafting |
 | HubSpot needs updating | After summary | `ops-dealops` with update instructions |
-| Investor meeting completed | After summary | `ops-irops` for IR log entry |
-| Decision made in meeting | During summary extraction | `ops-chiefops` decision log format |
+| Decision made in meeting | During extraction | `decision-tracker` for DEC-YYYY-NNN record |
+| Action items extracted | During extraction | `delegation-engine` for routing to ClickUp |
