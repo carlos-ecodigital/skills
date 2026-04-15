@@ -21,7 +21,7 @@ allowed-tools:
 
 **The single production line for all branded Digital Energy .docx output.**
 
-Content skills produce the words. Document Factory produces the file.
+Content skills produce the words. Document Factory produces the file — including cover pages, headers, and footers. Any skill that generates a `.docx` with a cover page delegates to Document Factory; no skill renders its own.
 
 ```
 content skill → structured content (markdown / sections / clauses)
@@ -33,7 +33,7 @@ content skill → structured content (markdown / sections / clauses)
 
 | Skill | Produces | Factory Profile |
 |-------|----------|-----------------|
-| `loi-generator` | LOI/NCNDA clauses | `agreement` (has its own generate_loi.py with DE branding integrated) |
+| `legal-assistant` (colocation stream) | LOI/NCNDA clauses | `agreement` (has its own `colocation/generate_loi.py` with DE branding integrated) |
 | `investor-memo-writer` | Investment memoranda, DD responses | `investor_memo` or `seed_memo` |
 | `seed-fundraising` | Pitch content, fundraising materials | `seed_memo` |
 | `document-writer` | Board papers, exec summaries, memos | `exec_summary` or markdown mode |
@@ -47,19 +47,55 @@ content skill → structured content (markdown / sections / clauses)
 | Profile | Use | Cover Page | Classification |
 |---------|-----|------------|----------------|
 | `letter` | Formal correspondence (DIN 5008) | No | None |
-| `agreement` | LOI, NDA, HoT, MSA cover page | Yes | Confidential |
+| `agreement` | LOI, NDA, HoT, MSA, SPA cover page | Yes | Confidential |
 | `seed_memo` | Seed fundraising memo (8 sections) | Yes | Confidential |
 | `investor_memo` | Institutional IM (10 sections) | Yes | Confidential |
 | `exec_summary` | 2-page standalone summary | No | None |
+
+## Cover Page System
+
+Agreement cover pages follow an IB-standard hierarchy:
+1. **Agreement type** (28pt) — e.g. "Letter of Intent", "Master Service Agreement"
+2. **Subject** (14pt) — deal description, e.g. "for AI Infrastructure Distribution"
+3. **Date** — document-level, below title block
+4. **Party blocks** — legal name, address, registration (binding only)
+5. **Metadata** — reference, version, classification
+
+### Formality levels
+- **Non-binding** (LOI, NDA, HoT, MoU): party labels "Between: / And:", no registration numbers
+- **Binding** (MSA, SPA, JVA, SHA): party labels "By and between: / And:", registration numbers shown
+
+### Entity selection
+- `--entity ag` → Digital Energy Group AG (default)
+- `--entity nl` → Digital Energy Netherlands B.V.
 
 ## Quick Start
 
 ```bash
 cd /path/to/skills/.claude/skills/document-factory
 
-# From a profile
+# Non-binding LOI cover
+python3 generate.py --profile agreement \
+  --agreement-type "Letter of Intent" \
+  --subject "for AI Infrastructure Distribution" \
+  --client "FrontierOne Ltd"
+
+# Binding MSA cover (auto-detects binding from type)
+python3 generate.py --profile agreement \
+  --agreement-type "Master Service Agreement" \
+  --subject "for Hosting Ethiopia Data Center" \
+  --client "Acme Corp" \
+  --client-address "123 Main St, Amsterdam" \
+  --client-reg-type KvK --client-reg-number 12345678
+
+# With NL entity
+python3 generate.py --profile agreement \
+  --agreement-type "Letter of Intent" \
+  --subject "for AI Colocation Services" \
+  --client "Partner BV" --entity nl
+
+# Other profiles (unchanged)
 python3 generate.py --profile letter
-python3 generate.py --profile agreement --title "Colocation Agreement" --client "Younggrow BV"
 python3 generate.py --profile seed_memo --client "Acme Fund"
 python3 generate.py --profile investor_memo --client "Infrastructure Partners"
 python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
@@ -77,8 +113,15 @@ python3 generate.py --profile seed_memo --client "Fund X" --dotx
 | Flag | Description | Default |
 |------|-------------|---------|
 | `--profile` | Document profile | Required (unless --md) |
-| `--title` | Document title | Auto per profile |
+| `--agreement-type` | Agreement name (e.g. "Letter of Intent") | Placeholder |
+| `--subject` | Deal description sub-header | None |
+| `--title` | Document title (legacy; maps to --agreement-type for agreement) | Auto per profile |
 | `--client` | Client/counterparty name | Placeholder |
+| `--client-address` | Counterparty address | Placeholder |
+| `--client-reg-type` | Registration type (KvK, CHE, EIN) | None |
+| `--client-reg-number` | Registration number | None |
+| `--entity` | DE contracting entity: ag, nl | ag |
+| `--formality` | Override: binding, non_binding | Auto-detected |
 | `--date` | Date (YYYY-MM-DD) | Today |
 | `--version` | Version number | 1 |
 | `--output` | Output file path | Auto-named in output/ |
@@ -106,10 +149,35 @@ Edit `ENTITY` dict at top of `generate.py`.
 .dotx Word templates available in Google Drive:
 `NEW_Marketing/DE_Marketing/DE_Brand_Assets/03_Templates/Document_Templates/`
 
+## Utilities
+
+| Script | Purpose |
+|--------|---------|
+| `generate.py` | Generate branded .docx for all profiles (primary entry point) |
+| `docx_to_pdf.py` | Standalone CLI: convert any .docx → .pdf via Microsoft Word |
+| `accept_changes.py` | Accept all tracked changes in a .docx via Word |
+
+```bash
+# PDF conversion (any .docx)
+python3 docx_to_pdf.py path/to/document.docx
+python3 docx_to_pdf.py doc.docx -o out.pdf
+
+# Accept tracked changes
+python3 accept_changes.py redlined.docx
+python3 accept_changes.py redlined.docx -o clean.docx
+
+# Generate + immediately produce PDF
+python3 generate.py --profile agreement --agreement-type "Letter of Intent" --client "FrontierOne" --pdf
+```
+
+**Word-only:** Both utilities drive Microsoft Word (AppleScript on macOS, COM on Windows). No LibreOffice fallback — Word's rendering of .docx is canonical; LibreOffice drift was deemed worse than a clean error.
+
 ## Requirements
 
-- Python 3.9+ with `python-docx`
-- Inter font (optional -- falls back to Arial)
+- Python 3.9+ with `python-docx`, `docx2pdf` (for `--pdf` and `docx_to_pdf.py`), `pyyaml` (for LOI generator)
+- **Microsoft Word** (macOS: Office 365; Windows: Office) — required for PDF conversion and tracked-changes acceptance
+- On macOS, AppleScript automation must be permitted: System Settings → Privacy & Security → Automation
+- Inter font (optional — falls back to Arial)
 
 ## Technical Note
 

@@ -18,7 +18,9 @@ import argparse
 import os
 import sys
 import re
+from dataclasses import dataclass
 from datetime import datetime, date
+from typing import Optional, List
 
 try:
     from docx import Document
@@ -32,20 +34,57 @@ except ImportError:
 # CONFIG
 # ---------------------------------------------------------------------------
 
-ENTITY = {
-    "legal_name": "Digital Energy Group AG",
-    "address": "Baarerstrasse 43, 6300 Zug, Switzerland",
-    "registration": "CHE-408.639.320",
-    "website": "digital-energy.group",
-    "return_address": "Digital Energy Group AG  \u2022  Baarerstrasse 43  \u2022  6300 Zug",
+DE_WEBSITE = "digital-energy.group"
+
+ENTITY_FOOTERS = {
+    "ag": {
+        "legal_name": "Digital Energy Group AG",
+        "address": "Baarerstrasse 43, 6300 Zug, Switzerland",
+        "registration": "CHE-408.639.320",
+        "website": DE_WEBSITE,
+        "return_address": "Digital Energy Group AG  \u2022  Baarerstrasse 43  \u2022  6300 Zug",
+    },
+    "nl": {
+        "legal_name": "Digital Energy Netherlands B.V.",
+        "address": "Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands",
+        "registration": "KvK 98580086",
+        "website": DE_WEBSITE,
+        "return_address": "Digital Energy Netherlands B.V.  \u2022  Mijnsherenweg 33 A  \u2022  1433 AP Kudelstaart",
+    },
 }
+ENTITY = ENTITY_FOOTERS["ag"]  # Backward-compat default
+
+
+def _footer_text(entity_key="ag"):
+    e = ENTITY_FOOTERS.get(entity_key, ENTITY_FOOTERS["ag"])
+    return "  |  ".join([e["legal_name"], e["address"], e["registration"], e["website"]])
 
 FONT = "Inter"
 FONT_FALLBACK = "Arial"
-COBALT = RGBColor(0x00, 0x34, 0xAF)
-DARK = RGBColor(0x14, 0x29, 0x45)
-BODY_COLOR = RGBColor(0x1E, 0x29, 0x3B)
-SLATE = RGBColor(0x64, 0x74, 0x8B)
+
+# DE Approved Palette (2026-03-31) — see memory/project_de_brand_palette.md
+# Intended use by domain:
+#   COBALT  → primary CTA / headers / links (default accent)
+#   VOLT    → success / growth accents (finance reports, KPI tables)
+#   NEON    → technology / AI themes (product, pitch)
+#   MINERAL → compute / premium (investor memos)
+#   FORGE   → heat / construction (permits, engineering)
+#   SAFFRON → value / returns (IRR tables, unit economics)
+#   PATINA  → sustainability (ESG, emissions)
+#   SLATE   → secondary / captions (default body secondary)
+# Constants are exported for import by any skill that needs them.
+COBALT = RGBColor(0x00, 0x34, 0xAF)      # Primary CTA, headers
+VOLT = RGBColor(0x63, 0xE2, 0x34)        # Success, growth
+NEON = RGBColor(0x16, 0xD3, 0xF2)        # Info, technology
+MINERAL = RGBColor(0x58, 0x1C, 0x87)     # AI/compute, premium
+FORGE = RGBColor(0xC0, 0x56, 0x21)       # Heat, construction
+SAFFRON = RGBColor(0xE5, 0xB2, 0x1D)     # Value, returns
+PATINA = RGBColor(0x0F, 0x76, 0x6E)      # Sustainability
+SLATE = RGBColor(0x64, 0x74, 0x8B)       # Slate 500 — captions, secondary
+
+# Neutral ramp (Slate)
+SLATE_800 = RGBColor(0x1E, 0x29, 0x3B)   # Body text
+SLATE_900 = RGBColor(0x0F, 0x17, 0x2A)   # Headings
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -63,18 +102,114 @@ PROFILE_CODES = {
     "exec_summary": "Exec_Summary",
 }
 
-FOOTER_TEXT = "  |  ".join([
-    ENTITY["legal_name"],
-    ENTITY["address"],
-    ENTITY["registration"],
-    ENTITY["website"],
-])
 
 
-def auto_name(profile, client=None, version=1, dt=None):
+# ---------------------------------------------------------------------------
+# PARTY DATA MODEL + ENTITY SYSTEM
+# ---------------------------------------------------------------------------
+
+@dataclass
+class Party:
+    legal_name: str
+    address: str
+    registration_type: Optional[str] = None    # "KvK", "CHE", "EIN"
+    registration_number: Optional[str] = None
+    parent: Optional[str] = None               # Parent company name + reg
+
+
+DE_ENTITIES = {
+    "ag": Party(
+        legal_name="Digital Energy Group AG",
+        address="Baarerstrasse 43, 6300 Zug, Switzerland",
+        registration_type="CHE",
+        registration_number="CHE-408.639.320",
+    ),
+    "nl": Party(
+        legal_name="Digital Energy Netherlands B.V.",
+        address="Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands",
+        registration_type="KvK",
+        registration_number="98580086",
+        parent="Digital Energy Group AG (CHE-408.639.320)",
+    ),
+}
+
+
+AGREEMENT_FORMALITY = {
+    # Non-binding: name + address. Labels: "Between:" / "And:"
+    "Letter of Intent": "non_binding",
+    "Letter of Intent and NCNDA": "non_binding",
+    "LOI": "non_binding",
+    "NCNDA": "non_binding",
+    "NDA": "non_binding",
+    "HoT": "non_binding",
+    "Heads of Terms": "non_binding",
+    "MoU": "non_binding",
+    "Term Sheet": "non_binding",
+    # Binding: name + address + registration. Labels: "By and between:" / "And:"
+    "Master Service Agreement": "binding",
+    "MSA": "binding",
+    "SPA": "binding",
+    "Sales and Purchase Agreement": "binding",
+    "JVA": "binding",
+    "Joint Venture Agreement": "binding",
+    "SHA": "binding",
+    "Shareholders Agreement": "binding",
+    "License Agreement": "binding",
+    "Services Agreement": "binding",
+    "Colocation Agreement": "binding",
+}
+
+
+_TYPE_ABBREVS = {
+    "Letter of Intent": "LOI",
+    "Letter of Intent and NCNDA": "LOI_NCNDA",
+    "NCNDA": "NCNDA",
+    "NDA": "NDA",
+    "Heads of Terms": "HoT",
+    "HoT": "HoT",
+    "MoU": "MoU",
+    "Term Sheet": "TS",
+    "Master Service Agreement": "MSA",
+    "MSA": "MSA",
+    "SPA": "SPA",
+    "Sales and Purchase Agreement": "SPA",
+    "JVA": "JVA",
+    "Joint Venture Agreement": "JVA",
+    "SHA": "SHA",
+    "Shareholders Agreement": "SHA",
+    "License Agreement": "License",
+    "Services Agreement": "Services",
+    "Colocation Agreement": "Colo",
+}
+
+
+def _type_code(agreement_type):
+    if not agreement_type:
+        return None
+    if agreement_type in _TYPE_ABBREVS:
+        return _TYPE_ABBREVS[agreement_type]
+    # Fallback: alphanumeric with underscores, word-boundary truncation at 20
+    cleaned = re.sub(r"[^A-Za-z0-9]+", "_", agreement_type).strip("_")
+    if not cleaned:
+        return None
+    max_len = 25
+    if len(cleaned) <= max_len:
+        return cleaned
+    # Find the last underscore at-or-before max_len; if none, hard-trim at 20
+    cut = cleaned.rfind("_", 0, max_len + 1)
+    if cut <= 0:
+        return cleaned[:20]
+    return cleaned[:cut]
+
+
+def auto_name(profile, client=None, version=1, dt=None, agreement_type=None):
     if dt is None:
         dt = date.today()
-    parts = [dt.strftime("%Y%m%d"), "DE", PROFILE_CODES.get(profile, profile)]
+    if profile == "agreement" and agreement_type:
+        type_part = _type_code(agreement_type) or PROFILE_CODES["agreement"]
+    else:
+        type_part = PROFILE_CODES.get(profile, profile)
+    parts = [dt.strftime("%Y%m%d"), "DE", type_part]
     if client:
         parts.append(client.replace(" ", "_")[:30])
     parts.append(f"v{version}")
@@ -85,7 +220,7 @@ def auto_name(profile, client=None, version=1, dt=None):
 # BUILDING BLOCKS (no OxmlElement, no raw XML)
 # ---------------------------------------------------------------------------
 
-def _run(para, text, size=Pt(11), color=BODY_COLOR, bold=False, italic=False, font=FONT):
+def _run(para, text, size=Pt(11), color=SLATE_800, bold=False, italic=False, font=FONT):
     """Add a styled run."""
     r = para.add_run(text)
     r.font.name = font
@@ -134,60 +269,163 @@ def setup_cont_header(section, title=""):
         r.font.color.rgb = SLATE
 
 
-def setup_footer(footer, classification=None):
-    """Footer: entity details left, page number right."""
+def setup_footer(footer, classification=None, entity="ag"):
+    """Footer: entity details left, page number right.
+
+    Classification is intentionally NOT prefixed into the footer — it appears
+    once on the cover page's metadata block. Repeating "Confidential" on every
+    page footer is redundant noise. The `classification` arg is retained for
+    signature compatibility but ignored here.
+    """
     p = footer.paragraphs[0]
     p.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-    prefix = f"{classification}    " if classification else ""
-    r = p.add_run(prefix + FOOTER_TEXT)
+    r = p.add_run(_footer_text(entity))
     r.font.size = Pt(8)
     r.font.name = FONT
     r.font.color.rgb = SLATE
 
 
-def setup_first_footer(section, classification=None):
+def setup_first_footer(section, classification=None, entity="ag"):
     f = section.first_page_footer
     f.is_linked_to_previous = False
-    setup_footer(f, classification)
+    setup_footer(f, classification, entity)
 
 
-def setup_cont_footer(section, classification=None):
+def setup_cont_footer(section, classification=None, entity="ag"):
     f = section.footer
     f.is_linked_to_previous = False
-    setup_footer(f, classification)
+    setup_footer(f, classification, entity)
 
 
-def add_cover(doc, title, subtitle=None, metadata=None):
-    """Clean white cover page."""
-    # Push title down
+def _cover_title(agreement_type):
+    """Derive the concise cover-page title from the full agreement type.
+
+    Compound agreement names (e.g. "Letter of Intent and Non-Circumvention
+    Non-Disclosure Agreement") are shortened to the primary type on the cover.
+    The full legal name continues to appear in the body/recitals.
+
+    Examples:
+        "Letter of Intent and Non-Circumvention Non-Disclosure Agreement" -> "Letter of Intent"
+        "Letter of Intent and NCNDA" -> "Letter of Intent"
+        "Master Service Agreement" -> "Master Service Agreement"
+    """
+    if not agreement_type:
+        return agreement_type
+    # Split on " and " — primary type is the first segment
+    primary = agreement_type.split(" and ")[0].strip()
+    return primary or agreement_type
+
+
+def add_cover(doc, agreement_type, subject=None, date_str=None,
+              parties=None, party_labels=None, formality="non_binding",
+              reference=None, version=None, classification="Confidential",
+              cover_title=None):
+    """IB-standard cover page with structured hierarchy.
+
+    Rendering order:
+      1. Agreement type (28pt bold) — e.g. "Letter of Intent"
+         (auto-shortened from compound names; override via cover_title)
+      2. Subject / deal description (14pt slate) — e.g. "for AI Infrastructure Distribution"
+      3. Date (11pt, document-level)
+      4. Party blocks — legal name, address, registration (binding only)
+      5. Metadata — reference, version, classification
+    """
+    # Push title down from logo
     spacer = doc.add_paragraph()
-    spacer.paragraph_format.space_before = Pt(160)
+    spacer.paragraph_format.space_before = Pt(140)
     spacer.paragraph_format.space_after = Pt(0)
 
-    # Title
+    # 1. Agreement type
     tp = doc.add_paragraph()
     tp.paragraph_format.space_before = Pt(8)
     tp.paragraph_format.space_after = Pt(4)
-    _run(tp, title, size=Pt(28), color=DARK, bold=True)
+    displayed_title = cover_title if cover_title else _cover_title(agreement_type)
+    _run(tp, displayed_title, size=Pt(28), color=SLATE_900, bold=True)
 
-    # Subtitle
-    if subtitle:
+    # 2. Subject / deal description
+    if subject:
         sp = doc.add_paragraph()
-        sp.paragraph_format.space_before = Pt(0)
+        sp.paragraph_format.space_before = Pt(2)
         sp.paragraph_format.space_after = Pt(0)
-        _run(sp, subtitle, size=Pt(14), color=SLATE)
+        _run(sp, subject, size=Pt(14), color=SLATE)
 
-    # Metadata
-    if metadata:
+    # 3. Date (document-level, below title block)
+    if date_str:
+        dp = doc.add_paragraph()
+        dp.paragraph_format.space_before = Pt(16)
+        dp.paragraph_format.space_after = Pt(0)
+        _run(dp, date_str, size=Pt(11), color=SLATE_900)
+
+    # 4. Party blocks
+    if parties:
+        # Determine labels
+        if party_labels is None:
+            if formality == "binding":
+                party_labels = ["By and between:"] + ["And:"] * (len(parties) - 1)
+            else:
+                party_labels = ["Between:"] + ["And:"] * (len(parties) - 1)
+        # Pad labels if fewer than parties
+        while len(party_labels) < len(parties):
+            party_labels.append("And:")
+
+        ps = doc.add_paragraph()
+        ps.paragraph_format.space_before = Pt(40)
+        ps.paragraph_format.space_after = Pt(0)
+
+        for i, party in enumerate(parties):
+            # Party label
+            lp = doc.add_paragraph()
+            lp.paragraph_format.space_before = Pt(12) if i > 0 else Pt(0)
+            lp.paragraph_format.space_after = Pt(2)
+            _run(lp, party_labels[i], size=Pt(10), color=SLATE)
+
+            # Legal name
+            np = doc.add_paragraph()
+            np.paragraph_format.space_before = Pt(0)
+            np.paragraph_format.space_after = Pt(0)
+            _run(np, party.legal_name, size=Pt(11), color=SLATE_900, bold=True)
+
+            # Address (skip empty — prevents blank paragraph for investor-style covers)
+            if party.address and party.address.strip():
+                ap = doc.add_paragraph()
+                ap.paragraph_format.space_before = Pt(0)
+                ap.paragraph_format.space_after = Pt(0)
+                _run(ap, party.address, size=Pt(10), color=SLATE)
+
+            # Registration (binding only)
+            if formality == "binding" and party.registration_type and party.registration_number:
+                rp = doc.add_paragraph()
+                rp.paragraph_format.space_before = Pt(0)
+                rp.paragraph_format.space_after = Pt(0)
+                _run(rp, f"{party.registration_type}: ", size=Pt(10), color=SLATE, bold=True)
+                _run(rp, party.registration_number, size=Pt(10), color=SLATE_900)
+
+            # Parent company
+            if party.parent:
+                pp = doc.add_paragraph()
+                pp.paragraph_format.space_before = Pt(0)
+                pp.paragraph_format.space_after = Pt(0)
+                _run(pp, f"a subsidiary of {party.parent}", size=Pt(9), color=SLATE, italic=True)
+
+    # 5. Metadata
+    meta_items = []
+    if reference:
+        meta_items.append(("Reference", reference))
+    if version is not None:
+        meta_items.append(("Version", f"v{version}"))
+    if classification:
+        meta_items.append(("Classification", classification))
+
+    if meta_items:
         ms = doc.add_paragraph()
-        ms.paragraph_format.space_before = Pt(80)
+        ms.paragraph_format.space_before = Pt(40)
         ms.paragraph_format.space_after = Pt(0)
-        for key, val in metadata.items():
+        for key, val in meta_items:
             mp = doc.add_paragraph()
             mp.paragraph_format.space_before = Pt(2)
             mp.paragraph_format.space_after = Pt(2)
             _run(mp, f"{key}:  ", size=Pt(10), color=SLATE, bold=True)
-            _run(mp, str(val), size=Pt(10), color=DARK)
+            _run(mp, str(val), size=Pt(10), color=SLATE_900)
 
     doc.add_page_break()
 
@@ -199,7 +437,7 @@ def add_section(doc, title, guidance, level=2):
     hp.paragraph_format.space_before = Pt(14) if level <= 2 else Pt(8)
     hp.paragraph_format.space_after = Pt(6)
     hp.paragraph_format.keep_with_next = True
-    _run(hp, title, size=sizes.get(level, Pt(12)), color=DARK, bold=True)
+    _run(hp, title, size=sizes.get(level, Pt(12)), color=SLATE_900, bold=True)
 
     gp = doc.add_paragraph()
     gp.paragraph_format.space_before = Pt(0)
@@ -218,25 +456,26 @@ def add_table(doc, headers, rows):
         for j, val in enumerate(row):
             cell = tbl.cell(i + 1, j)
             cell.text = ""
-            _run(cell.paragraphs[0], str(val), size=Pt(9), color=BODY_COLOR)
+            _run(cell.paragraphs[0], str(val), size=Pt(9), color=SLATE_800)
 
 
 # ---------------------------------------------------------------------------
 # PROFILES
 # ---------------------------------------------------------------------------
 
-def profile_letter(title="", date_str="", **kw):
+def profile_letter(title="", date_str="", entity="ag", **kw):
+    ent = ENTITY_FOOTERS.get(entity, ENTITY_FOOTERS["ag"])
     doc = new_doc(diff_first=True)
     setup_first_page_header(doc.sections[0])
     setup_cont_header(doc.sections[0], title=title or "Letter")
-    setup_first_footer(doc.sections[0])
-    setup_cont_footer(doc.sections[0])
+    setup_first_footer(doc.sections[0], entity=entity)
+    setup_cont_footer(doc.sections[0], entity=entity)
 
     # Return address
     rp = doc.add_paragraph()
     rp.paragraph_format.space_before = Pt(24)
     rp.paragraph_format.space_after = Pt(2)
-    r = _run(rp, ENTITY["return_address"], size=Pt(7), color=SLATE)
+    r = _run(rp, ent["return_address"], size=Pt(7), color=SLATE)
     r.underline = True
 
     # Recipient
@@ -257,7 +496,7 @@ def profile_letter(title="", date_str="", **kw):
     sp = doc.add_paragraph()
     sp.paragraph_format.space_before = Pt(16)
     sp.paragraph_format.space_after = Pt(12)
-    _run(sp, "[Subject Line]", size=Pt(11), color=DARK, bold=True)
+    _run(sp, "[Subject Line]", size=Pt(11), color=SLATE_900, bold=True)
 
     # Salutation + body
     _run(doc.add_paragraph(), "Dear [Mr./Ms. Last Name],", size=Pt(11))
@@ -275,28 +514,49 @@ def profile_letter(title="", date_str="", **kw):
     sig.paragraph_format.space_before = Pt(36)
     _run(sig, "[Name]", size=Pt(11), bold=True)
     _run(doc.add_paragraph(), "[Title]", size=Pt(11), color=SLATE)
-    _run(doc.add_paragraph(), ENTITY["legal_name"], size=Pt(11), color=SLATE)
+    _run(doc.add_paragraph(), ent["legal_name"], size=Pt(11), color=SLATE)
 
     return doc
 
 
-def profile_agreement(title="[Agreement Title]", client="[Counterparty]",
-                      date_str="", version=1, **kw):
+def profile_agreement(agreement_type="[Agreement Type]", subject=None,
+                      client="[Counterparty]", client_address=None,
+                      client_reg_type=None, client_reg_number=None,
+                      date_str="", version=1, formality=None,
+                      entity="ag", title=None, cover_title=None, reference=None, **kw):
+    # Backward compat: --title maps to agreement_type
+    if title and agreement_type == "[Agreement Type]":
+        agreement_type = title
+
     doc = new_doc(diff_first=True)
     setup_first_page_header(doc.sections[0])
-    setup_cont_header(doc.sections[0], title=title)
-    setup_first_footer(doc.sections[0], classification="Confidential")
-    setup_cont_footer(doc.sections[0], classification="Confidential")
+    setup_cont_header(doc.sections[0], title=_cover_title(agreement_type))
+    setup_first_footer(doc.sections[0], classification="Confidential", entity=entity)
+    setup_cont_footer(doc.sections[0], classification="Confidential", entity=entity)
 
-    add_cover(doc, title=title,
-              subtitle=f"Between {ENTITY['legal_name']} and {client}",
-              metadata={
-                  "Parties": f"{ENTITY['legal_name']}  /  {client}",
-                  "Date": date_str,
-                  "Reference": "[DE-AGR-YYYY-NNN]",
-                  "Version": f"v{version}",
-                  "Classification": "Confidential",
-              })
+    # Auto-detect formality from agreement type
+    if formality is None:
+        formality = AGREEMENT_FORMALITY.get(agreement_type, "non_binding")
+
+    # Build party list
+    de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
+    counterparty = Party(
+        legal_name=client,
+        address=client_address or "[Address]",
+        registration_type=client_reg_type,
+        registration_number=client_reg_number,
+    )
+
+    add_cover(doc,
+              agreement_type=agreement_type,
+              subject=subject,
+              date_str=date_str,
+              parties=[de_party, counterparty],
+              formality=formality,
+              reference=reference or "[DE-AGR-YYYY-NNN]",
+              version=version,
+              classification="Confidential",
+              cover_title=cover_title)
 
     gp = doc.add_paragraph()
     gp.paragraph_format.line_spacing = Pt(16.5)
@@ -326,25 +586,29 @@ SEED_SECTIONS = [
 ]
 
 
-def profile_seed_memo(client="[Investor Name]", date_str="", version=1, **kw):
+def profile_seed_memo(client="[Investor Name]", date_str="", version=1, entity="ag", **kw):
+    de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
     doc = new_doc(diff_first=True)
     setup_first_page_header(doc.sections[0])
     setup_cont_header(doc.sections[0], title="Seed Investment Memo")
-    setup_first_footer(doc.sections[0], classification="Confidential")
-    setup_cont_footer(doc.sections[0], classification="Confidential")
+    setup_first_footer(doc.sections[0], classification="Confidential", entity=entity)
+    setup_cont_footer(doc.sections[0], classification="Confidential", entity=entity)
 
-    add_cover(doc, title="Seed Investment Memo",
-              subtitle="Sovereign AI Infrastructure for Europe",
-              metadata={
-                  "Prepared for": client,
-                  "Prepared by": ENTITY["legal_name"],
-                  "Date": date_str,
-                  "Version": f"v{version}",
-                  "Classification": "Confidential",
-              })
+    add_cover(doc,
+              agreement_type="Seed Investment Memo",
+              subject="Sovereign AI Infrastructure for Europe",
+              date_str=date_str,
+              parties=[
+                  de_party,
+                  Party(legal_name=client, address=""),
+              ],
+              party_labels=["Prepared by:", "Prepared for:"],
+              formality="non_binding",
+              version=version,
+              classification="Confidential")
 
-    for title, guidance in SEED_SECTIONS:
-        add_section(doc, title, guidance)
+    for sect_title, guidance in SEED_SECTIONS:
+        add_section(doc, sect_title, guidance)
 
     return doc
 
@@ -373,25 +637,29 @@ IM_SECTIONS = [
 ]
 
 
-def profile_investor_memo(client="[Investor Name]", date_str="", version=1, **kw):
+def profile_investor_memo(client="[Investor Name]", date_str="", version=1, entity="ag", **kw):
+    de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
     doc = new_doc(diff_first=True)
     setup_first_page_header(doc.sections[0])
     setup_cont_header(doc.sections[0], title="Investment Memorandum")
-    setup_first_footer(doc.sections[0], classification="Confidential")
-    setup_cont_footer(doc.sections[0], classification="Confidential")
+    setup_first_footer(doc.sections[0], classification="Confidential", entity=entity)
+    setup_cont_footer(doc.sections[0], classification="Confidential", entity=entity)
 
-    add_cover(doc, title="Investment Memorandum",
-              subtitle="European Sovereign AI Infrastructure",
-              metadata={
-                  "Prepared for": client,
-                  "Prepared by": ENTITY["legal_name"],
-                  "Date": date_str,
-                  "Version": f"v{version}",
-                  "Classification": "Confidential",
-              })
+    add_cover(doc,
+              agreement_type="Investment Memorandum",
+              subject="European Sovereign AI Infrastructure",
+              date_str=date_str,
+              parties=[
+                  de_party,
+                  Party(legal_name=client, address=""),
+              ],
+              party_labels=["Prepared by:", "Prepared for:"],
+              formality="non_binding",
+              version=version,
+              classification="Confidential")
 
-    for title, guidance in IM_SECTIONS:
-        add_section(doc, title, guidance)
+    for sect_title, guidance in IM_SECTIONS:
+        add_section(doc, sect_title, guidance)
 
     return doc
 
@@ -405,7 +673,7 @@ def profile_exec_summary(title="[Executive Summary]", date_str="", **kw):
     tp = doc.add_paragraph()
     tp.paragraph_format.space_before = Pt(4)
     tp.paragraph_format.space_after = Pt(2)
-    _run(tp, title, size=Pt(24), color=DARK, bold=True)
+    _run(tp, title, size=Pt(24), color=SLATE_900, bold=True)
 
     _run(doc.add_paragraph(), date_str, size=Pt(10), color=SLATE)
 
@@ -435,7 +703,7 @@ def profile_exec_summary(title="[Executive Summary]", date_str="", **kw):
 # MARKDOWN CONVERTER
 # ---------------------------------------------------------------------------
 
-def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False):
+def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False, entity="ag"):
     """Convert markdown to branded docx."""
     has_cover = cover and title
     doc = new_doc(diff_first=has_cover)
@@ -443,18 +711,21 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False):
     if has_cover:
         setup_first_page_header(doc.sections[0])
         setup_cont_header(doc.sections[0], title=title)
-        setup_first_footer(doc.sections[0])
-        setup_cont_footer(doc.sections[0])
-        meta = {}
+        setup_first_footer(doc.sections[0], entity=entity)
+        setup_cont_footer(doc.sections[0], entity=entity)
+        de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
+        parties = [de_party]
         if client:
-            meta["Prepared for"] = client
-        meta["Prepared by"] = ENTITY["legal_name"]
-        if date_str:
-            meta["Date"] = date_str
-        add_cover(doc, title=title, metadata=meta)
+            parties.append(Party(legal_name=client, address=""))
+        add_cover(doc,
+                  agreement_type=title,
+                  date_str=date_str,
+                  parties=parties,
+                  party_labels=["Prepared by:", "Prepared for:"] if client else None,
+                  formality="non_binding")
     else:
         setup_cont_header(doc.sections[0], title=title or "")
-        setup_cont_footer(doc.sections[0])
+        setup_cont_footer(doc.sections[0], entity=entity)
 
     heading_sizes = {1: Pt(24), 2: Pt(18), 3: Pt(14), 4: Pt(12), 5: Pt(11), 6: Pt(11)}
 
@@ -476,7 +747,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False):
             p.paragraph_format.space_after = Pt(6)
             p.paragraph_format.keep_with_next = True
             _add_inline(p, m.group(2).strip(), size=heading_sizes.get(level, Pt(11)),
-                        color=DARK, bold=True)
+                        color=SLATE_900, bold=True)
             i += 1
             continue
 
@@ -549,7 +820,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False):
     return doc
 
 
-def _add_inline(para, text, size=Pt(11), color=BODY_COLOR, bold=False):
+def _add_inline(para, text, size=Pt(11), color=SLATE_800, bold=False):
     """Add text with **bold**, *italic*, `code` inline formatting."""
     for part in re.split(r'(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)', text):
         if not part:
@@ -562,6 +833,48 @@ def _add_inline(para, text, size=Pt(11), color=BODY_COLOR, bold=False):
             _run(para, part[1:-1], size=Pt(10), color=color, font="JetBrains Mono")
         else:
             _run(para, part, size=size, color=color, bold=bold)
+
+
+# ---------------------------------------------------------------------------
+# PDF CONVERSION (Microsoft Word via docx2pdf)
+# ---------------------------------------------------------------------------
+
+def docx_to_pdf(docx_path, pdf_path=None):
+    """Convert .docx → .pdf via Microsoft Word (docx2pdf).
+
+    Word is the canonical .docx renderer on the team's machines.
+    On macOS this uses AppleScript automation; on Windows, COM.
+    No fallback — if Word is unavailable, raises RuntimeError with
+    install instructions.
+
+    Returns the output PDF path on success.
+    """
+    docx_path = os.path.abspath(docx_path)
+    if not os.path.exists(docx_path):
+        raise FileNotFoundError(docx_path)
+    if pdf_path is None:
+        pdf_path = os.path.splitext(docx_path)[0] + ".pdf"
+    pdf_path = os.path.abspath(pdf_path)
+
+    try:
+        from docx2pdf import convert as _word_convert
+    except ImportError:
+        raise RuntimeError(
+            "docx2pdf not installed. Run: pip install docx2pdf\n"
+            "Also ensure Microsoft Word is installed (macOS: Office 365; Windows: Office)."
+        )
+
+    try:
+        _word_convert(docx_path, pdf_path)
+    except Exception as e:
+        raise RuntimeError(
+            f"Word conversion failed: {e}\n"
+            "Verify Microsoft Word is installed and, on macOS, that AppleScript is permitted."
+        )
+
+    if not os.path.exists(pdf_path):
+        raise RuntimeError("docx2pdf ran but produced no output file.")
+    return pdf_path
 
 
 # ---------------------------------------------------------------------------
@@ -581,12 +894,30 @@ def main():
     parser = argparse.ArgumentParser(description="Generate branded DE documents")
     parser.add_argument("--profile", choices=list(PROFILES.keys()),
                        help="Document profile")
-    parser.add_argument("--title", default=None)
+    parser.add_argument("--title", default=None,
+                       help="DEPRECATED for agreement profile; use --agreement-type. Still valid for other profiles.")
+    parser.add_argument("--agreement-type", default=None,
+                       help="Agreement type name (e.g. 'Letter of Intent', 'Master Service Agreement')")
+    parser.add_argument("--cover-title", default=None,
+                       help="Override cover-page title (28pt). Defaults to auto-shortened agreement-type")
+    parser.add_argument("--reference", default=None,
+                       help="Document reference (e.g. 'DE-AGR-2026-001'). Defaults to placeholder")
+    parser.add_argument("--subject", default=None,
+                       help="Deal description sub-header (e.g. 'for AI Infrastructure Distribution')")
     parser.add_argument("--client", default=None)
+    parser.add_argument("--client-address", default=None, help="Counterparty address")
+    parser.add_argument("--client-reg-type", default=None, help="Registration type (KvK, CHE, EIN)")
+    parser.add_argument("--client-reg-number", default=None, help="Registration number")
+    parser.add_argument("--entity", choices=list(DE_ENTITIES.keys()), default="ag",
+                       help="DE contracting entity (default: ag)")
+    parser.add_argument("--formality", choices=["binding", "non_binding"], default=None,
+                       help="Override formality auto-detection")
     parser.add_argument("--date", default=None, help="YYYY-MM-DD")
     parser.add_argument("--version", type=int, default=1)
     parser.add_argument("--output", default=None)
     parser.add_argument("--dotx", action="store_true")
+    parser.add_argument("--pdf", action="store_true",
+                       help="Also produce a PDF (Word-first, LibreOffice fallback)")
     # Markdown mode
     parser.add_argument("--md", default=None, help="Input markdown file")
     parser.add_argument("--cover", action="store_true", help="Add cover page to md output")
@@ -613,6 +944,13 @@ def main():
         out = args.output or os.path.join(OUTPUT, "md_output.docx")
         doc.save(out)
         print(f"Saved: {out}")
+        if args.pdf:
+            try:
+                pdf = docx_to_pdf(out)
+                print(f"PDF:   {pdf}")
+            except RuntimeError as e:
+                print(f"PDF conversion failed: {e}", file=sys.stderr)
+                sys.exit(1)
         return
 
     # Profile mode
@@ -621,17 +959,43 @@ def main():
 
     fn = PROFILES[args.profile]
     kwargs = {"date_str": date_str, "version": args.version}
-    if args.title:
-        kwargs["title"] = args.title
-    if args.client:
-        kwargs["client"] = args.client
+
+    # Agreement profile uses new structured flags
+    if args.profile == "agreement":
+        agreement_type = args.agreement_type or args.title or "[Agreement Type]"
+        kwargs["agreement_type"] = agreement_type
+        kwargs["subject"] = args.subject
+        kwargs["entity"] = args.entity
+        if getattr(args, "cover_title", None):
+            kwargs["cover_title"] = args.cover_title
+        if getattr(args, "reference", None):
+            kwargs["reference"] = args.reference
+        if args.client:
+            kwargs["client"] = args.client
+        if getattr(args, "client_address", None):
+            kwargs["client_address"] = args.client_address
+        if getattr(args, "client_reg_type", None):
+            kwargs["client_reg_type"] = args.client_reg_type
+        if getattr(args, "client_reg_number", None):
+            kwargs["client_reg_number"] = args.client_reg_number
+        if args.formality:
+            kwargs["formality"] = args.formality
+    else:
+        if args.title:
+            kwargs["title"] = args.title
+        if args.client:
+            kwargs["client"] = args.client
+        if args.profile in ("letter", "seed_memo", "investor_memo"):
+            kwargs["entity"] = args.entity
 
     doc = fn(**kwargs)
 
     if args.output:
         out = args.output
     else:
-        out = os.path.join(OUTPUT, auto_name(args.profile, args.client, args.version, dt))
+        out = os.path.join(OUTPUT, auto_name(
+            args.profile, args.client, args.version, dt,
+            agreement_type=kwargs.get("agreement_type")))
 
     doc.save(out)
     print(f"Generated: {out}")
@@ -640,6 +1004,14 @@ def main():
         dotx = out.replace(".docx", ".dotx")
         doc.save(dotx)
         print(f"Template:  {dotx}")
+
+    if args.pdf:
+        try:
+            pdf = docx_to_pdf(out)
+            print(f"PDF:       {pdf}")
+        except RuntimeError as e:
+            print(f"PDF conversion failed: {e}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

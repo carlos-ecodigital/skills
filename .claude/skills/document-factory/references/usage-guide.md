@@ -44,8 +44,12 @@ Examples:
 ### Setup
 
 ```bash
-# Ensure python-docx is installed
-pip install python-docx
+# Install Python deps
+pip install python-docx docx2pdf pyyaml
+
+# Microsoft Word must be installed (macOS: Office 365; Windows: Office).
+# On macOS, grant Terminal/Python AppleScript permission:
+# System Settings → Privacy & Security → Automation
 
 # Navigate to the skill
 cd ~/skills/.claude/skills/document-factory
@@ -55,12 +59,48 @@ python3 generate.py --profile letter
 # Opens output/YYYYMMDD_DE_Letter_v1.docx
 ```
 
+### PDF conversion and tracked changes
+
+```bash
+# Generate + PDF in one step
+python3 generate.py --profile agreement --agreement-type "Letter of Intent" \
+  --client "FrontierOne" --pdf
+
+# Convert an existing .docx (from any skill)
+python3 docx_to_pdf.py /path/to/existing.docx
+python3 docx_to_pdf.py doc.docx -o custom.pdf
+
+# Accept all tracked changes in a redlined .docx
+python3 accept_changes.py redlined.docx         # → redlined_accepted.docx
+python3 accept_changes.py redlined.docx -o clean.docx
+```
+
+Both utilities are Word-only (no LibreOffice fallback).
+
 ### Generating Documents
 
 ```bash
-# Each profile
+# Agreement cover pages (new structured flags)
+python3 generate.py --profile agreement \
+  --agreement-type "Letter of Intent" \
+  --subject "for AI Infrastructure Distribution" \
+  --client "FrontierOne Ltd"
+
+# Binding agreement (auto-detects formality, shows registration numbers)
+python3 generate.py --profile agreement \
+  --agreement-type "Master Service Agreement" \
+  --subject "for Hosting Ethiopia Data Center" \
+  --client "Acme Corp" \
+  --client-address "123 Main St, Amsterdam" \
+  --client-reg-type KvK --client-reg-number 12345678
+
+# Using NL entity instead of default AG
+python3 generate.py --profile agreement \
+  --agreement-type "Letter of Intent" \
+  --client "Partner BV" --entity nl
+
+# Other profiles
 python3 generate.py --profile letter
-python3 generate.py --profile agreement --title "Colocation Agreement" --client "Younggrow BV"
 python3 generate.py --profile seed_memo --client "Acme Fund"
 python3 generate.py --profile investor_memo --client "Infrastructure Partners"
 python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
@@ -69,7 +109,7 @@ python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
 python3 generate.py --profile seed_memo --client "Fund X" --date 2026-04-10 --version 2
 
 # Also produce a .dotx template
-python3 generate.py --profile agreement --title "NDA" --client "Partner" --dotx
+python3 generate.py --profile agreement --agreement-type "NDA" --client "Partner" --dotx
 
 # Custom output path
 python3 generate.py --profile exec_summary --title "Board Update" --output ~/Documents/board_update.docx
