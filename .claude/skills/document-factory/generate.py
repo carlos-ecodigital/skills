@@ -958,6 +958,7 @@ _ALPHA_ABSTRACT_ID = 100
 _ROMAN_ABSTRACT_ID = 101
 _DECIMAL_ABSTRACT_ID = 102
 _BULLET_ABSTRACT_ID = 103
+_HEADING_ABSTRACT_ID = 104
 
 
 def _setup_custom_numbering(doc):
@@ -988,12 +989,15 @@ def _setup_custom_numbering(doc):
 
     numbering_el = numbering_part.element
 
-    for abs_id, fmt, lvl_text, hanging in [
-        (_ALPHA_ABSTRACT_ID, 'lowerLetter', '(%1)', 360),
-        (_ROMAN_ABSTRACT_ID, 'lowerRoman', '(%1)', 480),
-        (_DECIMAL_ABSTRACT_ID, 'decimal', '%1.', 360),
-        (_BULLET_ABSTRACT_ID, 'bullet', '\u2022', 360),
-    ]:
+    _defs = [
+        (_ALPHA_ABSTRACT_ID, 'lowerLetter', '(%1)', 360, None),
+        (_ROMAN_ABSTRACT_ID, 'lowerRoman', '(%1)', 480, None),
+        (_DECIMAL_ABSTRACT_ID, 'decimal', '%1.', 360, None),
+        # Bullet uses Symbol font for the bullet character (same as template)
+        (_BULLET_ABSTRACT_ID, 'bullet', '\uf0b7', 360, ('Symbol', 'Symbol')),
+    ]
+
+    for abs_id, fmt, lvl_text, hanging, bullet_font in _defs:
         # Skip if already exists
         existing = numbering_el.findall(qn('w:abstractNum'))
         if any(e.get(qn('w:abstractNumId')) == str(abs_id) for e in existing):
@@ -1002,7 +1006,14 @@ def _setup_custom_numbering(doc):
         abstractNum = etree.Element(qn('w:abstractNum'))
         abstractNum.set(qn('w:abstractNumId'), str(abs_id))
 
-        # Multi-level required by schema but we only use level 0
+        # Required schema elements (Word ignores abstractNums without these)
+        nsid = etree.SubElement(abstractNum, qn('w:nsid'))
+        nsid.set(qn('w:val'), f'{0xDE000000 + abs_id:08X}')
+        multiLevel = etree.SubElement(abstractNum, qn('w:multiLevelType'))
+        multiLevel.set(qn('w:val'), 'singleLevel')
+        tmpl = etree.SubElement(abstractNum, qn('w:tmpl'))
+        tmpl.set(qn('w:val'), f'{0xDE100000 + abs_id:08X}')
+
         lvl = etree.SubElement(abstractNum, qn('w:lvl'))
         lvl.set(qn('w:ilvl'), '0')
 
@@ -1019,11 +1030,68 @@ def _setup_custom_numbering(doc):
         lvlJc.set(qn('w:val'), 'left')
 
         pPr = etree.SubElement(lvl, qn('w:pPr'))
+        tab_stops = etree.SubElement(pPr, qn('w:tabs'))
+        tab = etree.SubElement(tab_stops, qn('w:tab'))
+        tab.set(qn('w:val'), 'num')
+        tab.set(qn('w:pos'), str(hanging))
         ind = etree.SubElement(pPr, qn('w:ind'))
         ind.set(qn('w:left'), str(hanging))
         ind.set(qn('w:hanging'), str(hanging))
 
+        # Bullet character needs font specification
+        if bullet_font:
+            rPr = etree.SubElement(lvl, qn('w:rPr'))
+            rFonts = etree.SubElement(rPr, qn('w:rFonts'))
+            rFonts.set(qn('w:ascii'), bullet_font[0])
+            rFonts.set(qn('w:hAnsi'), bullet_font[1])
+            rFonts.set(qn('w:hint'), 'default')
+
         # Insert before first w:num (OOXML schema order)
+        first_num = numbering_el.find(qn('w:num'))
+        if first_num is not None:
+            first_num.addprevious(abstractNum)
+        else:
+            numbering_el.append(abstractNum)
+
+    # --- Multilevel heading numbering (104): 1. / 1.1 / 1.1.1 ---
+    existing = numbering_el.findall(qn('w:abstractNum'))
+    if not any(e.get(qn('w:abstractNumId')) == str(_HEADING_ABSTRACT_ID) for e in existing):
+        abstractNum = etree.Element(qn('w:abstractNum'))
+        abstractNum.set(qn('w:abstractNumId'), str(_HEADING_ABSTRACT_ID))
+
+        nsid = etree.SubElement(abstractNum, qn('w:nsid'))
+        nsid.set(qn('w:val'), f'{0xDE000000 + _HEADING_ABSTRACT_ID:08X}')
+        multiLevel = etree.SubElement(abstractNum, qn('w:multiLevelType'))
+        multiLevel.set(qn('w:val'), 'multilevel')
+        tmpl = etree.SubElement(abstractNum, qn('w:tmpl'))
+        tmpl.set(qn('w:val'), f'{0xDE100000 + _HEADING_ABSTRACT_ID:08X}')
+
+        # Level 0: "1." / Level 1: "1.1" / Level 2: "1.1.1"
+        heading_levels = [
+            (0, '%1.', 432, 432),       # 0.3in indent
+            (1, '%1.%2', 864, 432),     # 0.6in indent
+            (2, '%1.%2.%3', 1296, 432), # 0.9in indent
+        ]
+        for ilvl, lvl_text, left, hanging in heading_levels:
+            lvl = etree.SubElement(abstractNum, qn('w:lvl'))
+            lvl.set(qn('w:ilvl'), str(ilvl))
+            s = etree.SubElement(lvl, qn('w:start'))
+            s.set(qn('w:val'), '1')
+            nf = etree.SubElement(lvl, qn('w:numFmt'))
+            nf.set(qn('w:val'), 'decimal')
+            lt = etree.SubElement(lvl, qn('w:lvlText'))
+            lt.set(qn('w:val'), lvl_text)
+            jc = etree.SubElement(lvl, qn('w:lvlJc'))
+            jc.set(qn('w:val'), 'left')
+            pp = etree.SubElement(lvl, qn('w:pPr'))
+            tabs = etree.SubElement(pp, qn('w:tabs'))
+            tb = etree.SubElement(tabs, qn('w:tab'))
+            tb.set(qn('w:val'), 'num')
+            tb.set(qn('w:pos'), str(left))
+            ind = etree.SubElement(pp, qn('w:ind'))
+            ind.set(qn('w:left'), str(left))
+            ind.set(qn('w:hanging'), str(hanging))
+
         first_num = numbering_el.find(qn('w:num'))
         if first_num is not None:
             first_num.addprevious(abstractNum)
@@ -1495,8 +1563,25 @@ def profile_exec_summary(title="[Executive Summary]", date_str="", entity="ag", 
 # MARKDOWN CONVERTER
 # ---------------------------------------------------------------------------
 
+def _detect_entity(title, md_text=""):
+    """Auto-detect entity from title or document content.
+
+    Returns "nl" if the document is clearly about Digital Energy Netherlands,
+    otherwise "ag" (default).
+    """
+    combined = (title or "") + " " + (md_text[:500] if md_text else "")
+    combined_upper = combined.upper()
+    nl_signals = ("DENL", "NETHERLANDS B.V.", "NETHERLANDS BV",
+                  "DIGITAL ENERGY NETHERLANDS", "KVK:", "KVKNUMMER",
+                  "BESLOTEN VENNOOTSCHAP", "KUDELSTAART", "MIJNSHERENWEG")
+    for signal in nl_signals:
+        if signal in combined_upper:
+            return "nl"
+    return "ag"
+
+
 def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
-               entity="ag", subject=None, formality=None):
+               entity=None, subject=None, formality=None):
     """Convert markdown to branded docx.
 
     Args:
@@ -1504,6 +1589,8 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                    AGREEMENT_FORMALITY dict using title, defaulting to "non_binding".
         subject: Cover page subtitle (e.g. "Chairman, Horticulture Advisory Board").
     """
+    if entity is None:
+        entity = _detect_entity(title, md_text)
     has_cover = cover and title
     doc = new_doc(diff_first=has_cover)
 
@@ -1534,10 +1621,16 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
     doc.core_properties.author = "Digital Energy"
     doc.core_properties.subject = subject or ""
 
-    # Set up custom numbering definitions for alphabetic/roman lists
+    # Set up custom numbering definitions for lists + heading numbering
     _setup_custom_numbering(doc)
+    heading_num_id = _new_list_instance(doc, _HEADING_ABSTRACT_ID)
 
     heading_sizes = {1: Pt(24), 2: Pt(18), 3: Pt(14), 4: Pt(12), 5: Pt(11), 6: Pt(11)}
+    # Detect numbered headings: "## 1. Title", "### 1.1 Title", "#### 1.1.1 Title"
+    _numbered_heading_re = re.compile(r'^(\d+(?:\.\d+)*)\.?\s+(.*)')
+    # Map markdown heading level → ilvl for heading numbering
+    # ## (level 2) → ilvl 0 (top-level "1."), ### (level 3) → ilvl 1 ("1.1"), etc.
+    _heading_level_to_ilvl = {2: 0, 3: 1, 4: 2}
 
     # Regex patterns for list detection
     _alpha_re = re.compile(r'^[\s]*\([a-z]\)\s+')
@@ -1576,6 +1669,14 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             p.paragraph_format.space_before = _SP['h1_before'] if level <= 2 else _SP['h3_before']
             p.paragraph_format.space_after = _SP['heading_after']
             p.paragraph_format.keep_with_next = True
+
+            # Native heading numbering: "## 1. Title" → strip number, apply w:numPr
+            ilvl = _heading_level_to_ilvl.get(level)
+            nm = _numbered_heading_re.match(heading_text)
+            if nm and ilvl is not None and heading_num_id is not None:
+                heading_text = nm.group(2).strip()  # strip "1." prefix
+                _apply_numbering(p, heading_num_id, ilvl=ilvl)
+
             _add_inline(p, heading_text, size=heading_sizes.get(level, Pt(11)),
                         color=SLATE_900, bold=True)
             i += 1
