@@ -1963,11 +1963,28 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             if current_block:
                 party_blocks.append(current_block)
 
+            # Split blocks at bold party names — separates intro text from first party
+            split_blocks = []
+            for block in party_blocks:
+                current = []
+                for sl in block:
+                    if _SIG_PARTY_RE.match(sl.strip()) and current:
+                        split_blocks.append(current)
+                        current = []
+                    current.append(sl)
+                if current:
+                    split_blocks.append(current)
+            party_blocks = split_blocks
+
             # Render party blocks — corporate-grade signature layout
             _SIG_FIELD_RE = re.compile(r'^(By|Name|Title|Signature|Date|Signed)\s*:', re.IGNORECASE)
-            _SIG_LINE_CHAR = '\u2003' * 20  # em-spaces for clean sig line (not underscores)
 
             for block_idx, block in enumerate(party_blocks):
+                # Skip HR lines (---) inside signature blocks
+                block = [sl for sl in block if not re.match(r'^[-*_]{3,}\s*$', sl.strip())]
+                if not block:
+                    continue
+
                 for line_idx, sl in enumerate(block):
                     sl_stripped = sl.strip()
                     p = doc.add_paragraph()
@@ -1980,30 +1997,27 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                     is_party_name = _SIG_PARTY_RE.match(sl_stripped)
                     is_field = _SIG_FIELD_RE.match(sl_stripped)
 
-                    # Spacing — party names get breathing room, fields get moderate gaps
+                    # Spacing: breathing room within block, clear break between parties
                     if line_idx == 0 and block_idx == 0:
                         p.paragraph_format.space_before = _SP['sig_section_before']
                     elif line_idx == 0:
                         p.paragraph_format.space_before = _SP['sig_party_gap']
-                    elif is_field:
-                        p.paragraph_format.space_before = Pt(6)
                     else:
-                        p.paragraph_format.space_before = _SP['sig_line_gap']
+                        p.paragraph_format.space_before = Pt(4)
                     p.paragraph_format.space_after = Pt(2)
 
                     if is_party_name:
-                        # Party name: 12pt bold, Slate 900, slight visual weight
-                        p.paragraph_format.space_after = Pt(8)
+                        # Party name: 12pt bold — larger than fields for clear hierarchy
+                        p.paragraph_format.space_after = Pt(6)
                         _add_inline(p, sl_stripped, size=Pt(12), color=SLATE_900, bold=True)
                     elif is_field:
-                        # Normalize signature lines: "By: ___..." → "By:" + consistent line
+                        # Normalize signature lines to consistent width
                         fm = _SIG_FIELD_RE.match(sl_stripped)
-                        field_label = fm.group(0)  # "By:", "Name:", etc.
+                        field_label = fm.group(0)
                         field_value = sl_stripped[fm.end():].strip()
-                        # Replace bare underscores with clean line, keep actual values
                         if field_value and re.match(r'^[_\s]+$', field_value):
-                            field_value = '_' * 40  # consistent signature line length
-                        r_label = _run(p, field_label + ' ', size=Pt(11), color=SLATE_800)
+                            field_value = '_' * 40
+                        _run(p, field_label + ' ', size=Pt(11), color=SLATE_800)
                         if field_value:
                             _run(p, field_value, size=Pt(11), color=SLATE_800)
                     else:
