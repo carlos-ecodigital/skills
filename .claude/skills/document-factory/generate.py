@@ -432,14 +432,14 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
                 ap = doc.add_paragraph()
                 ap.paragraph_format.space_before = Pt(0)
                 ap.paragraph_format.space_after = Pt(0)
-                _run(ap, party.address, size=Pt(10), color=SLATE)
+                _run(ap, party.address, size=Pt(10), color=SLATE_900)
 
             # Registration (binding only)
             if formality == "binding" and party.registration_type and party.registration_number:
                 rp = doc.add_paragraph()
                 rp.paragraph_format.space_before = Pt(0)
                 rp.paragraph_format.space_after = Pt(0)
-                _run(rp, f"{party.registration_type}: ", size=Pt(10), color=SLATE, bold=True)
+                _run(rp, f"{party.registration_type}: ", size=Pt(10), color=SLATE_900, bold=True)
                 _run(rp, party.registration_number, size=Pt(10), color=SLATE_900)
 
             # Parent company
@@ -530,7 +530,8 @@ def _format_table(table, headers=None, rows=None):
     same lxml tree that python-docx builds internally and is safe on Word for Mac.
     """
     ncols = len(table.columns)
-    avail_width = Mm(165)  # page 210mm - 25mm left - 20mm right
+    avail_emu = int(Mm(165))     # page 210mm - 25mm left - 20mm right (in EMU for col widths)
+    avail_twips = int(165 / 25.4 * 1440)  # same width in twips (dxa) for tblW
 
     # Set total table width via tblPr to prevent overflow
     # OOXML tblPr order: tblStyle, tblpPr, tblOverlap, bidiVisual,
@@ -551,7 +552,7 @@ def _format_table(table, headers=None, rows=None):
                            after_tags=('w:tblStyle', 'w:tblpPr', 'w:tblOverlap',
                                        'w:bidiVisual', 'w:tblStyleRowBandSize',
                                        'w:tblStyleColBandSize'))
-    tblW.set(qn('w:w'), str(int(avail_width)))
+    tblW.set(qn('w:w'), str(avail_twips))
     tblW.set(qn('w:type'), 'dxa')
 
     tblLayout = _insert_element(tblPr, 'w:tblLayout',
@@ -562,11 +563,11 @@ def _format_table(table, headers=None, rows=None):
                                             'w:shd'))
     tblLayout.set(qn('w:type'), 'fixed')
 
-    # Proportional column widths
+    # Proportional column widths (EMU for python-docx col.width)
     if headers and rows:
-        col_widths = _compute_col_widths(headers, rows, int(avail_width))
+        col_widths = _compute_col_widths(headers, rows, avail_emu)
     else:
-        col_width = int(avail_width) // ncols
+        col_width = avail_emu // ncols
         col_widths = [col_width] * ncols
     for j, col in enumerate(table.columns):
         col.width = col_widths[j] if j < len(col_widths) else col_widths[-1]
@@ -612,12 +613,20 @@ def _format_table(table, headers=None, rows=None):
 
             # Cell padding for breathing room
             for p in cell.paragraphs:
-                p.paragraph_format.space_before = Pt(2)
-                p.paragraph_format.space_after = Pt(2)
+                p.paragraph_format.space_before = Pt(3)
+                p.paragraph_format.space_after = Pt(3)
 
 
 def add_table(doc, headers, rows):
     """Branded table: Cobalt header, proportional columns, inline formatting."""
+    # Pre-table spacing (12pt gap from preceding text)
+    spacer = doc.add_paragraph()
+    spacer.paragraph_format.space_before = Pt(0)
+    spacer.paragraph_format.space_after = Pt(0)
+    pf = spacer.paragraph_format
+    pf.space_before = Pt(6)
+    pf.space_after = Pt(6)
+
     tbl = doc.add_table(rows=1 + len(rows), cols=len(headers), style="Table Grid")
     for j, h in enumerate(headers):
         cell = tbl.cell(0, j)
@@ -629,6 +638,11 @@ def add_table(doc, headers, rows):
             cell.text = ""
             _add_inline(cell.paragraphs[0], str(val), size=Pt(10), color=SLATE_800)
     _format_table(tbl, headers, rows)
+
+    # Post-table spacing
+    spacer2 = doc.add_paragraph()
+    spacer2.paragraph_format.space_before = Pt(6)
+    spacer2.paragraph_format.space_after = Pt(0)
 
 
 # ---------------------------------------------------------------------------
@@ -925,7 +939,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         if m:
             level = len(m.group(1))
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(14) if level <= 2 else Pt(8)
+            p.paragraph_format.space_before = Pt(18) if level <= 2 else Pt(12)
             p.paragraph_format.space_after = Pt(6)
             p.paragraph_format.keep_with_next = True
             _add_inline(p, m.group(2).strip(), size=heading_sizes.get(level, Pt(11)),
@@ -938,28 +952,42 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             i += 1
             continue
 
-        # Unordered list
+        # Unordered list — native Word bullet style
         if re.match(r'^[\s]*[-*+]\s+', line):
+            first = True
             while i < len(lines) and re.match(r'^[\s]*[-*+]\s+', lines[i]):
                 text = re.sub(r'^[\s]*[-*+]\s+', '', lines[i]).strip()
-                p = doc.add_paragraph()
-                p.paragraph_format.left_indent = Mm(5)
-                _run(p, "\u2022  ", size=Pt(11), color=COBALT)
+                p = doc.add_paragraph(style='List Bullet')
+                if first:
+                    p.paragraph_format.space_before = Pt(6)
+                    first = False
+                else:
+                    p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(2)
                 _add_inline(p, text)
                 i += 1
+            # Space after last item
+            if p:
+                p.paragraph_format.space_after = Pt(6)
             continue
 
-        # Ordered list
+        # Ordered list — native Word numbered style
         if re.match(r'^[\s]*\d+[.)]\s+', line):
-            n = 1
+            first = True
             while i < len(lines) and re.match(r'^[\s]*\d+[.)]\s+', lines[i]):
                 text = re.sub(r'^[\s]*\d+[.)]\s+', '', lines[i]).strip()
-                p = doc.add_paragraph()
-                p.paragraph_format.left_indent = Mm(5)
-                _run(p, f"{n}.  ", size=Pt(11), color=COBALT)
+                p = doc.add_paragraph(style='List Number')
+                if first:
+                    p.paragraph_format.space_before = Pt(6)
+                    first = False
+                else:
+                    p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(2)
                 _add_inline(p, text)
-                n += 1
                 i += 1
+            # Space after last item
+            if p:
+                p.paragraph_format.space_after = Pt(6)
             continue
 
         # Table
@@ -984,6 +1012,34 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             _run(p, ' '.join(parts), size=Pt(11), color=SLATE, italic=True)
             continue
 
+        # Signature block detection: lines with ___ or "Name:"/"Title:"/"Signature:"/"Date:"
+        # Keep all signature-related paragraphs together on one page
+        sig_pattern = re.compile(r'^(_{3,}|.*\b(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
+        if sig_pattern.match(line):
+            sig_lines = []
+            while i < len(lines) and (sig_pattern.match(lines[i]) or not lines[i].strip()):
+                if lines[i].strip():
+                    sig_lines.append(lines[i])
+                i += 1
+            # Also grab trailing non-blank lines that look like signature content
+            while i < len(lines) and lines[i].strip() and not lines[i].startswith('#'):
+                if sig_pattern.match(lines[i]) or len(lines[i].strip()) < 60:
+                    sig_lines.append(lines[i])
+                    i += 1
+                else:
+                    break
+            for idx, sl in enumerate(sig_lines):
+                p = doc.add_paragraph()
+                p.paragraph_format.keep_together = True
+                p.paragraph_format.keep_with_next = (idx < len(sig_lines) - 1)
+                if idx == 0:
+                    p.paragraph_format.space_before = Pt(24)
+                else:
+                    p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(2)
+                _add_inline(p, sl.strip())
+            continue
+
         # Paragraph
         para_lines = []
         while (i < len(lines) and lines[i].strip()
@@ -994,6 +1050,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         if para_lines:
             p = doc.add_paragraph()
             p.paragraph_format.line_spacing = Pt(16.5)
+            p.paragraph_format.space_after = Pt(6)
             _add_inline(p, ' '.join(para_lines))
             continue
 
