@@ -165,6 +165,88 @@ Only use these when python-docx has no native API:
 | `w:tcBorders` | Cell border style/color/width | Not exposed in API |
 | `w:zoom` | Document zoom percent | python-docx omits `w:percent` attr |
 
+## Table Header Row Repeat
+
+Tables with more than 5 data rows MUST enable header row repeat via `w:tblHeader` on the first row's `w:trPr`. This ensures the header is visible when a table spans a page break.
+
+```python
+tr = table.rows[0]._tr
+trPr = tr.find(qn('w:trPr'))
+if trPr is None:
+    trPr = etree.SubElement(tr, qn('w:trPr'))
+    tr.insert(0, trPr)
+if trPr.find(qn('w:tblHeader')) is None:
+    etree.SubElement(trPr, qn('w:tblHeader'))
+```
+
+## Column Width Algorithm
+
+Minimum-guarantee + proportional overflow:
+
+1. **Measure** each column: `display_chars = max(header_len, min(max_data_len, 20))`, stripping markdown markers via `_display_len()`
+2. **Classify**: "compact" (≤25 chars) or "flex" (>25 chars)
+3. **Allocate**: Compact columns get their min_width (`display_chars * _CHAR_WIDTH_EMU + _CELL_PAD_EMU`, floored at `_MIN_COL_EMU = Mm(15)`). Flex columns share remaining space proportionally.
+4. **Guards**: If compact total > 70% of available width, fall back to proportional with floor. Longest-word minimum prevents headers from being crammed.
+
+Constants: `_CHAR_WIDTH_EMU = 63,500` (~5pt), `_CELL_PAD_EMU = Mm(4)`, `_MIN_COL_EMU = Mm(15)`.
+
+## Alphabetic & Roman List Patterns
+
+Legal sub-clause lists use `(a)`, `(b)`, `(c)` (lowerLetter) and `(i)`, `(ii)`, `(iii)` (lowerRoman). These MUST use native Word numbering, not plain text.
+
+- **Custom numbering**: abstractNumId 100 = lowerLetter `(%1)`, abstractNumId 101 = lowerRoman `(%1)`. IDs 100+ avoid conflict with template built-ins (0–9).
+- **Blank-line look-ahead**: Legal documents put blank lines between items. The detector skips blank lines and checks if the next non-blank line continues the list pattern.
+- **`(i)` ambiguity**: If followed by `(ii)` → roman. If followed by `(j)` → alphabetic. Default to alphabetic.
+- **Restart**: Each separate list block gets its own `w:num` with `w:startOverride val="1"`.
+
+See `references/ooxml-numbering.md` for the underlying OOXML structure.
+
+## Spacing Constants (`_SP` dict)
+
+All spacing values are centralized in the `_SP` module-level dict in `generate.py`. Both `add_section()` and `md_to_docx()` reference it. Never hardcode `Pt()` values for spacing — use `_SP['key']`.
+
+| Key | Value | Used for |
+|-----|-------|----------|
+| `h1_before` / `h2_before` | 18pt | Section break before H1/H2 headings |
+| `h3_before` / `h4_before` | 12pt | Subsection break before H3/H4 |
+| `heading_after` | 6pt | Tight coupling heading → first body paragraph |
+| `body_after` | 6pt | Inter-paragraph gap |
+| `body_line` | 16.5pt | Line spacing (1.5× at 11pt) |
+| `table_before` / `table_after` | 12pt | Gap above/below tables |
+| `sig_section_before` | 36pt | Gap before first signature party |
+| `sig_party_gap` | 18pt | Gap between signature parties |
+| `sig_line_gap` | 2pt | Within a signature block |
+
+## Cover Page Colors (Updated)
+
+Structural labels use **Cobalt (#0034AF)** — DE's primary brand accent, already used in table headers. Creates intentional hierarchy without looking faded.
+
+| Element | Color | Size |
+|---------|-------|------|
+| Party labels ("By and between:", "And:") | Cobalt (#0034AF) | 10pt |
+| Legal name | Slate 900 (#0F172A) | 11pt, bold |
+| Address, registration, metadata values | Slate 900 (#0F172A) | 10pt |
+| Subject line | Slate 800 (#1E293B) | 14pt |
+| Metadata labels ("Classification:", "Reference:") | Cobalt (#0034AF) | 10pt, bold |
+
+The only non-Cobalt, non-Slate-900 element is the subject line (Slate 800).
+
+## OOXML Element Ordering
+
+Word processors silently repair out-of-order elements, potentially stripping adjacent formatting. Maintain strict schema order.
+
+### `w:pPr` child order (relevant subset)
+`pStyle` → `keepNext` → `keepLines` → `pageBreakBefore` → `framePr` → `widowControl` → **`numPr`** → `suppressLineNumbers` → `pBorders` → `shd` → `tabs` → `suppressAutoHyphens` → `spacing` → `ind` → `jc` → `rPr`
+
+### `w:numbering` child order
+All `w:abstractNum` elements MUST precede all `w:num` elements.
+
+### `w:tcPr` child order (relevant subset)
+`tcW` → `gridSpan` → `tcBorders` → `shd` → `vAlign`
+
+### `w:tblPr` child order (relevant subset)
+`tblStyle` → `tblpPr` → `tblW` → `tblLayout` → `tblCellMar` → `tblLook`
+
 ## Anti-Patterns
 
 1. **Never use plain text for lists.** `1.` followed by text is not a list — Word cannot renumber it, indent it, or style it. Use `style='List Number'` or `style='List Bullet'`.

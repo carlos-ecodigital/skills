@@ -92,6 +92,47 @@ SLATE_800 = RGBColor(0x1E, 0x29, 0x3B)   # Body text
 SLATE_900 = RGBColor(0x0F, 0x17, 0x2A)   # Headings
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
+# ---------------------------------------------------------------------------
+# SPACING CONSTANTS — single source of truth for all formatting
+# ---------------------------------------------------------------------------
+_SP = {
+    'h1_before': Pt(18),   'h2_before': Pt(18),
+    'h3_before': Pt(12),   'h4_before': Pt(12),
+    'heading_after': Pt(6),
+    'body_after': Pt(6),
+    'body_line': Pt(16.5),
+    'list_first_before': Pt(6),
+    'list_gap': Pt(2),
+    'list_last_after': Pt(6),
+    'table_before': Pt(12),
+    'table_after': Pt(12),
+    'sig_section_before': Pt(36),
+    'sig_party_gap': Pt(18),
+    'sig_line_gap': Pt(2),
+}
+
+# Column width constants for table formatting
+_CHAR_WIDTH_EMU = 63_500    # ~5pt avg char width at 10pt Inter
+_CELL_PAD_EMU = int(Mm(4))  # 2mm left + 2mm right padding
+_MIN_COL_EMU = int(Mm(15))  # absolute minimum column width
+
+
+def _display_len(text):
+    """Character count after removing markdown formatting markers."""
+    t = re.sub(r'\*\*([^*]+)\*\*', r'\1', str(text))
+    t = re.sub(r'\*([^*]+)\*', r'\1', t)
+    t = re.sub(r'`([^`]+)`', r'\1', t)
+    return len(t)
+
+
+def _longest_word_len(text):
+    """Length of the longest single word after stripping markdown markers."""
+    t = re.sub(r'\*\*([^*]+)\*\*', r'\1', str(text))
+    t = re.sub(r'\*([^*]+)\*', r'\1', t)
+    t = re.sub(r'`([^`]+)`', r'\1', t)
+    return max((len(w) for w in t.split()), default=0)
+
+
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGO = os.path.join(SCRIPT_DIR, "assets", "DE_Logo_Black.png")
 if not os.path.exists(LOGO):
@@ -257,20 +298,71 @@ def _fix_zoom(doc):
         zoom.set(qn('w:percent'), '100')
 
 
+def _validate_output(doc):
+    """Self-validation: check for common formatting issues before save.
+
+    Prints warnings to stderr. Does NOT block save.
+    """
+    warnings = []
+
+    # 1. Table width ≤ content width
+    for t_idx, table in enumerate(doc.tables):
+        tblPr = table._tbl.find(qn('w:tblPr'))
+        if tblPr is not None:
+            tblW = tblPr.find(qn('w:tblW'))
+            if tblW is not None:
+                w_type = tblW.get(qn('w:type'))
+                w_val = tblW.get(qn('w:w'))
+                if w_type == 'dxa' and w_val and int(w_val) > 9360:
+                    warnings.append(f"Table {t_idx}: width {w_val} twips exceeds content width")
+
+        # 7. Table header rows
+        if len(table.rows) > 5:
+            tr = table.rows[0]._tr
+            trPr = tr.find(qn('w:trPr'))
+            if trPr is None or trPr.find(qn('w:tblHeader')) is None:
+                warnings.append(f"Table {t_idx}: {len(table.rows)} rows without header repeat")
+
+    # 2-4. Paragraph checks
+    for p_idx, para in enumerate(doc.paragraphs):
+        pf = para.paragraph_format
+        text = para.text.strip()
+        if not text:
+            continue
+
+        # Heading check
+        if para.runs and para.runs[0].font.bold and para.runs[0].font.size:
+            if para.runs[0].font.size >= Pt(14) and not pf.keep_with_next:
+                warnings.append(f"Heading P{p_idx} missing keep_with_next: '{text[:40]}'")
+
+    if warnings:
+        print(f"[validate] {len(warnings)} issue(s):", file=sys.stderr)
+        for w in warnings[:10]:
+            print(f"  - {w}", file=sys.stderr)
+
+
 def save_doc(doc, path):
     """Save document with all post-processing fixes applied."""
     _fix_zoom(doc)
+    _validate_output(doc)
     doc.save(path)
 
 
 def _run(para, text, size=Pt(11), color=SLATE_800, bold=False, italic=False, font=FONT):
-    """Add a styled run."""
+    """Add a styled run with full font fallback chain."""
     r = para.add_run(text)
     r.font.name = font
     r.font.size = size
     r.font.color.rgb = color
     r.font.bold = bold
     r.font.italic = italic
+    # Set w:cs and w:eastAsia fallback — without Inter, Word falls back to
+    # Calibri (wider metrics → layout shift). Arial has similar metrics to Inter.
+    rFonts = r._element.get_or_add_rPr().find(qn('w:rFonts'))
+    if rFonts is not None:
+        fallback = 'Arial' if font == FONT else font
+        rFonts.set(qn('w:cs'), fallback)
+        rFonts.set(qn('w:eastAsia'), fallback)
     return r
 
 
@@ -285,6 +377,12 @@ def new_doc(top=Mm(20), bottom=Mm(35), diff_first=False):
     s.top_margin = top
     s.bottom_margin = bottom
     s.different_first_page_header_footer = diff_first
+    # Suppress auto-hyphenation — legal documents must not hyphenate
+    settings = doc.settings.element
+    autoHyph = settings.find(qn('w:autoHyphenation'))
+    if autoHyph is None:
+        autoHyph = etree.SubElement(settings, qn('w:autoHyphenation'))
+    autoHyph.set(qn('w:val'), '0')
     return doc
 
 
@@ -390,7 +488,7 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
         sp = doc.add_paragraph()
         sp.paragraph_format.space_before = Pt(2)
         sp.paragraph_format.space_after = Pt(0)
-        _run(sp, subject, size=Pt(14), color=SLATE)
+        _run(sp, subject, size=Pt(14), color=SLATE_800)
 
     # 3. Date (document-level, below title block)
     if date_str:
@@ -420,7 +518,7 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
             lp = doc.add_paragraph()
             lp.paragraph_format.space_before = Pt(12) if i > 0 else Pt(0)
             lp.paragraph_format.space_after = Pt(2)
-            _run(lp, party_labels[i], size=Pt(10), color=SLATE)
+            _run(lp, party_labels[i], size=Pt(10), color=COBALT)
 
             # Legal name
             np = doc.add_paragraph()
@@ -443,13 +541,6 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
                 _run(rp, f"{party.registration_type}: ", size=Pt(10), color=SLATE_900, bold=True)
                 _run(rp, party.registration_number, size=Pt(10), color=SLATE_900)
 
-            # Parent company
-            if party.parent:
-                pp = doc.add_paragraph()
-                pp.paragraph_format.space_before = Pt(0)
-                pp.paragraph_format.space_after = Pt(0)
-                _run(pp, f"a subsidiary of {party.parent}", size=Pt(9), color=SLATE, italic=True)
-
     # 5. Metadata
     meta_items = []
     if reference:
@@ -467,7 +558,7 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
             mp = doc.add_paragraph()
             mp.paragraph_format.space_before = Pt(2)
             mp.paragraph_format.space_after = Pt(2)
-            _run(mp, f"{key}:  ", size=Pt(10), color=SLATE, bold=True)
+            _run(mp, f"{key}:  ", size=Pt(10), color=COBALT, bold=True)
             _run(mp, str(val), size=Pt(10), color=SLATE_900)
 
     doc.add_page_break()
@@ -477,47 +568,92 @@ def add_section(doc, title, guidance, level=2):
     """Section heading + italic guidance text."""
     sizes = {1: Pt(24), 2: Pt(18), 3: Pt(14), 4: Pt(12)}
     hp = doc.add_paragraph()
-    hp.paragraph_format.space_before = Pt(14) if level <= 2 else Pt(8)
-    hp.paragraph_format.space_after = Pt(6)
+    hp.paragraph_format.space_before = _SP['h1_before'] if level <= 2 else _SP['h3_before']
+    hp.paragraph_format.space_after = _SP['heading_after']
     hp.paragraph_format.keep_with_next = True
     _run(hp, title, size=sizes.get(level, Pt(12)), color=SLATE_900, bold=True)
 
     gp = doc.add_paragraph()
     gp.paragraph_format.space_before = Pt(0)
-    gp.paragraph_format.space_after = Pt(8)
+    gp.paragraph_format.space_after = _SP['body_after']
+    gp.paragraph_format.widow_control = True
     _run(gp, guidance, size=Pt(11), color=SLATE, italic=True)
 
 
 def _compute_col_widths(headers, rows, avail_emu):
-    """Compute proportional column widths based on content length.
+    """Compute column widths with minimum-guarantee + proportional overflow.
 
-    Rules:
-    - Weight = max character length across header + all rows, per column
-    - Cap each weight at 80 chars (prevents one giant cell from starving others)
-    - Minimum weight = header length + 2 (columns must fit their header)
-    - 2-column key-value tables: if the label column's max content is <30 chars
-      and the value column's max is >60, use 25/75 split (readable label/value)
+    Algorithm:
+    1. Compute min_width per column (header/data display length, longest word)
+    2. Classify: "compact" (≤25 display chars) or "flex" (>25)
+    3. Compact columns get their min_width; flex columns share remaining space
+    4. 2-column key-value heuristic preserved (25/75 split)
     """
     ncols = len(headers)
-    raw_weights = []
+
+    # Measure display lengths (strip markdown markers)
+    header_lens = [_display_len(h) for h in headers]
+    max_data_lens = []
     for j in range(ncols):
-        max_len = len(headers[j])
+        max_len = 0
         for row in rows:
             if j < len(row):
-                max_len = max(max_len, len(str(row[j])))
-        raw_weights.append(max_len)
+                max_len = max(max_len, _display_len(str(row[j])))
+        max_data_lens.append(max_len)
 
     # 2-column key-value heuristic
-    if ncols == 2 and raw_weights[0] < 30 and raw_weights[1] > 60:
+    if ncols == 2 and max_data_lens[0] < 30 and max_data_lens[1] > 60:
         return [int(avail_emu * 0.25), int(avail_emu * 0.75)]
 
-    # General case: cap and floor
-    min_weight = 5
-    max_weight = 80
-    weights = [max(min(w, max_weight), max(min_weight, len(headers[j]) + 2))
-               for j, w in enumerate(raw_weights)]
-    total = sum(weights)
-    return [int(avail_emu * w / total) for w in weights]
+    # Compute min_width and classify each column
+    min_widths = []
+    classifications = []
+    for j in range(ncols):
+        display_chars = max(header_lens[j], min(max_data_lens[j], 20))
+        min_from_content = display_chars * _CHAR_WIDTH_EMU + _CELL_PAD_EMU
+        # Also consider longest single word in header
+        min_from_word = _longest_word_len(headers[j]) * _CHAR_WIDTH_EMU + _CELL_PAD_EMU
+        min_w = max(min_from_content, min_from_word, _MIN_COL_EMU)
+        min_widths.append(min_w)
+        classifications.append("compact" if max_data_lens[j] <= 25 else "flex")
+
+    compact_total = sum(min_widths[j] for j in range(ncols) if classifications[j] == "compact")
+    flex_indices = [j for j in range(ncols) if classifications[j] == "flex"]
+
+    # OVERFLOW guard: if compact columns > 70% of available, fall back to proportional with floor
+    if compact_total > avail_emu * 0.70 or not flex_indices:
+        # Proportional with floor
+        weights = [max(min(max_data_lens[j], 80), max(5, header_lens[j] + 2))
+                   for j in range(ncols)]
+        total_w = sum(weights)
+        widths = [max(int(avail_emu * w / total_w), _MIN_COL_EMU) for w in weights]
+        # Correct rounding drift — apply to widest column (never shrink below minimum)
+        drift = avail_emu - sum(widths)
+        if drift != 0:
+            target = max(range(ncols), key=lambda j: widths[j])
+            widths[target] = max(widths[target] + drift, _MIN_COL_EMU)
+        return widths
+
+    # Normal path: compact columns get min_width, flex share the rest
+    remaining = avail_emu - compact_total
+    flex_weights = [min(max_data_lens[j], 80) for j in flex_indices]
+    flex_total = sum(flex_weights) or 1
+
+    widths = [0] * ncols
+    for j in range(ncols):
+        if classifications[j] == "compact":
+            widths[j] = min_widths[j]
+        else:
+            idx = flex_indices.index(j)
+            widths[j] = max(int(remaining * flex_weights[idx] / flex_total), _MIN_COL_EMU)
+
+    # Correct rounding drift — apply to widest column (never shrink below minimum)
+    drift = avail_emu - sum(widths)
+    if drift != 0:
+        target = max(range(ncols), key=lambda j: widths[j])
+        widths[target] = max(widths[target] + drift, _MIN_COL_EMU)
+
+    return widths
 
 
 def _insert_element(parent, tag_name, after_tags=()):
@@ -537,6 +673,132 @@ def _insert_element(parent, tag_name, after_tags=()):
     else:
         parent.append(new_elem)
     return new_elem
+
+
+# ---------------------------------------------------------------------------
+# CUSTOM NUMBERING (alphabetic + roman lists)
+# ---------------------------------------------------------------------------
+
+_ALPHA_ABSTRACT_ID = 100
+_ROMAN_ABSTRACT_ID = 101
+
+
+def _setup_custom_numbering(doc):
+    """Create custom abstractNum definitions for (a)/(i) lists.
+
+    Called once at the start of md_to_docx(). Adds abstractNum 100 (lowerLetter)
+    and 101 (lowerRoman) to numbering.xml. IDs start at 100 to avoid conflict
+    with the default template's 0-9.
+
+    OOXML ordering: w:abstractNum elements must come BEFORE all w:num elements.
+    """
+    try:
+        numbering_part = doc.part.numbering_part
+    except Exception:
+        # No numbering part — create one by adding a dummy list paragraph
+        dummy = doc.add_paragraph(style='List Bullet')
+        dummy._element.getparent().remove(dummy._element)
+        try:
+            numbering_part = doc.part.numbering_part
+        except Exception:
+            return  # Graceful fallback — lists will use manual text
+
+    numbering_el = numbering_part.element
+
+    for abs_id, fmt, lvl_text, hanging in [
+        (_ALPHA_ABSTRACT_ID, 'lowerLetter', '(%1)', 360),
+        (_ROMAN_ABSTRACT_ID, 'lowerRoman', '(%1)', 480),
+    ]:
+        # Skip if already exists
+        existing = numbering_el.findall(qn('w:abstractNum'))
+        if any(e.get(qn('w:abstractNumId')) == str(abs_id) for e in existing):
+            continue
+
+        abstractNum = etree.Element(qn('w:abstractNum'))
+        abstractNum.set(qn('w:abstractNumId'), str(abs_id))
+
+        # Multi-level required by schema but we only use level 0
+        lvl = etree.SubElement(abstractNum, qn('w:lvl'))
+        lvl.set(qn('w:ilvl'), '0')
+
+        start = etree.SubElement(lvl, qn('w:start'))
+        start.set(qn('w:val'), '1')
+
+        numFmt = etree.SubElement(lvl, qn('w:numFmt'))
+        numFmt.set(qn('w:val'), fmt)
+
+        lvlText_el = etree.SubElement(lvl, qn('w:lvlText'))
+        lvlText_el.set(qn('w:val'), lvl_text)
+
+        lvlJc = etree.SubElement(lvl, qn('w:lvlJc'))
+        lvlJc.set(qn('w:val'), 'left')
+
+        pPr = etree.SubElement(lvl, qn('w:pPr'))
+        ind = etree.SubElement(pPr, qn('w:ind'))
+        ind.set(qn('w:left'), str(hanging))
+        ind.set(qn('w:hanging'), str(hanging))
+
+        # Insert before first w:num (OOXML schema order)
+        first_num = numbering_el.find(qn('w:num'))
+        if first_num is not None:
+            first_num.addprevious(abstractNum)
+        else:
+            numbering_el.append(abstractNum)
+
+
+def _new_list_instance(doc, abstract_id):
+    """Create a new w:num instance pointing to abstract_id with startOverride=1.
+
+    Each separate list block gets its own numId so numbering restarts.
+    Returns the numId integer.
+    """
+    try:
+        numbering_el = doc.part.numbering_part.element
+    except Exception:
+        return None
+
+    # Find max existing numId
+    max_id = 0
+    for num_el in numbering_el.findall(qn('w:num')):
+        nid = num_el.get(qn('w:numId'))
+        if nid:
+            max_id = max(max_id, int(nid))
+    new_id = max_id + 1
+
+    num = etree.SubElement(numbering_el, qn('w:num'))
+    num.set(qn('w:numId'), str(new_id))
+
+    abstractNumId = etree.SubElement(num, qn('w:abstractNumId'))
+    abstractNumId.set(qn('w:val'), str(abstract_id))
+
+    # Restart numbering from 1
+    lvlOverride = etree.SubElement(num, qn('w:lvlOverride'))
+    lvlOverride.set(qn('w:ilvl'), '0')
+    startOverride = etree.SubElement(lvlOverride, qn('w:startOverride'))
+    startOverride.set(qn('w:val'), '1')
+
+    return new_id
+
+
+def _apply_numbering(para, num_id, ilvl=0):
+    """Set w:numPr on a paragraph in correct OOXML schema position.
+
+    w:numPr must come AFTER widowControl and BEFORE suppressLineNumbers in w:pPr.
+    Using SubElement would append at end — out of schema order if spacing/ind already set.
+    """
+    pPr = para._element.get_or_add_pPr()
+    # Remove existing numPr if any
+    existing = pPr.find(qn('w:numPr'))
+    if existing is not None:
+        pPr.remove(existing)
+
+    numPr = _insert_element(pPr, 'w:numPr',
+                            after_tags=('w:pStyle', 'w:keepNext', 'w:keepLines',
+                                        'w:pageBreakBefore', 'w:framePr', 'w:widowControl'))
+    ilvl_el = etree.SubElement(numPr, qn('w:ilvl'))
+    ilvl_el.set(qn('w:val'), str(ilvl))
+    numId_el = etree.SubElement(numPr, qn('w:numId'))
+    numId_el.set(qn('w:val'), str(num_id))
 
 
 def _format_table(table, headers=None, rows=None):
@@ -590,6 +852,16 @@ def _format_table(table, headers=None, rows=None):
     for j, col in enumerate(table.columns):
         col.width = col_widths[j] if j < len(col_widths) else col_widths[-1]
 
+    # Table header row repeat — repeats header on page break for tables >5 rows
+    if len(table.rows) > 5:
+        tr = table.rows[0]._tr
+        trPr = tr.find(qn('w:trPr'))
+        if trPr is None:
+            trPr = etree.SubElement(tr, qn('w:trPr'))
+            tr.insert(0, trPr)
+        if trPr.find(qn('w:tblHeader')) is None:
+            etree.SubElement(trPr, qn('w:tblHeader'))
+
     # OOXML tcPr order: cnfStyle, tcW, gridSpan, hMerge, vMerge,
     #   tcBorders, shd, noWrap, tcMar, textDirection, ...
     for i, row in enumerate(table.rows):
@@ -637,13 +909,13 @@ def _format_table(table, headers=None, rows=None):
 
 def add_table(doc, headers, rows):
     """Branded table: Cobalt header, proportional columns, inline formatting."""
-    # Pre-table spacing (12pt gap from preceding text)
+    # Pre-table spacing (invisible spacer — contributes gap via space_after)
     spacer = doc.add_paragraph()
     spacer.paragraph_format.space_before = Pt(0)
-    spacer.paragraph_format.space_after = Pt(0)
-    pf = spacer.paragraph_format
-    pf.space_before = Pt(6)
-    pf.space_after = Pt(6)
+    spacer.paragraph_format.space_after = _SP['table_before']
+    spacer.paragraph_format.line_spacing = Pt(1)
+    r = spacer.add_run()
+    r.font.size = Pt(1)
 
     tbl = doc.add_table(rows=1 + len(rows), cols=len(headers), style="Table Grid")
     for j, h in enumerate(headers):
@@ -659,10 +931,13 @@ def add_table(doc, headers, rows):
             _add_inline(cell.paragraphs[0], str(val), size=Pt(10), color=SLATE_800)
     _format_table(tbl, headers, rows)
 
-    # Post-table spacing
+    # Post-table spacing (invisible spacer — contributes gap via space_before)
     spacer2 = doc.add_paragraph()
-    spacer2.paragraph_format.space_before = Pt(6)
+    spacer2.paragraph_format.space_before = _SP['table_after']
     spacer2.paragraph_format.space_after = Pt(0)
+    spacer2.paragraph_format.line_spacing = Pt(1)
+    r2 = spacer2.add_run()
+    r2.font.size = Pt(1)
 
 
 # ---------------------------------------------------------------------------
@@ -763,6 +1038,11 @@ def profile_agreement(agreement_type="[Agreement Type]", subject=None,
               version=version,
               classification="Confidential",
               cover_title=cover_title)
+
+    # Document properties
+    doc.core_properties.title = agreement_type
+    doc.core_properties.author = "Digital Energy"
+    doc.core_properties.subject = subject or ""
 
     gp = doc.add_paragraph()
     gp.paragraph_format.line_spacing = Pt(16.5)
@@ -943,7 +1223,27 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         setup_cont_header(doc.sections[0], title=title or "")
         setup_cont_footer(doc.sections[0], entity=entity)
 
+    # Document properties
+    doc.core_properties.title = title or ""
+    doc.core_properties.author = "Digital Energy"
+    doc.core_properties.subject = subject or ""
+
+    # Set up custom numbering definitions for alphabetic/roman lists
+    _setup_custom_numbering(doc)
+
     heading_sizes = {1: Pt(24), 2: Pt(18), 3: Pt(14), 4: Pt(12), 5: Pt(11), 6: Pt(11)}
+
+    # Regex patterns for list detection
+    _alpha_re = re.compile(r'^[\s]*\([a-z]\)\s+')
+    _roman_re = re.compile(r'^[\s]*\((i{1,3}|iv|v|vi{0,3}|ix|x)\)\s+')
+
+    # Signature section mode
+    _SIG_HEADING_RE = re.compile(
+        r'(signatures?|counter[- ]?signatures?|execution|signature\s*page)',
+        re.IGNORECASE
+    )
+    _SIG_PARTY_RE = re.compile(r'^\*\*[^*]+\*\*\s*$')
+    in_signature_section = False
 
     lines = md_text.split('\n')
     i = 0
@@ -958,11 +1258,19 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         m = re.match(r'^(#{1,6})\s+(.+)$', line)
         if m:
             level = len(m.group(1))
+            heading_text = m.group(2).strip()
+
+            # Check if this heading enters/exits signature section
+            if _SIG_HEADING_RE.search(heading_text):
+                in_signature_section = True
+            elif in_signature_section:
+                in_signature_section = False  # Non-signature heading exits mode
+
             p = doc.add_paragraph()
-            p.paragraph_format.space_before = Pt(18) if level <= 2 else Pt(12)
-            p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.space_before = _SP['h1_before'] if level <= 2 else _SP['h3_before']
+            p.paragraph_format.space_after = _SP['heading_after']
             p.paragraph_format.keep_with_next = True
-            _add_inline(p, m.group(2).strip(), size=heading_sizes.get(level, Pt(11)),
+            _add_inline(p, heading_text, size=heading_sizes.get(level, Pt(11)),
                         color=SLATE_900, bold=True)
             i += 1
             continue
@@ -972,42 +1280,61 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             i += 1
             continue
 
-        # Unordered list — native Word bullet style
+        # Unordered list — native Word bullet style (with blank-line look-ahead)
         if re.match(r'^[\s]*[-*+]\s+', line):
             first = True
-            while i < len(lines) and re.match(r'^[\s]*[-*+]\s+', lines[i]):
-                text = re.sub(r'^[\s]*[-*+]\s+', '', lines[i]).strip()
-                p = doc.add_paragraph(style='List Bullet')
-                if first:
-                    p.paragraph_format.space_before = Pt(6)
+            p = None
+            while i < len(lines):
+                if re.match(r'^[\s]*[-*+]\s+', lines[i]):
+                    text = re.sub(r'^[\s]*[-*+]\s+', '', lines[i]).strip()
+                    p = doc.add_paragraph(style='List Bullet')
+                    p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
+                    p.paragraph_format.space_after = _SP['list_gap']
+                    p.paragraph_format.widow_control = True
+                    _add_inline(p, text)
                     first = False
+                    i += 1
+                elif not lines[i].strip():
+                    # Blank line — look ahead for list continuation
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if j < len(lines) and re.match(r'^[\s]*[-*+]\s+', lines[j]):
+                        i = j
+                    else:
+                        break
                 else:
-                    p.paragraph_format.space_before = Pt(2)
-                p.paragraph_format.space_after = Pt(2)
-                _add_inline(p, text)
-                i += 1
-            # Space after last item
+                    break
             if p:
-                p.paragraph_format.space_after = Pt(6)
+                p.paragraph_format.space_after = _SP['list_last_after']
             continue
 
-        # Ordered list — native Word numbered style
+        # Ordered list — native Word numbered style (with blank-line look-ahead)
         if re.match(r'^[\s]*\d+[.)]\s+', line):
             first = True
-            while i < len(lines) and re.match(r'^[\s]*\d+[.)]\s+', lines[i]):
-                text = re.sub(r'^[\s]*\d+[.)]\s+', '', lines[i]).strip()
-                p = doc.add_paragraph(style='List Number')
-                if first:
-                    p.paragraph_format.space_before = Pt(6)
+            p = None
+            while i < len(lines):
+                if re.match(r'^[\s]*\d+[.)]\s+', lines[i]):
+                    text = re.sub(r'^[\s]*\d+[.)]\s+', '', lines[i]).strip()
+                    p = doc.add_paragraph(style='List Number')
+                    p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
+                    p.paragraph_format.space_after = _SP['list_gap']
+                    p.paragraph_format.widow_control = True
+                    _add_inline(p, text)
                     first = False
+                    i += 1
+                elif not lines[i].strip():
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if j < len(lines) and re.match(r'^[\s]*\d+[.)]\s+', lines[j]):
+                        i = j
+                    else:
+                        break
                 else:
-                    p.paragraph_format.space_before = Pt(2)
-                p.paragraph_format.space_after = Pt(2)
-                _add_inline(p, text)
-                i += 1
-            # Space after last item
+                    break
             if p:
-                p.paragraph_format.space_after = Pt(6)
+                p.paragraph_format.space_after = _SP['list_last_after']
             continue
 
         # Table
@@ -1029,48 +1356,161 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                 i += 1
             p = doc.add_paragraph()
             p.paragraph_format.left_indent = Mm(10)
+            p.paragraph_format.widow_control = True
             _run(p, ' '.join(parts), size=Pt(11), color=SLATE, italic=True)
             continue
 
-        # Signature block detection: lines with ___ or "Name:"/"Title:"/"Signature:"/"Date:"
-        # Keep all signature-related paragraphs together on one page
-        sig_pattern = re.compile(r'^(_{3,}|.*\b(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
-        if sig_pattern.match(line):
-            sig_lines = []
-            while i < len(lines) and (sig_pattern.match(lines[i]) or not lines[i].strip()):
-                if lines[i].strip():
-                    sig_lines.append(lines[i])
-                i += 1
-            # Also grab trailing non-blank lines that look like signature content
-            while i < len(lines) and lines[i].strip() and not lines[i].startswith('#'):
-                if sig_pattern.match(lines[i]) or len(lines[i].strip()) < 60:
-                    sig_lines.append(lines[i])
+        # Alphabetic list: (a), (b), (c) — native lowerLetter numbering
+        if _alpha_re.match(line):
+            # Disambiguate (i): if next item is (ii) → roman, if (j) → alpha
+            abstract_id = _ALPHA_ABSTRACT_ID
+            if re.match(r'^[\s]*\(i\)\s+', line):
+                # Peek ahead for next list item
+                j = i + 1
+                while j < len(lines) and not lines[j].strip():
+                    j += 1
+                if j < len(lines) and re.match(r'^[\s]*\(ii\)\s+', lines[j]):
+                    abstract_id = _ROMAN_ABSTRACT_ID
+
+            num_id = _new_list_instance(doc, abstract_id)
+            first = True
+            p = None
+            while i < len(lines):
+                if _alpha_re.match(lines[i]) or _roman_re.match(lines[i]):
+                    text = re.sub(r'^[\s]*\([a-z]+\)\s+', '', lines[i]).strip()
+                    p = doc.add_paragraph()
+                    if num_id is not None:
+                        _apply_numbering(p, num_id)
+                    else:
+                        # Fallback: manual text prefix
+                        m_item = re.match(r'^[\s]*(\([a-z]+\))\s+', lines[i])
+                        if m_item:
+                            text = m_item.group(1) + ' ' + text
+                    p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
+                    p.paragraph_format.space_after = _SP['list_gap']
+                    p.paragraph_format.line_spacing = _SP['body_line']
+                    p.paragraph_format.widow_control = True
+                    _add_inline(p, text)
+                    first = False
                     i += 1
+                elif not lines[i].strip():
+                    # Blank line — look ahead for list continuation
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if j < len(lines) and (_alpha_re.match(lines[j]) or _roman_re.match(lines[j])):
+                        i = j  # skip blanks, continue same list
+                    else:
+                        break
                 else:
                     break
-            for idx, sl in enumerate(sig_lines):
-                p = doc.add_paragraph()
-                p.paragraph_format.keep_together = True
-                p.paragraph_format.keep_with_next = (idx < len(sig_lines) - 1)
-                if idx == 0:
-                    p.paragraph_format.space_before = Pt(24)
-                else:
-                    p.paragraph_format.space_before = Pt(2)
-                p.paragraph_format.space_after = Pt(2)
-                _add_inline(p, sl.strip())
+            if p:
+                p.paragraph_format.space_after = _SP['list_last_after']
             continue
 
-        # Paragraph
+        # Roman list: (i), (ii), (iii) — native lowerRoman numbering
+        if _roman_re.match(line) and not _alpha_re.match(line):
+            num_id = _new_list_instance(doc, _ROMAN_ABSTRACT_ID)
+            first = True
+            p = None
+            while i < len(lines):
+                if _roman_re.match(lines[i]):
+                    text = re.sub(r'^[\s]*\([ivxlcdm]+\)\s+', '', lines[i]).strip()
+                    p = doc.add_paragraph()
+                    if num_id is not None:
+                        _apply_numbering(p, num_id)
+                    p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
+                    p.paragraph_format.space_after = _SP['list_gap']
+                    p.paragraph_format.line_spacing = _SP['body_line']
+                    p.paragraph_format.widow_control = True
+                    _add_inline(p, text)
+                    first = False
+                    i += 1
+                elif not lines[i].strip():
+                    j = i + 1
+                    while j < len(lines) and not lines[j].strip():
+                        j += 1
+                    if j < len(lines) and _roman_re.match(lines[j]):
+                        i = j
+                    else:
+                        break
+                else:
+                    break
+            if p:
+                p.paragraph_format.space_after = _SP['list_last_after']
+            continue
+
+        # Signature block detection
+        # Mode 1: Section mode (in_signature_section flag set by heading)
+        # Mode 2: Fallback line detection for documents without ## Signatures heading
+        sig_line_re = re.compile(r'^(_{3,}|.*\b(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
+
+        if in_signature_section or sig_line_re.match(line) or _SIG_PARTY_RE.match(line.strip()):
+            # Collect all lines in this signature region
+            party_blocks = []
+            current_block = []
+            blank_count = 0
+            is_first_party = True
+
+            while i < len(lines):
+                cl = lines[i]
+                # Exit on heading (will be handled by heading handler which may exit sig mode)
+                if cl.strip().startswith('#'):
+                    break
+                # Blank lines: track for party block separation
+                if not cl.strip():
+                    blank_count += 1
+                    if blank_count >= 2 and current_block:
+                        party_blocks.append(current_block)
+                        current_block = []
+                        blank_count = 0
+                    i += 1
+                    continue
+                blank_count = 0
+                current_block.append(cl)
+                i += 1
+
+            if current_block:
+                party_blocks.append(current_block)
+
+            # Render party blocks with proper keep_together / keep_with_next
+            for block_idx, block in enumerate(party_blocks):
+                for line_idx, sl in enumerate(block):
+                    p = doc.add_paragraph()
+                    p.paragraph_format.keep_together = True
+                    is_last_line = (line_idx == len(block) - 1)
+                    is_last_block = (block_idx == len(party_blocks) - 1)
+                    # keep_with_next: True for all lines EXCEPT the very last line of the very last block
+                    p.paragraph_format.keep_with_next = not (is_last_line and is_last_block)
+
+                    # Spacing
+                    if line_idx == 0 and block_idx == 0:
+                        p.paragraph_format.space_before = _SP['sig_section_before']
+                    elif line_idx == 0:
+                        p.paragraph_format.space_before = _SP['sig_party_gap']
+                    else:
+                        p.paragraph_format.space_before = _SP['sig_line_gap']
+                    p.paragraph_format.space_after = _SP['sig_line_gap']
+
+                    _add_inline(p, sl.strip())
+            continue
+
+        # Paragraph (with guards to avoid swallowing lists/tables)
         para_lines = []
         while (i < len(lines) and lines[i].strip()
                and not lines[i].startswith('#')
-               and not re.match(r'^[-*_]{3,}\s*$', lines[i])):
+               and not re.match(r'^[-*_]{3,}\s*$', lines[i])
+               and not re.match(r'^[\s]*[-*+]\s+', lines[i])
+               and not re.match(r'^[\s]*\d+[.)]\s+', lines[i])
+               and not re.match(r'^[\s]*\([a-z]\)\s+', lines[i])
+               and not re.match(r'^[\s]*\((i{1,3}|iv|v|vi{0,3}|ix|x)\)\s+', lines[i])
+               and not (lines[i].strip().startswith('|') and '|' in lines[i][1:])):
             para_lines.append(lines[i])
             i += 1
         if para_lines:
             p = doc.add_paragraph()
-            p.paragraph_format.line_spacing = Pt(16.5)
-            p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.line_spacing = _SP['body_line']
+            p.paragraph_format.space_after = _SP['body_after']
             p.paragraph_format.widow_control = True
             _add_inline(p, ' '.join(para_lines))
             continue
