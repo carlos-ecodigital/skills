@@ -755,7 +755,7 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
     """
     # Push title down from logo
     spacer = doc.add_paragraph()
-    spacer.paragraph_format.space_before = Pt(140)
+    spacer.paragraph_format.space_before = Pt(200)
     spacer.paragraph_format.space_after = Pt(0)
 
     # 1. Agreement type
