@@ -863,13 +863,13 @@ def add_section(doc, title, guidance, level=2):
 
 
 def _compute_col_widths(headers, rows, avail_emu):
-    """Compute column widths with minimum-guarantee + proportional overflow.
+    """Compute column widths: header-first, then data-weighted surplus.
 
-    Algorithm:
-    1. Compute min_width per column (header/data display length, longest word)
-    2. Classify: "compact" (≤25 display chars) or "flex" (>25)
-    3. Compact columns get their min_width; flex columns share remaining space
-    4. 2-column key-value heuristic preserved (25/75 split)
+    Priority order:
+    1. Every column fits its header text on one line (non-negotiable)
+    2. Remaining space distributed proportionally by data volume
+    3. Columns with trivial data (≤ header length) don't get surplus
+    4. 2-column key-value layout uses 25/75 split
     """
     ncols = len(headers)
 
@@ -887,53 +887,47 @@ def _compute_col_widths(headers, rows, avail_emu):
     if ncols == 2 and max_data_lens[0] < 30 and max_data_lens[1] > 60:
         return [int(avail_emu * 0.25), int(avail_emu * 0.75)]
 
-    # Compute min_width and classify each column
-    min_widths = []
-    classifications = []
+    # Step 1: base width = enough to fit header on one line + padding
+    base_widths = []
     for j in range(ncols):
-        display_chars = max(header_lens[j], min(max_data_lens[j], 20))
-        min_from_content = display_chars * _CHAR_WIDTH_EMU + _CELL_PAD_EMU
-        # Also consider longest single word in header
-        min_from_word = _longest_word_len(headers[j]) * _CHAR_WIDTH_EMU + _CELL_PAD_EMU
-        min_w = max(min_from_content, min_from_word, _MIN_COL_EMU)
-        min_widths.append(min_w)
-        classifications.append("compact" if max_data_lens[j] <= 25 else "flex")
+        header_w = (header_lens[j] + 2) * _CHAR_WIDTH_EMU + _CELL_PAD_EMU
+        base_widths.append(max(header_w, _MIN_COL_EMU))
 
-    compact_total = sum(min_widths[j] for j in range(ncols) if classifications[j] == "compact")
-    flex_indices = [j for j in range(ncols) if classifications[j] == "flex"]
+    base_total = sum(base_widths)
 
-    # OVERFLOW guard: if compact columns > 70% of available, fall back to proportional with floor
-    if compact_total > avail_emu * 0.70 or not flex_indices:
-        # Proportional with floor
-        weights = [max(min(max_data_lens[j], 80), max(5, header_lens[j] + 2))
-                   for j in range(ncols)]
-        total_w = sum(weights)
-        widths = [max(int(avail_emu * w / total_w), _MIN_COL_EMU) for w in weights]
-        # Correct rounding drift — apply to widest column (never shrink below minimum)
+    # If headers alone exceed available space, scale down proportionally
+    if base_total > avail_emu:
+        scale = avail_emu / base_total
+        widths = [max(int(w * scale), _MIN_COL_EMU) for w in base_widths]
         drift = avail_emu - sum(widths)
         if drift != 0:
-            target = max(range(ncols), key=lambda j: widths[j])
-            widths[target] = max(widths[target] + drift, _MIN_COL_EMU)
+            widths[max(range(ncols), key=lambda j: widths[j])] += drift
         return widths
 
-    # Normal path: compact columns get min_width, flex share the rest
-    remaining = avail_emu - compact_total
-    flex_weights = [min(max_data_lens[j], 80) for j in flex_indices]
-    flex_total = sum(flex_weights) or 1
-
-    widths = [0] * ncols
+    # Step 2: distribute surplus by data volume
+    surplus = avail_emu - base_total
+    # Weight = how much MORE data each column has beyond its header width
+    # Columns where data fits in header width get zero surplus
+    data_needs = []
     for j in range(ncols):
-        if classifications[j] == "compact":
-            widths[j] = min_widths[j]
-        else:
-            idx = flex_indices.index(j)
-            widths[j] = max(int(remaining * flex_weights[idx] / flex_total), _MIN_COL_EMU)
+        data_chars = min(max_data_lens[j], 80)  # cap at 80 to prevent domination
+        header_chars = header_lens[j] + 2
+        need = max(0, data_chars - header_chars)
+        data_needs.append(need)
 
-    # Correct rounding drift — apply to widest column (never shrink below minimum)
+    total_need = sum(data_needs)
+    if total_need > 0 and surplus > 0:
+        widths = [base_widths[j] + int(surplus * data_needs[j] / total_need)
+                  for j in range(ncols)]
+    else:
+        # All data fits in headers — distribute surplus evenly
+        per_col = surplus // ncols
+        widths = [base_widths[j] + per_col for j in range(ncols)]
+
+    # Correct rounding drift
     drift = avail_emu - sum(widths)
     if drift != 0:
-        target = max(range(ncols), key=lambda j: widths[j])
-        widths[target] = max(widths[target] + drift, _MIN_COL_EMU)
+        widths[max(range(ncols), key=lambda j: widths[j])] += drift
 
     return widths
 
