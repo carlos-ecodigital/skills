@@ -20,12 +20,14 @@ import sys
 import re
 from dataclasses import dataclass
 from datetime import datetime, date
-from typing import Optional, List
+from typing import Optional
 
 try:
     from docx import Document
-    from docx.shared import Mm, Pt, RGBColor, Inches
+    from docx.shared import Mm, Pt, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+    from docx.oxml.ns import qn
+    from lxml import etree
 except ImportError:
     print("Error: python-docx is required. Install with: pip install python-docx")
     sys.exit(1)
@@ -57,10 +59,9 @@ ENTITY = ENTITY_FOOTERS["ag"]  # Backward-compat default
 
 def _footer_text(entity_key="ag"):
     e = ENTITY_FOOTERS.get(entity_key, ENTITY_FOOTERS["ag"])
-    return "  |  ".join([e["legal_name"], e["address"], e["registration"], e["website"]])
+    return "  \u00b7  ".join([e["legal_name"], e["address"], e["registration"], e["website"]])
 
 FONT = "Inter"
-FONT_FALLBACK = "Arial"
 
 # DE Approved Palette (2026-03-31) — see memory/project_de_brand_palette.md
 # Intended use by domain:
@@ -83,6 +84,9 @@ PATINA = RGBColor(0x0F, 0x76, 0x6E)      # Sustainability
 SLATE = RGBColor(0x64, 0x74, 0x8B)       # Slate 500 — captions, secondary
 
 # Neutral ramp (Slate)
+SLATE_50_HEX = "F8FAFC"                   # Table alt-row shading (hex for XML attrs)
+SLATE_300_HEX = "CBD5E1"                   # Table borders (hex for XML attrs)
+COBALT_HEX = "0034AF"                      # Header fill (hex for XML attrs)
 SLATE_800 = RGBColor(0x1E, 0x29, 0x3B)   # Body text
 SLATE_900 = RGBColor(0x0F, 0x17, 0x2A)   # Headings
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
@@ -92,6 +96,9 @@ LOGO = os.path.join(SCRIPT_DIR, "assets", "DE_Logo_Black.png")
 if not os.path.exists(LOGO):
     # Fallback: check script directory root
     LOGO = os.path.join(SCRIPT_DIR, "DE_Logo_Black.png")
+if not os.path.exists(LOGO):
+    print("Warning: DE_Logo_Black.png not found — documents will be generated without logo",
+          file=sys.stderr)
 OUTPUT = os.path.join(SCRIPT_DIR, "output")
 
 PROFILE_CODES = {
@@ -110,8 +117,8 @@ PROFILE_CODES = {
 
 @dataclass
 class Party:
-    legal_name: str
-    address: str
+    legal_name: str = ""
+    address: str = ""
     registration_type: Optional[str] = None    # "KvK", "CHE", "EIN"
     registration_number: Optional[str] = None
     parent: Optional[str] = None               # Parent company name + reg
@@ -122,7 +129,7 @@ DE_ENTITIES = {
         legal_name="Digital Energy Group AG",
         address="Baarerstrasse 43, 6300 Zug, Switzerland",
         registration_type="CHE",
-        registration_number="CHE-408.639.320",
+        registration_number="408.639.320",
     ),
     "nl": Party(
         legal_name="Digital Energy Netherlands B.V.",
@@ -157,6 +164,12 @@ AGREEMENT_FORMALITY = {
     "License Agreement": "binding",
     "Services Agreement": "binding",
     "Colocation Agreement": "binding",
+    "Advisory Agreement": "binding",
+    "SAR Grant Agreement": "binding",
+    "Board Resolution": "binding",
+    "Program Policy": "non_binding",
+    "Terms of Reference": "non_binding",
+    "Stock Appreciation Rights — Term Sheet": "non_binding",
 }
 
 
@@ -220,6 +233,20 @@ def auto_name(profile, client=None, version=1, dt=None, agreement_type=None):
 # BUILDING BLOCKS (no OxmlElement, no raw XML)
 # ---------------------------------------------------------------------------
 
+def _fix_zoom(doc):
+    """Ensure w:zoom has w:percent attribute (python-docx omits it, fails OOXML validation)."""
+    settings = doc.settings.element
+    zoom = settings.find(qn('w:zoom'))
+    if zoom is not None and zoom.get(qn('w:percent')) is None:
+        zoom.set(qn('w:percent'), '100')
+
+
+def save_doc(doc, path):
+    """Save document with all post-processing fixes applied."""
+    _fix_zoom(doc)
+    doc.save(path)
+
+
 def _run(para, text, size=Pt(11), color=SLATE_800, bold=False, italic=False, font=FONT):
     """Add a styled run."""
     r = para.add_run(text)
@@ -280,7 +307,7 @@ def setup_footer(footer, classification=None, entity="ag"):
     p = footer.paragraphs[0]
     p.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
     r = p.add_run(_footer_text(entity))
-    r.font.size = Pt(8)
+    r.font.size = Pt(7)
     r.font.name = FONT
     r.font.color.rgb = SLATE
 
@@ -445,18 +472,148 @@ def add_section(doc, title, guidance, level=2):
     _run(gp, guidance, size=Pt(11), color=SLATE, italic=True)
 
 
+def _compute_col_widths(headers, rows, avail_emu):
+    """Compute proportional column widths based on content length."""
+    ncols = len(headers)
+    # Weight = max character length across header + all rows for each column
+    weights = []
+    for j in range(ncols):
+        max_len = len(headers[j])
+        for row in rows:
+            if j < len(row):
+                max_len = max(max_len, len(str(row[j])))
+        weights.append(max(max_len, 3))  # minimum weight 3
+    total = sum(weights)
+    return [int(avail_emu * w / total) for w in weights]
+
+
+def _insert_element(parent, tag_name, after_tags=()):
+    """Insert a new child element respecting OOXML schema ordering.
+
+    Finds the position after the last occurrence of any element in after_tags,
+    or appends at end if none found. Returns the new element.
+    """
+    new_elem = etree.Element(qn(tag_name))
+    insert_idx = 0
+    for idx, child in enumerate(parent):
+        for at in after_tags:
+            if child.tag == qn(at):
+                insert_idx = idx + 1
+    if insert_idx < len(parent):
+        parent.insert(insert_idx, new_elem)
+    else:
+        parent.append(new_elem)
+    return new_elem
+
+
+def _format_table(table, headers=None, rows=None):
+    """IB-grade table formatting: Cobalt header, alternating rows, Slate borders.
+
+    Uses lxml.etree + docx.oxml.ns.qn to set cell properties. Respects OOXML
+    element ordering (tcBorders before shd; tblW before tblLayout before tblBorders).
+    This is NOT OxmlElement or raw XML string parsing — it works through the
+    same lxml tree that python-docx builds internally and is safe on Word for Mac.
+    """
+    ncols = len(table.columns)
+    avail_width = Mm(165)  # page 210mm - 25mm left - 20mm right
+
+    # Set total table width via tblPr to prevent overflow
+    # OOXML tblPr order: tblStyle, tblpPr, tblOverlap, bidiVisual,
+    #   tblStyleRowBandSize, tblStyleColBandSize, tblW, jc, tblCellSpacing,
+    #   tblInd, tblBorders, shd, tblLayout, tblCellMar, tblLook, ...
+    tbl_elem = table._tbl
+    tblPr = tbl_elem.find(qn('w:tblPr'))
+    if tblPr is None:
+        tblPr = etree.SubElement(tbl_elem, qn('w:tblPr'))
+        tbl_elem.insert(0, tblPr)
+
+    for tag in ('w:tblW', 'w:tblLayout'):
+        existing = tblPr.find(qn(tag))
+        if existing is not None:
+            tblPr.remove(existing)
+
+    tblW = _insert_element(tblPr, 'w:tblW',
+                           after_tags=('w:tblStyle', 'w:tblpPr', 'w:tblOverlap',
+                                       'w:bidiVisual', 'w:tblStyleRowBandSize',
+                                       'w:tblStyleColBandSize'))
+    tblW.set(qn('w:w'), str(int(avail_width)))
+    tblW.set(qn('w:type'), 'dxa')
+
+    tblLayout = _insert_element(tblPr, 'w:tblLayout',
+                                after_tags=('w:tblStyle', 'w:tblpPr', 'w:tblOverlap',
+                                            'w:bidiVisual', 'w:tblStyleRowBandSize',
+                                            'w:tblStyleColBandSize', 'w:tblW', 'w:jc',
+                                            'w:tblCellSpacing', 'w:tblInd', 'w:tblBorders',
+                                            'w:shd'))
+    tblLayout.set(qn('w:type'), 'fixed')
+
+    # Proportional column widths
+    if headers and rows:
+        col_widths = _compute_col_widths(headers, rows, int(avail_width))
+    else:
+        col_width = int(avail_width) // ncols
+        col_widths = [col_width] * ncols
+    for j, col in enumerate(table.columns):
+        col.width = col_widths[j] if j < len(col_widths) else col_widths[-1]
+
+    # OOXML tcPr order: cnfStyle, tcW, gridSpan, hMerge, vMerge,
+    #   tcBorders, shd, noWrap, tcMar, textDirection, ...
+    for i, row in enumerate(table.rows):
+        for cell in row.cells:
+            tc = cell._tc
+            tcPr = tc.find(qn('w:tcPr'))
+            if tcPr is None:
+                tcPr = etree.SubElement(tc, qn('w:tcPr'))
+                tc.insert(0, tcPr)
+
+            for tag in ('w:tcBorders', 'w:shd'):
+                existing = tcPr.find(qn(tag))
+                if existing is not None:
+                    tcPr.remove(existing)
+
+            # tcBorders FIRST (before shd in OOXML schema)
+            tcBorders = _insert_element(tcPr, 'w:tcBorders',
+                                        after_tags=('w:cnfStyle', 'w:tcW', 'w:gridSpan',
+                                                    'w:hMerge', 'w:vMerge'))
+            for edge in ('top', 'left', 'bottom', 'right'):
+                b = etree.SubElement(tcBorders, qn('w:{}'.format(edge)))
+                b.set(qn('w:val'), 'single')
+                b.set(qn('w:sz'), '4')       # 4 eighth-points = 0.5pt
+                b.set(qn('w:space'), '0')
+                b.set(qn('w:color'), SLATE_300_HEX)
+
+            # shd AFTER tcBorders
+            shd = _insert_element(tcPr, 'w:shd',
+                                  after_tags=('w:cnfStyle', 'w:tcW', 'w:gridSpan',
+                                              'w:hMerge', 'w:vMerge', 'w:tcBorders'))
+            shd.set(qn('w:val'), 'clear')
+            shd.set(qn('w:color'), 'auto')
+            if i == 0:
+                shd.set(qn('w:fill'), COBALT_HEX)
+            elif i % 2 == 0:
+                shd.set(qn('w:fill'), SLATE_50_HEX)
+            else:
+                shd.set(qn('w:fill'), 'FFFFFF')
+
+            # Cell padding for breathing room
+            for p in cell.paragraphs:
+                p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(2)
+
+
 def add_table(doc, headers, rows):
-    """Branded table with dark header."""
+    """Branded table: Cobalt header, proportional columns, inline formatting."""
     tbl = doc.add_table(rows=1 + len(rows), cols=len(headers), style="Table Grid")
     for j, h in enumerate(headers):
         cell = tbl.cell(0, j)
         cell.text = ""
-        _run(cell.paragraphs[0], h, size=Pt(9), color=WHITE, bold=True)
+        _run(cell.paragraphs[0], h, size=Pt(10), color=WHITE, bold=True)
     for i, row in enumerate(rows):
         for j, val in enumerate(row):
             cell = tbl.cell(i + 1, j)
             cell.text = ""
-            _run(cell.paragraphs[0], str(val), size=Pt(9), color=SLATE_800)
+            _add_inline(cell.paragraphs[0], str(val), size=Pt(10), color=SLATE_800)
+    _format_table(tbl, headers, rows)
 
 
 # ---------------------------------------------------------------------------
@@ -664,10 +821,10 @@ def profile_investor_memo(client="[Investor Name]", date_str="", version=1, enti
     return doc
 
 
-def profile_exec_summary(title="[Executive Summary]", date_str="", **kw):
+def profile_exec_summary(title="[Executive Summary]", date_str="", entity="ag", **kw):
     doc = new_doc(top=Mm(15), bottom=Mm(25))
     setup_cont_header(doc.sections[0], title=title)
-    setup_cont_footer(doc.sections[0])
+    setup_cont_footer(doc.sections[0], entity=entity)
 
     # Title
     tp = doc.add_paragraph()
@@ -890,6 +1047,19 @@ PROFILES = {
 }
 
 
+def _run_validate(docx_path):
+    """Run office_bridge validation if available."""
+    try:
+        from office_bridge import OfficeBridge
+        bridge = OfficeBridge()
+        result = bridge.validate(docx_path)
+        print(f"Validate:  {result.strip()}")
+    except ImportError:
+        print("Validate:  skipped (office_bridge not available)", file=sys.stderr)
+    except Exception as e:
+        print(f"Validate:  FAILED — {e}", file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate branded DE documents")
     parser.add_argument("--profile", choices=list(PROFILES.keys()),
@@ -917,7 +1087,11 @@ def main():
     parser.add_argument("--output", default=None)
     parser.add_argument("--dotx", action="store_true")
     parser.add_argument("--pdf", action="store_true",
-                       help="Also produce a PDF (Word-first, LibreOffice fallback)")
+                       help="Also produce a PDF via Microsoft Word")
+    parser.add_argument("--validate", action="store_true",
+                       help="Validate .docx via office_bridge after generation")
+    parser.add_argument("--strip-review", action="store_true",
+                       help="Strip [REVIEW REQUIRED] markers from output (md mode)")
     # Markdown mode
     parser.add_argument("--md", default=None, help="Input markdown file")
     parser.add_argument("--cover", action="store_true", help="Add cover page to md output")
@@ -939,11 +1113,15 @@ def main():
             sys.exit(1)
         with open(args.md, 'r') as f:
             md_text = f.read()
+        if args.strip_review:
+            md_text = re.sub(r'\[REVIEW REQUIRED\]', '', md_text)
         doc = md_to_docx(md_text, title=args.title, client=args.client,
-                         date_str=date_str, cover=args.cover)
+                         date_str=date_str, cover=args.cover, entity=args.entity)
         out = args.output or os.path.join(OUTPUT, "md_output.docx")
-        doc.save(out)
+        save_doc(doc, out)
         print(f"Saved: {out}")
+        if args.validate:
+            _run_validate(out)
         if args.pdf:
             try:
                 pdf = docx_to_pdf(out)
@@ -985,7 +1163,7 @@ def main():
             kwargs["title"] = args.title
         if args.client:
             kwargs["client"] = args.client
-        if args.profile in ("letter", "seed_memo", "investor_memo"):
+        if args.profile in ("letter", "seed_memo", "investor_memo", "exec_summary"):
             kwargs["entity"] = args.entity
 
     doc = fn(**kwargs)
@@ -997,12 +1175,15 @@ def main():
             args.profile, args.client, args.version, dt,
             agreement_type=kwargs.get("agreement_type")))
 
-    doc.save(out)
+    save_doc(doc, out)
     print(f"Generated: {out}")
+
+    if args.validate:
+        _run_validate(out)
 
     if args.dotx:
         dotx = out.replace(".docx", ".dotx")
-        doc.save(dotx)
+        save_doc(doc, dotx)
         print(f"Template:  {dotx}")
 
     if args.pdf:
