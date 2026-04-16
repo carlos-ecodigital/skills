@@ -172,97 +172,63 @@ python3 generate.py --profile agreement --agreement-type "Letter of Intent" --cl
 
 **Word-only:** Both utilities drive Microsoft Word (AppleScript on macOS, COM on Windows). No LibreOffice fallback — Word's rendering of .docx is canonical; LibreOffice drift was deemed worse than a clean error.
 
-## Office Bridge — Anthropic Skill Integration
+## Scope
 
-`office_bridge.py` discovers and wraps Anthropic's bundled office-skills toolchain (docx, pdf, xlsx, pptx) at runtime. These scripts live in session-scoped directories managed by Claude Code and **update automatically** with each Anthropic release — no manual syncing needed.
+### What You Own
+- Branded .docx creation (all profiles: letter, agreement, seed_memo, investor_memo, exec_summary)
+- Cover page rendering (entity details, party blocks, formality detection, metadata)
+- Markdown-to-docx conversion with brand formatting (headers, tables, lists, inline styles)
+- OOXML validation via Office Bridge
+- PDF conversion via Word (canonical) or LibreOffice (fallback)
+- Tracked-changes acceptance
 
-**Architecture:** Document Factory owns CREATION (python-docx, branded). Office Bridge adds VALIDATION, EDITING, and CONVERSION from Anthropic's toolchain.
+### What You Do NOT Own
+- **Content creation** — content skills (legal-assistant, seed-fundraising, collateral-studio) produce the words; document-factory only formats them
+- **Legal review** — formality detection is mechanical (dict lookup), not legal advice. Counsel reviews the content.
+- **Design** — visual identity is governed by `de-brand-bible` (messaging) and `de-brand-book` (design tokens). Document-factory implements their decisions, does not make them.
+- **PDF-only workflows** — if the deliverable is PDF-native (permit forms, RVO applications), use office_bridge.fill_pdf() directly
+- **Slide decks / presentations** — .pptx is out of scope; use collateral-studio or Gamma
 
-```
-Document Factory (create branded .docx)
-    → office_bridge.validate()     — OOXML schema check before external send
-    → office_bridge.unpack/pack()  — XML editing for tracked changes, comments
-    → office_bridge.to_pdf()       — LibreOffice fallback when Word unavailable
-    → office_bridge.fill_pdf()     — Permit form filling (RVO, gemeente)
-```
+## Anti-Patterns
 
-### Quick Start
+1. **Do not use OxmlElement or raw XML string parsing.** Use `lxml.etree` + `docx.oxml.ns.qn` through the same tree python-docx builds. OxmlElement creates orphaned elements that corrupt .docx on Word for Mac.
+2. **Do not use LibreOffice for final PDF output.** Word is canonical — LO rendering drifts (table widths, font substitution, page breaks). LO is fallback only.
+3. **Do not embed logos as base64 or inline data.** Always reference the file from `assets/`. python-docx handles the packaging.
+4. **Do not hardcode entity details in profile functions.** Use `DE_ENTITIES` dict and `ENTITY_FOOTERS` — one source of truth for all profiles.
+5. **Do not skip OOXML validation before external send.** Use `--validate` or `office_bridge.validate()`. A single missing attribute (like `w:percent` on `w:zoom`) causes Word to repair the file, which can strip formatting.
 
-```bash
-# Check what's available
-python3 office_bridge.py status
+## Office Bridge
 
-# Validate before sending externally
-python3 office_bridge.py validate output.docx
+`office_bridge.py` wraps Anthropic's bundled office-skills toolchain (docx, pdf, xlsx, pptx) via runtime discovery. Auto-updates with each Claude Code session.
 
-# Convert to PDF (LibreOffice, no Word needed)
-python3 office_bridge.py to-pdf output.docx
+See `references/office-bridge.md` for full API, capabilities table, and workflow examples.
 
-# Unpack for tracked changes / comments
-python3 office_bridge.py unpack output.docx unpacked/
-# ... edit XML in unpacked/word/ ...
-python3 office_bridge.py pack unpacked/ output_edited.docx output.docx
-```
+## Eval Scenarios
 
-### Python API
+### 1. Binding NL agreement cover
+**Input:** `--profile agreement --agreement-type "Master Service Agreement" --client "Test BV" --client-reg-type KvK --client-reg-number 12345678 --entity nl`
+**Expected:** Cover shows "By and between:", NL entity with KvK number, client with KvK, no "subsidiary of" text. Footer single line with `·` separators.
+**Success:** `office_bridge.validate()` passes. No literal `**` markers. Registration renders as `KvK: 98580086` not `KvK: KvK 98580086`.
 
-```python
-from office_bridge import OfficeBridge
+### 2. Non-binding LOI cover (AG entity)
+**Input:** `--profile agreement --agreement-type "Letter of Intent" --client "FrontierOne Ltd" --subject "for AI Infrastructure Distribution"`
+**Expected:** Cover shows "Between:" / "And:". No registration numbers. Subject line at 14pt slate.
+**Success:** Parties have names + addresses only. Subject renders below title.
 
-bridge = OfficeBridge()
-bridge.validate("output.docx")                          # Schema check
-bridge.unpack("doc.docx", "unpacked/")                  # For XML editing
-bridge.add_comment("unpacked/", 0, "Review this")       # Insert comment
-bridge.pack("unpacked/", "edited.docx", original="doc.docx")
-bridge.to_pdf_libreoffice("doc.docx")                   # PDF without Word
-bridge.fill_pdf_form("template.pdf", {"field": "val"})  # PDF forms
-```
+### 3. Markdown-to-docx with tables and bold
+**Input:** `--md sample.md --title "Test Report" --cover --entity nl --strip-review`
+**Expected:** Tables have Cobalt headers, proportional columns, fit within margins. `**bold**` renders as bold, not literal asterisks. `[REVIEW REQUIRED...]` markers stripped with count printed.
+**Success:** All tables within 165mm width. Header row has `0034AF` fill. Bold runs have `b=True`.
 
-### How it stays current
+### 4. Formality auto-detection (prefix match)
+**Input:** `md_to_docx(text, title="Board Resolution — SAR Program Adoption", cover=True, entity="nl")`
+**Expected:** `_detect_formality()` returns `"binding"` via prefix match on `"Board Resolution"`. Cover shows "By and between:".
+**Success:** formality == "binding". Registration numbers shown.
 
-Anthropic deploys skill scripts fresh each Claude Code session to:
-`~/Library/Application Support/Claude/local-agent-mode-sessions/skills-plugin/*/`
-
-The bridge discovers the latest session's scripts via glob, never copies them. When Anthropic ships updates (new validators, bug fixes, new capabilities), the bridge picks them up automatically next session. No maintenance required.
-
-**Capabilities sourced from Anthropic (auto-updating):**
-
-| Capability | Anthropic Skill | Bridge Method |
-|---|---|---|
-| OOXML schema validation | docx | `validate()` |
-| Unpack .docx to XML | docx | `unpack()` |
-| Repack XML to .docx | docx | `pack()` |
-| Insert comments | docx | `add_comment()` |
-| .docx → PDF (LibreOffice) | docx | `to_pdf_libreoffice()` |
-| .doc → .docx conversion | docx | `doc_to_docx()` |
-| PDF → images | pdf | `pdf_to_images()` |
-| PDF form field check | pdf | `check_pdf_form()` |
-| PDF form filling | pdf | `fill_pdf_form()` |
-| .xlsx validation | xlsx | `validate_xlsx()` |
-| .xlsx recalculation | xlsx | `recalc_xlsx()` |
-| .pptx validation | pptx | `validate_pptx()` |
-
-**Capabilities owned by Document Factory (DE-controlled):**
-
-| Capability | Script | Notes |
-|---|---|---|
-| Branded .docx creation | `generate.py` | python-docx, DE brand, 5 profiles |
-| .docx → PDF (Word) | `docx_to_pdf.py` | Higher fidelity than LibreOffice |
-| Accept tracked changes | `accept_changes.py` | Word-only (canonical rendering) |
-
-### Recommended workflow for external documents
-
-```bash
-# 1. Create branded .docx
-python3 generate.py --profile agreement --entity nl --client "Arco Vreugdenhil" ...
-
-# 2. Validate before sending
-python3 office_bridge.py validate output.docx
-
-# 3. Convert to PDF
-python3 docx_to_pdf.py output.docx        # Word (preferred)
-python3 office_bridge.py to-pdf output.docx  # LibreOffice (fallback)
-```
+### 5. OOXML validation (zoom fix)
+**Input:** Generate any document, inspect `w:zoom` element.
+**Expected:** `save_doc()` ensures `w:percent="100"` attribute exists on `w:zoom`.
+**Success:** `office_bridge.validate()` returns "All validations PASSED". No Word repair dialog on open.
 
 ## Requirements
 
