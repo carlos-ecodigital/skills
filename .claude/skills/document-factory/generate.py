@@ -26,6 +26,7 @@ try:
     from docx import Document
     from docx.shared import Mm, Pt, RGBColor
     from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
+    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
     from docx.oxml.ns import qn
     from lxml import etree
 except ImportError:
@@ -488,16 +489,33 @@ def add_section(doc, title, guidance, level=2):
 
 
 def _compute_col_widths(headers, rows, avail_emu):
-    """Compute proportional column widths based on content length."""
+    """Compute proportional column widths based on content length.
+
+    Rules:
+    - Weight = max character length across header + all rows, per column
+    - Cap each weight at 80 chars (prevents one giant cell from starving others)
+    - Minimum weight = header length + 2 (columns must fit their header)
+    - 2-column key-value tables: if the label column's max content is <30 chars
+      and the value column's max is >60, use 25/75 split (readable label/value)
+    """
     ncols = len(headers)
-    # Weight = max character length across header + all rows for each column
-    weights = []
+    raw_weights = []
     for j in range(ncols):
         max_len = len(headers[j])
         for row in rows:
             if j < len(row):
                 max_len = max(max_len, len(str(row[j])))
-        weights.append(max(max_len, 3))  # minimum weight 3
+        raw_weights.append(max_len)
+
+    # 2-column key-value heuristic
+    if ncols == 2 and raw_weights[0] < 30 and raw_weights[1] > 60:
+        return [int(avail_emu * 0.25), int(avail_emu * 0.75)]
+
+    # General case: cap and floor
+    min_weight = 5
+    max_weight = 80
+    weights = [max(min(w, max_weight), max(min_weight, len(headers[j]) + 2))
+               for j, w in enumerate(raw_weights)]
     total = sum(weights)
     return [int(avail_emu * w / total) for w in weights]
 
@@ -631,11 +649,13 @@ def add_table(doc, headers, rows):
     for j, h in enumerate(headers):
         cell = tbl.cell(0, j)
         cell.text = ""
+        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         _run(cell.paragraphs[0], h, size=Pt(10), color=WHITE, bold=True)
     for i, row in enumerate(rows):
         for j, val in enumerate(row):
             cell = tbl.cell(i + 1, j)
             cell.text = ""
+            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
             _add_inline(cell.paragraphs[0], str(val), size=Pt(10), color=SLATE_800)
     _format_table(tbl, headers, rows)
 
@@ -1051,6 +1071,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             p = doc.add_paragraph()
             p.paragraph_format.line_spacing = Pt(16.5)
             p.paragraph_format.space_after = Pt(6)
+            p.paragraph_format.widow_control = True
             _add_inline(p, ' '.join(para_lines))
             continue
 
