@@ -1067,10 +1067,11 @@ def _setup_custom_numbering(doc):
         tmpl.set(qn('w:val'), f'{0xDE100000 + _HEADING_ABSTRACT_ID:08X}')
 
         # Level 0: "1." / Level 1: "1.1" / Level 2: "1.1.1"
+        # No indent — headings are flush left with number followed by tab to text
         heading_levels = [
-            (0, '%1.', 432, 432),       # 0.3in indent
-            (1, '%1.%2', 864, 432),     # 0.6in indent
-            (2, '%1.%2.%3', 1296, 432), # 0.9in indent
+            (0, '%1.', 432, 432),       # "1." tab to text
+            (1, '%1.%2', 576, 576),     # "1.1" slightly wider for two-part
+            (2, '%1.%2.%3', 720, 720),  # "1.1.1" wider for three-part
         ]
         for ilvl, lvl_text, left, hanging in heading_levels:
             lvl = etree.SubElement(abstractNum, qn('w:lvl'))
@@ -1091,6 +1092,13 @@ def _setup_custom_numbering(doc):
             ind = etree.SubElement(pp, qn('w:ind'))
             ind.set(qn('w:left'), str(left))
             ind.set(qn('w:hanging'), str(hanging))
+            # Match heading text font — prevents Word defaulting to Calibri
+            rPr = etree.SubElement(lvl, qn('w:rPr'))
+            rFonts = etree.SubElement(rPr, qn('w:rFonts'))
+            rFonts.set(qn('w:ascii'), FONT)
+            rFonts.set(qn('w:hAnsi'), FONT)
+            rFonts.set(qn('w:cs'), 'Arial')
+            rFonts.set(qn('w:hint'), 'default')
 
         first_num = numbering_el.find(qn('w:num'))
         if first_num is not None:
@@ -1580,15 +1588,56 @@ def _detect_entity(title, md_text=""):
     return "ag"
 
 
+def _extract_title_from_md(md_text):
+    """Extract clean document title from markdown headings.
+
+    Looks at H1 and H2. If H1 is an entity name (e.g. "DIGITAL ENERGY NETHERLANDS B.V."),
+    uses H2 as the title. If H2 is also generic, falls back to H1.
+    Also extracts H3 as subject if it looks like a subtitle.
+    Returns (title, subject).
+    """
+    h1 = h2 = h3 = None
+    for line in md_text.split('\n')[:30]:
+        if line.startswith('# ') and not line.startswith('## '):
+            h1 = line[2:].strip()
+        elif line.startswith('## ') and not line.startswith('### ') and h2 is None:
+            h2 = line[3:].strip()
+            # Strip numbering prefix: "## 1. Parties" → "Parties" — but keep unnumbered
+            h2_clean = re.sub(r'^\d+[A-Z]?\.\s+', '', h2)
+            if h2_clean != h2:
+                h2 = None  # First H2 was numbered section, not a title
+                continue
+        elif line.startswith('### ') and not line.startswith('#### ') and h3 is None and h2:
+            h3_text = line[4:].strip()
+            # Only use H3 as subject if it's not a numbered section
+            if not re.match(r'^\d+', h3_text):
+                h3 = h3_text
+
+    entity_names = ('DIGITAL ENERGY', 'DE GROUP', 'DEG AG', 'DENL', 'DEC THERMAL')
+    if h1 and any(en in h1.upper() for en in entity_names):
+        # H1 is entity name — use H2 as title
+        return (h2 or h1, h3)
+    return (h1 or h2, h3)
+
+
 def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                entity=None, subject=None, formality=None):
     """Convert markdown to branded docx.
 
     Args:
+        title: Document title. If None, auto-extracted from markdown H1/H2.
         formality: "binding" or "non_binding". If None, auto-detects from
                    AGREEMENT_FORMALITY dict using title, defaulting to "non_binding".
         subject: Cover page subtitle (e.g. "Chairman, Horticulture Advisory Board").
     """
+    # Auto-extract title and subject from markdown if not provided
+    if title is None or (cover and subject is None):
+        auto_title, auto_subject = _extract_title_from_md(md_text)
+        if title is None:
+            title = auto_title
+        if subject is None and cover:
+            subject = auto_subject
+
     if entity is None:
         entity = _detect_entity(title, md_text)
     has_cover = cover and title
@@ -1627,9 +1676,10 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
 
     heading_sizes = {1: Pt(24), 2: Pt(18), 3: Pt(14), 4: Pt(12), 5: Pt(11), 6: Pt(11)}
     # Detect numbered headings: "## 1. Title", "### 1.1 Title", "#### 1.1.1 Title"
-    _numbered_heading_re = re.compile(r'^(\d+(?:\.\d+)*)\.?\s+(.*)')
+    # Detect numbered headings: "1. Title", "1.1 Title", "2A. Title", "3.2 Title"
+    _numbered_heading_re = re.compile(r'^(\d+(?:[A-Z]|\.\d+)*)\.?\s+(.*)')
     # Map markdown heading level → ilvl for heading numbering
-    # ## (level 2) → ilvl 0 (top-level "1."), ### (level 3) → ilvl 1 ("1.1"), etc.
+    # ## (level 2) → ilvl 0 (top-level "1."), ### (level 3) → ilvl 1 ("1.1" or "2A"), #### → ilvl 2
     _heading_level_to_ilvl = {2: 0, 3: 1, 4: 2}
 
     # Regex patterns for list detection
