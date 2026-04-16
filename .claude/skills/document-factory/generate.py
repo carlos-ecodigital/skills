@@ -1092,13 +1092,7 @@ def _setup_custom_numbering(doc):
             ind = etree.SubElement(pp, qn('w:ind'))
             ind.set(qn('w:left'), str(left))
             ind.set(qn('w:hanging'), str(hanging))
-            # Match heading text font — prevents Word defaulting to Calibri
-            rPr = etree.SubElement(lvl, qn('w:rPr'))
-            rFonts = etree.SubElement(rPr, qn('w:rFonts'))
-            rFonts.set(qn('w:ascii'), FONT)
-            rFonts.set(qn('w:hAnsi'), FONT)
-            rFonts.set(qn('w:cs'), 'Arial')
-            rFonts.set(qn('w:hint'), 'default')
+            # No w:rPr — Word inherits font/size/bold from paragraph formatting
 
         first_num = numbering_el.find(qn('w:num'))
         if first_num is not None:
