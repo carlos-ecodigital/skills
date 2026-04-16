@@ -129,15 +129,14 @@ DE_ENTITIES = {
         legal_name="Digital Energy Group AG",
         address="Baarerstrasse 43, 6300 Zug, Switzerland",
         registration_type="CHE",
-        registration_number="CHE-408.639.320",
+        registration_number="408.639.320",
     ),
     "nl": Party(
         legal_name="Digital Energy Netherlands B.V.",
         address="Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands",
         registration_type="KvK",
         registration_number="98580086",
-        parent="Digital Energy Group AG (CHE-408.639.320)",
-    ),
+    ),  # No parent — NL presented as standalone entity on all documents
 }
 
 
@@ -1140,7 +1139,9 @@ def main():
         with open(args.md, 'r') as f:
             md_text = f.read()
         if args.strip_review:
-            md_text = re.sub(r'\[REVIEW REQUIRED\]', '', md_text)
+            md_text, n_stripped = re.subn(r'\[REVIEW REQUIRED[^\]]*\]', '', md_text)
+            if n_stripped:
+                print(f"Stripped:  {n_stripped} [REVIEW REQUIRED] marker(s)", file=sys.stderr)
         doc = md_to_docx(md_text, title=args.title, client=args.client,
                          date_str=date_str, cover=args.cover, entity=args.entity,
                          subject=args.subject, formality=args.formality)
