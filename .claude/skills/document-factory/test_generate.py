@@ -24,7 +24,7 @@ from generate import (
     _compute_col_widths, _display_len, _longest_word_len, _SP,
     _CHAR_WIDTH_EMU, _CELL_PAD_EMU, _MIN_COL_EMU,
     _setup_custom_numbering, _new_list_instance, _apply_numbering,
-    _ALPHA_ABSTRACT_ID, _ROMAN_ABSTRACT_ID,
+    _ALPHA_ABSTRACT_ID, _ROMAN_ABSTRACT_ID, _DECIMAL_ABSTRACT_ID, _BULLET_ABSTRACT_ID,
     md_to_docx, new_doc, add_table, add_section, _run, _format_table,
     save_doc, profile_agreement, profile_letter, profile_seed_memo,
     profile_investor_memo, profile_exec_summary, add_cover,
@@ -228,23 +228,64 @@ class TestSpacing:
 # ---------------------------------------------------------------------------
 
 class TestLists:
-    def test_bullet_list_native_style(self):
+    def test_bullet_list_has_numPr(self):
+        """Bullet list items must have explicit w:numPr in the XML."""
         doc = _make_doc("- First\n- Second\n- Third")
-        found = False
-        for p in doc.paragraphs:
-            if p.text.strip() == "First" and p.style and p.style.name == "List Bullet":
-                found = True
-                break
-        assert found, "Bullet list item should use 'List Bullet' style"
+        bullet_paras = [p for p in doc.paragraphs
+                        if p.text.strip() in ("First", "Second", "Third")
+                        and p._element.find(f'.//{qn("w:numPr")}') is not None]
+        assert len(bullet_paras) == 3, (
+            f"All 3 bullet items must have w:numPr, got {len(bullet_paras)}")
 
-    def test_numbered_list_native_style(self):
-        doc = _make_doc("1. First\n2. Second")
-        found = False
+    def test_bullet_list_shares_numId(self):
+        """All items in one bullet block should share a single numId."""
+        doc = _make_doc("- A\n- B\n- C")
+        num_ids = set()
         for p in doc.paragraphs:
-            if p.text.strip() == "First" and p.style and p.style.name == "List Number":
-                found = True
+            numPr = p._element.find(f'.//{qn("w:numPr")}')
+            if numPr is not None:
+                nid = numPr.find(qn('w:numId'))
+                if nid is not None:
+                    num_ids.add(nid.get(qn('w:val')))
+        assert len(num_ids) == 1, f"Expected 1 numId for one bullet block, got {num_ids}"
+
+    def test_numbered_list_has_numPr(self):
+        """Numbered list items must have explicit w:numPr in the XML."""
+        doc = _make_doc("1. First\n2. Second\n3. Third")
+        numbered_paras = [p for p in doc.paragraphs
+                          if p.text.strip() in ("First", "Second", "Third")
+                          and p._element.find(f'.//{qn("w:numPr")}') is not None]
+        assert len(numbered_paras) == 3, (
+            f"All 3 numbered items must have w:numPr, got {len(numbered_paras)}")
+
+    def test_numbered_list_restarts(self):
+        """Two separate numbered blocks must have DIFFERENT numIds."""
+        doc = _make_doc("1. A\n2. B\n\nSome text.\n\n1. C\n2. D")
+        num_ids = []
+        for p in doc.paragraphs:
+            numPr = p._element.find(f'.//{qn("w:numPr")}')
+            if numPr is not None:
+                nid = numPr.find(qn('w:numId'))
+                if nid is not None:
+                    num_ids.append(nid.get(qn('w:val')))
+        assert len(num_ids) == 4, f"Expected 4 numbered items, got {len(num_ids)}"
+        assert num_ids[0] == num_ids[1], "Items in first block should share numId"
+        assert num_ids[2] == num_ids[3], "Items in second block should share numId"
+        assert num_ids[0] != num_ids[2], "Two blocks must have different numIds to restart"
+
+    def test_numbered_list_decimal_abstractnum(self):
+        """Numbered lists should use abstractNum 102 (decimal format)."""
+        doc = _make_doc("1. Test item")
+        numbering_el = doc.part.numbering_part.element
+        abstract = None
+        for a in numbering_el.findall(qn('w:abstractNum')):
+            if a.get(qn('w:abstractNumId')) == str(_DECIMAL_ABSTRACT_ID):
+                abstract = a
                 break
-        assert found, "Numbered list item should use 'List Number' style"
+        assert abstract is not None, f"abstractNum {_DECIMAL_ABSTRACT_ID} must exist"
+        lvl = abstract.find(qn('w:lvl'))
+        fmt = lvl.find(qn('w:numFmt'))
+        assert fmt.get(qn('w:val')) == 'decimal', "Numbered list format must be 'decimal'"
 
     def test_alpha_list_numbering_exists(self):
         doc = _make_doc("(a) First item\n\n(b) Second item\n\n(c) Third item")
@@ -658,3 +699,50 @@ Signature: ____________________________
 
         assert md_h2_spacing == sec_h2_spacing == _SP['h1_before'], \
             f"H2 spacing mismatch: md={md_h2_spacing}, section={sec_h2_spacing}, expected={_SP['h1_before']}"
+
+    def test_bold_label_before_bullets_not_swallowed(self):
+        """Bold label followed by bullets must NOT be swallowed by signature handler."""
+        md = "**Management Board:**\n- Person A\n- Person B\n"
+        doc = _make_doc(md)
+        bullet_paras = [p for p in doc.paragraphs
+                        if p._element.find(f'.//{qn("w:numPr")}') is not None]
+        assert len(bullet_paras) == 2, (
+            f"Expected 2 native bullet items, got {len(bullet_paras)}. "
+            f"Texts: {[p.text for p in doc.paragraphs if p.text.strip()]}")
+        # Verify prefix stripped
+        assert all("- " not in p.text for p in bullet_paras), \
+            "Bullet prefix '- ' should be stripped from text"
+
+    def test_numbered_list_separate_from_headings(self):
+        """Heading numbers (## 1. Title) must NOT get numPr; list numbers (1. item) must."""
+        md = "## 1. Background\n\n1. First item\n2. Second item\n"
+        doc = _make_doc(md)
+        for p in doc.paragraphs:
+            has_numPr = p._element.find(f'.//{qn("w:numPr")}') is not None
+            if "Background" in p.text:
+                assert not has_numPr, "Heading '1. Background' should NOT have numPr"
+            elif p.text.strip() in ("First item", "Second item"):
+                assert has_numPr, f"List item '{p.text}' should have numPr"
+
+    def test_every_list_paragraph_has_numPr(self):
+        """ALL list types must produce paragraphs with explicit w:numPr."""
+        md = """- Bullet A
+- Bullet B
+
+1. Number one
+2. Number two
+
+(a) Alpha first
+
+(b) Alpha second
+"""
+        doc = _make_doc(md)
+        expected = {"Bullet A", "Bullet B", "Number one", "Number two",
+                    "Alpha first", "Alpha second"}
+        for p in doc.paragraphs:
+            text = p.text.strip()
+            if text in expected:
+                has_numPr = p._element.find(f'.//{qn("w:numPr")}') is not None
+                assert has_numPr, f"'{text}' must have w:numPr but doesn't"
+                expected.discard(text)
+        assert not expected, f"Missing list items in output: {expected}"

@@ -681,14 +681,22 @@ def _insert_element(parent, tag_name, after_tags=()):
 
 _ALPHA_ABSTRACT_ID = 100
 _ROMAN_ABSTRACT_ID = 101
+_DECIMAL_ABSTRACT_ID = 102
+_BULLET_ABSTRACT_ID = 103
 
 
 def _setup_custom_numbering(doc):
-    """Create custom abstractNum definitions for (a)/(i) lists.
+    """Create custom abstractNum definitions for all list types.
 
-    Called once at the start of md_to_docx(). Adds abstractNum 100 (lowerLetter)
-    and 101 (lowerRoman) to numbering.xml. IDs start at 100 to avoid conflict
-    with the default template's 0-9.
+    Called once at the start of md_to_docx(). Adds abstractNum definitions:
+      100 = lowerLetter (a), (b), (c)
+      101 = lowerRoman  (i), (ii), (iii)
+      102 = decimal      1. 2. 3.
+      103 = bullet        bullet character
+
+    IDs start at 100 to avoid conflict with the default template's 0-9.
+    Each list block gets its own w:num instance via _new_list_instance() so
+    numbering restarts correctly.
 
     OOXML ordering: w:abstractNum elements must come BEFORE all w:num elements.
     """
@@ -708,6 +716,8 @@ def _setup_custom_numbering(doc):
     for abs_id, fmt, lvl_text, hanging in [
         (_ALPHA_ABSTRACT_ID, 'lowerLetter', '(%1)', 360),
         (_ROMAN_ABSTRACT_ID, 'lowerRoman', '(%1)', 480),
+        (_DECIMAL_ABSTRACT_ID, 'decimal', '%1.', 360),
+        (_BULLET_ABSTRACT_ID, 'bullet', '\u2022', 360),
     ]:
         # Skip if already exists
         existing = numbering_el.findall(qn('w:abstractNum'))
@@ -1280,14 +1290,19 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             i += 1
             continue
 
-        # Unordered list — native Word bullet style (with blank-line look-ahead)
+        # Unordered list — explicit w:numPr numbering (with blank-line look-ahead)
         if re.match(r'^[\s]*[-*+]\s+', line):
+            bullet_num_id = _new_list_instance(doc, _BULLET_ABSTRACT_ID)
             first = True
             p = None
             while i < len(lines):
                 if re.match(r'^[\s]*[-*+]\s+', lines[i]):
                     text = re.sub(r'^[\s]*[-*+]\s+', '', lines[i]).strip()
-                    p = doc.add_paragraph(style='List Bullet')
+                    p = doc.add_paragraph()
+                    if bullet_num_id is not None:
+                        _apply_numbering(p, bullet_num_id)
+                    else:
+                        p.style = doc.styles['List Bullet']  # fallback
                     p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
                     p.paragraph_format.space_after = _SP['list_gap']
                     p.paragraph_format.widow_control = True
@@ -1309,14 +1324,19 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                 p.paragraph_format.space_after = _SP['list_last_after']
             continue
 
-        # Ordered list — native Word numbered style (with blank-line look-ahead)
+        # Ordered list — explicit w:numPr numbering (with blank-line look-ahead)
         if re.match(r'^[\s]*\d+[.)]\s+', line):
+            decimal_num_id = _new_list_instance(doc, _DECIMAL_ABSTRACT_ID)
             first = True
             p = None
             while i < len(lines):
                 if re.match(r'^[\s]*\d+[.)]\s+', lines[i]):
                     text = re.sub(r'^[\s]*\d+[.)]\s+', '', lines[i]).strip()
-                    p = doc.add_paragraph(style='List Number')
+                    p = doc.add_paragraph()
+                    if decimal_num_id is not None:
+                        _apply_numbering(p, decimal_num_id)
+                    else:
+                        p.style = doc.styles['List Number']  # fallback
                     p.paragraph_format.space_before = _SP['list_first_before'] if first else _SP['list_gap']
                     p.paragraph_format.space_after = _SP['list_gap']
                     p.paragraph_format.widow_control = True
@@ -1445,7 +1465,18 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         # Mode 2: Fallback line detection for documents without ## Signatures heading
         sig_line_re = re.compile(r'^(_{3,}|.*\b(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
 
-        if in_signature_section or sig_line_re.match(line) or _SIG_PARTY_RE.match(line.strip()):
+        # Signature fallback: only trigger on bold party names if NEXT non-blank
+        # lines look like signature content (By:, Name:, Title:, ___, etc.)
+        _sig_bold_with_context = False
+        if _SIG_PARTY_RE.match(line.strip()) and not in_signature_section:
+            # Peek ahead for signature-like lines
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j < len(lines) and sig_line_re.match(lines[j].strip()):
+                _sig_bold_with_context = True
+
+        if in_signature_section or sig_line_re.match(line) or _sig_bold_with_context:
             # Collect all lines in this signature region
             party_blocks = []
             current_block = []
