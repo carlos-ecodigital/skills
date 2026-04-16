@@ -20,7 +20,7 @@
 | `ops-irops` | Ops Orchestrator | — | — | **DEPRECATED** → `carlos-ceo` | — | Absorbed into carlos-ceo (investor-relations-playbook ref) |
 | `contact-intake` | Ops Orchestrator | — | — | Active | — | HubSpot (via sales-intake), ClickUp (via delegation-engine), Gmail (via ops-outreachops), Calendar, Claude vision. Delegates to: counter-party-intel, sales-intake, ops-outreachops, ops-contextops, delegation-engine, vendor-lifecycle, competitive-intel, ops-targetops |
 
-### Domain Executors (8 skills)
+### Domain Executors (9 skills)
 
 | Skill | Type | Score | Hrs/wk | Status | Dependencies | Referenced By |
 |-------|------|-------|--------|--------|-------------|--------------|
@@ -33,6 +33,7 @@
 | `positioning-expert` | Domain Executor | — | — | Active | `de-brand-bible` | ops-storyops |
 | `research-engine` | Domain Executor | 88 | — | Active | — | seed-fundraising, project-financing, ops-dealops, marketing-strategist, content-engine, collateral-studio, legal-counsel, ops-targetops |
 | `lead-generation` | Domain Executor | ~89 | — | Active | — | ops-targetops (warm paths), ops-outreachops (sequences), sales-intake (qualification), ops-dealops (CRM), counter-party-intel (deep profiling) |
+| `legal-assistant` | Domain Executor | — | — | Active | `document-factory` (logo asset), `_shared/` (NDA policy) | legal-counsel (redline escalation), hot-negotiation, grower-relationship-mgr |
 
 ### Panel of Experts (4 skills)
 
@@ -125,6 +126,7 @@
 | CRM/pipeline | `ops-dealops` + `ops-targetops` | Intentional: dealops = active deal management; targetops = prospecting pipeline |
 | Contact ingestion | `contact-intake` + `sales-intake` + `ops-contextops` | Intentional: contact-intake = orchestrator (bulk multi-format intake + scoring + routing); sales-intake = deep ICP qualification (called by contact-intake); ops-contextops = relationship intelligence storage (called by contact-intake) |
 | Content/outreach | `content-engine` + `ops-outreachops` | Intentional: content-engine = writing; outreachops = orchestration + sequencing |
+| Legal document production | `legal-counsel` + `legal-assistant` | Intentional Agent-Framework split. `legal-counsel` (Agent) owns legal judgment, advisory, negotiation, bespoke drafting, CIA-CAP. `legal-assistant` (Framework) owns DE-specific templated document production across colocation (LOI v3.0) and site sourcing (DE Site HoT v1.0) streams. Connected via `_shared/nda-policy-positions.md`. Routing: DE LOI/HoT → legal-assistant; M&A/investment/generic → legal-counsel; redlines → legal-counsel. |
 
 ## Governance Notes
 
