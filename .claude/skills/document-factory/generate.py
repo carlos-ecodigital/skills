@@ -467,6 +467,13 @@ def audit_document(doc):
                     if r.font.color.rgb not in (SLATE_800, SLATE):
                         v.append(f"P6: body color {r.font.color.rgb} not SLATE_800/SLATE: '{text[:30]}'")
 
+        # P7: numbered heading must have pPr/rPr with bold (for numbering character)
+        if is_h and para._element.find(f'.//{qn("w:numPr")}') is not None:
+            pPr = para._element.find(qn('w:pPr'))
+            pRpr = pPr.find(qn('w:rPr')) if pPr is not None else None
+            if pRpr is None or pRpr.find(qn('w:b')) is None:
+                v.append(f"P7: numbered heading missing pPr/rPr bold: '{text[:40]}'")
+
     # ===== T: Table checks =====
     for t_idx, table in enumerate(doc.tables):
         tblPr = table._tbl.find(qn('w:tblPr'))
@@ -1715,13 +1722,30 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             p.paragraph_format.keep_with_next = True
 
             # Native heading numbering: "## 1. Title" → strip number, apply w:numPr
+            heading_size = heading_sizes.get(level, Pt(11))
             ilvl = _heading_level_to_ilvl.get(level)
             nm = _numbered_heading_re.match(heading_text)
             if nm and ilvl is not None and heading_num_id is not None:
                 heading_text = nm.group(2).strip()  # strip "1." prefix
                 _apply_numbering(p, heading_num_id, ilvl=ilvl)
+                # Set paragraph-level rPr so numbering character inherits
+                # font/size/bold (Word ignores run-level formatting for numbers)
+                pPr = p._element.get_or_add_pPr()
+                pRpr = etree.SubElement(pPr, qn('w:rPr'))
+                etree.SubElement(pRpr, qn('w:b'))
+                rFonts = etree.SubElement(pRpr, qn('w:rFonts'))
+                rFonts.set(qn('w:ascii'), FONT)
+                rFonts.set(qn('w:hAnsi'), FONT)
+                rFonts.set(qn('w:cs'), 'Arial')
+                sz = etree.SubElement(pRpr, qn('w:sz'))
+                sz.set(qn('w:val'), str(int(heading_size / 6350)))  # EMU → half-points
+                szCs = etree.SubElement(pRpr, qn('w:szCs'))
+                szCs.set(qn('w:val'), str(int(heading_size / 6350)))
+                # Color
+                color_el = etree.SubElement(pRpr, qn('w:color'))
+                color_el.set(qn('w:val'), '0F172A')  # SLATE_900
 
-            _add_inline(p, heading_text, size=heading_sizes.get(level, Pt(11)),
+            _add_inline(p, heading_text, size=heading_size,
                         color=SLATE_900, bold=True)
             i += 1
             continue
