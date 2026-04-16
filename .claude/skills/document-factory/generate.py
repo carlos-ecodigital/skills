@@ -129,7 +129,7 @@ DE_ENTITIES = {
         legal_name="Digital Energy Group AG",
         address="Baarerstrasse 43, 6300 Zug, Switzerland",
         registration_type="CHE",
-        registration_number="408.639.320",
+        registration_number="CHE-408.639.320",
     ),
     "nl": Party(
         legal_name="Digital Energy Netherlands B.V.",
@@ -151,7 +151,10 @@ AGREEMENT_FORMALITY = {
     "HoT": "non_binding",
     "Heads of Terms": "non_binding",
     "MoU": "non_binding",
+    "Memorandum of Understanding": "non_binding",
     "Term Sheet": "non_binding",
+    "Non-Disclosure Agreement": "non_binding",
+    "Non-Circumvention Non-Disclosure Agreement": "non_binding",
     # Binding: name + address + registration. Labels: "By and between:" / "And:"
     "Master Service Agreement": "binding",
     "MSA": "binding",
@@ -171,6 +174,19 @@ AGREEMENT_FORMALITY = {
     "Terms of Reference": "non_binding",
     "Stock Appreciation Rights — Term Sheet": "non_binding",
 }
+
+
+def _detect_formality(title):
+    """Look up formality by exact match, then by prefix match."""
+    if not title:
+        return "non_binding"
+    if title in AGREEMENT_FORMALITY:
+        return AGREEMENT_FORMALITY[title]
+    # Prefix match: "Board Resolution — SAR Program" matches "Board Resolution"
+    for key, val in AGREEMENT_FORMALITY.items():
+        if title.startswith(key):
+            return val
+    return "non_binding"
 
 
 _TYPE_ABBREVS = {
@@ -693,7 +709,7 @@ def profile_agreement(agreement_type="[Agreement Type]", subject=None,
 
     # Auto-detect formality from agreement type
     if formality is None:
-        formality = AGREEMENT_FORMALITY.get(agreement_type, "non_binding")
+        formality = _detect_formality(agreement_type)
 
     # Build party list
     de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
@@ -860,26 +876,36 @@ def profile_exec_summary(title="[Executive Summary]", date_str="", entity="ag", 
 # MARKDOWN CONVERTER
 # ---------------------------------------------------------------------------
 
-def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False, entity="ag"):
-    """Convert markdown to branded docx."""
+def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
+               entity="ag", subject=None, formality=None):
+    """Convert markdown to branded docx.
+
+    Args:
+        formality: "binding" or "non_binding". If None, auto-detects from
+                   AGREEMENT_FORMALITY dict using title, defaulting to "non_binding".
+        subject: Cover page subtitle (e.g. "Chairman, Horticulture Advisory Board").
+    """
     has_cover = cover and title
     doc = new_doc(diff_first=has_cover)
 
     if has_cover:
         setup_first_page_header(doc.sections[0])
-        setup_cont_header(doc.sections[0], title=title)
+        setup_cont_header(doc.sections[0], title=_cover_title(title))
         setup_first_footer(doc.sections[0], entity=entity)
         setup_cont_footer(doc.sections[0], entity=entity)
         de_party = DE_ENTITIES.get(entity, DE_ENTITIES["ag"])
         parties = [de_party]
         if client:
             parties.append(Party(legal_name=client, address=""))
+        if formality is None:
+            formality = _detect_formality(title)
         add_cover(doc,
                   agreement_type=title,
+                  subject=subject,
                   date_str=date_str,
                   parties=parties,
                   party_labels=["Prepared by:", "Prepared for:"] if client else None,
-                  formality="non_binding")
+                  formality=formality)
     else:
         setup_cont_header(doc.sections[0], title=title or "")
         setup_cont_footer(doc.sections[0], entity=entity)
@@ -1116,7 +1142,8 @@ def main():
         if args.strip_review:
             md_text = re.sub(r'\[REVIEW REQUIRED\]', '', md_text)
         doc = md_to_docx(md_text, title=args.title, client=args.client,
-                         date_str=date_str, cover=args.cover, entity=args.entity)
+                         date_str=date_str, cover=args.cover, entity=args.entity,
+                         subject=args.subject, formality=args.formality)
         out = args.output or os.path.join(OUTPUT, "md_output.docx")
         save_doc(doc, out)
         print(f"Saved: {out}")
