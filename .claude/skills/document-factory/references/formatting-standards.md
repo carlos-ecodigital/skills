@@ -28,7 +28,7 @@
 | Table body | Inter | 10pt | Slate 800 | Regular | Single |
 | Footer | Inter | 7pt | Slate 500 | Regular | Single |
 | Cover title | Inter | 28pt | Slate 900 | Bold | Single |
-| Cover subject | Inter | 14pt | Slate 500 | Regular | Single |
+| Cover subject | Inter | 14pt | Slate 800 | Regular | Single |
 
 ## Spacing Rules
 
@@ -56,7 +56,7 @@
 - **Use Word native list styles** (`List Number`, `List Bullet`) — not plain text with manual numbers/bullets. Native styles ensure proper indentation, hanging indent, and renumbering.
 
 ### Signature blocks
-- **Space before signature section:** 24pt minimum
+- **Space before signature section:** 36pt
 - **keep_together:** True on all paragraphs in a signature block
 - **keep_with_next:** True on all paragraphs except the last in each block
 - A signature block = label + name + title + line. The entire set of signature blocks for all parties must stay on the same page. If they won't fit, force a page break before the signature section.
@@ -66,14 +66,12 @@
 ### Color consistency
 All party block text uses a single color (Slate 900) for professionalism. Do not mix light grey labels with dark values — it looks fragmented.
 
-- **Party labels** ("By and between:", "And:"): Slate 500, 10pt
+- **Party labels** ("By and between:", "And:"): Cobalt (#0034AF), 10pt
 - **Legal name:** Slate 900, 11pt, bold
-- **Address, registration, metadata values:** Slate 900, 10pt (not Slate 500)
-
-The only elements in Slate 500 on the cover are: subject line, party labels, and metadata labels. Everything else is Slate 900.
+- **Address, registration, metadata values:** Slate 900, 10pt
 
 ### Metadata
-- **Labels** ("Classification:", "Reference:"): Slate 500, 10pt, bold
+- **Labels** ("Classification:", "Reference:"): Cobalt (#0034AF), 10pt, bold
 - **Values**: Slate 900, 10pt
 
 ## Table Formatting

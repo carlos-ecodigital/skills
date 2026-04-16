@@ -298,53 +298,328 @@ def _fix_zoom(doc):
         zoom.set(qn('w:percent'), '100')
 
 
-def _validate_output(doc):
-    """Self-validation: check for common formatting issues before save.
+def audit_document(doc):
+    """Comprehensive formatting audit. Returns list of violation strings.
 
-    Prints warnings to stderr. Does NOT block save.
+    Empty list = clean. Checks every invariant from formatting-standards.md:
+    D1-D10 (document), P1-P6 (paragraph), T1-T10 (table), X1-X3 (OOXML).
+    Cover page paragraphs (before first page break) are exempt from body checks.
     """
-    warnings = []
+    v = []  # violations
 
-    # 1. Table width ≤ content width
+    # --- Locate cover page boundary ---
+    body_el = doc.element.body
+    cover_end_idx = -1  # paragraph index where cover ends
+    for p_idx, p_el in enumerate(body_el.findall(qn('w:p'))):
+        if p_el.find(f'.//{qn("w:br")}[@{qn("w:type")}="page"]') is not None:
+            cover_end_idx = p_idx
+            break
+
+    # --- Regexes ---
+    _list_num_re = re.compile(r'^\d+[.)]\s+')
+    _list_bul_re = re.compile(r'^[-*+\u2022]\s+')
+    _list_alp_re = re.compile(r'^\([a-z]\)\s+')
+    _list_rom_re = re.compile(r'^\((i{1,3}|iv|v|vi{0,3}|ix|x)\)\s+')
+    # Signature line: starts with keyword or underscores (not buried mid-sentence)
+    _sig_re = re.compile(r'^(_{3,}|(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
+
+    def _is_heading(para):
+        if not para.runs:
+            return False
+        r = para.runs[0]
+        return bool(r.font.bold and r.font.size and r.font.size >= Pt(12))
+
+    def _is_spacer(para):
+        return not para.text.strip() or (para.runs and para.runs[0].font.size and para.runs[0].font.size <= Pt(2))
+
+    def _is_italic(para):
+        return para.runs and all(r.font.italic for r in para.runs if r.text.strip())
+
+    # ===== D: Document checks =====
+    sec = doc.sections[0]
+    if not doc.core_properties.title:
+        v.append("D1: core_properties.title is empty")
+    if not doc.core_properties.author:
+        v.append("D2: core_properties.author is empty")
+
+    settings = doc.settings.element
+    ah = settings.find(qn('w:autoHyphenation'))
+    if ah is None or ah.get(qn('w:val')) != '0':
+        v.append("D3: auto-hyphenation not disabled")
+
+    zoom = settings.find(qn('w:zoom'))
+    if zoom is not None and zoom.get(qn('w:percent')) is None:
+        v.append("D4: w:zoom missing w:percent")
+
+    # D5: font fallback
+    fallback_ok = False
+    for para in doc.paragraphs[:30]:
+        for run in para.runs:
+            rPr = run._element.find(qn('w:rPr'))
+            if rPr is not None:
+                rFonts = rPr.find(qn('w:rFonts'))
+                if rFonts is not None and rFonts.get(qn('w:cs')) and rFonts.get(qn('w:eastAsia')):
+                    fallback_ok = True
+                    break
+        if fallback_ok:
+            break
+    if not fallback_ok:
+        v.append("D5: no font fallback (w:cs/w:eastAsia) on any run")
+
+    # D6-D8: page layout
+    if abs(sec.page_width - Mm(210)) > Mm(1):
+        v.append(f"D6: page_width {sec.page_width} != Mm(210)")
+    if abs(sec.page_height - Mm(297)) > Mm(1):
+        v.append(f"D6: page_height {sec.page_height} != Mm(297)")
+    if abs(sec.left_margin - Mm(25)) > Mm(1):
+        v.append(f"D7: left_margin {sec.left_margin} != Mm(25)")
+    if abs(sec.right_margin - Mm(20)) > Mm(1):
+        v.append(f"D7: right_margin {sec.right_margin} != Mm(20)")
+    valid_top = {int(Mm(15)), int(Mm(20))}
+    if not any(abs(sec.top_margin - t) < Mm(1) for t in valid_top):
+        v.append(f"D8: top_margin {sec.top_margin} not in {{Mm(15), Mm(20)}}")
+    valid_bot = {int(Mm(25)), int(Mm(35))}
+    if not any(abs(sec.bottom_margin - b) < Mm(1) for b in valid_bot):
+        v.append(f"D8: bottom_margin {sec.bottom_margin} not in {{Mm(25), Mm(35)}}")
+
+    # D9: abstractNum before num
+    try:
+        numbering_el = doc.part.numbering_part.element
+        last_abstract_idx = -1
+        first_num_idx = len(numbering_el) + 1
+        for idx, child in enumerate(numbering_el):
+            if child.tag == qn('w:abstractNum'):
+                last_abstract_idx = idx
+            elif child.tag == qn('w:num'):
+                first_num_idx = min(first_num_idx, idx)
+        if last_abstract_idx > first_num_idx:
+            v.append("D9: w:abstractNum after w:num in numbering.xml")
+    except Exception:
+        pass  # no numbering part = no lists = OK
+
+    # D10: custom abstractNums exist if lists present
+    has_lists = any(
+        p._element.find(f'.//{qn("w:numPr")}') is not None
+        for p in doc.paragraphs
+    )
+    if has_lists:
+        try:
+            numbering_el = doc.part.numbering_part.element
+            abs_ids = {
+                e.get(qn('w:abstractNumId'))
+                for e in numbering_el.findall(qn('w:abstractNum'))
+            }
+            for required in ('100', '101', '102', '103'):
+                if required not in abs_ids:
+                    v.append(f"D10: abstractNum {required} missing")
+        except Exception:
+            v.append("D10: no numbering part but lists exist")
+
+    # ===== P: Paragraph checks (body only — skip cover) =====
+    all_p_elements = body_el.findall(qn('w:p'))
+    for p_idx, para in enumerate(doc.paragraphs):
+        # Skip cover paragraphs
+        if cover_end_idx >= 0 and p_idx <= cover_end_idx:
+            continue
+
+        text = para.text.strip()
+        if not text:
+            continue
+        if _is_spacer(para):
+            continue
+
+        pf = para.paragraph_format
+        is_h = _is_heading(para)
+
+        # P1: heading keep_with_next
+        if is_h and not pf.keep_with_next:
+            v.append(f"P1: heading missing keep_with_next: '{text[:40]}'")
+
+        # P2: body widow_control (skip headings, italic/guidance, blockquotes)
+        if not is_h and not _is_italic(para) and pf.widow_control is not True:
+            # Check it's actual body content (has runs, not just whitespace)
+            if para.runs and any(r.text.strip() for r in para.runs):
+                v.append(f"P2: missing widow_control: '{text[:40]}'")
+
+        # P3: list text without native numbering
+        if not is_h:
+            is_list_text = (_list_num_re.match(text) or _list_bul_re.match(text)
+                           or _list_alp_re.match(text) or _list_rom_re.match(text))
+            has_numPr = para._element.find(f'.//{qn("w:numPr")}') is not None
+            if is_list_text and not has_numPr:
+                v.append(f"P3: plain-text list without w:numPr: '{text[:50]}'")
+
+        # P4: signature keep_together
+        if _sig_re.match(text) and not pf.keep_together:
+            v.append(f"P4: sig line missing keep_together: '{text[:40]}'")
+
+        # P5: heading color
+        if is_h and para.runs[0].font.color and para.runs[0].font.color.rgb:
+            if para.runs[0].font.color.rgb != SLATE_900:
+                v.append(f"P5: heading color {para.runs[0].font.color.rgb} != SLATE_900: '{text[:30]}'")
+
+        # P6: body color (skip italic/guidance, skip headings)
+        # Allow SLATE_800 (primary body) and SLATE (secondary/closing text)
+        if not is_h and not _is_italic(para) and para.runs:
+            r = para.runs[0]
+            if r.font.size and abs(r.font.size - Pt(11)) < Pt(1) and not r.font.bold:
+                if r.font.color and r.font.color.rgb:
+                    if r.font.color.rgb not in (SLATE_800, SLATE):
+                        v.append(f"P6: body color {r.font.color.rgb} not SLATE_800/SLATE: '{text[:30]}'")
+
+    # ===== T: Table checks =====
     for t_idx, table in enumerate(doc.tables):
         tblPr = table._tbl.find(qn('w:tblPr'))
+
+        # T1: width
         if tblPr is not None:
             tblW = tblPr.find(qn('w:tblW'))
             if tblW is not None:
-                w_type = tblW.get(qn('w:type'))
-                w_val = tblW.get(qn('w:w'))
-                if w_type == 'dxa' and w_val and int(w_val) > 9360:
-                    warnings.append(f"Table {t_idx}: width {w_val} twips exceeds content width")
+                wt = tblW.get(qn('w:type'))
+                wv = tblW.get(qn('w:w'))
+                if wt == 'dxa' and wv and int(wv) > 9360:
+                    v.append(f"T1: table {t_idx} width {wv} > 9360 twips")
 
-        # 7. Table header rows
+            # T2: fixed layout
+            tblLayout = tblPr.find(qn('w:tblLayout'))
+            if tblLayout is None or tblLayout.get(qn('w:type')) != 'fixed':
+                v.append(f"T2: table {t_idx} not fixed layout")
+
+        # T3: header repeat
         if len(table.rows) > 5:
             tr = table.rows[0]._tr
             trPr = tr.find(qn('w:trPr'))
             if trPr is None or trPr.find(qn('w:tblHeader')) is None:
-                warnings.append(f"Table {t_idx}: {len(table.rows)} rows without header repeat")
+                v.append(f"T3: table {t_idx} ({len(table.rows)} rows) missing header repeat")
 
-    # 2-4. Paragraph checks
-    for p_idx, para in enumerate(doc.paragraphs):
-        pf = para.paragraph_format
-        text = para.text.strip()
-        if not text:
+        # T4: column minimum width (500 EMU tolerance for rounding)
+        for c_idx, col in enumerate(table.columns):
+            if col.width and col.width < _MIN_COL_EMU - 500:
+                v.append(f"T4: table {t_idx} col {c_idx} width {col.width} < {_MIN_COL_EMU}")
+
+        if not table.rows:
             continue
 
-        # Heading check
-        if para.runs and para.runs[0].font.bold and para.runs[0].font.size:
-            if para.runs[0].font.size >= Pt(14) and not pf.keep_with_next:
-                warnings.append(f"Heading P{p_idx} missing keep_with_next: '{text[:40]}'")
+        # T5-T7: header row
+        for c_idx, cell in enumerate(table.rows[0].cells):
+            tc = cell._tc
+            tcPr = tc.find(qn('w:tcPr'))
+            if tcPr is not None:
+                shd = tcPr.find(qn('w:shd'))
+                if shd is not None:
+                    fill = (shd.get(qn('w:fill')) or '').upper()
+                    if fill != COBALT_HEX.upper():
+                        v.append(f"T5: table {t_idx} header col {c_idx} fill {fill} != {COBALT_HEX}")
+            # T7: vertical alignment
+            if cell.vertical_alignment != WD_CELL_VERTICAL_ALIGNMENT.CENTER:
+                v.append(f"T7: table {t_idx} header col {c_idx} not CENTER aligned")
 
-    if warnings:
-        print(f"[validate] {len(warnings)} issue(s):", file=sys.stderr)
-        for w in warnings[:10]:
-            print(f"  - {w}", file=sys.stderr)
+        # T6: header text
+        for c_idx, cell in enumerate(table.rows[0].cells):
+            for run in cell.paragraphs[0].runs if cell.paragraphs else []:
+                if run.text.strip():
+                    if run.font.color and run.font.color.rgb and run.font.color.rgb != WHITE:
+                        v.append(f"T6: table {t_idx} header col {c_idx} text color != WHITE")
+                    if not run.font.bold:
+                        v.append(f"T6: table {t_idx} header col {c_idx} text not bold")
+                    break
+
+        # T8: data cell vertical alignment
+        for r_idx in range(1, min(len(table.rows), 4)):  # sample first 3 data rows
+            for c_idx, cell in enumerate(table.rows[r_idx].cells):
+                if cell.vertical_alignment != WD_CELL_VERTICAL_ALIGNMENT.TOP:
+                    v.append(f"T8: table {t_idx} row {r_idx} col {c_idx} not TOP aligned")
+
+        # T9: borders (sample first data cell)
+        if len(table.rows) > 1:
+            tc = table.rows[1].cells[0]._tc
+            tcPr = tc.find(qn('w:tcPr'))
+            if tcPr is not None:
+                tcBorders = tcPr.find(qn('w:tcBorders'))
+                if tcBorders is None:
+                    v.append(f"T9: table {t_idx} missing cell borders")
+                else:
+                    for edge in ('w:top', 'w:left', 'w:bottom', 'w:right'):
+                        b = tcBorders.find(qn(edge))
+                        if b is None:
+                            v.append(f"T9: table {t_idx} missing {edge} border")
+                        elif b.get(qn('w:val')) != 'single' or b.get(qn('w:sz')) != '4':
+                            v.append(f"T9: table {t_idx} {edge} border wrong style/size")
+
+        # T10: alt-row shading (sample)
+        for r_idx in range(1, min(len(table.rows), 6)):
+            cell = table.rows[r_idx].cells[0]
+            tcPr = cell._tc.find(qn('w:tcPr'))
+            if tcPr is not None:
+                shd = tcPr.find(qn('w:shd'))
+                if shd is not None:
+                    fill = (shd.get(qn('w:fill')) or '').upper()
+                    expected = SLATE_50_HEX.upper() if r_idx % 2 == 0 else 'FFFFFF'
+                    if fill != expected:
+                        v.append(f"T10: table {t_idx} row {r_idx} fill {fill} != {expected}")
+
+    # ===== X: OOXML structural checks (sampled) =====
+    # X1: numPr before spacing in pPr
+    for para in doc.paragraphs:
+        pPr = para._element.find(qn('w:pPr'))
+        if pPr is None:
+            continue
+        numPr_idx = spacing_idx = None
+        for idx, child in enumerate(pPr):
+            if child.tag == qn('w:numPr'):
+                numPr_idx = idx
+            elif child.tag == qn('w:spacing'):
+                spacing_idx = idx
+        if numPr_idx is not None and spacing_idx is not None and numPr_idx > spacing_idx:
+            v.append(f"X1: w:numPr after w:spacing in pPr")
+            break  # one is enough
+
+    # X2: tcBorders before shd in tcPr (sample first table)
+    if doc.tables:
+        for row in doc.tables[0].rows[:2]:
+            for cell in row.cells:
+                tcPr = cell._tc.find(qn('w:tcPr'))
+                if tcPr is None:
+                    continue
+                b_idx = s_idx = None
+                for idx, child in enumerate(tcPr):
+                    if child.tag == qn('w:tcBorders'):
+                        b_idx = idx
+                    elif child.tag == qn('w:shd'):
+                        s_idx = idx
+                if b_idx is not None and s_idx is not None and b_idx > s_idx:
+                    v.append("X2: w:tcBorders after w:shd in tcPr")
+                    break
+            else:
+                continue
+            break
+
+    # X3: tblW before tblLayout in tblPr
+    for table in doc.tables:
+        tblPr = table._tbl.find(qn('w:tblPr'))
+        if tblPr is None:
+            continue
+        w_idx = l_idx = None
+        for idx, child in enumerate(tblPr):
+            if child.tag == qn('w:tblW'):
+                w_idx = idx
+            elif child.tag == qn('w:tblLayout'):
+                l_idx = idx
+        if w_idx is not None and l_idx is not None and w_idx > l_idx:
+            v.append("X3: w:tblW after w:tblLayout in tblPr")
+            break
+
+    return v
 
 
 def save_doc(doc, path):
     """Save document with all post-processing fixes applied."""
     _fix_zoom(doc)
-    _validate_output(doc)
+    warnings = audit_document(doc)
+    if warnings:
+        print(f"[audit] {len(warnings)} issue(s):", file=sys.stderr)
+        for w in warnings[:10]:
+            print(f"  - {w}", file=sys.stderr)
     doc.save(path)
 
 
@@ -966,6 +1241,7 @@ def profile_letter(title="", date_str="", entity="ag", **kw):
     rp = doc.add_paragraph()
     rp.paragraph_format.space_before = Pt(24)
     rp.paragraph_format.space_after = Pt(2)
+    rp.paragraph_format.widow_control = True
     r = _run(rp, ent["return_address"], size=Pt(7), color=SLATE)
     r.underline = True
 
@@ -975,11 +1251,13 @@ def profile_letter(title="", date_str="", entity="ag", **kw):
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(0)
         p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.widow_control = True
         _run(p, line, size=Pt(11))
 
     # Date
     dp = doc.add_paragraph()
     dp.paragraph_format.space_before = Pt(16)
+    dp.paragraph_format.widow_control = True
     dp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     _run(dp, f"Zug, {date_str}", size=Pt(10))
 
@@ -987,26 +1265,38 @@ def profile_letter(title="", date_str="", entity="ag", **kw):
     sp = doc.add_paragraph()
     sp.paragraph_format.space_before = Pt(16)
     sp.paragraph_format.space_after = Pt(12)
+    sp.paragraph_format.widow_control = True
     _run(sp, "[Subject Line]", size=Pt(11), color=SLATE_900, bold=True)
 
     # Salutation + body
-    _run(doc.add_paragraph(), "Dear [Mr./Ms. Last Name],", size=Pt(11))
+    sal = doc.add_paragraph()
+    sal.paragraph_format.widow_control = True
+    _run(sal, "Dear [Mr./Ms. Last Name],", size=Pt(11))
 
     bp = doc.add_paragraph()
     bp.paragraph_format.line_spacing = Pt(16.5)
+    bp.paragraph_format.widow_control = True
     _run(bp, "[Letter body text. DIN 5008 Form B compliant for windowed envelopes.]", size=Pt(11))
 
     # Closing
     cp = doc.add_paragraph()
     cp.paragraph_format.space_before = Pt(18)
+    cp.paragraph_format.widow_control = True
     _run(cp, "Kind regards,", size=Pt(11))
 
     sig = doc.add_paragraph()
     sig.paragraph_format.space_before = Pt(36)
+    sig.paragraph_format.widow_control = True
     _run(sig, "[Name]", size=Pt(11), bold=True)
-    _run(doc.add_paragraph(), "[Title]", size=Pt(11), color=SLATE)
-    _run(doc.add_paragraph(), ent["legal_name"], size=Pt(11), color=SLATE)
+    p_title = doc.add_paragraph()
+    p_title.paragraph_format.widow_control = True
+    _run(p_title, "[Title]", size=Pt(11), color=SLATE)
+    p_entity = doc.add_paragraph()
+    p_entity.paragraph_format.widow_control = True
+    _run(p_entity, ent["legal_name"], size=Pt(11), color=SLATE)
 
+    doc.core_properties.title = title or "Letter"
+    doc.core_properties.author = "Digital Energy"
     return doc
 
 
@@ -1106,6 +1396,8 @@ def profile_seed_memo(client="[Investor Name]", date_str="", version=1, entity="
     for sect_title, guidance in SEED_SECTIONS:
         add_section(doc, sect_title, guidance)
 
+    doc.core_properties.title = "Seed Investment Memo"
+    doc.core_properties.author = "Digital Energy"
     return doc
 
 
@@ -1157,6 +1449,8 @@ def profile_investor_memo(client="[Investor Name]", date_str="", version=1, enti
     for sect_title, guidance in IM_SECTIONS:
         add_section(doc, sect_title, guidance)
 
+    doc.core_properties.title = "Investment Memorandum"
+    doc.core_properties.author = "Digital Energy"
     return doc
 
 
@@ -1192,6 +1486,8 @@ def profile_exec_summary(title="[Executive Summary]", date_str="", entity="ag", 
     add_section(doc, "Next Steps",
                 "[3-5 numbered action items: action + owner + deadline.]")
 
+    doc.core_properties.title = title or "Executive Summary"
+    doc.core_properties.author = "Digital Energy"
     return doc
 
 
@@ -1509,9 +1805,9 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                 for line_idx, sl in enumerate(block):
                     p = doc.add_paragraph()
                     p.paragraph_format.keep_together = True
+                    p.paragraph_format.widow_control = True
                     is_last_line = (line_idx == len(block) - 1)
                     is_last_block = (block_idx == len(party_blocks) - 1)
-                    # keep_with_next: True for all lines EXCEPT the very last line of the very last block
                     p.paragraph_format.keep_with_next = not (is_last_line and is_last_block)
 
                     # Spacing
