@@ -2007,8 +2007,8 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                     p.paragraph_format.space_after = Pt(2)
 
                     if is_party_name:
-                        # Party name: 12pt bold — larger than fields for clear hierarchy
-                        p.paragraph_format.space_after = Pt(6)
+                        # Party name: 12pt bold — space after leaves room for physical signature
+                        p.paragraph_format.space_after = Pt(12)
                         _add_inline(p, sl_stripped, size=Pt(12), color=SLATE_900, bold=True)
                     elif is_field:
                         # Normalize signature lines to consistent width
