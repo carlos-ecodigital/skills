@@ -375,7 +375,7 @@ def audit_document(doc):
         v.append(f"D7: left_margin {sec.left_margin} != Mm(25)")
     if abs(sec.right_margin - Mm(20)) > Mm(1):
         v.append(f"D7: right_margin {sec.right_margin} != Mm(20)")
-    valid_top = {int(Mm(15)), int(Mm(20))}
+    valid_top = {int(Mm(15)), int(Mm(20)), int(Mm(25))}
     if not any(abs(sec.top_margin - t) < Mm(1) for t in valid_top):
         v.append(f"D8: top_margin {sec.top_margin} not in {{Mm(15), Mm(20)}}")
     valid_bot = {int(Mm(25)), int(Mm(35))}
@@ -648,8 +648,11 @@ def _run(para, text, size=Pt(11), color=SLATE_800, bold=False, italic=False, fon
     return r
 
 
-def new_doc(top=Mm(20), bottom=Mm(35), diff_first=False):
-    """Create A4 document."""
+def new_doc(top=Mm(25), bottom=Mm(35), diff_first=False):
+    """Create A4 document with professional margins.
+
+    top=25mm gives ~10mm clearance below header (header occupies ~15mm).
+    """
     doc = Document()
     s = doc.sections[0]
     s.page_width = Mm(210)
