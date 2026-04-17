@@ -5,6 +5,39 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.4 — 2026-04-17
+
+Regression-regen anchor. Ships a reproducible Wholesale-type regression fixture for the Polarise use case that triggered the whole v3.5.x cycle, so any future v3.5.x change can be regressed against the known-good baseline. Sibling-docs-sync (Scope B) and full consolidated CHANGELOG (Scope M extension) deferred to a dedicated session — better to ship the regression anchor now than hold it behind docs.
+
+### Added
+- **Regression fixture directory**: `colocation/regression/v3.5/` with `README.md` explaining purpose, regen command, and non-goals.
+- **`polarise_wholesale_intake.yaml`** — synthetic-but-realistic intake reconstructed from Jonathan's 2026-04-17 memo. Exercises:
+  - v3.5.1 Scope J5 (`[TBC]` handling in counterparty sig block)
+  - v3.5.1 Scope J3 (Cl. 3.4 non-numeric `expansion_mw: "to be discussed"` → fallback clause)
+  - v3.5.1 Scope J1 (Cl. 3.2 rack density default — 130 kW + DLC)
+  - v3.5.1 Scope N-subset (Schedule 1 `technical.gpu_platform: "NVIDIA GB200 NVL72 (2× SU, ~1,152 GPUs total)"` renders from YAML)
+  - v3.5.2 Scope A''' (Parties Preamble)
+  - v3.5.2 brand rename (Digital Energy throughout; no "the Provider")
+  - v3.5.2 Scope 0 Signal Test: Recital B names SWI Stoneweg Icona (Euronext-listed controlling owner), Macquarie (infra-credit third-party DD), NVIDIA Cloud Partner (credentialled partnership), Deutsche Telekom Industrial AI Cloud (named marquee customer). **Zero inline citations. Zero fundraising-vanity. Augsburg forward pipeline omitted from Recital B** (fails Signal Test gate 1 — no named endorser — moved to Cl. 3 commercial context where self-reported sizing belongs).
+
+### Scope deferred to v3.5.5 / sibling-docs session
+- **L (remaining 3 fixtures)** — Cudo Compute (Wholesale), Sovereign AI Grid / Man of Solutions B.V. (Distributor Mode B), InfraPartners LLC (Strategic Supplier). Each requires tier-1 source verification + v3.4-corrected language application before fixture lands.
+- **B** (sibling docs sync — ASSEMBLY_GUIDE / FEATURE_MATRIX / SOP) — 17+ discrete v3.4→v3.5 language updates across 694 lines of sibling docs. Scoped mapping doc and edit sprint carry to dedicated session.
+- **M** (full consolidated CHANGELOG) — this file currently has four separate v3.5.x entries; a final consolidation pass aligning all entries with forward/backward navigation anchors carries to when all v3.5.x PRs merge.
+
+### Verified
+- Polarise regression regen: QA PASS, 0 warnings, 0 failures
+- Rendered `.docx` verified end-to-end:
+  - Parties Preamble renders with Polarise GmbH + `(1) Digital Energy Netherlands B.V.` + Macquarie / SWI Stoneweg named in Recital B
+  - Schedule 1 renders `NVIDIA GB200 NVL72 (2× SU, ~1,152 GPUs total)` from intake YAML (not hardcoded TBC)
+  - Cl. 3.4 fires non-numeric fallback for `expansion_mw: "to be discussed"`
+  - Zero `[polarise.eu]` / `[swi.com]` / `[companyhouse.de]` inline citations (R-24 OK)
+  - Zero `raised` / `valuation` vanity (R-25 OK)
+  - Zero `the Provider` in body; `Digital Energy` appears 43× (brand rename OK)
+- 88/88 pytest tests still pass
+
+---
+
 ## v3.5.3 — 2026-04-17
 
 Workflow + governance increment. Ships the independent portions of the v3.5.3 plan — Scope J (EP Recital D polish), Scope K (legacy YAML migration pre-flight), Scope J14 (Gmail MCP fallback), Scope J13 (Drive routing — doc-only, deferred until `artifact_storage.py` lands). Dependent scopes (D/E/F linter refinements, G Phase 7.5 fail-closed code spec, J8/J9 Phase-5/6 UX, J12 per-type defaults matrix) carry forward to v3.5.3 continuation.

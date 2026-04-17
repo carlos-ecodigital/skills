@@ -1,0 +1,103 @@
+# Polarise Wholesale LOI — v3.5 regression intake
+#
+# Regression fixture: confirms v3.5.1 + v3.5.2 + v3.5.3 produce a sendable
+# Wholesale LOI on first pass for Jonathan's real Polarise use case.
+# Recital B applies Signal Test 3-gate methodology (see
+# _shared/counterpart-description-framework.md): named endorsers SWI
+# Stoneweg Icona + Macquarie + NVIDIA + Deutsche Telekom; NO inline
+# source citations; NO vanity-financial (valuation / raise-size) claims;
+# NO self-announced forward pipeline (Augsburg expansion moved to Cl. 3
+# Indicative Capacity context, not Recital B).
+
+type: Wholesale
+
+# --- Provider (NL BV, Carlos / Director pre-MSA) ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  kvk: "98580086"
+  reg_number: "98580086"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
+
+# --- Counterparty (Polarise GmbH) ---
+counterparty:
+  name: "Polarise GmbH"
+  short: "Polarise"
+  address: "Technologiepark 12, 33100 Paderborn, Germany"
+  jurisdiction: "Germany"
+  legal_form: "Gesellschaft mit beschränkter Haftung (GmbH)"
+  reg_type: "Handelsregister"
+  reg_number: "[TBC]"
+  contact_name: "Thimo Groneberg"
+  contact_title: "[TBC]"
+  salutation: "Mr Groneberg"
+  signatory_name: "[TBC]"
+  signatory_title: "[TBC]"
+  # Recital B — Signal Test compliant. Every named party passes Attribution
+  # (gate 1) + Operational relevance (gate 2) + Freshness (gate 3).
+  # Zero inline citations; zero vanity-financial numbers; zero self-slogans.
+  description: >-
+    is a wholesale AI-colocation and European GPU cloud operator
+    headquartered in Paderborn, Germany, majority-owned by Euronext
+    Amsterdam-listed SWI Stoneweg Icona Group and backed by senior
+    infrastructure financing from Macquarie. Polarise operates AI-ready
+    datacentres and a European GPU cloud platform serving enterprise and
+    public-sector customers requiring sovereign compute on European soil.
+    As an NVIDIA Cloud Partner deploying GB200 NVL72 platforms, Polarise
+    supports Deutsche Telekom's Industrial AI Cloud in Munich
+  source_map:
+    pillar_1:
+      - "[TBC]"          # Identity & scale — polarise.eu/about (v3.5.5: replace with tier-1 URL on verification)
+    pillar_2:
+      - "[TBC]"          # Core business — polarise.eu (product taxonomy)
+    pillar_3:
+      - "[TBC]"          # Track record — Deutsche Telekom Industrial AI Cloud announcement; SWI Stoneweg Icona press; Macquarie facility; NVIDIA Cloud Partner status page
+    pillar_4: "inferred from Phase 1 context (wholesale AI-colocation demand + sovereign EU positioning)"
+    pillar_5: "[TBC]"    # Forward plans — Augsburg expansion cited in Cl. 3, not Recital B (Signal Test: self-announced forward plans fail gate 1)
+
+# --- Commercial (Jonathan's actual deal parameters) ---
+# 3 MW IT, 5-year term preferred (shorter acceptable), single facility, RFS
+# 20–40 weeks from commercial close. Rack density overrides the v3.5.1 J1
+# default (which is already 130 kW) to GB300 NVL72's target 140 kW.
+commercial:
+  indicative_mw: "3"
+  expansion_mw: "to be discussed"   # Tests v3.5.1 J3 branching — non-numeric → fallback clause
+  min_term: "5 years"
+  rack_density_kw: "130"
+  cooling_topology: "direct-to-chip liquid cooling (consistent with NVIDIA GB200 NVL72 and GB300 NVL72 reference architectures)"
+
+# --- Schedule 1 technical parameters (v3.5.1 Scope N-subset) ---
+schedule_1:
+  technical:
+    gpu_platform: "NVIDIA GB200 NVL72 (2× SU, ~1,152 GPUs total)"
+    rack_density_kw: "130"
+    cooling: "Direct-to-chip liquid cooling"
+    designated_sites: "Single NL facility, to be confirmed in technical scoping"
+
+# --- Choices ---
+choices:
+  pricing: false
+  phasing: false
+  existing_nda: false
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  recital_a_variant: "default"
+
+# --- Protection ---
+protection:
+  nc_duration: "24 months"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
