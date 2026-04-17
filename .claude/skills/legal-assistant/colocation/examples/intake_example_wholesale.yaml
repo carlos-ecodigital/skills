@@ -4,14 +4,28 @@
 type: Wholesale
 
 # --- Provider (pre-filled defaults) ---
+# v3.5.2 scope Q: the generator supports two equivalent provider patterns.
+#
+# PATTERN A — explicit fields (shown below, v3.5.1-compatible):
 provider:
   legal_name: "Digital Energy Netherlands B.V."
   short_name: "Digital Energy"
   address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  jurisdiction: "the Netherlands"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  reg_type: "KvK"
   kvk: "98580086"
+  reg_number: "98580086"
   parent: "Digital Energy Group AG (CHE-408.639.320)"
   signatory_name: "Carlos Reuven"
   signatory_title: "Director"
+#
+# PATTERN B — entities-register lookup (new in v3.5.2; cleaner, single-source-of-truth):
+#   provider:
+#     entity: "de_nl"              # key in skills/legal-assistant/config/entities.yaml
+#     signatory_mode: "pre_msa"     # pre_msa | post_msa (NL BV) | ceo (AG)
+# The loader expands all other provider fields from the register. Explicit
+# intake values (e.g. signatory_name override) win over register defaults.
 
 # --- Counterparty ---
 counterparty:

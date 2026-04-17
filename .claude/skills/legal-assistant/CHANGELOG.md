@@ -5,6 +5,45 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.2 — 2026-04-17
+
+Foundations layer: the architectural scopes v3.5.1 deferred. Four big pieces — entities register, Parties Preamble + brand-name defined term, Signal Test methodology + new linter rules, legal-counsel Phase 7.5 callee — plus continued test-harness expansion.
+
+### Added
+- **Scope Q — entities register (`config/entities.yaml`)**: single source of truth for DE's legal entities. `de_nl` (Digital Energy Netherlands B.V., KvK 98580086) + `de_ag` (Digital Energy Group AG, CHE-408.639.320). Contains legal_name / short_name / abbreviation / legal_form / jurisdiction / address / reg_type / reg_number / RSIN / parent / footer_key / default signatories (pre_msa / post_msa for BV; ceo for AG) + per-type defaults matrix.
+- **`load_entities_register()` + `expand_provider_from_register()`** helpers in `generate_loi.py`. Intake YAMLs can now use `provider.entity: "de_nl"` + `provider.signatory_mode: "pre_msa"` and the loader expands the full record at runtime. Explicit intake field values override register defaults (intake wins). Backward-compat with v3.5.1 explicit-fields pattern preserved.
+- **Scope A''' — `parties()` method**: renders Parties Preamble legal-identification block in document body between cover page and Recital A. Pattern: `THIS LETTER OF INTENT (the "LOI") is dated [Date] and entered into between: (1) [Provider legal name], [form] incorporated under the laws of [jurisdiction], with registered office at [address] and registered with [registry] under number [reg_number] ("Digital Energy"); and (2) [Counterparty], [...] (the "[Customer/Partner/Supplier]"). (each a "Party" and together the "Parties")`. Invoked in `build()` and `_build_ep()`.
+- **Scope C — legal-counsel LOI review workflow callee** (`legal-counsel/specializations/contract-review/loi-review-workflow.md`): single-phase 4-point structured review matching `legal-assistant` Phase 7.5 caller contract. Reference-only markdown (per codebase cross-skill convention — zero runtime coupling). Returns strict `PASS` / `FLAG-FOR-REVISION` / `REJECT` envelopes parseable by the caller. Fail-closed on incomplete review. `legal-counsel/SKILL.md` router updated.
+- **Scope 0 — Signal Test methodology section** in `_shared/counterpart-description-framework.md`: 3-gate test (Attribution / Operational relevance / Freshness-health) supersedes v3.4 topic-based filtering. Writer discipline rule (named third parties must be tier-1-attributed before draft enters Phase 5). Fundraising-specific rule (corrects v3.4 crude exclusion — named-endorser financings pass; unattributed vanity fails). Customer / ownership specific rules.
+- **Scope 0 — four new linter rules** (`generate_loi.py` `_FAIL_RULES` + `_WARN_RULES`):
+  - **R-24 (fail)**: inline bracket citation in Recital B (`[polarise.eu]` pattern) — source attribution lives in YAML, never in prose
+  - **R-25 (fail)**: vanity-financial pattern in Recital B (valuation-of / raised $X / generic Series-X) — does NOT match named-endorser financing like "backed by Macquarie"
+  - **R-27 (fail)**: `[TBC]` rendered literally in sig-block Name/Title (`Name: [TBC]`) — must route through `_render_placeholder`
+  - **R-28 (warn, count-based)**: `[TBC]` count exceeds 5 body-wide — intake likely incomplete
+- **Scope T expansion** — `tests/test_v3_5_2.py` with 33 additional unit tests covering: entities-register contents, provider expansion (de_nl/de_ag + override wins + backward-compat), Parties Preamble output contract, brand rename invariants, R-24/25/27 pattern matching, and v3.5.1 regression checks. Total harness: 80 tests, all passing.
+
+### Changed
+- **Brand-name defined term — body-wide rename**: `"the Provider"` / `"The Provider"` → `"Digital Energy"` across all 99 occurrences in `generate_loi.py` (Recital A constants, type-specific tails, clause templates, meta-commentary regex). Recital A no longer opens with `'{prov} (the "Provider") develops...'`; now opens with `'{prov} develops...'`. Parties Preamble establishes `"Digital Energy"` as the defined short-name used throughout.
+- **`self.party` for Strategic Supplier**: changed from `"Partner"` to `"Supplier"` — semantically correct (counterparty in SS LOI IS the supplier; DE is the buying principal).
+- **Parties Preamble grammar**: `legal_form` auto-prefixed with "a" if missing article (renders as "a Besloten Vennootschap (B.V.)" when YAML has "Besloten Vennootschap (B.V.)").
+- **`intake_example_wholesale.yaml`**: fleshed out Provider block with `jurisdiction`, `legal_form`, `reg_type`, `reg_number` for the explicit-fields pattern; comment block documenting both patterns (explicit + entities-register).
+
+### Fixed
+- (no corrective fixes — v3.5.2 is architectural additions; v3.5.1 shipped the correctness fixes)
+
+### Scope still deferred (per 4-way split)
+- **v3.5.3**: linter refinements D/E/F (R-22 narrow, R-23 pillar-specific, Recital B multi-paragraph extraction) + Phase 7.5 fail-closed spec (G) + J8/J9/J12/J13/J14 (workflow UX, Drive routing, Gmail fallback) + H/I/J/K (tier-2 qualifier, re-verification, EP polish, migration pre-flight). v3.5.3-prep agent has drafted the independent items.
+- **v3.5.4**: Scope B (sibling docs sync — ASSEMBLY_GUIDE / FEATURE_MATRIX / SOP) + Scope L (regression regen of Cudo / SAG / InfraPartners / Polarise) + Scope M (full CHANGELOG consolidation). v3.5.4-prep agent has drafted regression intake YAMLs and sibling-docs-sync mapping.
+
+### Verified
+- 80/80 pytest unit tests pass in both repos (47 v3.5.1 + 33 v3.5.2)
+- All 6 intake examples regenerate with QA PASS (0 warn, 0 fail) under v3.5.2
+- Parties Preamble renders correctly between cover and Recital A (structural verify: `THIS LETTER OF INTENT` present, `(1) (2)` party enumeration present, `each a "Party"` defined-term block present)
+- Brand rename end-to-end: zero `the Provider` / `The Provider` in rendered body; `Digital Energy` appears ~43× per Wholesale LOI
+- Entities register backward-compat: intake YAMLs without `provider.entity` key unchanged; YAMLs with `entity: "de_nl"` expand correctly; override mechanism verified
+
+---
+
 ## v3.5.1 — 2026-04-17
 
 First production use of v3.4 on the Polarise Wholesale LOI (Jonathan memo 2026-04-17) surfaced 19 concrete field findings. v3.5.1 is the correctness critical-path sprint — makes the next-run LOI sendable without post-gen manual editing. Architectural scopes (entities register, full test harness, Recital B methodology rewrite, Parties Preamble + brand-name rename, legal-counsel callee, workflow UX) defer to v3.5.2 / v3.5.3 / v3.5.4 per the 4-way PR split in `plans/expressive-cooking-flamingo.md`.

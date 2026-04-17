@@ -1,0 +1,71 @@
+# Digital Energy entity register — v3.5.2 (Scope Q)
+#
+# Single source of truth for DE's legal entities. Intake YAMLs reference by
+# key (e.g. `provider.entity: "de_nl"`) and the generator expands the record
+# at runtime. Eliminates address/KvK/signatory drift across intake files.
+#
+# Backward compat (v3.5.2): if an intake YAML does NOT set `provider.entity`
+# but DOES set `provider.legal_name + address + kvk`, the generator uses
+# those explicit fields (prior behaviour). If `provider.entity` IS set, the
+# register value wins; any explicit overrides on the intake YAML itself
+# (e.g. signatory_name/signatory_title) still override the register default.
+
+entities:
+  de_nl:
+    legal_name: "Digital Energy Netherlands B.V."
+    short_name: "Digital Energy"
+    abbreviation: "DEN"
+    legal_form: "Besloten Vennootschap (B.V.)"
+    jurisdiction: "the Netherlands"
+    address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+    reg_type: "KvK"
+    reg_number: "98580086"
+    rsin: "868554935"
+    parent: "Digital Energy Group AG (CHE-408.639.320)"
+    website: "digital-energy.group"
+    footer_key: "nl"
+    default_signatory_pre_msa:
+      name: "Carlos Reuven"
+      title: "Director"
+    default_signatory_post_msa:
+      name: "Jelmer ten Wolde"
+      title: "Chief Platform Officer"
+
+  de_ag:
+    legal_name: "Digital Energy Group AG"
+    short_name: "Digital Energy"
+    abbreviation: "DEG"
+    legal_form: "Aktiengesellschaft (AG)"
+    jurisdiction: "Switzerland"
+    address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+    reg_type: "CHE"
+    reg_number: "CHE-408.639.320"
+    parent: null
+    website: "digital-energy.group"
+    footer_key: "ag"
+    default_signatory:
+      name: "Carlos Reuven"
+      title: "Chief Executive Officer"
+
+# Per-type + stage provider-entity matrix. The intake YAML may specify
+# `provider.signatory_mode: "pre_msa" | "post_msa"` to select between the
+# two NL BV signatories; the matrix below documents recommended defaults
+# per LOI type (used by the Phase-6 confirmation gate and /loi slash cmd
+# to propose sensible defaults rather than making the user think).
+
+type_defaults:
+  EndUser:
+    entity: "de_nl"
+    signatory_mode: "pre_msa"
+  Distributor:
+    entity: "de_nl"
+    signatory_mode: "pre_msa"
+  Wholesale:
+    entity: "de_nl"
+    signatory_mode: "pre_msa"
+  StrategicSupplier:
+    entity: "de_ag"
+    signatory_mode: "ceo"
+  EcosystemPartnership:
+    entity: "de_ag"
+    signatory_mode: "ceo"
