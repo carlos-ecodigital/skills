@@ -5,17 +5,31 @@
 The two `.docx` files in this directory are **Git LFS pointer files**, not real Word documents:
 
 - `hot-grower-annex-a-v1.docx` — 130 B pointer (real binary ~20,491 B)
-- `hot-grower-body-v1.docx` — 130 B pointer (real binary: unknown size)
+- `hot-grower-body-v1.docx` — 130 B pointer (real binary ~37,343 B)
 
-They were copied from `digital-energy-ssot-main/contracts/templates/` during the 2026-04-13 `loi-generator → legal-assistant` restructure. The SSOT Obsidian vault is not a git checkout, so `git lfs pull` cannot be run in place.
+The LFS objects are **missing from the GitHub remote** (`git@github.com:carlos-ecodigital/skills.git`) — all four LFS OIDs return 404 on `git lfs fetch --all` (verified 2026-04-16). The Obsidian SSOT vault at `digital-energy-ssot-main/contracts/templates/` also contains only 130-byte stubs (verified 2026-04-16) — the original binaries were added to LFS but the objects were never pushed to any reachable LFS server.
+
+## Canonical location of the real binaries
+
+As of 2026-04-16, the real Word documents are tracked in the sibling `degitos-staging` repo at `domains/legal/templates/` (the repo's `*.docx` .gitignore rule post-dates the commit that added them — `90530b9`):
+
+- `domains/legal/templates/hot-grower-body-v1.docx` (37,343 B, Microsoft Word 2007+)
+- `domains/legal/templates/hot-grower-annex-a-v1.docx` (20,491 B, Microsoft Word 2007+)
 
 ## How to fetch the real binaries
 
-One of:
+In order of convenience:
 
-1. Clone the SSOT repo with LFS enabled (assuming it's pushed to a remote that retains LFS objects), then `git lfs pull`, then copy the resolved binaries on top of these stubs.
-2. Fetch the binaries directly from a teammate or cloud storage (Dropbox/Drive backup), then overwrite these stubs.
-3. Re-export from the source Word files used to author v1.0 (see `template-version.md`).
+1. **From degitos-staging** (fastest):
+   ```bash
+   git clone --depth=1 git@github.com:EcoDigital-Software/degitos-staging.git /tmp/ds
+   cp /tmp/ds/domains/legal/templates/hot-grower-body-v1.docx \
+      /tmp/ds/domains/legal/templates/hot-grower-annex-a-v1.docx \
+      "$(dirname "$0")/"
+   rm -rf /tmp/ds
+   ```
+2. Ask a teammate to push the LFS objects to `carlos-ecodigital/skills` LFS server.
+3. Re-export from the source Word files (see `template-version.md` for authoring chain).
 
 After fetching, verify:
 
