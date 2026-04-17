@@ -5,6 +5,36 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.3 — 2026-04-17
+
+Workflow + governance increment. Ships the independent portions of the v3.5.3 plan — Scope J (EP Recital D polish), Scope K (legacy YAML migration pre-flight), Scope J14 (Gmail MCP fallback), Scope J13 (Drive routing — doc-only, deferred until `artifact_storage.py` lands). Dependent scopes (D/E/F linter refinements, G Phase 7.5 fail-closed code spec, J8/J9 Phase-5/6 UX, J12 per-type defaults matrix) carry forward to v3.5.3 continuation.
+
+### Added
+- **Scope K — `--migrate-check` CLI flag** in `generate_loi.py::main()`. Inspects intake YAML for missing `counterparty.source_map` (v3.4 R-23 requirement); if absent, emits a ready-to-paste snippet with all 5 pillars marked `[TBC]`; exits 0 (non-blocking). Uses `yaml.safe_load` directly so legacy YAMLs that would fail full `validate()` can still be migration-checked. Covered by `test_v3_5_3.py::TestMigrateCheck` (3 tests).
+- **Scope J14 — Gmail MCP fallback paragraph** in `SKILL.md` Phase 3: documents schema-error detection (`"False is not of type 'array'"`) and the PDF-export / thread-paste fallback. Explicit note that silent omission is NOT acceptable — email threads often carry technical commitments (GPU platform, rack density, RFS) that must reach Schedule 1.
+- **Scope J13 — Drive-routing spec** in `SKILL.md` Phase 8: documents the `scripts/artifact_storage.py::upload_artifact()` integration pattern with CLAUDE.md §4 rationale. Status: deferred — script does not yet exist. Wire-up occurs when `artifact_storage.py` lands.
+- **8 new unit tests** in `tests/test_v3_5_3.py` (EP Recital D polish + --migrate-check + v3.5.2 regression). Total harness: **88 tests all passing**.
+
+### Changed
+- **Scope J — EP Recital D**: `"The Parties may exchange..."` → `"The Parties will exchange..."` (consistency with other-type confidentiality framing; EP now matches EU/DS/WS/SS).
+
+### Deferred to v3.5.3 continuation (needs v3.5.2-dependent context)
+- **D**: R-23 pillar-specific granularity + override reason validation
+- **E**: R-22 regex refinement (narrow to clause-context; allowlist for false positives)
+- **F**: Recital B multi-paragraph extraction regex fix
+- **G**: Phase 7.5 fail-closed operational spec (beyond the contract already documented in v3.5.2's `loi-review-workflow.md`)
+- **J8 / J9**: Phase 6 full-Recital-B display + Phase 5 redraft-as-first-class UX
+- **J12**: Per-type defaults matrix (depends on Scope Q entities register already landed in v3.5.2)
+- **H / I**: Tier-2 qualifier worked examples + direct WebFetch re-verification of 4 framework examples
+
+### Verified
+- 88/88 pytest tests pass in both repos
+- EP Recital D renders `"will exchange"` in generated .docx
+- `--migrate-check` verified with legacy-style YAML (emits snippet) and v3.4-style YAML (reports OK)
+- All 6 intake examples regenerate with QA PASS
+
+---
+
 ## v3.5.2 — 2026-04-17
 
 Foundations layer: the architectural scopes v3.5.1 deferred. Four big pieces — entities register, Parties Preamble + brand-name defined term, Signal Test methodology + new linter rules, legal-counsel Phase 7.5 callee — plus continued test-harness expansion.

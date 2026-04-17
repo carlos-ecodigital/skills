@@ -714,7 +714,7 @@ class LOI:
                 f"the Parties."
             )
             self.p(
-                "(D) The Parties may exchange commercially sensitive or non-public information in "
+                "(D) The Parties will exchange commercially sensitive or non-public information in "
                 "connection with research, policy, or programme activities under this LOI, and agree "
                 "to the mutual confidentiality provisions set out in Clause 6."
             )
@@ -2376,13 +2376,62 @@ def _parse_arg(flag: str) -> str:
     return ""
 
 
+def _migrate_check(path: str) -> int:
+    """v3.5.3 scope K: legacy intake YAML migration pre-flight.
+
+    Inspects intake YAML for missing `counterparty.source_map` (required by
+    v3.4 R-23 fabrication gate). If absent or empty, emits a ready-to-paste
+    snippet with all 5 pillars marked `[TBC]` and exits 0 (non-blocking —
+    the user copies the snippet, pastes into their YAML, and re-runs the
+    generator). If `source_map` is already present, reports that and exits 0.
+
+    Uses raw yaml.safe_load (bypasses full validate()) so legacy YAMLs that
+    would fail other v3.4/v3.5 validators can still be migration-checked.
+    """
+    try:
+        with open(path, "r") as f:
+            raw = yaml.safe_load(f) or {}
+    except Exception as e:
+        print(f"[--migrate-check] Could not read {path}: {e}")
+        return 0
+    cp = raw.get("counterparty", {}) or {}
+    source_map = cp.get("source_map")
+    if source_map and isinstance(source_map, dict) and any(source_map.values()):
+        print(f"[--migrate-check] {path}")
+        print("  OK: counterparty.source_map present with entries.")
+        print("  R-23 fabrication gate will evaluate URL attribution per pillar.")
+        return 0
+    # Missing or empty — emit snippet
+    print(f"[--migrate-check] {path}")
+    print("  counterparty.source_map NOT SET — legacy v3.3 intake.")
+    print("  Paste the following into your YAML under `counterparty:`:")
+    print()
+    print("  source_map:")
+    print("    pillar_1: \"[TBC]\"   # Identity & scale — own website, registry")
+    print("    pillar_2: \"[TBC]\"   # Core business — own website")
+    print("    pillar_3: \"[TBC]\"   # Track record / proof points — named customer press")
+    print("    pillar_4: \"inferred from Phase 1 context\"")
+    print("    pillar_5: \"[TBC]\"   # Forward plans — only if anchored to named third party")
+    print()
+    print("  Replace [TBC] with tier-1 URLs where available. See")
+    print("  _shared/counterpart-description-framework.md for the Signal")
+    print("  Test and tier hierarchy policy.")
+    return 0
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python generate_loi.py <intake.yaml>")
         print("  [--output path.docx]")
         print("  [--override R-11,R-14]")
         print("  [--override-reason \"...\"]")
+        print("  [--migrate-check]          (v3.5.3: inspect YAML for v3.4 source_map; non-blocking)")
         sys.exit(1)
+
+    # v3.5.3 scope K: --migrate-check runs before load_intake so legacy
+    # YAMLs that would fail full validation can still be inspected.
+    if "--migrate-check" in sys.argv:
+        sys.exit(_migrate_check(sys.argv[1]))
 
     data = load_intake(sys.argv[1])
 

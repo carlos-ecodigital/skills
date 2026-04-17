@@ -227,6 +227,8 @@ Question to resolve: [one clarifying question]
 - `Read` user-provided email / Fireflies / deck paths
 - For NL counterparties: KVK lookup; for UK: Companies House
 
+**v3.5.3 scope J14 — Gmail MCP fallback:** if Gmail MCP returns a schema error (e.g. `"False is not of type 'array'"`) or is otherwise unavailable, request PDF export or paste of the relevant email thread from the user rather than proceeding without the source. Detection heuristic: a schema-error from `search_threads` / `list_drafts` indicates the MCP is degraded; fall back immediately. Do not silently omit the email-thread context — it often carries technical commitments (GPU platform, rack density, RFS timing) that must land in Schedule 1.
+
 **Skill action:** Extract structured facts into 5 pillars per `_shared/counterpart-description-framework.md`. Tag each material claim with its source. Surface unresolved gaps.
 
 **Internal scratch format:**
@@ -412,6 +414,8 @@ Return: PASS / FLAG-FOR-REVISION (with line-level feedback) / REJECT (with reaso
 ### Phase 8 — Delivery
 
 **Skill action:** Emit path and next-step menu. Hand off to downstream skills as needed.
+
+**v3.5.3 scope J13 — Drive routing (deferred):** Phase 8 should route the generated `.docx` through `scripts/artifact_storage.py::upload_artifact()` so binaries land in the Drive folder structure (`Fundraise DE/06_Shared_Collateral/` generic or `Projects Benelux_Ops/{project}/Legal/` when site-named), not in `/tmp/`. This is a CLAUDE.md §4 requirement. **Status: deferred — `artifact_storage.py` script does not yet exist in the repo.** When it lands, wire Phase 8 to call `upload_artifact(output_path, drive_subpath=...)` after `doc.save(output)` and emit the Drive URL (not the local path) in the delivery prompt. Local copy can be retained via optional `--local` flag.
 
 **Prompt template (PASS):**
 ```
