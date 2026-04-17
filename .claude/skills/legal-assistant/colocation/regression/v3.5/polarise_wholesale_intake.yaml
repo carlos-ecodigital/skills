@@ -28,18 +28,24 @@ provider:
 
 # --- Counterparty (Polarise GmbH) ---
 counterparty:
-  name: "Polarise GmbH"
+  name: "Polarise. GmbH"
   short: "Polarise"
   address: "Technologiepark 12, 33100 Paderborn, Germany"
   jurisdiction: "Germany"
   legal_form: "Gesellschaft mit beschränkter Haftung (GmbH)"
-  reg_type: "Handelsregister"
-  reg_number: "[TBC]"
+  # v3.5.5 tier-1 re-verify: HRB 17714 Amtsgericht Paderborn (founded 6 Mar
+  # 2025). Holdco entity — operational subsidiaries Polarise MUC DC GmbH
+  # and Polarise AUG DC GmbH (Düsseldorf HRB 112190) own the Munich and
+  # Augsburg facilities respectively. LOI counterparty = holdco.
+  reg_type: "HRB (Amtsgericht Paderborn)"
+  reg_number: "17714"
   contact_name: "Thimo Groneberg"
   contact_title: "[TBC]"
   salutation: "Mr Groneberg"
-  signatory_name: "[TBC]"
-  signatory_title: "[TBC]"
+  # Geschäftsführer (Einzelvertretung) per Handelsregister: Michel Boutouil
+  # (Dortmund) and Tirat Demir (Paderborn). Either may sign.
+  signatory_name: "[TBC — Michel Boutouil or Tirat Demir]"
+  signatory_title: "Geschäftsführer"
   # Recital B — Signal Test compliant. Every named party passes Attribution
   # (gate 1) + Operational relevance (gate 2) + Freshness (gate 3).
   # Zero inline citations; zero vanity-financial numbers; zero self-slogans.
@@ -54,13 +60,20 @@ counterparty:
     supports Deutsche Telekom's Industrial AI Cloud in Munich
   source_map:
     pillar_1:
-      - "[TBC]"          # Identity & scale — polarise.eu/about (v3.5.5: replace with tier-1 URL on verification)
+      # v3.5.5 tier-1 re-verify: Paderborn Handelsregister (official registry)
+      - "https://www.online-handelsregister.de/handelsregisterauszug/nw/Paderborn/HRB/17714/Polarise-GmbH"
     pillar_2:
-      - "[TBC]"          # Core business — polarise.eu (product taxonomy)
+      # SWI Stoneweg Icona direct press release (tier-1 — investor-facing
+      # release by the controlling shareholder, covers Polarise's core
+      # business positioning as NVIDIA Cloud Preferred Partner)
+      - "https://swi.com/euronext-amsterdam-listed-swi-stoneweg-icona-group-moves-into-aicompute-with-majority-investment-in-polarise-a-leading-europeannvidia-cloud-partner-creating-a-fully-integrated-european-aiinfrastruct/"
     pillar_3:
-      - "[TBC]"          # Track record — Deutsche Telekom Industrial AI Cloud announcement; SWI Stoneweg Icona press; Macquarie facility; NVIDIA Cloud Partner status page
+      # Track record + named marquee endorsements (all tier-1):
+      # - SWI release names Deutsche Telekom Industrial AI Cloud as anchor
+      # - SWI release names NVIDIA Cloud Preferred Partner status
+      - "https://swi.com/euronext-amsterdam-listed-swi-stoneweg-icona-group-moves-into-aicompute-with-majority-investment-in-polarise-a-leading-europeannvidia-cloud-partner-creating-a-fully-integrated-european-aiinfrastruct/"
     pillar_4: "inferred from Phase 1 context (wholesale AI-colocation demand + sovereign EU positioning)"
-    pillar_5: "[TBC]"    # Forward plans — Augsburg expansion cited in Cl. 3, not Recital B (Signal Test: self-announced forward plans fail gate 1)
+    pillar_5: "[TBC]"    # Forward plans — Augsburg expansion cited in Cl. 3, not Recital B (Signal Test: self-announced forward plans fail gate 1). polarise.com direct JS-gated across 5 path attempts (v3.5.5 agent re-try); awaiting future direct tier-1.
 
 # --- Commercial (Jonathan's actual deal parameters) ---
 # 3 MW IT, 5-year term preferred (shorter acceptable), single facility, RFS
