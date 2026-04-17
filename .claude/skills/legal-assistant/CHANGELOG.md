@@ -5,6 +5,46 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.1 — 2026-04-17
+
+First production use of v3.4 on the Polarise Wholesale LOI (Jonathan memo 2026-04-17) surfaced 19 concrete field findings. v3.5.1 is the correctness critical-path sprint — makes the next-run LOI sendable without post-gen manual editing. Architectural scopes (entities register, full test harness, Recital B methodology rewrite, Parties Preamble + brand-name rename, legal-counsel callee, workflow UX) defer to v3.5.2 / v3.5.3 / v3.5.4 per the 4-way PR split in `plans/expressive-cooking-flamingo.md`.
+
+### Added
+- **Scope T seed**: `colocation/tests/` pytest harness with 47 unit tests for every v3.5.1 code path — `_is_tbc`, `_render_placeholder`, `_derive_footer_entity`, Cl. 3.4 numeric detection, signature-block output contract (no KvK, no "ACKNOWLEDGED AND AGREED", Place field present, placeholder helper used). Discipline rule for all subsequent PRs: no render-logic change ships without a unit test exercising the new branch.
+- **`_is_tbc(value)`** static helper — detects placeholder sentinels: `None`, empty, `[TBC]`, `[TO BE CONFIRMED]`, `TBC`, `XXXXXXXX`.
+- **`_render_placeholder(value, context)`** helper — context-scoped rendering; `sig_block_name` / `sig_block_title` render `____________________________` for placeholder values; `body_clause` preserves `[TBC]` as visible draft marker.
+- **`_derive_footer_entity(legal_name)`** static helper — maps `provider.legal_name` to document-factory footer entity key (`"nl"` for B.V. / Netherlands; `"ag"` default).
+- **Scope N-subset**: Schedule 1 now reads `schedule_1.technical.gpu_platform` / `rack_density_kw` / `cooling` / `designated_sites` from intake YAML (Wholesale + End User). Prior behaviour hardcoded `[To be confirmed]` regardless of intake content.
+- **Place: field** in both provider + counterparty sig blocks (Dutch/EU execution convention, jurisdictional + eIDAS relevance).
+
+### Changed
+- **Scope A (signatory default)**: NL BV default signatory changed from `Jelmer ten Wolde` / `Chief Platform Officer` to `Carlos Reuven` / `Director` across 5 intake YAMLs + `SKILL.md:323`. Statutory capacity ("Director") — legally authoritative to bind Digital Energy Netherlands B.V. under Dutch corporate law; CEO is a functional title, not statutory.
+- **Scope A'' (NL BV address + KvK)**: all 6 intake YAMLs updated from `Baarerstrasse 43, 6300 Zug, Switzerland` (the Swiss AG parent's address) to `Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands` + `kvk: "98580086"` (was placeholder `"XXXXXXXX"`). Confirmed NL B.V. registered seat.
+- **Scope A' (signature block cleanup)**: `DocBuilder.signature()` stripped (i) unconditional `KvK:` line (duplicate of Parties clause / cover page), (ii) `ACKNOWLEDGED AND AGREED:` header (unnecessary on bilateral instruments — signing = agreement), (iii) counterparty `{reg_type}: {reg_number}` block. Signatory `Name` and `Title` lines now route through `_render_placeholder(..., "sig_block_name"|"sig_block_title")` so `[TBC]` renders as fillable blank.
+- **Scope A'''' (footer)**: `document-factory/generate.py::setup_footer` now CENTER-aligned (was default left). `generate_loi.py::_setup` derives entity from `provider.legal_name` via `_derive_footer_entity()` and passes to `setup_first_footer(entity=...)` / `setup_cont_footer(entity=...)`. Prior behaviour defaulted to `"ag"` causing BV-signed LOIs to ship with Swiss parent's entity in the footer.
+- **Scope J1 (Cl. 3.2 rack density + cooling)**: Wholesale Cl. 3.2 Technical Specification default updated from `"40 kW and above"` (obsolete for AI compute) to `"approximately 130 kW and above"` + `"direct-to-chip liquid cooling (consistent with NVIDIA GB200 NVL72 and GB300 NVL72 reference architectures, which target approximately 120–140 kW per rack at full configuration)"`. Both parametrized via `commercial.rack_density_kw` + `commercial.cooling_topology` for non-GB workloads.
+- **Scope J3 (Cl. 3.4 Expansion branching)**: template now detects numeric vs non-numeric `expansion_mw` values. Numeric → original sentence. Empty / `[TBC]` / `"to be discussed"` / non-numeric → fallback sentence: *"The Customer has expressed interest in future expansion beyond the initial deployment, with scale to be determined following technical scoping and subject to availability, commercial agreement, and the terms of the MSA."* Prior behaviour interpolated non-numeric values verbatim, producing ungrammatical output (*"approximately to be discussed MW IT"*).
+- **Scope J7 (source_map format documentation)**: `intake_example_wholesale.yaml` updated with comment block documenting R-23 URL-list requirement + schedule_1.technical block showing GPU platform pattern.
+
+### Fixed
+- **NL B.V. LOIs no longer ship with Swiss AG address** on cover / footer (root cause: YAML defaults + footer entity default — both fixed).
+- **Sig block no longer displays `Title: [TBC]`** as literal string on external-facing drafts (root cause: no placeholder hygiene — fixed via `_render_placeholder` helper).
+- **Cl. 3.4 no longer produces ungrammatical output** when `expansion_mw` is non-numeric.
+- **Cl. 3.2 no longer ships obsolete 40 kW rack density** for AI-compute LOIs.
+- **Schedule 1 now renders GPU platform from intake** instead of hardcoded `[To be confirmed]`.
+
+### Scope deferred to later v3.5.x PRs (per plan `expressive-cooking-flamingo.md`)
+- **v3.5.2**: Scope Q (entities register — `config/entities.yaml`); full Scope T (golden-file integration tests + CI hook); Scope 0 (Recital B methodology + Signal Test + R-24/25/27/28); Scope A''' (Parties Preamble + body-wide `"the Provider"` → `"Digital Energy"` rename); Scope C (legal-counsel Phase 7.5 callee).
+- **v3.5.3**: Scope D/E/F/G (linter refinements + Phase 7.5 fallback); J8/J9/J12/J13/J14 (workflow UX + Drive routing + MCP fallback); H/I/J/K (tier-2 + re-verification + EP polish + migration).
+- **v3.5.4**: Scope B (sibling docs sync); Scope L (regression regen); full CHANGELOG.
+
+### Verified
+- All 6 intake example YAMLs regenerate with QA PASS, 0 warnings, 0 failures
+- Rendered .docx verified: sig block clean; footer centred + NL entity; Cl. 3.2 + 3.4 correct; no `KvK:` in body; no `ACKNOWLEDGED AND AGREED` in body
+- 47/47 pytest unit tests pass in both repos
+
+---
+
 ## v3.4 — 2026-04-17
 
 Post-v3.3-merge review surfaced five gaps. v3.4 closes all five.

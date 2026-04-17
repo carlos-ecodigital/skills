@@ -315,6 +315,15 @@ class LOI:
         style.font.size = FONT_BODY
         style.paragraph_format.space_after = Pt(3)
         style.paragraph_format.line_spacing = LINE_SPACING
+        # v3.5 scope A'''': derive footer entity from provider.legal_name so
+        # BV-signed instruments render "Digital Energy Netherlands B.V."
+        # footer and AG-signed instruments render "Digital Energy Group AG"
+        # footer. Prior default of "ag" caused BV LOIs to ship with the
+        # Swiss parent's entity in the footer — material misidentification.
+        entity = self._derive_footer_entity(
+            self.d.get("provider", {}).get("legal_name", "")
+        )
+
         for s in self.doc.sections:
             s.page_width = Mm(210)
             s.page_height = Mm(297)
@@ -327,8 +336,8 @@ class LOI:
             # Shared header/footer from document-factory
             setup_first_page_header(s)
             setup_cont_header(s, title=self.agreement_type)
-            setup_first_footer(s, classification="Confidential")
-            setup_cont_footer(s, classification="Confidential")
+            setup_first_footer(s, classification="Confidential", entity=entity)
+            setup_cont_footer(s, classification="Confidential", entity=entity)
 
     # --- Helpers ---
 
@@ -340,6 +349,52 @@ class LOI:
 
     def choice(self, k):
         return bool(self.g("choices", k))
+
+    @staticmethod
+    def _is_tbc(value):
+        """Detect placeholder / unresolved sentinel values."""
+        if value is None:
+            return True
+        s = str(value).strip()
+        if not s:
+            return True
+        return s.upper() in ("[TBC]", "[TO BE CONFIRMED]", "TBC", "TO BE CONFIRMED", "XXXXXXXX")
+
+    @staticmethod
+    def _derive_footer_entity(legal_name):
+        """Map provider legal name to document-factory footer entity key.
+
+        v3.5 scope A'''': dedicated helper so the derivation is unit-testable.
+        Returns "nl" for Digital Energy Netherlands B.V.; "ag" for Digital
+        Energy Group AG; "ag" as safe default for anything unrecognized.
+        """
+        if not legal_name:
+            return "ag"
+        name = str(legal_name)
+        if "Netherlands" in name or "B.V." in name or " BV" in name:
+            return "nl"
+        return "ag"
+
+    def _render_placeholder(self, value, context):
+        """Return render-appropriate string for a value that may be a placeholder.
+
+        context values:
+          - "sig_block_name"   → blank fillable line
+          - "sig_block_title"  → blank fillable line
+          - "body_clause"      → keep "[TBC]" as visible draft marker
+          - default            → return empty string
+
+        v3.5 scope J5 (Jonathan memo): `[TBC]` should never surface literally
+        in the sig block of an external-facing draft — renders as a fillable
+        blank line per standard legal instrument convention. The helper is
+        also used for other render contexts; behaviour is context-scoped.
+        """
+        is_tbc = self._is_tbc(value)
+        if context in ("sig_block_name", "sig_block_title"):
+            return "____________________________" if is_tbc else str(value)
+        if context == "body_clause":
+            return "[TBC]" if is_tbc else str(value)
+        return "" if is_tbc else str(value)
 
     def p(self, text, bold=False, italic=False, size=None, color=None, align=None, space_after=None):
         para = self.doc.add_paragraph()
@@ -730,7 +785,19 @@ class LOI:
         # v3.2: capacity expressed in MW IT + Designated Sites; no "DEC Block" customer-facing.
         self.bp("3.1 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {mw} MW IT of liquid-cooled AI colocation capacity, to be delivered across one or more Designated Sites. Site configuration, phasing, and delivery milestones will be set out in the MSA.")
 
-        self.bp("3.2 Technical Specification. ", "All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, direct liquid cooling infrastructure supporting rack densities of 40 kW and above, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.")
+        # v3.5 scope J1 (Jonathan memo): Cl. 3.2 parametrized. Default density
+        # bumped from "40 kW and above" to "approximately 130 kW and above"
+        # matching NVIDIA GB200/GB300 NVL72 reference architectures. Cooling
+        # topology explicit. Both overridable via YAML for non-AI workloads.
+        rack_density = comm.get("rack_density_kw", "130")
+        cooling_topology = comm.get(
+            "cooling_topology",
+            "direct-to-chip liquid cooling (consistent with NVIDIA GB200 NVL72 and GB300 NVL72 reference architectures, which target approximately 120\u2013140 kW per rack at full configuration)",
+        )
+        self.bp(
+            "3.2 Technical Specification. ",
+            f"All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, {cooling_topology} supporting rack densities of approximately {rack_density} kW and above, rear-door heat exchangers or equivalent where applicable, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.",
+        )
 
         if self.choice("phasing"):
             self.bp("3.3 Deployment Phasing. ", f"The {self.party} has indicated the following high-level phasing interest:")
@@ -738,8 +805,24 @@ class LOI:
             rows = [[f"Phase {i+1}", f"{p.get('mw', '')} MW IT", p.get("timeline", "")] for i, p in enumerate(phases)]
             self.table(["Phase", "Approximate Capacity", "Indicative Timeline"], rows)
 
+        # v3.5 scope J3 (Jonathan memo): Cl. 3.4 Expansion branches on value
+        # type. Numeric values render the approximate-MW sentence; empty,
+        # [TBC], "to be discussed" and non-numeric strings render a generic
+        # forward-expansion clause that doesn't insert broken grammar into
+        # the instrument.
         exp = comm.get("expansion_mw", "")
-        self.bp("3.4 Expansion. ", f"The {self.party} has expressed interest in future expansion to approximately {exp} MW IT, subject to availability, commercial agreement, and the terms of the MSA. The Provider will use reasonable endeavours to accommodate expansion requirements within its DEC programme.")
+        exp_str = str(exp).strip() if exp is not None else ""
+        is_numeric_exp = bool(exp_str) and exp_str.lstrip("~<>= ").split()[0].split(".")[0].isdigit()
+        if is_numeric_exp and not self._is_tbc(exp_str):
+            self.bp(
+                "3.4 Expansion. ",
+                f"The {self.party} has expressed interest in future expansion to approximately {exp_str} MW IT, subject to availability, commercial agreement, and the terms of the MSA. The Provider will use reasonable endeavours to accommodate expansion requirements within its DEC programme.",
+            )
+        else:
+            self.bp(
+                "3.4 Expansion. ",
+                f"The {self.party} has expressed interest in future expansion beyond the initial deployment, with scale to be determined following technical scoping and subject to availability, commercial agreement, and the terms of the MSA. The Provider will use reasonable endeavours to accommodate expansion requirements within its DEC programme.",
+            )
 
         if self.choice("pricing"):
             self.bp("3.5 Indicative Pricing. ", f"Based on the {self.party}'s indicated capacity and term preferences, the Provider's indicative pricing is as follows:")
@@ -1294,6 +1377,12 @@ class LOI:
         # the closing line. Hardcoded single-sentence closing matches main.
         # If choices.bespoke_closing is present in YAML, it is silently ignored
         # for backward compatibility.
+        #
+        # v3.5 scope A' (signature block cleanup): removed KvK / registration
+        # lines (duplicate Parties Preamble — scope A''') and removed the
+        # "ACKNOWLEDGED AND AGREED" header (unnecessary on bilateral
+        # instruments; signing = agreement). Added Place: field per Dutch/EU
+        # execution convention (jurisdictional + eIDAS relevance).
         self.p("We look forward to working with you.")
         self.p("")
         self.p("Yours faithfully,")
@@ -1301,30 +1390,25 @@ class LOI:
 
         prov = self.d.get("provider", {})
         self.p(f"For and on behalf of {prov.get('legal_name', '')}", bold=True)
-        self.p(f"KvK: {prov.get('kvk', '')}")
         self.p("")
         self.p("Signature: ____________________________")
-        self.p(f"Name: {prov.get('signatory_name', '')}")
-        self.p(f"Title: {prov.get('signatory_title', '')}")
+        self.p(f"Name: {self._render_placeholder(prov.get('signatory_name'), 'sig_block_name')}")
+        self.p(f"Title: {self._render_placeholder(prov.get('signatory_title'), 'sig_block_title')}")
         self.p("Date: ____________________________")
+        self.p("Place: ____________________________")
 
         self.p("")
         self.line()
         self.p("")
-        self.p("ACKNOWLEDGED AND AGREED:", bold=True)
-        self.p("")
 
         cp = self.d.get("counterparty", {})
         self.p(f"For and on behalf of {cp.get('name', '')}", bold=True)
-        rt = cp.get("reg_type", "")
-        rn = cp.get("reg_number", "")
-        if rt and rn:
-            self.p(f"{rt}: {rn}")
         self.p("")
         self.p("Signature: ____________________________")
-        self.p(f"Name: {cp.get('signatory_name', '')}")
-        self.p(f"Title: {cp.get('signatory_title', '')}")
+        self.p(f"Name: {self._render_placeholder(cp.get('signatory_name'), 'sig_block_name')}")
+        self.p(f"Title: {self._render_placeholder(cp.get('signatory_title'), 'sig_block_title')}")
         self.p("Date: ____________________________")
+        self.p("Place: ____________________________")
 
     def schedule(self):
         # Schedule starts on its own page.
@@ -1380,15 +1464,36 @@ class LOI:
             self.h("Schedule 1 \u2014 Capacity and Technical Requirements")
             self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
-            # v3.2: no DEC Block count; MW IT + Designated Sites only.
+            tech = self.d.get("schedule_1", {}).get("technical", {}) or self.d.get("technical", {})
+            # v3.5 scope N (Jonathan memo): Schedule 1 now reads technical
+            # fields from intake YAML. Previously hardcoded "[To be confirmed]"
+            # placeholders regardless of intake content — caused GPU platform
+            # commitments established in email/user intake to be lost in the
+            # Polarise LOI. Default values kept for backward-compat when
+            # intake omits `schedule_1.technical.*`.
+            gpu_platform = self._render_placeholder(
+                tech.get("gpu_platform"), "body_clause"
+            ) or "[To be confirmed during technical scoping]"
+            rack_density = tech.get("rack_density_kw") or comm.get("rack_density_kw")
+            rack_density_cell = (
+                f"{rack_density} kW/rack"
+                if rack_density and not self._is_tbc(rack_density)
+                else "[To be confirmed]"
+            )
+            cooling = tech.get("cooling") or comm.get(
+                "cooling_topology", "Direct-to-chip liquid cooling"
+            )
+            designated_sites = tech.get("designated_sites") or self._render_placeholder(
+                tech.get("designated_sites"), "body_clause"
+            ) or "To be confirmed during technical scoping"
             self.table(
                 ["Item", "Detail"],
                 [
                     ["Indicative Capacity", f"{comm.get('indicative_mw', '')} MW IT"],
-                    ["Designated Sites", "To be confirmed during technical scoping"],
-                    ["GPU / Accelerator Type", "[To be confirmed during technical scoping]"],
-                    ["Target Rack Density", "[To be confirmed]"],
-                    ["Cooling Requirement", "Direct liquid cooling"],
+                    ["Designated Sites", designated_sites],
+                    ["GPU / Accelerator Type", gpu_platform],
+                    ["Target Rack Density", rack_density_cell],
+                    ["Cooling Requirement", cooling],
                     ["Technical scoping complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Credit assessment complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Sales Order Form issued", f"{self.g('dates', 'loi_date')} + 60 days"],
@@ -1401,15 +1506,22 @@ class LOI:
             self.h("Schedule 1 \u2014 Service Requirements")
             self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
+            tech = self.d.get("schedule_1", {}).get("technical", {}) or self.d.get("technical", {})
             types = comm.get("service_type", [])
             type_str = ", ".join(t.replace("_", " ").title() for t in types)
+            gpu_platform = self._render_placeholder(
+                tech.get("gpu_platform"), "body_clause"
+            ) or "[To be confirmed during technical scoping]"
+            data_sovereignty = self._render_placeholder(
+                tech.get("data_sovereignty"), "body_clause"
+            ) or "[To be confirmed]"
             self.table(
                 ["Item", "Detail"],
                 [
                     ["Service Model", type_str],
                     ["Indicative Capacity", comm.get("indicative_capacity", "")],
-                    ["GPU / Accelerator Type", "[To be confirmed during technical scoping]"],
-                    ["Data Sovereignty", "[To be confirmed]"],
+                    ["GPU / Accelerator Type", gpu_platform],
+                    ["Data Sovereignty", data_sovereignty],
                     ["Technical scoping complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Commercial proposal issued", f"{self.g('dates', 'loi_date')} + 60 days"],
                     ["MSA executed", f"{self.g('dates', 'loi_date')} + 90 days"],

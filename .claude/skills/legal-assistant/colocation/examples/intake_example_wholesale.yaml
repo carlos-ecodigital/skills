@@ -7,11 +7,11 @@ type: Wholesale
 provider:
   legal_name: "Digital Energy Netherlands B.V."
   short_name: "Digital Energy"
-  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
-  kvk: "XXXXXXXX"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  kvk: "98580086"
   parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Jelmer ten Wolde"
-  signatory_title: "Chief Platform Officer"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
 
 # --- Counterparty ---
 counterparty:
@@ -27,20 +27,42 @@ counterparty:
   signatory_name: "Alex Park"
   signatory_title: "Chief Executive Officer"
     # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
-  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers, backed by Series B funding of USD 150 million [TBC — synthetic example]"
+  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers [TBC — synthetic example]"
+  # source_map: v3.4 R-23 fabrication gate requires each pillar value to be
+  # a list of https:// URLs OR the literal string "[TBC]". Plain strings
+  # (other than [TBC]) fail R-23. For real counterparties, populate with
+  # tier-1 URLs — counterparty's own website, official registry, direct-
+  # quoted press on counterparty's domain. See counterpart-description-
+  # framework.md for the signal test and tier hierarchy policy.
   source_map:
-    pillar_1: "[TBC]"
-    pillar_2: "[TBC]"
-    pillar_3: "[TBC]"
+    pillar_1: "[TBC]"   # Identity & scale — own website, registry
+    pillar_2: "[TBC]"   # Core business — own website
+    pillar_3: "[TBC]"   # Track record / proof points — named customer press, credentialled partnership pages
     pillar_4: "inferred from Phase 1 context"
-    pillar_5: "[TBC]"
+    pillar_5: "[TBC]"   # Forward plans — only if anchored to named third party
 
 # --- Commercial ---
 # v3.2: dec_block_count removed. Capacity expressed in MW IT.
+# v3.5 scope J1: rack_density_kw + cooling_topology optional overrides for
+# Cl. 3.2 (default: 130 kW + direct-to-chip liquid cooling matching
+# NVIDIA GB200/GB300 NVL72 reference architectures).
 commercial:
   indicative_mw: "10.8"
   expansion_mw: "21.6"
   min_term: "5 years"
+  # rack_density_kw: "130"           # override default if non-GB workload
+  # cooling_topology: "..."           # override default cooling description
+
+# --- Schedule 1 technical parameters ---
+# v3.5 scope N (Jonathan memo): Schedule 1 reads these fields from YAML.
+# Prior behaviour hardcoded "[To be confirmed]" regardless of intake. If
+# email/intake establishes a GPU platform commitment, specify it here.
+schedule_1:
+  technical:
+    gpu_platform: "[TBC]"             # e.g., "NVIDIA GB200 NVL72" | "NVIDIA GB300 NVL72" | "NVIDIA H200 SXM" | "[TBC]"
+    rack_density_kw: "[TBC]"          # numeric kW/rack; empty or [TBC] renders placeholder
+    cooling: "Direct-to-chip liquid cooling"
+    designated_sites: "[TBC]"
 
 # --- Choices ---
 choices:

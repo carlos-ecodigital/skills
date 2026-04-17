@@ -320,7 +320,7 @@ Accept, or request edits?
 📋 Ready to generate. Final confirmation:
 
 Type: [Type]
-Provider: Digital Energy Netherlands B.V. (Jelmer ten Wolde, CPO)
+Provider: Digital Energy Netherlands B.V. (Carlos Reuven, Director)
 Counterparty: [Name], [address], [reg_type]: [reg_number]
 Signatory: [Name], [Title]
 Contact: [Name], [Title]
