@@ -619,14 +619,53 @@ def audit_document(doc):
     return v
 
 
-def save_doc(doc, path):
-    """Save document with all post-processing fixes applied."""
+class AuditFailedError(Exception):
+    """Raised in strict mode when audit_document() finds violations.
+
+    Attributes:
+        violations: list of violation strings from audit_document()
+    """
+    def __init__(self, violations):
+        self.violations = violations
+        msg = f"{len(violations)} audit violation(s)"
+        if violations:
+            msg += f": {violations[0]}"
+            if len(violations) > 1:
+                msg += f" (+{len(violations) - 1} more)"
+        super().__init__(msg)
+
+
+def save_doc(doc, path, strict=None):
+    """Save document with post-processing fixes applied.
+
+    Args:
+        doc: python-docx Document
+        path: output .docx path
+        strict:
+            None (default) — warn on audit violations via stderr, save anyway.
+                             If env var DOCFACTORY_STRICT=1, behaves as True.
+            True           — raise AuditFailedError on violations, do NOT save.
+            False          — silent, save unconditionally (skip audit print).
+    """
     _fix_zoom(doc)
-    warnings = audit_document(doc)
-    if warnings:
-        print(f"[audit] {len(warnings)} issue(s):", file=sys.stderr)
-        for w in warnings[:10]:
+    # Resolve the effective mode: "strict" | "warn" | "silent"
+    if strict is True:
+        mode = "strict"
+    elif strict is False:
+        mode = "silent"
+    else:  # None — consult env var
+        mode = "strict" if os.environ.get("DOCFACTORY_STRICT") == "1" else "warn"
+
+    violations = audit_document(doc)
+
+    if violations and mode == "strict":
+        raise AuditFailedError(violations)
+
+    if violations and mode == "warn":
+        print(f"[audit] {len(violations)} issue(s):", file=sys.stderr)
+        for w in violations[:10]:
             print(f"  - {w}", file=sys.stderr)
+
     doc.save(path)
 
 
@@ -1925,12 +1964,32 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
         # Signature block detection
         # Mode 1: Section mode (in_signature_section flag set by heading)
         # Mode 2: Fallback line detection for documents without ## Signatures heading
-        sig_line_re = re.compile(r'^(_{3,}|.*\b(Name|Title|Signature|Date|Signed|By)\s*:)', re.IGNORECASE)
+        # Negative lookahead (?!\*) rejects **bold metadata** like **Grant Date:** from
+        # falsely triggering the signature handler.
+        sig_line_re = re.compile(
+            r'^(?!\*)(_{3,}|(Name|Title|Signature|Date|Signed|By)\s*:)',
+            re.IGNORECASE
+        )
+
+        # Party-name detector: bold-only line that is NOT a disclaimer/meta marker.
+        # Prevents **DRAFT — ...** / **End of Agreement.** from being styled as party.
+        _SIG_NON_PARTY_RE = re.compile(
+            r'^\*\*(DRAFT|END|NOTE|WARNING|CONFIDENTIAL|PRIVILEGED|TBD|TODO)\b',
+            re.IGNORECASE
+        )
+
+        def _is_sig_party_name(line_stripped):
+            """True if line is a bold-only party name (not a disclaimer)."""
+            if not _SIG_PARTY_RE.match(line_stripped):
+                return False
+            if _SIG_NON_PARTY_RE.match(line_stripped):
+                return False
+            return True
 
         # Signature fallback: only trigger on bold party names if NEXT non-blank
         # lines look like signature content (By:, Name:, Title:, ___, etc.)
         _sig_bold_with_context = False
-        if _SIG_PARTY_RE.match(line.strip()) and not in_signature_section:
+        if _is_sig_party_name(line.strip()) and not in_signature_section:
             # Peek ahead for signature-like lines
             j = i + 1
             while j < len(lines) and not lines[j].strip():
@@ -1971,7 +2030,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
             for block in party_blocks:
                 current = []
                 for sl in block:
-                    if _SIG_PARTY_RE.match(sl.strip()) and current:
+                    if _is_sig_party_name(sl.strip()) and current:
                         split_blocks.append(current)
                         current = []
                     current.append(sl)
@@ -1997,7 +2056,7 @@ def md_to_docx(md_text, title=None, client=None, date_str=None, cover=False,
                     is_last_block = (block_idx == len(party_blocks) - 1)
                     p.paragraph_format.keep_with_next = not (is_last_line and is_last_block)
 
-                    is_party_name = _SIG_PARTY_RE.match(sl_stripped)
+                    is_party_name = _is_sig_party_name(sl_stripped)
                     is_field = _SIG_FIELD_RE.match(sl_stripped)
 
                     # Spacing: breathing room within block, clear break between parties
