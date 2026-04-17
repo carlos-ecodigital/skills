@@ -1,0 +1,84 @@
+# LOI Generation Intake — Strategic Supplier Example (DE-LOI-SS-v1.0)
+# Seeded from the InfraPartners profile (regenerated as SS under v3.2).
+# v3.2 engine: produces cover + Recital A + Recital B automatically.
+# Clauses 1–8 + Schedule 1 drafted from the markdown template at:
+#   templates/DE-LOI-StrategicSupplier-v1.0_TEMPLATE.md
+
+type: StrategicSupplier
+
+# --- Provider ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Jelmer ten Wolde"
+  signatory_title: "Chief Platform Officer"
+
+# --- Counterparty ---
+# Recital B should follow _shared/counterpart-description-framework.md:
+# 5 pillars, 80–150 words, supplier-tuned (pillar 3 emphasis: manufacturing /
+# engineering track record + delivered projects + capability scale).
+counterparty:
+  name: "InfraPartners LLC"
+  short: "InfraPartners"
+  address: "1 Canada Square, Canary Wharf, London E14 5AB, United Kingdom"
+  jurisdiction: "England and Wales"
+  reg_type: "Companies House"
+  reg_number: "00000000"
+  contact_name: "TBC"
+  contact_title: "Chief Executive Officer"
+  salutation: "TBC"
+  signatory_name: "TBC"
+  signatory_title: "Chief Executive Officer"
+  description: >-
+    is a global digital-infrastructure company specialising in the design,
+    off-site manufacturing, and rapid deployment of modular data-centre
+    solutions for high-density AI and accelerated compute workloads, with
+    operations spanning London, Dublin, Cluj, and Houston and an active
+    project portfolio exceeding 60 MW of delivered and contracted capacity.
+    The company targets 80% off-site completion and a Ready-for-Service
+    target of 90 days or less from site-preparation completion. The
+    relationship is intended to integrate modular DEC delivery capability
+    with the Provider's active site portfolio, reducing time-to-capacity
+    on the Provider's development pipeline
+
+# --- Supplier-specific ---
+supplier:
+  capability_category: "modular_infra"
+  core_capability: >-
+    modular DEC infrastructure design and engineering, off-site prefabrication
+    and factory manufacturing, on-site assembly and integration, commissioning
+    support, and ongoing design iteration for next-generation accelerator
+    architectures
+  strategic_purposes:
+    - "engineering_integration"
+    - "pipeline_visibility"
+  lead_time_target: "Ready-for-Service within 90 days of site-preparation completion"
+  volume_indicative: "indicative target of 5–10 modular DEC units per year"
+  geographic_coverage: "Europe, Middle East, and Africa (EMEA)"
+
+# --- Choices ---
+choices:
+  joint_ip: "foreground"
+  exclusivity: false
+  existing_nda: false
+  # bespoke_closing: ""   # optional — linter-checked (R-5/R-6/R-9)
+
+# --- Programme ---
+# v3.2: library-sourced Recital A. Variants: default | sovereignty | integration | bespoke.
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+  recital_a_variant: "default"
+
+# --- Protection ---
+protection:
+  nc_duration: "24 months"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "15 April 2026"
+  validity_date: "15 April 2027"

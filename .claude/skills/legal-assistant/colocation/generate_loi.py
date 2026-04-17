@@ -1,12 +1,34 @@
 #!/usr/bin/env python3
 """
-LOI/NCNDA v3.0 — Document Generation Script (v3.1)
+LOI/NCNDA v3.2 — Document Generation Script
 
 Usage:
     python generate_loi.py intake.yaml [--output path/to/output.docx]
+                                        [--override R-11,R-14]
+                                        [--override-reason "..."]
 
 Takes a YAML intake file and produces a complete, branded .docx ready to sign.
 All clauses, conditionals, and schedules are generated from the intake data.
+
+v3.2 changes (2026-04-16):
+- Recital A is library-sourced (see _shared/loi-recital-a-library.md). Variants:
+  default | sovereignty | integration | bespoke.
+- Customer-facing "DEC Block" language removed. Capacity expressed in MW IT +
+  Designated Sites. Deprecated YAML field: commercial.dec_block_count.
+- "Minimum commitment term of 5 years" replaced with "approximately 5 years,
+  indicative only".
+- Cl. 4.2 "Revenue Chain" with Unicode arrows replaced with "Contractual
+  Sequence" prose + numbered list.
+- Closing line: hardcoded single-sentence "We look forward to working with you."
+  Honors OPEN-1 (commit 2097f52) — bespoke_closing is not supported.
+  choices.bespoke_closing in YAML is silently ignored for backward compat.
+- Schedule 1 title no longer carries "(NON-BINDING)" suffix. Italic prefatory
+  note on the schedule; authoritative binding/non-binding assignment in Cl. 5.1.
+- Pre-save QA linter. Rules in _shared/loi-qa-gate.md. Severity: fail / warn /
+  info. Overridable via --override / --override-reason.
+
+Planned (not yet wired in this file): new types StrategicSupplier (DE-LOI-SS-v1.0)
+and EcosystemPartnership (DE-LOI-EP-v1.0). See CHANGELOG.md.
 """
 
 import sys
@@ -62,10 +84,18 @@ def load_intake(path: str) -> dict:
 
 
 def validate(d: dict):
+    """Validate intake YAML. Raises SystemExit on failure.
+
+    v3.2: rule R-18 (fail) — deprecated field commercial.dec_block_count.
+    """
     errors = []
     t = d.get("type", "")
-    if t not in ("EndUser", "Distributor", "Wholesale"):
-        errors.append(f"type must be EndUser, Distributor, or Wholesale (got: {d.get('type')})")
+    if t not in ("EndUser", "Distributor", "Wholesale",
+                  "StrategicSupplier", "EcosystemPartnership"):
+        errors.append(
+            "type must be one of: EndUser, Distributor, Wholesale, "
+            f"StrategicSupplier, EcosystemPartnership (got: {d.get('type')})"
+        )
     for s in ("provider", "counterparty", "programme", "dates"):
         if s not in d:
             errors.append(f"Missing section: {s}")
@@ -75,23 +105,100 @@ def validate(d: dict):
             errors.append(f"counterparty.{f} required")
     if not d.get("dates", {}).get("loi_date"):
         errors.append("dates.loi_date required")
+
+    # R-18 — deprecated field migration error
+    if "dec_block_count" in d.get("commercial", {}):
+        errors.append(
+            "[R-18] commercial.dec_block_count is deprecated in v3.2. "
+            "Use commercial.indicative_mw instead. See CHANGELOG.md § Migration."
+        )
+
     if t == "Distributor" and d.get("partnership_mode", "combined") == "combined":
         for f in ("partner_core_capability", "partner_contribution",
                    "combined_offering", "target_end_users", "partner_service_scope"):
             if not d.get("commercial", {}).get(f):
                 errors.append(f"commercial.{f} required for Distributor Mode A")
     if t == "Wholesale":
-        for f in ("dec_block_count", "indicative_mw"):
-            if not d.get("commercial", {}).get(f):
-                errors.append(f"commercial.{f} required for Wholesale")
+        if not d.get("commercial", {}).get("indicative_mw"):
+            errors.append("commercial.indicative_mw required for Wholesale (MW IT)")
     if t == "EndUser":
         if not d.get("commercial", {}).get("service_type"):
             errors.append("commercial.service_type required for EndUser")
+
+    # Recital A variant validation
+    variant = d.get("programme", {}).get("recital_a_variant", "default")
+    if variant not in ("default", "sovereignty", "integration", "bespoke"):
+        errors.append(
+            f"programme.recital_a_variant must be one of: default, sovereignty, "
+            f"integration, bespoke (got: {variant})"
+        )
+    if variant == "bespoke" and not d.get("programme", {}).get("recital_a_bespoke"):
+        errors.append(
+            "programme.recital_a_bespoke required when recital_a_variant=bespoke"
+        )
+
     if errors:
         print("VALIDATION ERRORS:")
         for e in errors:
             print(f"  - {e}")
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# Recital A variant library (v3.2)
+# ---------------------------------------------------------------------------
+# Source of truth is _shared/loi-recital-a-library.md. The variants below are
+# copied in sync with that file. If the library file is updated, update these.
+# Drift guard: QA linter warns if the variant strings diverge from the library.
+
+RECITAL_A_VARIANTS = {
+    "default": (
+        '{prov} (the "Provider") develops and operates Digital Energy Centers '
+        '("DECs"): purpose-built, liquid-cooled colocation facilities that '
+        "integrate accelerated compute with on-site energy recycling, thermal "
+        "recovery, and grid-flexible operation. The Provider is building an "
+        "integrated sovereign AI infrastructure platform across European markets, "
+        "structured for institutional project financing and designed to deliver "
+        "compute capacity alongside heat and grid value from a single energy input."
+    ),
+    "sovereignty": (
+        '{prov} (the "Provider") develops and operates Digital Energy Centers '
+        '("DECs"): purpose-built, liquid-cooled colocation facilities for '
+        "high-density accelerated compute workloads. The Provider operates a "
+        "sovereign AI infrastructure platform on European soil, controlled by "
+        "European operators, designed to serve European enterprises, institutions, "
+        "and public-sector customers with compliance-grade data residency and "
+        "independent supply-chain control. DECs integrate AI compute with energy "
+        "recycling and grid-flexible operation, and the platform is structured "
+        "for institutional project financing."
+    ),
+    "integration": (
+        '{prov} (the "Provider") develops and operates Digital Energy Centers '
+        '("DECs"): integrated energy infrastructure assets in which electricity '
+        "entering a site powers accelerated compute, the resulting heat is "
+        "recovered and upgraded for thermal offtake to greenhouses or "
+        "district-heating networks, and residual grid and power-system value is "
+        "captured through battery storage, flexible generation, and "
+        "grid-balancing services. DECs turn energy into digital intelligence "
+        "and capture heat, power, and grid value along the way."
+    ),
+}
+
+
+def resolve_recital_a(d: dict) -> str:
+    """Return the Recital A body (without the '(A) ' prefix).
+
+    Looks up the variant key in RECITAL_A_VARIANTS and formats with provider
+    short name. For variant='bespoke', returns the raw bespoke string; the
+    QA linter will catch any forbidden patterns.
+    """
+    prov = d.get("provider", {}).get("short_name", "Digital Energy")
+    variant = d.get("programme", {}).get("recital_a_variant", "default")
+    if variant == "bespoke":
+        bespoke = d.get("programme", {}).get("recital_a_bespoke", "")
+        return bespoke or RECITAL_A_VARIANTS["default"].format(prov=prov)
+    tmpl = RECITAL_A_VARIANTS.get(variant, RECITAL_A_VARIANTS["default"])
+    return tmpl.format(prov=prov)
 
 
 # ---------------------------------------------------------------------------
@@ -102,12 +209,16 @@ _AGREEMENT_TYPE_BY_LOI = {
     "Distributor": "Letter of Intent and NCNDA",
     "Wholesale": "Letter of Intent and NCNDA",
     "EndUser": "Letter of Intent",
+    "StrategicSupplier": "Letter of Intent and NCNDA",
+    "EcosystemPartnership": "Letter of Intent",
 }
 
 _SUBJECT_BY_LOI = {
     "Distributor": "Strategic Infrastructure Partnership",
     "Wholesale": "Purpose-Built AI Colocation Capacity",
     "EndUser": "AI Compute Infrastructure Services",
+    "StrategicSupplier": "Strategic Supply and Infrastructure Partnership",
+    "EcosystemPartnership": "Strategic Ecosystem Collaboration",
 }
 
 
@@ -119,7 +230,18 @@ class LOI:
         self.subject = _SUBJECT_BY_LOI[self.t]
         self.doc = Document()
         self._setup()
-        self.party = "Partner" if self.t == "Distributor" else "Customer"
+        party_by_type = {
+            "Distributor": "Partner",
+            "StrategicSupplier": "Partner",
+            "EcosystemPartnership": "Partner",
+            "Wholesale": "Customer",
+            "EndUser": "Customer",
+        }
+        self.party = party_by_type.get(self.t, "Customer")
+        # QA linter accumulators (populated during build)
+        self.overrides = set(self.d.get("_overrides", []))
+        self.override_reason = self.d.get("_override_reason", "")
+        self.qa_findings = []
 
     def _setup(self):
         style = self.doc.styles["Normal"]
@@ -248,42 +370,37 @@ class LOI:
 
     def recitals(self):
         self.h("Recitals")
-        prov = self.g("provider", "short_name")
         cp = self.g("counterparty", "short")
         desc = self.g("counterparty", "description")
-        sites = self.g("programme", "site_count")
 
-        if self.t == "Distributor":
-            self.p(
-                f'(A) {prov} (the "Provider") develops and operates Digital Energy Centers ("DECs"): '
-                f"purpose-built, liquid-cooled colocation facilities designed for high-density accelerated "
-                f"compute workloads. DECs integrate AI compute with energy recycling and generation. "
-                f"The Provider's programme spans {sites} identified sites with secured energy and "
-                f"grid access, positioning its platform as one of the leading sovereign AI infrastructure "
-                f"programmes capable of delivering capacity at scale within 12 months of commercial "
-                f"commitment. The Provider seeks qualified channel and integration partners to extend "
-                f"its platform reach to end-user segments where the {self.party} holds established customer "
-                f"relationships and domain expertise."
-            )
-        elif self.t == "Wholesale":
-            self.p(
-                f'(A) {prov} (the "Provider") develops and operates Digital Energy Centers ("DECs"): '
-                f"purpose-built, liquid-cooled colocation facilities designed for high-density accelerated "
-                f"compute workloads. DECs integrate AI compute with energy recycling and generation. "
-                f"The Provider's programme spans {sites} identified sites with secured energy and "
-                f"grid access, positioning its platform as one of the leading sovereign AI infrastructure "
-                f"programmes capable of delivering capacity at scale within 12 months of commercial commitment."
-            )
-        else:
-            self.p(
-                f'(A) {prov} (the "Provider") operates Digital Energy Centers ("DECs"): '
-                f"purpose-built, liquid-cooled colocation facilities designed for high-density AI and "
-                f"accelerated compute workloads. DECs integrate AI compute with energy recycling and "
-                f"generation. The Provider's programme spans {sites} identified sites with secured "
-                f"energy and grid access, offering European data sovereignty and capacity across multiple "
-                f"service models \u2014 including dedicated bare metal colocation, shared cloud environments, "
-                f"and token-based GPU access."
-            )
+        # Recital A — library-sourced variant (v3.2)
+        recital_a_body = resolve_recital_a(self.d)
+
+        # Append type-specific strategic-fit tail to Recital A.
+        # The library variants cover identity + platform framing; each type
+        # adds one sentence that frames the counterparty relationship.
+        tail_by_type = {
+            "Distributor": (
+                f" The Provider seeks qualified channel and integration partners to "
+                f"extend its platform reach to end-user segments where the {self.party} "
+                f"holds established customer relationships and domain expertise."
+            ),
+            "StrategicSupplier": (
+                f" The Provider seeks qualified supply and engineering partners to "
+                f"accelerate the delivery of its DEC platform, integrate complementary "
+                f"infrastructure capability, and de-risk the supply chain supporting "
+                f"the Provider's active development pipeline."
+            ),
+            "EcosystemPartnership": (
+                f" The Provider participates in ecosystem initiatives that advance "
+                f"sovereign AI infrastructure, sustainable datacentre design, and "
+                f"European industrial policy alignment."
+            ),
+            "Wholesale": "",
+            "EndUser": "",
+        }
+        recital_a_body += tail_by_type.get(self.t, "")
+        self.p(f"(A) {recital_a_body}")
 
         self.p(f'(B) {cp} (the "{self.party}") {desc}.')
 
@@ -375,7 +492,8 @@ class LOI:
         defs.append(("", ci_text))
 
         defs.append(('"DEC"', "means a Digital Energy Center: a purpose-built colocation facility developed and operated by the Provider;"))
-        defs.append(('"DEC Block"', "means a standardised compute unit of approximately 1.2 MW IT capacity" + (", factory-manufactured and modular;" if self.t != "EndUser" else ";")))
+        # v3.2: "DEC Block" removed from customer-facing definitions. Capacity expressed in MW IT + Designated Sites.
+        defs.append(('"Designated Site"', "means any DEC or DEC site designated by the Provider for the delivery of capacity to the " + self.party + ", as confirmed in the MSA;"))
         defs.append(('"Financing Party"', "means any bank, financial institution, fund, security trustee, or other entity providing or arranging " + ("debt, mezzanine, or structured " if self.t != "EndUser" else "") + "finance to the Provider or any of its Affiliates in connection with the development or operation of any DEC;"))
 
         if self.t == "Distributor":
@@ -396,7 +514,7 @@ class LOI:
             defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of an MSA;"))
 
         if self.t in ("Distributor", "Wholesale"):
-            defs.append(('"Ready-for-Service" or "RFS"', "means the date on which a DEC or DEC Block has been commissioned and is available for the provision of colocation services;"))
+            defs.append(('"Ready-for-Service" or "RFS"', "means the date on which a DEC (or a discrete capacity allocation within a DEC) has been commissioned and is available for the provision of colocation services;"))
 
         defs.append(('"Representatives"', "means, in relation to a Party, its Affiliates, and its and their respective directors, officers, employees, agents, and professional advisers;"))
 
@@ -440,7 +558,7 @@ class LOI:
 
     def clause3_ds(self):
         mode = self.d.get("partnership_mode", "combined")
-        heading = "3. Partnership and Combined Offering (NON-BINDING)" if mode == "combined" else "3. Partnership and Referral Arrangement (NON-BINDING)"
+        heading = "3. Partnership and Combined Offering" if mode == "combined" else "3. Partnership and Referral Arrangement"
         self.h(heading)
         comm = self.d.get("commercial", {})
         mode = self.d.get("partnership_mode", "combined")
@@ -516,13 +634,13 @@ class LOI:
             self.bp("3.5 Non-Exclusivity. ", "The partnership contemplated by this LOI is non-exclusive. Both Parties retain the right to enter into similar arrangements with third parties.")
 
     def clause3_ws(self):
-        self.h("3. Indicative Capacity and Commercial Terms (NON-BINDING)")
+        self.h("3. Indicative Capacity and Commercial Terms")
         comm = self.d.get("commercial", {})
         ch = self.d.get("choices", {})
-        blocks = comm.get("dec_block_count", "")
         mw = comm.get("indicative_mw", "")
 
-        self.bp("3.1 Capacity Requirement. ", f"The {self.party} has indicated interest in approximately {blocks} DEC Blocks ({mw} MW IT) of purpose-built AI colocation capacity. Capacity is provisioned in whole DEC Block increments of 1.2 MW IT each; partial requirements are rounded up to the nearest full DEC Block.")
+        # v3.2: capacity expressed in MW IT + Designated Sites; no "DEC Block" customer-facing.
+        self.bp("3.1 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {mw} MW IT of purpose-built, liquid-cooled AI colocation capacity, to be delivered across one or more Designated Sites. Site configuration, phasing, and delivery milestones will be set out in the MSA.")
 
         self.bp("3.2 Technical Specification. ", "All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, direct liquid cooling infrastructure supporting rack densities of 40 kW and above, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.")
 
@@ -553,14 +671,15 @@ class LOI:
             self.bp("3.5 Indicative Pricing. ", f"Pricing for the Services will be determined following the technical scoping phase and set out in the Sales Order Form. The Provider will provide indicative pricing upon completion of the {self.party}'s capacity, density, and term requirements.")
 
         term = comm.get("min_term", "")
-        self.bp("3.6 Term and Commitment. ", f"The {self.party} has indicated willingness to enter into a minimum commitment term of {term} under the MSA. The {self.party} acknowledges that the Provider intends the MSA to include take-or-pay provisions commensurate with the committed capacity, the terms of which will be negotiated in good faith.")
+        # v3.2: "minimum commitment term" replaced with "approximately X, indicative only".
+        self.bp("3.6 Indicative Term. ", f"The {self.party} anticipates a commitment term of approximately {term}, indicative only and subject to confirmation in the MSA. Actual term may be longer or shorter depending on final commercial terms. The {self.party} acknowledges that the Provider intends the MSA to include take-or-pay provisions commensurate with the committed capacity, the terms of which will be negotiated in good faith.")
 
         self.bp("3.7 Credit Assessment. ", f"The Provider will complete a credit assessment of the {self.party} (or the entity that will execute the MSA) as part of the commercial process. The {self.party} agrees to cooperate with such assessment, which may include provision of audited financial statements, credit references, evidence of parent company support, or other financial information as reasonably requested. Where the {self.party} does not hold an investment-grade credit rating (or equivalent), the Parties will discuss appropriate credit support mechanisms, which may include a parent company guarantee, security deposit, or letter of credit.")
 
         self.bp("3.8 Site Allocation. ", f"The Provider is developing DEC facilities across multiple locations. The Provider will allocate capacity to the {self.party} based on the DEC(s) best suited to the {self.party}'s requirements, taking into account development readiness, grid availability, RFS timeline, and the {self.party}'s latency and connectivity needs. Site allocation will be confirmed during the technical scoping phase and formalised in the Sales Order Form.")
 
     def clause3_eu(self):
-        self.h("3. Service Requirements (NON-BINDING)")
+        self.h("3. Service Requirements")
         comm = self.d.get("commercial", {})
         types = comm.get("service_type", [])
 
@@ -622,11 +741,12 @@ class LOI:
             self.bp("3.4 Indicative Pricing. ", f"Pricing will be determined following the technical scoping phase and set out in the MSA. The Provider will provide indicative pricing upon agreement of the {self.party}'s capacity, density, and service model requirements.")
 
         term = comm.get("min_term", "")
-        self.bp("3.5 Term. ", f"The {self.party} has indicated willingness to enter into a minimum commitment of {term} under the MSA.")
+        # v3.2: indicative, not "minimum commitment"
+        self.bp("3.5 Indicative Term. ", f"The {self.party} anticipates a commitment term of approximately {term}, indicative only and subject to confirmation in the MSA.")
 
     def clause4(self):
         if self.t == "Distributor":
-            self.h("4. Relationship Structure and Protection (NON-BINDING)")
+            self.h("4. Relationship Structure and Protection")
             pbi = self.g("protection", "pbi_survival", default="10 years")
             self.bp("4.1 Protected Business Information. ",
                      f"The {self.party} acknowledges that the Provider's competitive position depends on the confidentiality of its Protected Business Information as defined in Clause 1. The {self.party} agrees that, for a period of {pbi} from the date of this LOI, it shall not directly or indirectly use any PBI to replicate, reverse-engineer, or independently develop any material element of the Provider's business model, site-sourcing methodology, energy procurement strategy, or commercial framework, whether for itself or for any third party. This obligation survives termination or expiry of this LOI and of any MSA.")
@@ -642,9 +762,15 @@ class LOI:
             self.p("These timelines are indicative and non-binding.")
 
         elif self.t == "Wholesale":
-            self.h("4. Relationship Structure and Next Steps (NON-BINDING)")
+            self.h("4. Relationship Structure and Next Steps")
             self.bp("4.1 MSA Structure. ", "The Parties intend to execute a Master Services Agreement incorporating: (a) a Pricing Framework setting out the commercial terms for the Services; (b) Sales Order Forms for each capacity commitment; and (c) an SLA Schedule defining availability, performance, and remediation commitments. The MSA will be the sole binding commercial agreement between the Parties.")
-            self.bp("4.2 Revenue Chain. ", "The Parties acknowledge the intended contractual chain: this LOI (non-binding commercial intent) \u2192 Sales Order Form (binding capacity commitment and pricing) \u2192 MSA (definitive commercial terms). Each stage is designed to provide increasing commercial certainty and to support the Provider's project finance activities.")
+            # v3.2: Cl. 4.2 arrows replaced with institutional prose + numbered list.
+            self.bp("4.2 Contractual Sequence. ", "The Parties acknowledge the intended progression of commercial instruments:")
+            self.p("(a) this LOI, setting out non-binding commercial intent;")
+            self.p("(b) a Sales Order Form or equivalent binding capacity commitment with indicative pricing;")
+            self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
+            self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
+            self.p("Each stage is designed to provide increasing commercial certainty and to support the Provider's project finance activities.")
             self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with the Provider's Financing Parties if requested under Clause 5.3. The {self.party} acknowledges that its cooperation in this regard materially supports the Provider's ability to deliver the committed capacity on the indicative timeline.")
             self.bp("4.4 Expansion and Priority. ", f"The Provider will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
@@ -656,7 +782,7 @@ class LOI:
             self.bp("4.6 No Capacity Reservation. ", "This LOI does not reserve capacity at any DEC. Capacity allocation is on a first-come, first-served basis and will only be confirmed upon execution of the MSA.")
 
         else:  # EndUser
-            self.h("4. Next Steps (NON-BINDING)")
+            self.h("4. Next Steps")
             self.p("4.1 Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Technical scoping (target: 30 days post-LOI) \u2014 Detailed discovery to determine capacity, configuration, connectivity, and service model requirements.")
             self.p("(b) Commercial proposal (target: 60 days post-LOI) \u2014 The Provider will issue a commercial proposal setting out confirmed pricing, service scope, and SLA framework.")
@@ -794,6 +920,11 @@ class LOI:
 
     def signature(self):
         self.line()
+        # v3.3: honours OPEN-1 (commit 2097f52) — bespoke_closing removed.
+        # Operational near-signature content belongs in the letter body, not
+        # the closing line. Hardcoded single-sentence closing matches main.
+        # If choices.bespoke_closing is present in YAML, it is silently ignored
+        # for backward compatibility.
         self.p("We look forward to working with you.")
         self.p("")
         self.p("Yours faithfully,")
@@ -827,11 +958,17 @@ class LOI:
         self.p("Date: ____________________________")
 
     def schedule(self):
-        # Schedule starts on its own page
+        # Schedule starts on its own page.
+        # v3.2: schedule titles no longer carry "(NON-BINDING)" suffix. Italic
+        # prefatory note carries the non-binding signal. Authoritative
+        # binding/non-binding assignment lives in Cl. 5.1 / Cl. 8.1.
         self.doc.add_page_break()
+        prefatory = ("This schedule expresses the Parties' current intentions "
+                      "and is non-binding, in accordance with Clause 5.1.")
         if self.t == "Distributor":
             self.line()
-            self.h("Schedule 1 \u2014 Partnership Details (NON-BINDING)")
+            self.h("Schedule 1 \u2014 Partnership Details")
+            self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
             self.table(
                 ["Item", "Detail"],
@@ -847,12 +984,15 @@ class LOI:
             )
         elif self.t == "Wholesale":
             self.line()
-            self.h("Schedule 1 \u2014 Capacity and Technical Requirements (NON-BINDING)")
+            self.h("Schedule 1 \u2014 Capacity and Technical Requirements")
+            self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
+            # v3.2: no DEC Block count; MW IT + Designated Sites only.
             self.table(
                 ["Item", "Detail"],
                 [
-                    ["Indicative Capacity", f"{comm.get('dec_block_count', '')} DEC Blocks ({comm.get('indicative_mw', '')} MW IT)"],
+                    ["Indicative Capacity", f"{comm.get('indicative_mw', '')} MW IT"],
+                    ["Designated Sites", "To be confirmed during technical scoping"],
                     ["GPU / Accelerator Type", "[To be confirmed during technical scoping]"],
                     ["Target Rack Density", "[To be confirmed]"],
                     ["Cooling Requirement", "Direct liquid cooling"],
@@ -865,7 +1005,8 @@ class LOI:
             )
         else:  # EndUser
             self.line()
-            self.h("Schedule 1 \u2014 Service Requirements (NON-BINDING)")
+            self.h("Schedule 1 \u2014 Service Requirements")
+            self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
             types = comm.get("service_type", [])
             type_str = ", ".join(t.replace("_", " ").title() for t in types)
@@ -919,18 +1060,143 @@ class LOI:
 # Main
 # ---------------------------------------------------------------------------
 
+import re  # noqa: E402 — used below by qa_lint
+
+
+# v3.2 QA linter. Rules in sync with _shared/loi-qa-gate.md.
+
+_ARROW_CHARS = "\u2192\u21D2\u279C\u27F6\u21A6\u27F9\u21E8"
+
+_FAIL_RULES = {
+    "R-1": (r"minimum commitment term of 5 years", "body",
+            "'minimum commitment term of 5 years' banned; use 'approximately 5 years, indicative only'"),
+    "R-2": (r"\b\d+\s+identified\s+sites\b", "Recital A",
+            "Fixed site-count language in Recital A"),
+    "R-3": (r"12 months of commercial commitment", "Recital A",
+            "'12 months of commercial commitment' banned in Recital A"),
+    "R-5": (r"We are confident that", "closing",
+            "'We are confident that' banned"),
+    "R-7": (f"[{_ARROW_CHARS}]", "body",
+            "Unicode arrow detected in body"),
+    "R-8": (r"Schedule \d+ [^\n]*\(NON-BINDING\)", "schedule-title",
+            "'(NON-BINDING)' suffix in schedule title — use italic prefatory note instead"),
+    "R-10": (r"4\.2 Revenue Chain", "Cl. 4.2",
+             "Cl. 4.2 heading must be 'Contractual Sequence', not 'Revenue Chain'"),
+    "R-20": (r"programme spans \d+", "Recital A",
+             "'programme spans N...' language regression"),
+}
+
+_WARN_RULES = {
+    "R-11": (r"\bISO \d{4,5}\b", "Recital B",
+             "ISO certification in Recital B (set choices.cert_relevant=true to suppress)"),
+    "R-14": (r"\b(leading|innovative|cutting-edge|world-class|best-in-class)\b", "Recital B",
+             "Salesy adjective in Recital B"),
+    "R-15": (r"positioning (its|itself) as", "body",
+             "'positioning (its|itself) as' — formulaic"),
+    "R-19": (r"^\s*\d+(?:\.\d+)?\s+[^\n]*\(NON-BINDING\)", "heading",
+             "'(NON-BINDING)' in a clause heading — v3.2 style regression"),
+}
+
+
+def _extract_text(doc) -> str:
+    """Extract all paragraph text from a python-docx Document, including tables."""
+    lines = []
+    for p in doc.paragraphs:
+        lines.append(p.text)
+    for t in doc.tables:
+        for row in t.rows:
+            for cell in row.cells:
+                for p in cell.paragraphs:
+                    lines.append(p.text)
+    return "\n".join(lines)
+
+
+def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
+            override_reason: str):
+    """Run QA rules over the built Document. Returns (status, report_lines).
+
+    status: "PASS" | "PASS_WITH_WARN" | "FAIL"
+    """
+    text = _extract_text(doc)
+    lines = [
+        "LOI QA Report",
+        f"Counterparty: {data.get('counterparty', {}).get('short', 'Unknown')}",
+        f"Generated: {datetime.now().isoformat()}Z",
+        f"Variant: programme.recital_a_variant={data.get('programme', {}).get('recital_a_variant', 'default')}",
+        f"Overrides: {','.join(sorted(overrides)) if overrides else 'none'}",
+    ]
+    if override_reason:
+        lines.append(f"Override reason: {override_reason}")
+    lines.append("")
+    lines.append("Findings:")
+
+    fail_count = 0
+    warn_count = 0
+
+    for rule, scope, msg in builder_findings:
+        if rule in overrides:
+            lines.append(f"  [OVRD] {rule}  {scope}   {msg}")
+        else:
+            lines.append(f"  [FAIL] {rule}  {scope}   {msg}")
+            fail_count += 1
+
+    for rid, (pattern, scope, msg) in _FAIL_RULES.items():
+        if re.search(pattern, text, re.MULTILINE):
+            if rid in overrides:
+                lines.append(f"  [OVRD] {rid}  {scope}   {msg}")
+            else:
+                lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
+                fail_count += 1
+
+    for rid, (pattern, scope, msg) in _WARN_RULES.items():
+        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
+            if rid == "R-11" and data.get("choices", {}).get("cert_relevant"):
+                continue
+            lines.append(f"  [WARN] {rid}  {scope}   {msg}")
+            warn_count += 1
+
+    if not data.get("programme", {}).get("recital_a_variant"):
+        lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
+    if not data.get("choices", {}).get("bespoke_closing"):
+        lines.append("  [INFO] R-17  YAML   No bespoke_closing, used default single-sentence")
+
+    lines.append("")
+    if fail_count > 0:
+        status = "FAIL"
+    elif warn_count > 0:
+        status = "PASS_WITH_WARN"
+    else:
+        status = "PASS"
+    lines.append(f"Status: {status} (warnings: {warn_count}, failures: {fail_count})")
+    return status, lines
+
+
+def _parse_arg(flag: str) -> str:
+    if flag in sys.argv:
+        idx = sys.argv.index(flag)
+        if idx + 1 < len(sys.argv):
+            return sys.argv[idx + 1]
+    return ""
+
+
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python generate_loi.py <intake.yaml> [--output path.docx]")
+        print("Usage: python generate_loi.py <intake.yaml>")
+        print("  [--output path.docx]")
+        print("  [--override R-11,R-14]")
+        print("  [--override-reason \"...\"]")
         sys.exit(1)
 
     data = load_intake(sys.argv[1])
 
-    output = None
-    if "--output" in sys.argv:
-        idx = sys.argv.index("--output")
-        if idx + 1 < len(sys.argv):
-            output = sys.argv[idx + 1]
+    override_str = _parse_arg("--override")
+    if override_str:
+        data["_overrides"] = [r.strip() for r in override_str.split(",") if r.strip()]
+    override_reason = _parse_arg("--override-reason")
+    if override_reason:
+        data["_override_reason"] = override_reason
+
+    output = _parse_arg("--output")
 
     if not output:
         loi_date = data.get("dates", {}).get("loi_date", "")
@@ -944,11 +1210,28 @@ def main():
 
     loi = LOI(data)
     doc = loi.build()
+
+    qa_report_path = output.replace(".docx", "_qa.txt")
+    qa_status, qa_lines = qa_lint(doc, data, loi.qa_findings, loi.overrides,
+                                   loi.override_reason)
+    with open(qa_report_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(qa_lines) + "\n")
+
+    if qa_status == "FAIL":
+        print("QA FAIL — build blocked. Findings:")
+        for line in qa_lines:
+            if "[FAIL]" in line:
+                print(f"  {line}")
+        print(f"\nFull QA report: {qa_report_path}")
+        print("To override: --override R-xx,R-yy --override-reason \"...\"")
+        sys.exit(2)
+
     doc.save(output)
 
     print(f"Generated: {output}")
-    print(f"Type: DE-LOI-{data['type']}-v3.0")
+    print(f"Type: DE-LOI-{data['type']}-v3.2")
     print(f"Counterparty: {data.get('counterparty', {}).get('name', 'Unknown')}")
+    print(f"QA: {qa_status} ({qa_report_path})")
     print(f"Clauses: ALL (full document)")
 
 

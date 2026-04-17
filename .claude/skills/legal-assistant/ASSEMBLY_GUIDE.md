@@ -11,17 +11,28 @@ Previously called `loi-generator/ASSEMBLY_GUIDE.md`.
 
 ---
 
-## 1. LOI Type Selection
+## 1. LOI Type Selection (5 types, v3.2)
 
 | If the counterparty... | Use | Template |
 |---|---|---|
-| Buys compute directly (enterprise, AI lab, startup) | **End User** | DE-LOI-EndUser-v3.0 |
-| Packages DE capacity with their own services to sell to end users (SI, MSP, software company, sovereign AI builder) | **Distributor** | DE-LOI-Distributor-v3.0 |
-| Buys capacity in bulk to resell to their own customers (neocloud, GPU cloud) | **Wholesale** | DE-LOI-Wholesale-v3.0 |
+| Buys compute directly (enterprise, AI lab, startup) | **End User (EU)** | DE-LOI-EndUser-v3.2 |
+| Packages DE capacity with their own services to sell to end users (SI, MSP, software company, sovereign AI builder) | **Distributor (DS)** | DE-LOI-Distributor-v3.2 |
+| Buys capacity in bulk to resell to their own customers (neocloud, GPU cloud) | **Wholesale (WS)** | DE-LOI-Wholesale-v3.2 |
+| Supplies equipment, services, or build capability (EPC, modular vendor, cooling/power OEM, key supplier) | **Strategic Supplier (SS)** | DE-LOI-SS-v1.0 |
+| Ecosystem / co-positioning relationship with no commercial flow (standards body, university, research consortium, co-marketing alliance) | **Ecosystem Partnership (EP)** | DE-LOI-EP-v1.0 |
 
-**When in doubt:** If the counterparty has its own end-user customers → Distributor or Wholesale. If the counterparty IS the end user → End User.
+**Decision logic:**
+- **If counterparty IS the end user** (buys to consume): End User.
+- **If counterparty has its own end-user customers and adds value**: Distributor.
+- **If counterparty resells raw capacity at scale**: Wholesale.
+- **If counterparty supplies to DE** (goods/services/capability): Strategic Supplier.
+- **If no commercial flow within 12 months** (co-positioning only): Ecosystem Partnership.
+
+**Critical test for EP:** If commercial flow is contemplated, do NOT use EP. Use the commercial type that matches the direction of flow.
 
 **Distributor vs Wholesale:** Distributors add value (integration, managed services, software). Wholesale customers resell raw capacity. The test: does the counterparty transform or bundle the capacity with their own services?
+
+**Consortium / federation counterparty:** the coordinating entity signs. Describe it (not every member) per the consortium guidance in `_shared/counterpart-description-framework.md`.
 
 ---
 
@@ -35,6 +46,58 @@ The Distributor template (DE-LOI-Distributor) has two modes:
 | Introduces customers to DE but does not deliver services | **Mode B: Introduction/Referral** | Referral arrangement, fee economics in separate agreement |
 
 **Mode B note:** When Mode B is selected, the economic terms (fees, qualifying introductions, payment schedule) are NOT in the LOI. They go in a separate **Commercial Introduction Agreement** signed alongside or after the LOI. The LOI captures the relationship intent; the fee agreement captures the economics.
+
+---
+
+## Strategic Supplier — Purpose Selector (v1.0)
+
+SS intake requires **1–2** strategic purposes. Each drives which Cl. 3 / Cl. 4 sub-clauses fire in the template.
+
+| Purpose | Cl. 3 blocks | Cl. 4 blocks | Always required YAML |
+|---|---|---|---|
+| `capacity_lock_in` | 3.2 Capacity Reservation, 3.3 Lead-Time Targets | optional 4.5 Exclusivity | `supplier.lead_time_target` |
+| `pricing_volume` | 3.4 Pricing Framework, 3.5 Volume Tiers | — | `supplier.volume_indicative` |
+| `supply_chain_de_risking` | 3.6 Dual-Source + Continuity | — | — |
+| `engineering_integration` | 3.7 Design Integration + IP Allocation | 4.3 Joint-Development Governance | `choices.joint_ip` (none / background / foreground) |
+| `pipeline_visibility` | 3.8 Preferred-Supplier / ROFR (20-BD window) | 4.1 Project Introduction Process | — |
+
+**Always-on clauses** (regardless of purpose selection): Cl. 3.1 Capability Contribution; Cl. 4.2 Contractual Sequence; Cl. 4.4 Change of Control; Cl. 4.6 Implementation Roadmap; Cl. 5 Project Finance; Cl. 6 Confidentiality (Tier B); Cl. 7 Non-Circumvention (light supply-side); Cl. 8 General.
+
+Full template: `colocation/templates/DE-LOI-StrategicSupplier-v1.0_TEMPLATE.md`.
+
+---
+
+## Ecosystem Partnership — Variant Guidance (v1.0)
+
+EP has no purpose selector — the shape is fixed. Configuration via YAML:
+
+| Field | Options | Default |
+|---|---|---|
+| `ecosystem.relationship_type` | standards_body / university / research_consortium / co_marketing / industry_association / policy_partner / other | — (required) |
+| `ecosystem.collaboration_themes` | freeform list | — (required) |
+| `ecosystem.joint_activity_categories` | publications / events / pilots / advocacy / working_groups (subset) | — (required) |
+| `choices.announcement_protocol` | mutual_approval / notify_only | mutual_approval |
+| `choices.logo_use` | reciprocal / one_way / none | reciprocal |
+| `programme.recital_a_variant` | default / sovereignty / integration / bespoke | `sovereignty` for EU-mission; else `default` |
+
+Full template: `colocation/templates/DE-LOI-EcosystemPartnership-v1.0_TEMPLATE.md`.
+
+---
+
+## Recital A Variant Selection
+
+Per `_shared/loi-recital-a-library.md` — same library across all five types. Suggested variant by counterparty profile:
+
+| Counterparty profile | Recommended variant |
+|---|---|
+| Neocloud / GPU cloud / wholesale buyer | `default` |
+| European enterprise, AI lab, government / institution | `sovereignty` |
+| Grower, district-heating, energy-led partner | `integration` |
+| Distributor / channel partner | `default` (`sovereignty` if end-users are sovereignty-sensitive) |
+| Strategic supplier / EPC | `default` |
+| Ecosystem partner (EU-mission) | `sovereignty` |
+
+`bespoke` is the escape hatch — linter-checked against R-2, R-3, R-14, R-15.
 
 ---
 
@@ -244,10 +307,14 @@ All three templates share identical binding clauses (Cl. 5, 6 ALT-B, 8). If a bi
 
 | Template | Version | Last Updated |
 |---|---|---|
-| DE-LOI-Distributor-v3.0 | 3.0 | 2026-04-05 |
-| DE-LOI-Wholesale-v3.0 | 3.0 | 2026-04-05 |
-| DE-LOI-EndUser-v3.0 | 3.0 | 2026-04-05 |
+| DE-LOI-Distributor | 3.2 | 2026-04-16 |
+| DE-LOI-Wholesale | 3.2 | 2026-04-16 |
+| DE-LOI-EndUser | 3.2 | 2026-04-16 |
+| DE-LOI-StrategicSupplier | 1.0 | 2026-04-16 |
+| DE-LOI-EcosystemPartnership | 1.0 | 2026-04-16 |
 | DE-Site-HoT (grower body + Annex A) | 1.0 | 2026-03-13 (see `de-site-hot/templates/template-version.md`) |
+
+**v3.2 changes:** Recital A is library-sourced (`_shared/loi-recital-a-library.md`). "DEC Block" dropped from customer-facing clauses. "Minimum 5 years" replaced with "approximately 5 years, indicative only". Cl. 4.2 arrows replaced with prose. Schedule titles cleaned of "(NON-BINDING)". QA linter embedded (`_shared/loi-qa-gate.md`). Deprecated: `commercial.dec_block_count`. See `CHANGELOG.md`.
 
 ---
 

@@ -1,0 +1,78 @@
+# LOI Generation Intake — Ecosystem Partnership Example (DE-LOI-EP-v1.0)
+# v3.2 engine: produces cover + Recital A + Recital B automatically.
+# Clauses 1–7 + (optional) Schedule 1 drafted from the markdown template at:
+#   templates/DE-LOI-EcosystemPartnership-v1.0_TEMPLATE.md
+
+type: EcosystemPartnership
+
+# --- Provider ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
+  kvk: "XXXXXXXX"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Chief Executive Officer"
+
+# --- Counterparty (example: a plausible European research consortium) ---
+counterparty:
+  name: "European Institute for Sovereign AI Infrastructure e.V."
+  short: "EISAI"
+  address: "Alexanderplatz 1, 10178 Berlin, Germany"
+  jurisdiction: "Germany"
+  reg_type: "Vereinsregister"
+  reg_number: "VR XXXXX"
+  contact_name: "Dr. [TBC]"
+  contact_title: "Executive Director"
+  salutation: "Dr [TBC]"
+  signatory_name: "[TBC]"
+  signatory_title: "Executive Director"
+  description: >-
+    is a European research and policy institute founded in 2023 and hosted
+    under [governance form] in Berlin, convening 22 member institutions
+    across 11 EU member states on sovereign AI infrastructure, energy-
+    efficient compute, and sustainable datacentre design. The institute has
+    published 14 peer-reviewed papers, convened 6 working groups on
+    federated AI infrastructure since 2024, and co-ordinates the EU's
+    informal dialogue on Article 12b hosting arrangements for sovereign
+    compute. The relationship is intended to support joint thought-
+    leadership on sovereign AI infrastructure in the European Union and
+    co-ordinated contribution to emerging EU compute-infrastructure
+    standards
+
+# --- Ecosystem-specific ---
+ecosystem:
+  relationship_type: "research_consortium"
+  collaboration_themes:
+    - "sovereign AI infrastructure"
+    - "sustainable datacentre design"
+    - "energy-recycling integration in compute"
+    - "EU industrial policy alignment"
+  joint_activity_categories:
+    - "publications"
+    - "events"
+    - "working_groups"
+    - "advocacy"
+
+# --- Choices ---
+choices:
+  announcement_protocol: "mutual_approval"
+  logo_use: "reciprocal"
+  # bespoke_closing: ""
+
+# --- Programme ---
+# EU-mission counterparty — use sovereignty variant for Recital A.
+programme:
+  platform_mw: "100+"
+  site_count: "14"
+  recital_a_variant: "sovereignty"
+
+# --- Protection ---
+protection:
+  confidentiality_survival: "2 years"
+
+# --- Dates ---
+dates:
+  loi_date: "1 May 2026"
+  validity_date: "1 May 2027"
