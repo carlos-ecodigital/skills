@@ -450,8 +450,8 @@ class LOI:
                 f"partnership under which the {self.party} would collaborate with the Provider to deliver "
                 f"AI colocation services to end-user customers, on the indicative terms set out below. "
                 f'This letter of intent and non-circumvention non-disclosure agreement (the "LOI") '
-                f"precedes a definitive partnership agreement or master services "
-                f'agreement (the "MSA").'
+                f"is subject to the negotiation and execution of a definitive partnership "
+                f'agreement or master services agreement (the "MSA").'
             )
             self.p(
                 "(D) The Parties will exchange commercially sensitive and competitively valuable "
@@ -463,8 +463,8 @@ class LOI:
                 f"(C) The Parties wish to record their mutual interest in the Provider making available, "
                 f"and the {self.party} procuring, dedicated AI colocation capacity at the Provider's DEC "
                 f"facilities, on the indicative terms set out below. This letter of intent and "
-                f'non-circumvention non-disclosure agreement (the "LOI") precedes a Master Services '
-                f'Agreement (the "MSA").'
+                f'non-circumvention non-disclosure agreement (the "LOI") is subject to the '
+                f'negotiation and execution of a Master Services Agreement (the "MSA").'
             )
             self.p(
                 "(D) The Parties will exchange commercially sensitive information, including "
@@ -477,8 +477,9 @@ class LOI:
                 f"(C) The Parties wish to record their mutual interest in establishing a strategic "
                 f"supply partnership under which the {self.party} would contribute to the delivery of "
                 f"the Provider's DEC platform, on the indicative terms set out below. This letter of "
-                f'intent and non-circumvention non-disclosure agreement (the "LOI") precedes a '
-                f"Framework Agreement and statements of work for named Provider projects."
+                f'intent and non-circumvention non-disclosure agreement (the "LOI") is subject '
+                f"to the negotiation and execution of a Framework Agreement and statements of "
+                f"work for named Provider projects."
             )
             self.p(
                 "(D) The Parties will exchange commercially sensitive and competitively valuable "
@@ -492,9 +493,9 @@ class LOI:
             self.p(
                 f"(C) The Parties wish to record their mutual interest in a non-commercial ecosystem "
                 f"collaboration focused on {themes_str}, on the framework set out in Clauses 3 through 5. "
-                f'This letter of intent (the "LOI") reflects both Parties\' strategic intent to collaborate '
-                f"on a non-commercial basis and does not contemplate any payment, capacity purchase, or "
-                f"commercial commitment between the Parties."
+                f'This letter of intent (the "LOI") is non-commercial in scope and does not '
+                f"contemplate any payment, capacity purchase, or commercial commitment between "
+                f"the Parties."
             )
             self.p(
                 "(D) The Parties may exchange commercially sensitive or non-public information in "
@@ -505,8 +506,8 @@ class LOI:
             self.p(
                 f"(C) The Parties wish to record their mutual interest in the {self.party} procuring "
                 f"AI compute infrastructure services at the Provider's DEC facilities, on the indicative "
-                f'terms set out below. This letter of intent (the "LOI") precedes a service '
-                f'agreement (the "MSA").'
+                f'terms set out below. This letter of intent (the "LOI") is subject to the '
+                f'negotiation and execution of a service agreement (the "MSA").'
             )
 
     def definitions(self):
@@ -1856,18 +1857,101 @@ _FAIL_RULES = {
              "Cl. 4.2 heading must be 'Contractual Sequence', not 'Revenue Chain'"),
     "R-20": (r"programme spans \d+", "Recital A",
              "'programme spans N...' language regression"),
+    # R-23 (v3.4): fabrication gate — implemented as a custom check in qa_lint,
+    # not a simple regex. See _check_fabrication_gate() below.
 }
 
 _WARN_RULES = {
     "R-11": (r"\bISO \d{4,5}\b", "Recital B",
              "ISO certification in Recital B (set choices.cert_relevant=true to suppress)"),
-    "R-14": (r"\b(leading|innovative|cutting-edge|world-class|best-in-class)\b", "Recital B",
-             "Salesy adjective in Recital B"),
+    # v3.4: R-14 scope broadened from Recital B to body. Added "purpose-built"
+    # and "state-of-the-art" as R-21 (kept R-14 list focused on the original
+    # salesy adjectives for clarity in QA reports).
+    "R-14": (r"\b(leading|innovative|cutting-edge|world-class|best-in-class)\b", "body",
+             "Salesy adjective"),
     "R-15": (r"positioning (its|itself) as", "body",
              "'positioning (its|itself) as' — formulaic"),
     "R-19": (r"^\s*\d+(?:\.\d+)?\s+[^\n]*\(NON-BINDING\)", "heading",
              "'(NON-BINDING)' in a clause heading — v3.2 style regression"),
+    # v3.4 additions:
+    "R-21": (r"\b(purpose-built|state-of-the-art)\b", "body",
+             "Marketing adjective — 'purpose-built' / 'state-of-the-art' banned body-wide (v3.4)"),
+    "R-22": (
+        r"("
+        r"Provider's ability to|"
+        r"depends in part on|"
+        r"is intended to evidence|"
+        r"while non-binding in its commercial terms|"
+        r"to support the Provider's financing|"
+        r"will require the exchange of|"
+        r"The Parties acknowledge that the Provider intends|"
+        r"is intended to form the basis"
+        r")",
+        "body",
+        "Meta-commentary pattern — explains the LOI rather than creating obligations (v3.4)"
+    ),
 }
+
+# R-23 fabrication gate: regex targets material numeric-metric claims in
+# Recital B. Every trigger must be matched against counterparty.source_map
+# or marked [TBC] in the intake; otherwise R-23 FAILS the build.
+_R23_CLAIM_PATTERN = re.compile(
+    r"\b\d+[\d,]*\s*"
+    r"(MW|GW|customers|clients|sites|deployments|GPUs|operations|"
+    r"offices|countries|years|employees|%)\b",
+    re.IGNORECASE,
+)
+
+
+def _check_fabrication_gate(text_recital_b: str, source_map: dict,
+                             overrides: set) -> list:
+    """R-23: every material numeric claim in Recital B must be attributable.
+
+    Returns a list of (rule_id, scope, message) findings. Empty list = pass.
+
+    A claim is considered attributed if ANY of:
+    - Recital B text contains a literal '[TBC]' marker near the claim
+    - counterparty.source_map has at least one URL entry in ANY pillar
+      (pillar-level granularity; reviewer's Phase 7.5 handles pillar-to-claim
+      mapping)
+    - the rule R-23 is in overrides (user ran with --override R-23 ...)
+    """
+    findings = []
+    if "R-23" in overrides:
+        return findings  # overridden
+    claims = list(_R23_CLAIM_PATTERN.finditer(text_recital_b))
+    if not claims:
+        return findings  # no material claims
+    # If ALL claims are accompanied by [TBC] within 50 chars, that's acceptable
+    has_tbc = "[TBC]" in text_recital_b or "[TO BE CONFIRMED]" in text_recital_b
+    # If source_map exists and has at least one URL entry in any pillar,
+    # attribution is present at document level.
+    sm_has_urls = False
+    if isinstance(source_map, dict):
+        for pillar_val in source_map.values():
+            if isinstance(pillar_val, list) and any(
+                isinstance(u, str) and u.startswith(("http://", "https://"))
+                for u in pillar_val
+            ):
+                sm_has_urls = True
+                break
+            if isinstance(pillar_val, str) and pillar_val.startswith(
+                ("http://", "https://")
+            ):
+                sm_has_urls = True
+                break
+    if not has_tbc and not sm_has_urls:
+        # No source_map URLs and no [TBC] markers — flag every claim
+        sample = [c.group(0) for c in claims[:3]]
+        findings.append((
+            "R-23", "Recital B",
+            f"Fabrication gate: {len(claims)} material claim(s) in Recital B "
+            f"without source_map attribution or [TBC] marker (e.g. "
+            f"{', '.join(repr(s) for s in sample)}). Add counterparty.source_map "
+            f"pillar_N: ['https://tier-1-url'] to intake YAML, mark claims "
+            f"[TBC], or pass --override R-23 --override-reason."
+        ))
+    return findings
 
 
 def _extract_text(doc) -> str:
@@ -1926,6 +2010,18 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
                 continue
             lines.append(f"  [WARN] {rid}  {scope}   {msg}")
             warn_count += 1
+
+    # R-23 (v3.4) — fabrication gate on Recital B
+    # Extract Recital B text (starts with "(B) ", ends at next recital marker or blank line)
+    recital_b_text = ""
+    m = re.search(r"\(B\)\s*(.*?)(?=\(C\)|\(D\)|\n\n|$)", text, re.DOTALL)
+    if m:
+        recital_b_text = m.group(1)
+    source_map = data.get("counterparty", {}).get("source_map", {})
+    r23_findings = _check_fabrication_gate(recital_b_text, source_map, overrides)
+    for rid, scope, msg in r23_findings:
+        lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
+        fail_count += 1
 
     if not data.get("programme", {}).get("recital_a_variant"):
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")

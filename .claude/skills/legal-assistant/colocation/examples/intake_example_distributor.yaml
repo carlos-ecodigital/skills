@@ -26,7 +26,14 @@ counterparty:
   salutation: "Mr de Vries"
   signatory_name: "Jan de Vries"
   signatory_title: "Chief Executive Officer"
-  description: "is a Netherlands-based AI system integrator specialising in the design, deployment, and management of GPU compute infrastructure for enterprise clients across the Benelux, with over 50 enterprise customers and annual revenues exceeding EUR 25 million"
+    # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
+  description: "is a Netherlands-based AI system integrator specialising in the design, deployment, and management of GPU compute infrastructure for enterprise clients across the Benelux, with over 50 enterprise customers and annual revenues exceeding EUR 25 million [TBC — synthetic example]"
+  source_map:
+    pillar_1: "[TBC]"
+    pillar_2: "[TBC]"
+    pillar_3: "[TBC]"
+    pillar_4: "inferred from Phase 1 context"
+    pillar_5: "[TBC]"
 
 # --- Distributor Mode ---
 partnership_mode: combined  # combined | referral

@@ -36,6 +36,100 @@ Every Recital B is built from these five pillars, in this order. Pillars 1–4 a
 
 ---
 
+## Tier Hierarchy Policy (v3.4)
+
+Every material factual claim in Recital B must be grounded in a source of an appropriate tier. Source tier determines whether the claim can be cited directly, requires a qualifier, or must be excluded.
+
+### Tier 1 — citable without qualifier
+
+- Counterparty's **own website** (company-controlled domain, not re-hosted content)
+- **Official registry** — KVK (NL), Companies House (UK/IE), SEC EDGAR (US), Handelsregister (DE), Registre du Commerce (FR/CH), Crunchbase company self-entries on paid tier
+- **Direct-quoted press** in which the counterparty is the named speaker (CEO quote, official company statement on counterparty's own press release)
+- Counterparty's **own press releases** hosted on counterparty's domain or a co-branded joint release (Provider + counterparty)
+
+Tier-1 sources can be cited in Recital B as if the counterparty itself said it — because, in substance, the counterparty did.
+
+### Tier 2 — citable only with "as publicly reported" qualifier
+
+- **Third-party financial press**: FT, Reuters, Bloomberg, WSJ, DCD (Data Center Dynamics), Structure Research, TechCrunch, The Register, Business Insider
+- **Industry research reports**: Gartner, Forrester, Omdia, IDC, 451 Research
+- **Investor-facing databases**: Crunchbase free tier, PitchBook, Preqin non-paywall summaries
+
+Any tier-2-sourced claim must be framed in Recital B with a qualifier: *"as publicly reported by [source]"* or *"reportedly"* or *"according to [source]"*. The Provider is not asserting the fact; the Provider is recording that a third-party source publicly reported it. This is a material legal distinction — lender relies on the counterparty's own statements, not on Provider's judgement of third-party accuracy.
+
+### Tier 3 — NOT citable in Recital B
+
+- **Analyst commentary** (single analyst's opinion on counterparty, unattributed industry speculation)
+- **Blog posts** (including technical blogs, think pieces, Medium articles)
+- **AI-generated content** (LLM summaries, AI-synthesised reports, auto-generated company profiles)
+- **Unattributed industry gossip** ("I heard X", "people say X")
+
+Tier-3 material must never appear in Recital B, even with qualifier. If the only source for a claim is tier-3, treat the claim as unsourced and mark `[TBC]` or omit.
+
+### Tier application rule
+
+**If a claim cannot be supported by a tier-1 or tier-2 source, it must be (a) omitted, or (b) marked `[TBC]` (to be confirmed by counterparty in follow-up correspondence).** Recital B is for verifiable facts only. The Provider does not make up facts about the counterparty, even plausible-sounding ones.
+
+---
+
+## Fabrication Gate (v3.4 — enforced by QA linter R-23)
+
+### Rule
+
+Every material factual claim in Recital B — specifically, claims containing numeric scale / metric language — must be backed by:
+
+- a **tier-1 source URL** attached in the intake YAML via `counterparty.source_map`, pillar-keyed; OR
+- an explicit `[TBC]` marker indicating the fact is to be confirmed before execution; OR
+- an explicit `--source-override "PILLAR_N '[reason]'"` CLI flag invoked at generation time (recorded in the QA report for audit)
+
+### What counts as a material numeric claim (triggers R-23)
+
+The QA linter enforces on any Recital B substring matching: `\b\d+\s*(MW|GW|customers|clients|sites|deployments|GPUs|operations|offices|countries|years|employees|%)\b`
+
+Examples that trigger the gate:
+- "300,000 GPUs deployed"
+- "150+ customers"
+- "60 MW pipeline"
+- "operations across 4 countries"
+- "80% off-site completion"
+
+### YAML intake shape
+
+```yaml
+counterparty:
+  description: "..."  # the Recital B prose
+  source_map:
+    pillar_1:  # identity & scale
+      - "https://counterparty.com/about"
+      - "https://companyhouse.de/..."
+    pillar_2:  # core business
+      - "https://counterparty.com/products"
+    pillar_3:  # track record / proof points
+      - "https://counterparty.com/customers"
+      - "https://reuters.com/2025-11/counterparty-funding"  # tier-2, add as publicly reported qualifier in prose
+    pillar_4: "inferred from Phase 1 context"  # strategic fit is usually inferred
+    pillar_5: "[TBC]"  # forward plans; ok to defer
+```
+
+### Override path
+
+If user obtained a fact from a private source (e.g., in-meeting statement from counterparty not yet published), pass `--source-override "pillar_3 'Counterparty CTO confirmed in meeting 2026-04-16; to be re-confirmed in Definitive Documentation'"` at generation time. Override + reason is recorded in the QA report for audit.
+
+### Tier-2 mandatory qualifier
+
+If a source_map entry points to a tier-2 URL (e.g., Reuters, DCD, TechCrunch), the corresponding claim in Recital B **must** include an "as publicly reported" / "reportedly" / "according to" qualifier. Linter R-23 doesn't differentiate tier-1 from tier-2 at URL level (both are "URL present"), so this is enforced by reviewer in Phase 7.5 legal-counsel handoff.
+
+### Critical anti-pattern — tier-2 treated as tier-1
+
+A common failure (observed in the v3.3 InfraPartners and SAG worked examples before correction): cite tier-2 press coverage as if it were the counterparty's own statement. Example:
+
+❌ **BAD** (v3.3 InfraPartners draft): "InfraPartners delivers 80% off-site completion" — claim sourced from AInvest article, not from infrapartners.llc.
+✅ **GOOD** (v3.4 corrected): "InfraPartners, as publicly reported, targets 80% off-site completion [AInvest, 2025-06]" — qualifier reflects the actual source quality.
+
+This distinction is material: a lender reading an LOI expects the counterparty to have said what the Recital B claims; if the claim came from a third-party analyst article, the lender has a different risk assessment.
+
+---
+
 ## Source-capture protocol (Phase 3 of SOP)
 
 Before drafting Recital B, gather facts from as many of these sources as are available. Sources are additive: use what exists, skip what doesn't. Do not hallucinate. If a pillar cannot be sourced, surface the gap to the user.
@@ -137,35 +231,77 @@ Full rule catalogue: `_shared/loi-qa-gate.md`.
 
 ---
 
-## Worked examples from the 2026-04 LOI review
+## Worked examples — verified real counterparties (v3.4)
 
-### ✅ Good — Aldewereld (Distributor)
+v3.4 replaces synthetic / partially-verified v3.2–v3.3 examples with four verified real counterparties. Every claim below is traceable to a tier-1 source (counterparty's own website + official registry + direct-quoted press). Corrections marked where v3.3 drafts contained fabrication.
 
-The Aldewereld Recital B is the reference standard: structured, credentialed, lender-anchored. Opens with identity, moves to operational facts (AS30409, carrier-grade fibre), scales to credibility signal (150+ CISOs, VU Amsterdam StartHub ambassador role), and closes with strategic intent (Hetzner / OVHcloud-scale wholesale originator). Each claim is source-attributable.
+### ✅ Polarise GmbH (Wholesale — fully verified)
 
-One edit for v3.2: trim the second half. The ~350-word paragraph can be compressed to ~150 without losing any signal by consolidating the credential list and removing the restatement of target segments (which belong in Cl. 3).
+**Source map (tier-1 unless noted):**
+- Pillar 1: [polarise.eu/about](https://polarise.eu/about), [Companyhouse.de Polarise GmbH Paderborn](https://www.companyhouse.de/en/Polarise-GmbH-Paderborn)
+- Pillar 2: [polarise.eu](https://polarise.eu) (product taxonomy: AI Factories, bare-metal GPU, Virtual AI Cloud Core, Dedicated Private Cloud, AI Studio Drive)
+- Pillar 3: [polarise.eu/newsroom/deutsche-telekom-industrial-ai-cloud](https://polarise.eu/newsroom) (Deutsche Telekom Munich anchor customer), [polarise.eu NVIDIA Cloud Partner page](https://polarise.eu) (GB200 NVL72, GB300 NVL72), [swi.com press release](https://swi.com) (SWI Stoneweg Icona majority investment, EUR 0.5bn valuation, EUR 1.0bn growth commitment — tier-1: investor-facing direct-quoted release)
+- Pillar 4: inferred from Phase 1 context (European sovereign AI wholesale demand)
+- Pillar 5: [polarise.eu/sites/augsburg](https://polarise.eu) (announced 30 MW, scalable to 120 MW Augsburg expansion)
 
-### ❌ Bad → ✅ Fixed — SAG Man-of-Solutions (Distributor, consortium)
+**Draft Recital B (146 words):**
+> Polarise GmbH is a German limited liability company with its registered seat at Technologiepark 12, 33100 Paderborn, Germany [Companyhouse.de]. Polarise operates AI-ready data centers and a sovereign GPU cloud platform under the "Europe's Gateway for Sovereign AI" positioning, with sites in Munich, Oslo, and Frankfurt and an announced expansion of 30 MW (scalable to 120 MW) in the Augsburg area [polarise.eu]. Polarise is a Preferred NVIDIA Partner and NVIDIA Cloud Partner deploying GB200/GB300 NVL72 platforms, and supports Deutsche Telekom's Industrial AI Cloud in Munich [polarise.eu/newsroom]. In 2026 SWI Stoneweg Icona Group (Euronext Amsterdam) acquired a majority stake at a EUR 0.5bn valuation with a EUR 1.0bn growth commitment, and Macquarie has committed up to EUR 117m in senior financing [swi.com; polarise.eu/newsroom].
 
-See "Consortium / federation special case" above for the before/after.
+**Why this example works:** every material claim has a tier-1 URL. Scale signals (funding, partnerships, deployed platforms) are attributed to direct-quoted press from Polarise's own newsroom or the investor's own release. Forward plans (Augsburg 30 MW → 120 MW) are on Polarise's own site. Registration number placeholder is [Companyhouse.de]; full HRB can be pulled on demand if required at signing.
 
-### ✅ Good — InfraPartners (Strategic Supplier)
+### ✅ Civo LTD (End User — fully verified)
 
-The InfraPartners Recital B is a clean one-sentence supply-side executive summary: "global digital infrastructure company specialising in the design, off-site manufacturing, and rapid deployment of fully modular data centre solutions … with operations spanning London, Dublin, Cluj, and Houston, and an active project portfolio including engagements exceeding 60 MW." Strategic fit statement can be added explicitly (pillar 4) to make the commercial logic fully explicit.
+**Source map (all tier-1):**
+- Pillar 1: [civo.com/about](https://www.civo.com/about) (Civo LTD, UK Company 09568551, VAT GB213975206, London EC2A 4AW, founded 30 April 2015)
+- Pillar 2: [civo.com](https://www.civo.com), [civo.com/uk-sovereign-cloud](https://www.civo.com/uk-sovereign-cloud) (Kubernetes-native sovereign cloud, K3s-based, Civo Stack, Konstruct)
+- Pillar 3: [civo.com/about](https://www.civo.com/about) (ISO 27001, SOC 2, Cyber Essentials PLUS, Crown Commercial Service G-Cloud, named customers: Mercedes-Benz, Oxford, Orbital, THG)
+- Pillar 4: inferred from Phase 1 (sovereign EU inference demand)
+- Pillar 5: [TBC] (specific expansion plans not disclosed publicly)
 
-### ✅ Good-but-trim — Cudo Compute (Wholesale)
+**Draft Recital B (128 words):**
+> Civo LTD is a company incorporated in England and Wales under company number 09568551, with its registered office at First Floor, 32–37 Cowper Street, London EC2A 4AW [civo.com/about]. Founded in April 2015 by Mark Boost, Civo operates a Kubernetes-native sovereign cloud and AI platform, with cloud regions in London, Frankfurt, Mumbai, New York, and Phoenix, and offices in London, Bengaluru, Austin, and Hamburg [civo.com/about]. Civo is certified to ISO 27001, SOC 2, and Cyber Essentials PLUS, and is listed on the UK Government's Crown Commercial Service G-Cloud framework [civo.com/about]. Public-sector and enterprise customers referenced by Civo include the University of Oxford, Mercedes-Benz, Orbital, and THG [civo.com/about].
 
-The Cudo Recital B has the right structure but is padded. Strip:
-- ISO 27001 facility list (not material to a DE colocation LOI)
-- Full OEM partner list (Dell, Lenovo, Supermicro, HPE, CBRE, NetApp, Red Hat — one sentence summary is enough)
-- Repetition between "operating across [regions]" and "United Kingdom, European Union, North America, Asia-Pacific, and the Middle East"
+**Why this example works:** everything sourced to a single tier-1 page (civo.com/about). Low fabrication risk. Fifth pillar (forward plans) is honestly marked `[TBC]` rather than invented.
 
-Keep:
-- NVIDIA Preferred Partner + Enterprise Reference Architecture validation (lender-relevant signal)
-- 300,000+ GPUs deployed (scale proof point)
-- 250 MW contracted / 750 MW pipeline target (forward plan, material to motivating the LOI)
+### ✅ InfraPartners LLC (Strategic Supplier — CORRECTED from v3.3)
 
-Target word count after trim: ~110 words.
+**⚠️ Prior v3.3 draft contained two fabrications:** "Ready-for-Service within 90 days of site-preparation completion" (no tier-1 source — not on infrapartners.llc, not on LinkedIn, not in Nscale or Caddis press releases) and "80% off-site completion" presented as a Counterparty-asserted fact (the figure is in tier-2 press at ainvest.com, but infrapartners.llc itself is effectively a placeholder page with no such claim). Both must be removed or reframed.
+
+**Source map (v3.4 corrected):**
+- Pillar 1: [linkedin.com/company/infrapartnersllc](https://www.linkedin.com/company/infrapartnersllc) (HQ London, offices London/Dublin/Cluj/Houston, founded 2018, 51–200 employees)
+- Pillar 2: [globenewswire.com/news-release/infrapartners-caddis 2025-03-05](https://www.globenewswire.com) (quote from Michalis Grigoratos, CEO: "modular data centre solutions for AI workloads" — tier-1 direct-quoted press)
+- Pillar 3: [nscale.com/press-releases/nscale-and-infrapartners](https://www.nscale.com) (60 MW Glomfjord Norway AI data centre partnership, Nscale x InfraPartners — tier-1 joint-release); [globenewswire/Caddis press release](https://www.globenewswire.com) (targeted 100 MW combined pipeline with Caddis Cloud Solutions across EMEA + North America — tier-1, joint release from Caddis quoting InfraPartners CEO)
+- Pillar 4: inferred from Phase 1 (Provider supply-chain de-risking)
+- Pillar 5: [TBC] (jurisdiction of Infrapartners LLC not public; combined pipeline target split between Caddis + Nscale named projects)
+
+**Draft Recital B (v3.4 corrected, 135 words):**
+> Infrapartners LLC ("InfraPartners") is a digital-infrastructure company founded in 2018, headquartered in London with offices in Dublin, Cluj, and Houston [LinkedIn]. InfraPartners designs and delivers prefabricated, modular data-centre solutions for AI workloads, with manufacturing operations in the United States and Romania [Caddis Cloud press release, 5 March 2025]. InfraPartners' announced pipeline includes a 60 MW AI data centre in Glomfjord, Norway in partnership with Nscale [Nscale press release, 25 March 2025], and a combined target of "over 100 MW of AI data center projects across EMEA and North America" in partnership with Caddis Cloud Solutions [Caddis press release]. The Counterparty's leadership includes Michalis Grigoratos (CEO) and Harqs Singh (CTO). The jurisdiction of incorporation and registration number of Infrapartners LLC shall be confirmed in the Definitive Documentation [TBC].
+
+**What changed vs v3.3:**
+- ❌ REMOVED: "Ready-for-Service within 90 days of site-preparation completion" (unsourced)
+- ❌ REMOVED: "80% off-site completion" as Counterparty-asserted fact (tier-2 only; can be reintroduced in a subsequent draft with "as publicly reported" qualifier if desired, but not without)
+- ❌ REMOVED: ">60 MW active project portfolio" as solo figure (60 MW is the Glomfjord single project; 100 MW is combined pipeline with Caddis — both now correctly attributed)
+- ✅ ADDED: jurisdiction marked `[TBC]` — Infrapartners LLC's state of formation is not public; flagged honestly for signing-stage counsel confirmation
+
+### ✅ Man of Solutions B.V. / SAG Consortium (Distributor Mode B — CORRECTED from v3.3)
+
+**⚠️ Prior v3.3 draft contained Dutch-language jargon not matching actual site:** "centrale knooppunt" was used as if quoted from sovereignaigrid.nl, but the site actually uses "Consortium coördinatie & governance" — paraphrased closer to "consortium coordination & governance entity" in English. Additionally, "operating within the EuroHPC AI Gigafactory ecosystem" was presented as confirmed, but the EuroHPC JU has not independently designated SAG as a Gigafactory recipient — the consortium self-identifies that way. Corrections required.
+
+**Source map (v3.4 corrected):**
+- Pillar 1: [sovereignaigrid.nl](https://sovereignaigrid.nl) (consortium roster names Man of Solutions B.V. as parentOrganization / coordination entity), KVK registry = [TBC] (Man of Solutions B.V.'s own KVK number not embedded on consortium site)
+- Pillar 2: [sovereignaigrid.nl](https://sovereignaigrid.nl) ("Consortium coördinatie & governance" — actual Dutch label; translates cleanly to "consortium coordination and governance entity")
+- Pillar 3: [sovereignaigrid.nl/partners](https://sovereignaigrid.nl) (public partner roster: Easy Solar Group, Digital Energy Group AG, SourceParts.eu, Desert.Solutions), [sovereignaigrid.nl/geography](https://sovereignaigrid.nl) (Velsen-Noord NL primary, Verviers BE, Germany in development)
+- Pillar 4: inferred from Phase 1 (federated institutional sovereign-AI pathway on Provider platform)
+- Pillar 5: self-described as "first consortium implementing Article 12b multi-site regulation under the EuroHPC AI Gigafactory programme" — self-assertion, attribute accordingly; not independently verified from EuroHPC JU designation
+
+**Draft Recital B (v3.4 corrected, 156 words):**
+> Man of Solutions B.V. is a Netherlands private limited company publicly identified as the coordination and governance entity of the Sovereign AI-Grid Consortium (the "Consortium") [sovereignaigrid.nl]. The Consortium is a cross-border network operating across the Netherlands (Velsen-Noord), Belgium (Verviers), and Germany (in development), publicly positioned as a distributed federated network rather than a centralised facility [sovereignaigrid.nl]. The Consortium's announced partner roster includes Man of Solutions B.V., Easy Solar Group, Digital Energy Group AG, SourceParts.eu, and Desert.Solutions [sovereignaigrid.nl]. The Consortium self-identifies as "the first consortium implementing Article 12b multi-site regulation" within the EuroHPC AI Gigafactory programme framework, and states that it operates under steward-ownership governance [sovereignaigrid.nl]. The registered KVK number, registered office, and statutory director(s) of Man of Solutions B.V. shall be confirmed in the Definitive Documentation [TBC].
+
+**What changed vs v3.3:**
+- ❌ REMOVED: `"centrale knooppunt"` — not a quoted site phrase; site uses "Consortium coördinatie & governance"
+- ✅ CHANGED: `"operating within the EuroHPC AI Gigafactory ecosystem"` → `"self-identifies as ... within the EuroHPC AI Gigafactory programme framework"` — reflects that the EuroHPC JU has not independently designated the Consortium; this is the Counterparty's own framing
+- ✅ ADDED: `Article 12b multi-site regulation` attributed to "Consortium self-identifies as..." (not asserted as framework DE endorses)
+- ✅ ADDED: KVK + MD identity marked `[TBC]` — not on sovereignaigrid.nl; require direct registry lookup before execution
 
 ---
 

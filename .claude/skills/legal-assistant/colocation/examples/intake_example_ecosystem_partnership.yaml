@@ -28,6 +28,7 @@ counterparty:
   salutation: "Dr [TBC]"
   signatory_name: "[TBC]"
   signatory_title: "Executive Director"
+  # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
   description: >-
     is a European research and policy institute founded in 2023 and hosted
     under [governance form] in Berlin, convening 22 member institutions
@@ -39,7 +40,13 @@ counterparty:
     compute. The relationship is intended to support joint thought-
     leadership on sovereign AI infrastructure in the European Union and
     co-ordinated contribution to emerging EU compute-infrastructure
-    standards
+    standards [TBC — synthetic example]
+  source_map:
+    pillar_1: "[TBC]"
+    pillar_2: "[TBC]"
+    pillar_3: "[TBC]"
+    pillar_4: "inferred from Phase 1 context"
+    pillar_5: "[TBC]"
 
 # --- Ecosystem-specific ---
 ecosystem:

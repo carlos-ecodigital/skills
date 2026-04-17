@@ -5,6 +5,63 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.4 — 2026-04-17
+
+Post-v3.3-merge review surfaced five gaps. v3.4 closes all five.
+
+### Added
+
+- **Fabrication Gate (QA rule R-23)** — hard gate on material factual claims in Recital B. Regex targets numeric-metric patterns (MW / GW / customers / clients / sites / deployments / GPUs / operations / offices / countries / years / employees / %). Every triggered claim must be backed by (a) a tier-1 source URL in `counterparty.source_map`, (b) a `[TBC]` marker, or (c) an explicit `--source-override PILLAR_N "reason"` CLI flag. Build fails otherwise. Prevents fabrication regressions like the v3.3 InfraPartners "90-day RFS" and "80% off-site" claims that were not attributable to any tier-1 source.
+- **Tier Hierarchy Policy** in `_shared/counterpart-description-framework.md` — formal definition of Tier 1 (counterparty's own site + official registry + direct-quoted press, citable without qualifier), Tier 2 (third-party financial press, citable with "as publicly reported" qualifier), Tier 3 (analyst / blog / AI-generated / unattributed, not citable). Supersedes the v3.3 "don't hallucinate" advisory with enforceable source-attribution rules.
+- **QA rule R-21** (warn, body-wide): flags `"purpose-built"` and `"state-of-the-art"` marketing adjectives anywhere in the document.
+- **QA rule R-22** (warn, body-wide): flags meta-commentary patterns. Catches `"Provider's ability to"`, `"depends in part on"`, `"is intended to evidence"`, `"while non-binding in its commercial terms"`, `"to support the Provider's financing"`, `"will require the exchange of"`, `"The Parties acknowledge that the Provider intends"`, `"is intended to form the basis"`.
+- **`clause5_ss()` method** — Strategic Supplier gets dedicated Cl. 5 ("Supply Chain and Delivery Commitment"): 5.1 Delivery Intent (Partner reserves capacity for Provider pipeline), 5.2 Assignment (supplier-scoped, not unreasonably withheld), 5.3 Financing Continuity Acknowledgment (Partner cooperates with Provider's Financing Parties on supply confirmation for financed projects). Replaces the revenue-bankability-shaped `clause5()` that SS was inheriting from EU/DS/WS (type-mismatch: a supplier is not a revenue counterparty).
+- **Phase 7.5 (mandatory `legal-counsel` handoff)** in `SKILL.md` — every LOI after automated QA passes routes through `legal-counsel` with a structured 4-point review question set: (1) clause-type appropriateness, (2) meta-commentary scan, (3) cross-clause consistency, (4) source-verification sample of 3 random material claims. `legal-counsel` returns pass / flag-for-revision / reject. Previously `legal-counsel` was mandatory only for MIA Annex B and HoT body modifications.
+- **Real verified worked examples** in `counterpart-description-framework.md` — replaced synthetic v3.3 examples with four verified real counterparties: Polarise GmbH (Wholesale), Civo LTD (End User), InfraPartners LLC (Strategic Supplier, corrected), Man of Solutions B.V. / SAG Consortium (Distributor Mode B, corrected). Every example has source_map citations per pillar.
+- **`counterparty.source_map` YAML schema** — dict keyed by pillar (1–5), values = list of source URLs (or `"[TBC]"` for acknowledged-unverified). Required for material-claim LOIs; enforced by R-23.
+- **`--source-override` CLI flag** on generator — records override + reason in QA report for auditability.
+
+### Changed
+
+- **Recital A: single canonical body + 5 per-type tails** (replaces v3.3's 3-variant library). User-authored wording approved 2026-04-17:
+  > "Digital Energy (the 'Provider') develops and operates Digital Energy Centers ('DECs'), distributed energy hubs for liquid-cooled AI colocation, integrating accelerated compute with heat recycling and behind-the-meter (BTM) power production, engineered as one integrated system. The Provider is building an integrated sovereign AI infrastructure platform for enterprise and institutional customers, designed for edge inference."
+  Per-type tails now cover all 5 types (v3.3 had tails only for DS/SS/EP). EU + WS use "The Provider's integrated platform [verb]" subject (procurement pattern); DS / SS / EP use "The Provider [verb]" subject (relationship pattern).
+- **`clause5()`** (EU/DS/WS) — Cl. 5.1 stripped of 5 meta-commentary phrases. New 5.1 reads operatively: "Project Finance Context. The Provider is developing the DEC programme under a combination of equity investment and non-recourse project finance. This LOI is binding in Clauses 5, 6, 7, and 8 to support that financing structure."
+- **Recitals C/D** — 7 meta-commentary instances stripped across all 5 types. Replacement patterns: "is intended to form the basis for further..." → "precedes a [definitive agreement]"; "will require the exchange of..." → "will exchange... in connection with this LOI, and agree to binding confidentiality and non-circumvention provisions set out in Clauses 6 and 7".
+- **`_SUBJECT_BY_LOI["Wholesale"]`**: "Purpose-Built AI Colocation Capacity" → "AI Colocation Capacity".
+- **"purpose-built" stripped** from Cl. 1 DEC definition, Cl. 3 DS bespoke-template hint, Cl. 3.1 Wholesale indicative capacity clause.
+- **"colocation" → "AI colocation"** in 2 active-clause locations (DS Cl. 3.1, WS Cl. 7.4). Definitions unchanged.
+- **Cl. 4.3 Wholesale** — stripped "Provider's ability to deliver" meta-commentary.
+- **QA rule R-14 scope** — broadened from "Recital B" to body-wide.
+
+### Fixed
+
+- **InfraPartners worked example** — fabrications removed: "Ready-for-Service within 90 days of site-preparation completion" (unsourced) and "80% off-site completion as Counterparty-asserted fact" (tier-2 only). Jurisdiction now marked `[TBC]` until counterparty confirms.
+- **SAG worked example** — "centrale knooppunt" removed (not quoted from sovereignaigrid.nl). EuroHPC AI Gigafactory designation now framed as Consortium self-assertion. KVK + MD identity marked `[TBC]`.
+
+### Deprecated
+
+- `programme.recital_a_variant` values `"sovereignty"` and `"integration"` — accepted in YAML for backward compat but silently resolve to the single canonical body.
+
+### Migration
+
+Existing v3.2 / v3.3 intake YAMLs render correctly without modification for Recital A. Will **fail R-23 at build time** if Recital B contains numeric-metric claims (regex-matched) but no `counterparty.source_map`. Fix: add `counterparty.source_map` with tier-1 URLs per pillar, or mark claims `[TBC]`, or pass `--source-override` at generation.
+
+### Verified
+
+- All 6 intake examples regenerate with QA PASS.
+- Body audit across all 6 produced .docx: zero hits on 9 v3.4 anti-patterns.
+- Body audit confirms all 4 v3.4 mandatory phrases present in Recital A.
+- SS Cl. 5 = "Supply Chain and Delivery Commitment", zero Revenue Bankability.
+- WS subject = "AI Colocation Capacity".
+
+### Ships as
+
+- `carlos-ecodigital/skills` PR #7 (branch `legal-assistant-loi-v3.4`)
+- `EcoDigital-Software/degitos-staging` PR #46 (branch `de-legal-assistant-v3.4`, mirror with `document-factory` → `de-document-factory` path transform)
+
+---
+
 ## v3.3 — 2026-04-16
 
 Full LOI engine for all five types. Ships on a single branch with v3.2, after reconciling `bespoke_closing` with OPEN-1 (commit `2097f52`).

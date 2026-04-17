@@ -48,6 +48,12 @@ Override + reason are written to the QA report.
 | R-18 | fail | YAML (pre-run) | Deprecated field `commercial.dec_block_count` present | No — emit migration error pointing to CHANGELOG |
 | R-19 | warn | Whole document | Any clause heading contains `"(NON-BINDING)"` — style regression (per v3.2 Schedule 1 fix, the signal belongs in Cl. 5.1 only) | No — surface for user review |
 | R-20 | fail | Body | "(Provider's) programme spans \d+" language regression | Yes — falls back to `default` |
+| **R-21** | **warn** | **Body (v3.4 body-wide)** | **Marketing adjectives `"purpose-built"` or `"state-of-the-art"` anywhere in document. Broadens v3.2 R-14 scope from Recital B to body.** | **No — surface for user review** |
+| **R-22** | **warn** | **Body (v3.4)** | **Meta-commentary patterns — sentences that explain the LOI's purpose rather than creating / modifying obligations. Regex catches: `Provider's ability to`, `depends in part on`, `is intended to evidence`, `while non-binding in its commercial terms`, `to support the Provider's financing`, `will require the exchange of`, `The Parties acknowledge that the Provider intends`, `is intended to form the basis`.** | **No — surface for user review (reviewer rewrites in operative register)** |
+| **R-23** | **fail** | **Recital B (v3.4 fabrication gate)** | **Material numeric-metric claims (regex: `\b\d+[\d,]*\s*(MW\|GW\|customers\|clients\|sites\|deployments\|GPUs\|operations\|offices\|countries\|years\|employees\|%)\b`) in Recital B MUST be backed by (a) a tier-1 source URL in `counterparty.source_map` YAML, (b) a `[TBC]` marker in the description text, or (c) an explicit `--override R-23 --override-reason "..."` CLI flag. Prevents v3.3 InfraPartners-style fabrication (unsourced "90-day RFS" / "80% off-site" claims).** | **No — hard gate; resolve by adding source_map URLs, adding [TBC] markers, or overriding with recorded reason** |
+
+Also updated in v3.4:
+- **R-14 scope** broadened from "Recital B" to "Body" (salesy adjectives flagged anywhere).
 
 ---
 
