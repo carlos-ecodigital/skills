@@ -369,6 +369,46 @@ Options:
 (3) Edit Recital B manually
 ```
 
+### Phase 7.5 — Mandatory `legal-counsel` review (v3.4)
+
+**Trigger:** Every LOI after Phase 7 QA PASS. Non-optional, non-bypassable, applies to every LOI regardless of type or size.
+
+**Background:** v3.3 terminated at automated QA. A v3.3 LOI could ship with type-appropriateness bugs (e.g., SS inheriting revenue-bankability Cl. 5), meta-commentary, cross-clause inconsistency, or unverified material claims that passed the linter but would fail a tier-1 legal-review sanity check. v3.4 wires a mandatory human-judgement gate between automated QA and delivery.
+
+**Skill action:** Invoke `legal-counsel` skill with a structured 4-point review question set. The skill passes the .docx, the intake YAML, the QA report, and the `counterparty.source_map`.
+
+**The 4 review questions:**
+
+1. **Clause-type appropriateness** — Does each clause make sense for this counterparty type? (e.g., SS Cl. 5 must be "Supply Chain and Delivery Commitment", not revenue-bankability; EP must have no Cl. 5 Project Finance or Cl. 7 NC; customer-facing types must have revenue-counterparty Cl. 5.)
+2. **Meta-commentary scan** — Does any clause explain the LOI's purpose or commercial mechanics rather than create / modify / memorialise obligations? (Linter R-22 catches the known patterns; reviewer catches new ones.)
+3. **Cross-clause consistency** — Is Cl. 5 aligned with Cl. 3 commercial model? Is Recital A tail aligned with Cl. 3 commercial offer? Do capacity numbers in Recital B, Cl. 3, and Schedule 1 match?
+4. **Source-verification sample** — Randomly select 3 material claims from Recital B. For each: verify the corresponding `counterparty.source_map` URL loads and supports the claim. Flag as FAIL if (a) URL 404s, (b) URL doesn't support the claim, (c) source is tier-2 but claim isn't qualified with "as publicly reported".
+
+**`legal-counsel` return states:**
+
+- **PASS** → proceed to Phase 8 (Delivery)
+- **FLAG-FOR-REVISION** → return specific line-level feedback. Skill routes back to Phase 5 (Recital B redraft) or Phase 6 (intake confirmation) depending on finding. User iterates, then re-runs Phase 7 + 7.5.
+- **REJECT** → stop. Skill does not deliver. Owner (Carlos) notified with reviewer's rejection note.
+
+**Prompt template (Phase 7.5 invocation, internal):**
+```
+[legal-counsel] Please review this LOI per Phase 7.5:
+- .docx: [path]
+- intake YAML: [path]
+- QA report: [path]
+- counterparty.source_map: [inline]
+
+4-point question set:
+1. Clause-type appropriateness
+2. Meta-commentary scan
+3. Cross-clause consistency
+4. Source-verification sample (3 random material claims)
+
+Return: PASS / FLAG-FOR-REVISION (with line-level feedback) / REJECT (with reason).
+```
+
+**Override path:** None. Phase 7.5 is non-bypassable for colocation LOIs. If `legal-counsel` skill is unavailable (outage), skill fails closed — LOI is not delivered until Phase 7.5 runs. This is by design: consistent with "mandatory on every LOI" decision (v3.4 plan).
+
 ### Phase 8 — Delivery
 
 **Skill action:** Emit path and next-step menu. Hand off to downstream skills as needed.

@@ -26,7 +26,15 @@ counterparty:
   salutation: "Ms Bakker"
   signatory_name: "Lisa Bakker"
   signatory_title: "Chief Technology Officer"
-  description: "is a Netherlands-based AI startup developing large language models for the European legal and compliance market, currently serving 20+ enterprise clients"
+  # v3.4: synthetic example — material claims marked [TBC] to pass R-23.
+  # Real EU LOI intake would use counterparty.source_map with tier-1 URLs.
+  description: "is a Netherlands-based AI startup developing large language models for the European legal and compliance market, currently serving 20+ enterprise clients [TBC — synthetic example]"
+  source_map:
+    pillar_1: "[TBC]"
+    pillar_2: "[TBC]"
+    pillar_3: "[TBC]"
+    pillar_4: "inferred from Phase 1 context"
+    pillar_5: "[TBC]"
 
 # --- Commercial ---
 commercial:

@@ -26,7 +26,14 @@ counterparty:
   salutation: "Mr Lindqvist"
   signatory_name: "Erik Lindqvist"
   signatory_title: "Managing Partner"
+    # v3.4: synthetic example. No numeric material claims, but source_map shown for consistency.
   description: "is a London-based advisory firm specialising in AI infrastructure market access for European enterprise and institutional clients, with established relationships across the Nordic and Benelux enterprise market"
+  source_map:
+    pillar_1: "[TBC]"
+    pillar_2: "[TBC]"
+    pillar_3: "[TBC]"
+    pillar_4: "inferred from Phase 1 context"
+    pillar_5: "[TBC]"
 
 # --- Distributor Mode ---
 partnership_mode: referral  # combined | referral

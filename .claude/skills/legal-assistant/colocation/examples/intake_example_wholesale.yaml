@@ -26,7 +26,14 @@ counterparty:
   salutation: "Ms Chen"
   signatory_name: "Alex Park"
   signatory_title: "Chief Executive Officer"
-  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers, backed by Series B funding of USD 150 million"
+    # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
+  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers, backed by Series B funding of USD 150 million [TBC — synthetic example]"
+  source_map:
+    pillar_1: "[TBC]"
+    pillar_2: "[TBC]"
+    pillar_3: "[TBC]"
+    pillar_4: "inferred from Phase 1 context"
+    pillar_5: "[TBC]"
 
 # --- Commercial ---
 # v3.2: dec_block_count removed. Capacity expressed in MW IT.

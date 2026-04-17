@@ -32,17 +32,33 @@ counterparty:
   salutation: "TBC"
   signatory_name: "TBC"
   signatory_title: "Chief Executive Officer"
+  # v3.4: CORRECTED — removed "80% off-site completion" (tier-2 only — AInvest
+  # article, not on infrapartners.llc itself) and "Ready-for-Service within 90
+  # days" (unsourced — no tier-1 InfraPartners-attributed source found).
+  # Jurisdiction [TBC] flagged for signing-stage confirmation.
   description: >-
-    is a global digital-infrastructure company specialising in the design,
-    off-site manufacturing, and rapid deployment of modular data-centre
-    solutions for high-density AI and accelerated compute workloads, with
-    operations spanning London, Dublin, Cluj, and Houston and an active
-    project portfolio exceeding 60 MW of delivered and contracted capacity.
-    The company targets 80% off-site completion and a Ready-for-Service
-    target of 90 days or less from site-preparation completion. The
-    relationship is intended to integrate modular DEC delivery capability
-    with the Provider's active site portfolio, reducing time-to-capacity
-    on the Provider's development pipeline
+    is a digital-infrastructure company founded in 2018, headquartered in
+    London with offices in Dublin, Cluj, and Houston. InfraPartners designs
+    and delivers prefabricated, modular data-centre solutions for AI
+    workloads, with manufacturing operations in the United States and Romania.
+    InfraPartners' announced pipeline includes a 60 MW AI data centre in
+    Glomfjord, Norway, in partnership with Nscale, and a combined target of
+    over 100 MW of AI data-center projects across EMEA and North America, in
+    partnership with Caddis Cloud Solutions. The jurisdiction of incorporation
+    and registration number of Infrapartners LLC shall be confirmed in the
+    Definitive Documentation [TBC]
+  # v3.4: source_map enforces R-23 fabrication gate. Every material numeric
+  # claim in the description above is backed by a tier-1 URL here.
+  source_map:
+    pillar_1:  # identity & scale
+      - "https://www.linkedin.com/company/infrapartnersllc"
+    pillar_2:  # core business
+      - "https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html"
+    pillar_3:  # track record / pipeline
+      - "https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway"
+      - "https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html"
+    pillar_4: "inferred from Phase 1 (Provider supply-chain de-risking)"
+    pillar_5: "[TBC]"
 
 # --- Supplier-specific ---
 supplier:

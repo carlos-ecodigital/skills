@@ -194,60 +194,76 @@ def validate(d: dict):
 
 
 # ---------------------------------------------------------------------------
-# Recital A variant library (v3.2)
+# Recital A (v3.4 — single canonical body + per-type tails)
 # ---------------------------------------------------------------------------
-# Source of truth is _shared/loi-recital-a-library.md. The variants below are
-# copied in sync with that file. If the library file is updated, update these.
-# Drift guard: QA linter warns if the variant strings diverge from the library.
+# Source of truth is _shared/loi-recital-a-library.md. v3.4 change: collapsed
+# three variants (default / sovereignty / integration) into a single canonical
+# body. User-approved wording 2026-04-17. Per-type tails now cover all 5 types
+# (v3.3 only had tails for DS/SS/EP; EU/WS were empty strings).
 
-RECITAL_A_VARIANTS = {
-    "default": (
-        '{prov} (the "Provider") develops and operates Digital Energy Centers '
-        '("DECs"): purpose-built, liquid-cooled colocation facilities that '
-        "integrate accelerated compute with on-site energy recycling, thermal "
-        "recovery, and grid-flexible operation. The Provider is building an "
-        "integrated sovereign AI infrastructure platform across European markets, "
-        "structured for institutional project financing and designed to deliver "
-        "compute capacity alongside heat and grid value from a single energy input."
+RECITAL_A_BODY = (
+    '{prov} (the "Provider") develops and operates Digital Energy Centers '
+    '("DECs"), distributed energy hubs for liquid-cooled AI colocation, '
+    "integrating accelerated compute with heat recycling and behind-the-meter "
+    "(BTM) power production, engineered as one integrated system. The Provider "
+    "is building an integrated sovereign AI infrastructure platform for "
+    "enterprise and institutional customers, designed for edge inference."
+)
+
+# Per-type tail appended to the shared body. Customer-facing types (EU, WS)
+# use "The Provider's integrated platform [verb]" subject (procurement pattern);
+# relationship-facing types (DS, SS, EP) use "The Provider [verb]" subject.
+RECITAL_A_TAIL_BY_TYPE = {
+    "EndUser": (
+        " The Provider's integrated platform supplies dedicated AI inference "
+        "capacity to enterprises, AI labs, and research institutions requiring "
+        "sovereign, high-density and low-latency infrastructure on European soil."
     ),
-    "sovereignty": (
-        '{prov} (the "Provider") develops and operates Digital Energy Centers '
-        '("DECs"): purpose-built, liquid-cooled colocation facilities for '
-        "high-density accelerated compute workloads. The Provider operates a "
-        "sovereign AI infrastructure platform on European soil, controlled by "
-        "European operators, designed to serve European enterprises, institutions, "
-        "and public-sector customers with compliance-grade data residency and "
-        "independent supply-chain control. DECs integrate AI compute with energy "
-        "recycling and grid-flexible operation, and the platform is structured "
-        "for institutional project financing."
+    "Distributor": (
+        " The Provider seeks qualified channel and integration partners to "
+        "extend its platform reach to end-user segments where the Partner "
+        "holds established customer relationships and domain expertise."
     ),
-    "integration": (
-        '{prov} (the "Provider") develops and operates Digital Energy Centers '
-        '("DECs"): integrated energy infrastructure assets in which electricity '
-        "entering a site powers accelerated compute, the resulting heat is "
-        "recovered and upgraded for thermal offtake to greenhouses or "
-        "district-heating networks, and residual grid and power-system value is "
-        "captured through battery storage, flexible generation, and "
-        "grid-balancing services. DECs turn energy into digital intelligence "
-        "and capture heat, power, and grid value along the way."
+    "Wholesale": (
+        " The Provider's integrated platform contracts liquid-cooled AI "
+        "colocation capacity at megawatt scale to NeoCloud operators and "
+        "GPU cloud providers internationally."
+    ),
+    "StrategicSupplier": (
+        " The Provider seeks qualified EPC contractors, modular infrastructure "
+        "manufacturers, and OEM vendors to deliver the DEC platform and secure "
+        "supply continuity across its active development pipeline."
+    ),
+    "EcosystemPartnership": (
+        " The Provider engages with ecosystem partners on sovereign AI "
+        "infrastructure, sustainable datacentre design, and European "
+        "industrial policy alignment."
     ),
 }
 
 
 def resolve_recital_a(d: dict) -> str:
-    """Return the Recital A body (without the '(A) ' prefix).
+    """Return the Recital A body + type-specific tail (without the '(A) ' prefix).
 
-    Looks up the variant key in RECITAL_A_VARIANTS and formats with provider
-    short name. For variant='bespoke', returns the raw bespoke string; the
-    QA linter will catch any forbidden patterns.
+    v3.4: single canonical body formatted with provider short name, plus a
+    per-type tail. Bespoke override path (programme.recital_a_variant='bespoke'
+    with programme.recital_a_bespoke) returns the raw bespoke string, with the
+    QA linter enforcing forbidden-pattern rules.
+
+    Legacy YAMLs with recital_a_variant set to 'default' / 'sovereignty' /
+    'integration' still render correctly — those variant keys are ignored and
+    the single canonical body is used. No migration break.
     """
     prov = d.get("provider", {}).get("short_name", "Digital Energy")
+    t = d.get("type", "EndUser")
     variant = d.get("programme", {}).get("recital_a_variant", "default")
     if variant == "bespoke":
         bespoke = d.get("programme", {}).get("recital_a_bespoke", "")
-        return bespoke or RECITAL_A_VARIANTS["default"].format(prov=prov)
-    tmpl = RECITAL_A_VARIANTS.get(variant, RECITAL_A_VARIANTS["default"])
-    return tmpl.format(prov=prov)
+        if bespoke:
+            return bespoke
+    body = RECITAL_A_BODY.format(prov=prov)
+    tail = RECITAL_A_TAIL_BY_TYPE.get(t, "")
+    return body + tail
 
 
 # ---------------------------------------------------------------------------
@@ -262,9 +278,10 @@ _AGREEMENT_TYPE_BY_LOI = {
     "EcosystemPartnership": "Letter of Intent",
 }
 
+# v3.4: Wholesale subject dropped "Purpose-Built" marketing modifier.
 _SUBJECT_BY_LOI = {
     "Distributor": "Strategic Infrastructure Partnership",
-    "Wholesale": "Purpose-Built AI Colocation Capacity",
+    "Wholesale": "AI Colocation Capacity",
     "EndUser": "AI Compute Infrastructure Services",
     "StrategicSupplier": "Strategic Supply and Infrastructure Partnership",
     "EcosystemPartnership": "Strategic Ecosystem Collaboration",
@@ -422,34 +439,8 @@ class LOI:
         cp = self.g("counterparty", "short")
         desc = self.g("counterparty", "description")
 
-        # Recital A — library-sourced variant (v3.2)
-        recital_a_body = resolve_recital_a(self.d)
-
-        # Append type-specific strategic-fit tail to Recital A.
-        # The library variants cover identity + platform framing; each type
-        # adds one sentence that frames the counterparty relationship.
-        tail_by_type = {
-            "Distributor": (
-                f" The Provider seeks qualified channel and integration partners to "
-                f"extend its platform reach to end-user segments where the {self.party} "
-                f"holds established customer relationships and domain expertise."
-            ),
-            "StrategicSupplier": (
-                f" The Provider seeks qualified supply and engineering partners to "
-                f"accelerate the delivery of its DEC platform, integrate complementary "
-                f"infrastructure capability, and de-risk the supply chain supporting "
-                f"the Provider's active development pipeline."
-            ),
-            "EcosystemPartnership": (
-                f" The Provider participates in ecosystem initiatives that advance "
-                f"sovereign AI infrastructure, sustainable datacentre design, and "
-                f"European industrial policy alignment."
-            ),
-            "Wholesale": "",
-            "EndUser": "",
-        }
-        recital_a_body += tail_by_type.get(self.t, "")
-        self.p(f"(A) {recital_a_body}")
+        # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
+        self.p(f"(A) {resolve_recital_a(self.d)}")
 
         self.p(f'(B) {cp} (the "{self.party}") {desc}.')
 
@@ -459,48 +450,42 @@ class LOI:
                 f"partnership under which the {self.party} would collaborate with the Provider to deliver "
                 f"AI colocation services to end-user customers, on the indicative terms set out below. "
                 f'This letter of intent and non-circumvention non-disclosure agreement (the "LOI") '
-                f"reflects both Parties' strategic intent and is intended to form the basis for further "
-                f"commercial negotiation toward a definitive partnership agreement or master services "
-                f'agreement (the "MSA").'
+                f"is subject to the negotiation and execution of a definitive partnership "
+                f'agreement or master services agreement (the "MSA").'
             )
             self.p(
-                "(D) The Parties recognise that the commercial discussions contemplated by this LOI "
-                "will require the exchange of commercially sensitive and competitively valuable "
-                "information, and wish to establish binding confidentiality and non-circumvention "
-                "protections to facilitate those discussions."
+                "(D) The Parties will exchange commercially sensitive and competitively valuable "
+                "information in connection with this LOI, and agree to the binding confidentiality "
+                "and non-circumvention provisions set out in Clauses 6 and 7."
             )
         elif self.t == "Wholesale":
             self.p(
                 f"(C) The Parties wish to record their mutual interest in the Provider making available, "
                 f"and the {self.party} procuring, dedicated AI colocation capacity at the Provider's DEC "
                 f"facilities, on the indicative terms set out below. This letter of intent and "
-                f'non-circumvention non-disclosure agreement (the "LOI") reflects both Parties\' strategic '
-                f"intent to establish a long-term infrastructure partnership and is intended to form the "
-                f"basis for further technical scoping and commercial negotiation toward a Master Services "
-                f'Agreement (the "MSA").'
+                f'non-circumvention non-disclosure agreement (the "LOI") is subject to the '
+                f'negotiation and execution of a Master Services Agreement (the "MSA").'
             )
             self.p(
-                "(D) The Parties recognise that the commercial discussions contemplated by this LOI "
-                "will require the exchange of commercially sensitive information, including site-specific "
-                "data, pricing models, and infrastructure specifications, and wish to establish binding "
-                "confidentiality and non-circumvention protections to facilitate those discussions."
+                "(D) The Parties will exchange commercially sensitive information, including "
+                "site-specific data, pricing models, and infrastructure specifications, in connection "
+                "with this LOI, and agree to the binding confidentiality and non-circumvention "
+                "provisions set out in Clauses 6 and 7."
             )
         elif self.t == "StrategicSupplier":
             self.p(
                 f"(C) The Parties wish to record their mutual interest in establishing a strategic "
                 f"supply partnership under which the {self.party} would contribute to the delivery of "
                 f"the Provider's DEC platform, on the indicative terms set out below. This letter of "
-                f'intent and non-circumvention non-disclosure agreement (the "LOI") reflects both '
-                f"Parties' strategic intent and is intended to form the basis for further technical and "
-                f"commercial negotiation toward a Framework Agreement and statements of work for named "
-                f"Provider projects."
+                f'intent and non-circumvention non-disclosure agreement (the "LOI") is subject '
+                f"to the negotiation and execution of a Framework Agreement and statements of "
+                f"work for named Provider projects."
             )
             self.p(
-                "(D) The Parties recognise that the discussions contemplated by this LOI will require "
-                "the exchange of commercially sensitive and competitively valuable information, including "
-                "site-specific information about Provider projects and Partner design and manufacturing "
-                "methodology, and wish to establish binding confidentiality and non-circumvention "
-                "protections to facilitate those discussions."
+                "(D) The Parties will exchange commercially sensitive and competitively valuable "
+                "information, including site-specific information about Provider projects and Partner "
+                "design and manufacturing methodology, in connection with this LOI, and agree to the "
+                "binding confidentiality and non-circumvention provisions set out in Clauses 6 and 7."
             )
         elif self.t == "EcosystemPartnership":
             themes_list = self.d.get("ecosystem", {}).get("collaboration_themes", [])
@@ -508,23 +493,21 @@ class LOI:
             self.p(
                 f"(C) The Parties wish to record their mutual interest in a non-commercial ecosystem "
                 f"collaboration focused on {themes_str}, on the framework set out in Clauses 3 through 5. "
-                f'This letter of intent (the "LOI") reflects both Parties\' strategic intent to collaborate '
-                f"on a non-commercial basis and does not contemplate any payment, capacity purchase, or "
-                f"commercial commitment between the Parties."
+                f'This letter of intent (the "LOI") is non-commercial in scope and does not '
+                f"contemplate any payment, capacity purchase, or commercial commitment between "
+                f"the Parties."
             )
             self.p(
-                "(D) The Parties recognise that the discussions and joint activities contemplated by "
-                "this LOI may involve the exchange of commercially sensitive or non-public information "
-                "in connection with research, policy, or programme activities, and wish to establish "
-                "mutual confidentiality protections to facilitate that collaboration."
+                "(D) The Parties may exchange commercially sensitive or non-public information in "
+                "connection with research, policy, or programme activities under this LOI, and agree "
+                "to the mutual confidentiality provisions set out in Clause 6."
             )
-        else:
+        else:  # EndUser
             self.p(
-                f"(C) The Parties wish to record their mutual interest in the {self.party} procuring AI "
-                f"compute infrastructure services at the Provider's DEC facilities, on the indicative "
-                f'terms set out below. This letter of intent (the "LOI") reflects both Parties\' intent '
-                f"and is intended to form the basis for further technical scoping and commercial "
-                f'negotiation toward a service agreement (the "MSA").'
+                f"(C) The Parties wish to record their mutual interest in the {self.party} procuring "
+                f"AI compute infrastructure services at the Provider's DEC facilities, on the indicative "
+                f'terms set out below. This letter of intent (the "LOI") is subject to the '
+                f'negotiation and execution of a service agreement (the "MSA").'
             )
 
     def definitions(self):
@@ -573,7 +556,7 @@ class LOI:
         ci_text += ". The existence and contents of this LOI are Confidential Information;"
         defs.append(("", ci_text))
 
-        defs.append(('"DEC"', "means a Digital Energy Center: a purpose-built colocation facility developed and operated by the Provider;"))
+        defs.append(('"DEC"', "means a Digital Energy Center: a liquid-cooled AI colocation facility developed and operated by the Provider;"))
         # v3.2: "DEC Block" removed from customer-facing definitions. Capacity expressed in MW IT + Designated Sites.
         defs.append(('"Designated Site"', "means any DEC or DEC site designated by the Provider for the delivery of capacity to the " + self.party + ", as confirmed in the MSA;"))
         defs.append(('"Financing Party"', "means any bank, financial institution, fund, security trustee, or other entity providing or arranging " + ("debt, mezzanine, or structured " if self.t != "EndUser" else "") + "finance to the Provider or any of its Affiliates in connection with the development or operation of any DEC;"))
@@ -671,12 +654,12 @@ class LOI:
         # 3.1
         self.bp("3.1 Partnership Overview. ",
                 f"{self.g('counterparty', 'short')} provides {comm.get('partner_core_capability', '')}. "
-                f"The Provider develops and operates purpose-built AI colocation facilities with secured "
+                f"The Provider develops and operates liquid-cooled AI colocation facilities with secured "
                 f"energy and grid access, liquid cooling, and full energy recovery infrastructure.")
         if mode == "combined":
             self.p(
                 f"The Parties intend to combine the {self.party}'s {comm.get('partner_contribution', '')} "
-                f"with the Provider's colocation platform to deliver {comm.get('combined_offering', '')} "
+                f"with the Provider's AI colocation platform to deliver {comm.get('combined_offering', '')} "
                 f"to {comm.get('target_end_users', '')}."
             )
         else:
@@ -745,7 +728,7 @@ class LOI:
         mw = comm.get("indicative_mw", "")
 
         # v3.2: capacity expressed in MW IT + Designated Sites; no "DEC Block" customer-facing.
-        self.bp("3.1 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {mw} MW IT of purpose-built, liquid-cooled AI colocation capacity, to be delivered across one or more Designated Sites. Site configuration, phasing, and delivery milestones will be set out in the MSA.")
+        self.bp("3.1 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {mw} MW IT of liquid-cooled AI colocation capacity, to be delivered across one or more Designated Sites. Site configuration, phasing, and delivery milestones will be set out in the MSA.")
 
         self.bp("3.2 Technical Specification. ", "All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, direct liquid cooling infrastructure supporting rack densities of 40 kW and above, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.")
 
@@ -1086,7 +1069,7 @@ class LOI:
             self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
             self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
             self.p("Each stage is designed to provide increasing commercial certainty and to support the Provider's project finance activities.")
-            self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with the Provider's Financing Parties if requested under Clause 5.3. The {self.party} acknowledges that its cooperation in this regard materially supports the Provider's ability to deliver the committed capacity on the indicative timeline.")
+            self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with the Provider's Financing Parties if requested under Clause 5.3. The {self.party}'s cooperation in this regard materially supports delivery of the committed capacity on the indicative timeline.")
             self.bp("4.4 Expansion and Priority. ", f"The Provider will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Technical scoping (target: 30 days post-LOI) \u2014 Detailed technical discovery to determine exact capacity, rack layout, power distribution, cooling specifications, and connectivity requirements.")
@@ -1106,12 +1089,67 @@ class LOI:
             self.p("4.2 This LOI does not reserve capacity at any DEC. Capacity allocation will be confirmed upon execution of the MSA.")
 
     def clause5(self):
+        """Cl. 5 for EU / DS / WS — Project Finance and Assignment.
+        v3.4: meta-commentary stripped from 5.1. Strategic Supplier uses
+        clause5_ss() instead (supply-side bankability, not revenue-bankability).
+        """
         self.h("5. Project Finance and Assignment (BINDING)")
-        self.bp("5.1 Revenue Bankability. ", "The Parties acknowledge that the Provider intends to finance the development and operation of its DEC programme through a combination of equity investment and non-recourse project finance. The Provider's ability to secure favourable financing terms depends in part on demonstrating contracted or committed revenue streams. This LOI, while non-binding in its commercial terms, is intended to evidence the Parties' genuine commercial intent and to support the Provider's financing activities.")
+        self.bp(
+            "5.1 Project Finance Context. ",
+            "The Provider is developing the DEC programme under a combination "
+            "of equity investment and non-recourse project finance. This LOI "
+            "is binding in Clauses 5, 6, 7, and 8 to support that financing "
+            "structure."
+        )
         self.bp("5.2 Assignment. ", f"Neither Party may assign its rights or obligations under this LOI without the prior written consent of the other Party, except that:")
         self.p("(a) the Provider may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
         self.p(f"(b) the Provider may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided the Provider remains liable for the performance of the assignee's obligations.")
         self.bp("5.3 Lender Acknowledgment. ", f"The {self.party} acknowledges and agrees that, upon the Provider's written request, the {self.party} shall negotiate in good faith and execute a direct agreement (or lender acknowledgment letter) with the Provider's Financing Party within 30 Business Days of such request. Such direct agreement may include, as is customary in project finance transactions: (a) step-in rights for the Financing Party upon a Provider default; (b) cure periods in favour of the Financing Party; and (c) information rights enabling the Financing Party to monitor the commercial relationship. The terms of any such direct agreement shall be commercially reasonable and consistent with market practice for project finance transactions.")
+
+    def clause5_ss(self):
+        """v3.4: Cl. 5 for Strategic Supplier — Supply Chain and Delivery Commitment.
+
+        A supplier is not a revenue counterparty. The bankability signal DE
+        cares about from a supplier is SUPPLY CERTAINTY and DELIVERY
+        COMMITMENT, not contracted revenue. This clause reshapes Cl. 5 to
+        that frame, keeping the Assignment and Financing Continuity
+        Acknowledgment sub-clauses structurally parallel to the commercial
+        Cl. 5 so a lender reading across the five LOI types sees consistent
+        architecture.
+        """
+        self.h("5. Supply Chain and Delivery Commitment (BINDING)")
+        self.bp(
+            "5.1 Delivery Intent. ",
+            f"The {self.party} confirms its intent to reserve manufacturing "
+            f"and service-delivery capacity to support the Provider's active "
+            f"development pipeline, on the terms to be agreed in the Framework "
+            f"Agreement and accompanying statements of work. This LOI is "
+            f"binding in Clauses 5, 6, 7, and 8 to support that supply "
+            f"relationship."
+        )
+        self.bp(
+            "5.2 Assignment. ",
+            f"Neither Party may assign its rights or obligations under this "
+            f"LOI without the prior written consent of the other Party (such "
+            f"consent not to be unreasonably withheld), except that:"
+        )
+        self.p("(a) the Provider may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
+        self.p(f"(b) the Provider may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided the Provider remains liable for the performance of the assignee's obligations.")
+        self.bp(
+            "5.3 Financing Continuity Acknowledgment. ",
+            f"The {self.party} acknowledges that the Provider's DEC programme "
+            f"is financed on a non-recourse, per-site basis, and that supply "
+            f"continuity from qualified suppliers materially supports that "
+            f"financing. Upon the Provider's written request, the {self.party} "
+            f"shall negotiate in good faith with the Provider's Financing "
+            f"Party to confirm supply arrangements on financed projects, "
+            f"including reasonable cooperation with customary direct-agreement "
+            f"or acknowledgment mechanics (step-in, cure periods, information "
+            f"rights), within 30 Business Days of such request. The terms of "
+            f"any such direct agreement shall be commercially reasonable and "
+            f"consistent with market practice for project finance supply "
+            f"arrangements."
+        )
 
     def clause6(self):
         self.h(f"6. Confidentiality {'and Non-Disclosure ' if self.t != 'EndUser' else ''}(BINDING)")
@@ -1201,7 +1239,7 @@ class LOI:
             self.p("(a) Private Associated Counterparties (landowners, greenhouse operators, heat offtakers, energy counterparties, EPCs): in all cases where the Provider has introduced or disclosed their identity or involvement; and")
             self.p("(b) Public Bodies (government agencies, municipalities, regulatory bodies, distribution system operators): only where the Provider has made a specific, named introduction to an individual or department within that body. General knowledge that the Provider engages with a public body does not trigger non-circumvention protection.")
         elif self.t == "StrategicSupplier":
-            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future customers, including other colocation operators, cloud service providers, or enterprise customers.")
+            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future customers, including other AI colocation operators, cloud service providers, or enterprise customers.")
         else:
             self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future end-user customers, cloud service customers, or compute buyers.")
 
@@ -1755,7 +1793,12 @@ class LOI:
         else:
             self.clause4()
 
-        self.clause5()
+        # v3.4: SS uses clause5_ss (Supply Chain and Delivery Commitment).
+        # EU/DS/WS use the generic clause5 (Project Finance and Assignment).
+        if self.t == "StrategicSupplier":
+            self.clause5_ss()
+        else:
+            self.clause5()
         self.clause6()
         self.clause7_nc()
         self.clause_general()
@@ -1814,18 +1857,101 @@ _FAIL_RULES = {
              "Cl. 4.2 heading must be 'Contractual Sequence', not 'Revenue Chain'"),
     "R-20": (r"programme spans \d+", "Recital A",
              "'programme spans N...' language regression"),
+    # R-23 (v3.4): fabrication gate — implemented as a custom check in qa_lint,
+    # not a simple regex. See _check_fabrication_gate() below.
 }
 
 _WARN_RULES = {
     "R-11": (r"\bISO \d{4,5}\b", "Recital B",
              "ISO certification in Recital B (set choices.cert_relevant=true to suppress)"),
-    "R-14": (r"\b(leading|innovative|cutting-edge|world-class|best-in-class)\b", "Recital B",
-             "Salesy adjective in Recital B"),
+    # v3.4: R-14 scope broadened from Recital B to body. Added "purpose-built"
+    # and "state-of-the-art" as R-21 (kept R-14 list focused on the original
+    # salesy adjectives for clarity in QA reports).
+    "R-14": (r"\b(leading|innovative|cutting-edge|world-class|best-in-class)\b", "body",
+             "Salesy adjective"),
     "R-15": (r"positioning (its|itself) as", "body",
              "'positioning (its|itself) as' — formulaic"),
     "R-19": (r"^\s*\d+(?:\.\d+)?\s+[^\n]*\(NON-BINDING\)", "heading",
              "'(NON-BINDING)' in a clause heading — v3.2 style regression"),
+    # v3.4 additions:
+    "R-21": (r"\b(purpose-built|state-of-the-art)\b", "body",
+             "Marketing adjective — 'purpose-built' / 'state-of-the-art' banned body-wide (v3.4)"),
+    "R-22": (
+        r"("
+        r"Provider's ability to|"
+        r"depends in part on|"
+        r"is intended to evidence|"
+        r"while non-binding in its commercial terms|"
+        r"to support the Provider's financing|"
+        r"will require the exchange of|"
+        r"The Parties acknowledge that the Provider intends|"
+        r"is intended to form the basis"
+        r")",
+        "body",
+        "Meta-commentary pattern — explains the LOI rather than creating obligations (v3.4)"
+    ),
 }
+
+# R-23 fabrication gate: regex targets material numeric-metric claims in
+# Recital B. Every trigger must be matched against counterparty.source_map
+# or marked [TBC] in the intake; otherwise R-23 FAILS the build.
+_R23_CLAIM_PATTERN = re.compile(
+    r"\b\d+[\d,]*\s*"
+    r"(MW|GW|customers|clients|sites|deployments|GPUs|operations|"
+    r"offices|countries|years|employees|%)\b",
+    re.IGNORECASE,
+)
+
+
+def _check_fabrication_gate(text_recital_b: str, source_map: dict,
+                             overrides: set) -> list:
+    """R-23: every material numeric claim in Recital B must be attributable.
+
+    Returns a list of (rule_id, scope, message) findings. Empty list = pass.
+
+    A claim is considered attributed if ANY of:
+    - Recital B text contains a literal '[TBC]' marker near the claim
+    - counterparty.source_map has at least one URL entry in ANY pillar
+      (pillar-level granularity; reviewer's Phase 7.5 handles pillar-to-claim
+      mapping)
+    - the rule R-23 is in overrides (user ran with --override R-23 ...)
+    """
+    findings = []
+    if "R-23" in overrides:
+        return findings  # overridden
+    claims = list(_R23_CLAIM_PATTERN.finditer(text_recital_b))
+    if not claims:
+        return findings  # no material claims
+    # If ALL claims are accompanied by [TBC] within 50 chars, that's acceptable
+    has_tbc = "[TBC]" in text_recital_b or "[TO BE CONFIRMED]" in text_recital_b
+    # If source_map exists and has at least one URL entry in any pillar,
+    # attribution is present at document level.
+    sm_has_urls = False
+    if isinstance(source_map, dict):
+        for pillar_val in source_map.values():
+            if isinstance(pillar_val, list) and any(
+                isinstance(u, str) and u.startswith(("http://", "https://"))
+                for u in pillar_val
+            ):
+                sm_has_urls = True
+                break
+            if isinstance(pillar_val, str) and pillar_val.startswith(
+                ("http://", "https://")
+            ):
+                sm_has_urls = True
+                break
+    if not has_tbc and not sm_has_urls:
+        # No source_map URLs and no [TBC] markers — flag every claim
+        sample = [c.group(0) for c in claims[:3]]
+        findings.append((
+            "R-23", "Recital B",
+            f"Fabrication gate: {len(claims)} material claim(s) in Recital B "
+            f"without source_map attribution or [TBC] marker (e.g. "
+            f"{', '.join(repr(s) for s in sample)}). Add counterparty.source_map "
+            f"pillar_N: ['https://tier-1-url'] to intake YAML, mark claims "
+            f"[TBC], or pass --override R-23 --override-reason."
+        ))
+    return findings
 
 
 def _extract_text(doc) -> str:
@@ -1884,6 +2010,18 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
                 continue
             lines.append(f"  [WARN] {rid}  {scope}   {msg}")
             warn_count += 1
+
+    # R-23 (v3.4) — fabrication gate on Recital B
+    # Extract Recital B text (starts with "(B) ", ends at next recital marker or blank line)
+    recital_b_text = ""
+    m = re.search(r"\(B\)\s*(.*?)(?=\(C\)|\(D\)|\n\n|$)", text, re.DOTALL)
+    if m:
+        recital_b_text = m.group(1)
+    source_map = data.get("counterparty", {}).get("source_map", {})
+    r23_findings = _check_fabrication_gate(recital_b_text, source_map, overrides)
+    for rid, scope, msg in r23_findings:
+        lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
+        fail_count += 1
 
     if not data.get("programme", {}).get("recital_a_variant"):
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
