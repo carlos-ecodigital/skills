@@ -1,0 +1,46 @@
+# MIA Intake — Master Only (no annexes activated at initial execution)
+# Use case: Parties sign the framework now; annexes activate later once scope is confirmed.
+# Rare — most executions will activate at least one annex alongside the Master.
+
+type: "MIA"
+scope: "master_only"
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "[Registered address]"
+  reg_type: "KvK"
+  reg_number: "[KvK number]"
+  signatory_name: "[Confirm with Carlos]"
+  signatory_title: "[Confirm with Carlos]"
+
+introducer:
+  name: "[INTRODUCER_LEGAL_NAME]"
+  short: "[INTRODUCER_SHORT]"
+  address: "[INTRODUCER_ADDRESS]"
+  jurisdiction: "[e.g., 'the Netherlands']"
+  reg_type: "[KvK / Company No. / EIN]"
+  reg_number: "[NUMBER]"
+  contact_name: "[FIRST LAST]"
+  contact_title: "[TITLE]"
+  salutation: "[e.g., 'Dear [First]']"
+  signatory_name: "[SIGNATORY_NAME]"
+  signatory_title: "[SIGNATORY_TITLE]"
+  description: "[One or two sentences — who they are, what credibility they bring. Factual, no puffery.]"
+
+activation:
+  annex_a: false
+  annex_b: false
+
+choices:
+  existing_nda: false  # true = ALT-A (existing LOI/NDA); false = ALT-B (embedded confidentiality)
+
+protection:
+  nc_duration: "12 months"
+  confidentiality_survival: "3 years"
+  lookback_months: "12 months"
+
+dates:
+  mia_date: "[e.g., '20 April 2026']"
+  effective_date: "[Same as mia_date unless delayed activation agreed]"
+  loi_date: ""  # Only if existing_nda = true; date of the LOI/NDA that provides confidentiality

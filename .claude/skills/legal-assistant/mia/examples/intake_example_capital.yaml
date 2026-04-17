@@ -1,0 +1,62 @@
+# MIA Intake — Master + Annex B (Capital Introductions)
+# Use case: Introducer will introduce prospective investors to DE.
+# Example: Rutger — first capital-only execution.
+# IMPORTANT: Annex B requires legal-counsel skill review before issuing.
+
+type: "MIA"
+scope: "capital"
+
+provider:
+  # NOTE MIA-Q7: Default AG for capital intros (equity object is AG); confirm per deal.
+  legal_name: "Digital Energy Group AG"
+  short_name: "Digital Energy"
+  address: "[Registered address — Swiss AG]"
+  reg_type: "CHE-No."
+  reg_number: "CHE-408.639.320"
+  signatory_name: "[Confirm with Carlos]"
+  signatory_title: "[Confirm with Carlos]"
+
+introducer:
+  name: "[Rutger — confirm full name and legal entity]"
+  short: "[Rutger's entity short name]"
+  address: "[ADDRESS]"
+  jurisdiction: "[e.g., 'the Netherlands']"
+  reg_type: "[KvK / Company No.]"
+  reg_number: "[NUMBER]"
+  contact_name: "[Rutger — full name]"
+  contact_title: "[TITLE]"
+  salutation: "Dear Rutger"
+  signatory_name: "[Rutger — full name]"
+  signatory_title: "[TITLE]"
+  description: "[Factual description of Rutger's investor network and the credibility they bring to capital introductions.]"
+
+activation:
+  annex_a: false
+  annex_b: true
+
+choices:
+  existing_nda: false  # true = ALT-A; false = ALT-B (embedded confidentiality)
+
+protection:
+  nc_duration: "12 months"
+  confidentiality_survival: "3 years"
+  lookback_months: "12 months"
+
+dates:
+  mia_date: "[e.g., '20 April 2026']"
+  effective_date: "[Same as mia_date]"
+  loi_date: ""  # Only if existing_nda = true
+
+annex_b:
+  tail: "12 months"
+  approval_window: "10 Business Days"
+  suspension_restructure_window: "60 days"
+
+  # Schedule B-1 fields (fill per Qualifying Capital Introduction — below are examples/defaults):
+  schedule_b1:
+    invoicing_entity: "Digital Energy Group AG"
+    payable_to_entity: "[Introducer entity — confirm]"
+    currency: "EUR"
+    payment_terms: "Net 30"
+    vat_treatment: "[Reverse-charge / standard / per local rules]"
+    counsel_review_confirmation: "[DATE / REVIEWER — must be completed before issuing]"

@@ -40,7 +40,6 @@ choices:
   pricing: true
   phasing: true
   existing_nda: false
-  bespoke_closing: ""
 
   # Phasing details
   phases:

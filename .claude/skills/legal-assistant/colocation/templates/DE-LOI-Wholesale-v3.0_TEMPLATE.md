@@ -388,9 +388,6 @@ These timelines are indicative and non-binding.
 
 We look forward to working with you.
 
-| *DRAFTER: Optional — add a bespoke closing line. E.g., "We are confident that the combination of [Customer's] market position and our infrastructure programme will deliver significant value to both organisations."* |
-| :---- |
-
 Yours faithfully,
 
 **For and on behalf of [DE:LEGAL_NAME]**

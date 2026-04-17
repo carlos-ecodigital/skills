@@ -419,9 +419,6 @@ These timelines are indicative and non-binding.
 
 We look forward to working with you.
 
-| *DRAFTER: Optional — add a bespoke closing line tailored to this partner. E.g., "We are particularly excited by the opportunity to combine [Partner's] enterprise reach with our infrastructure platform to serve the [vertical] market."* |
-| :---- |
-
 Yours faithfully,
 
 **For and on behalf of [DE:LEGAL_NAME]**

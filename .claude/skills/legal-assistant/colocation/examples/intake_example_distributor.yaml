@@ -47,7 +47,6 @@ choices:
   pricing: false
   exclusivity: false
   existing_nda: false
-  bespoke_closing: ""
 
 # --- Programme ---
 programme:

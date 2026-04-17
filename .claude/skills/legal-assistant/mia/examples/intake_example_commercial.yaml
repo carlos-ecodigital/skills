@@ -1,0 +1,58 @@
+# MIA Intake — Master + Annex A (Commercial Introductions)
+# Use case: Introducer will introduce prospective customers to DE for colocation services.
+# Example: Nick Alderwelde (Sovereign AI) — first commercial-only execution.
+
+type: "MIA"
+scope: "commercial"
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  address: "[Registered address]"
+  reg_type: "KvK"
+  reg_number: "[KvK number]"
+  signatory_name: "[Confirm with Carlos]"
+  signatory_title: "[Confirm with Carlos]"
+
+introducer:
+  name: "[Nick Alderwelde / Sovereign AI — confirm legal entity name]"
+  short: "Sovereign AI"
+  address: "[ADDRESS]"
+  jurisdiction: "[e.g., 'the Netherlands']"
+  reg_type: "[KvK / Company No.]"
+  reg_number: "[NUMBER]"
+  contact_name: "Nick Alderwelde"
+  contact_title: "[TITLE]"
+  salutation: "Dear Nick"
+  signatory_name: "Nick Alderwelde"
+  signatory_title: "[TITLE]"
+  description: "[Sovereign AI specialises in ... — factual description of their market presence and the credibility they bring to introductions.]"
+
+activation:
+  annex_a: true
+  annex_b: false
+
+choices:
+  existing_nda: false  # true = ALT-A; false = ALT-B (embedded confidentiality)
+
+protection:
+  nc_duration: "12 months"
+  confidentiality_survival: "3 years"
+  lookback_months: "12 months"
+
+dates:
+  mia_date: "[e.g., '20 April 2026']"
+  effective_date: "[Same as mia_date]"
+  loi_date: ""  # Only if existing_nda = true
+
+annex_a:
+  tail: "12 months"
+  fee_election: "capitalised"  # "capitalised" | "tiered_residual" | "per_schedule" (Introducer elects per Schedule A-1)
+
+  # Schedule A-1 fields (fill per Qualifying Introduction — below are examples/defaults):
+  schedule_a1:
+    invoicing_entity: "Digital Energy Netherlands B.V."
+    payable_to_entity: "[Introducer entity — confirm]"
+    currency: "EUR"
+    payment_terms: "Net 30"
+    vat_treatment: "[Reverse-charge / standard / per local rules]"

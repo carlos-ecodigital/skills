@@ -47,7 +47,6 @@ choices:
   pricing: false    # Referral economics in separate Referral Agreement
   exclusivity: false
   existing_nda: false
-  bespoke_closing: ""
 
 # --- Programme ---
 programme:

@@ -1,6 +1,17 @@
-# LOI/NCNDA v3.0 — Assembly Guide
+# legal-assistant — Assembly Guide
 
-## Type Selection
+This guide covers two streams produced by `legal-assistant`:
+
+- **Colocation Capacity** — LOI/NCNDA v3.0 (End User, Distributor, Wholesale). Sections 1–11 below.
+- **Site Sourcing** — DE Site HoT v1.0 (grower Heads of Terms). Section 12 below.
+
+A third, parallel stream — **Introducer Fees** (DE-MIA Master Introduction Agreement, Master + severable Annex A Commercial / Annex B Capital) — has its own operator guide at `mia/MIA_ASSEMBLY_GUIDE.md` and engine at `mia/generate_mia.py`. Not covered here. If a counterparty is an Introducer (customer or investor referrer), use that guide instead. **Annex B (capital) MUST be routed through the `legal-counsel` skill before first execution.**
+
+Previously called `loi-generator/ASSEMBLY_GUIDE.md`.
+
+---
+
+## 1. LOI Type Selection
 
 | If the counterparty... | Use | Template |
 |---|---|---|
@@ -195,7 +206,7 @@ When a counterparty marks up the LOI, apply these postures:
 |---|---|---|
 | Cl. 1-4 (non-binding) | **Flexible** | Negotiate freely. These clauses capture intent, not obligations. |
 | Cl. 5 (Project Finance) | **Defend** | Lender signals are non-negotiable. Assignment carve-out and lender acknowledgment must remain. |
-| Cl. 6 (Confidentiality) | **Negotiate** | Within DE policy bands (see nda-policy-positions.md). Standard adjustments: survival period, return/destruction timeline, compliance confirmation frequency. |
+| Cl. 6 (Confidentiality) | **Negotiate** | Within DE policy bands (see `_shared/nda-policy-positions.md`). Standard adjustments: survival period, return/destruction timeline, compliance confirmation frequency. |
 | Cl. 7 (Non-Circumvention) | **Negotiate** | Duration (18-36 month range acceptable), scope of Associated Counterparties, independent knowledge evidence standard. |
 | Cl. 8 (General) | **Defend** | Governing law (Dutch), jurisdiction (Amsterdam), eIDAS, good faith — these are standard and non-negotiable. |
 
@@ -236,3 +247,52 @@ All three templates share identical binding clauses (Cl. 5, 6 ALT-B, 8). If a bi
 | DE-LOI-Distributor-v3.0 | 3.0 | 2026-04-05 |
 | DE-LOI-Wholesale-v3.0 | 3.0 | 2026-04-05 |
 | DE-LOI-EndUser-v3.0 | 3.0 | 2026-04-05 |
+| DE-Site-HoT (grower body + Annex A) | 1.0 | 2026-03-13 (see `de-site-hot/templates/template-version.md`) |
+
+---
+
+## 12. Site Sourcing Stream — DE Site HoT
+
+This section covers assembly rules specific to the DE Site HoT (grower Heads of Terms, v1.0). Detailed workflow is in `SKILL.md` § Site Sourcing Stream Workflow.
+
+### 12.1 Two-part structure
+
+| Artefact | Source | Modification allowed? |
+|---|---|---|
+| **Body** (`hot-grower-body-v1.docx`) | `de-site-hot/templates/` | **NEVER**. Legally reviewed bilingual (EN/NL) body. Variable references point to Annex A items. If a request implies body modification, REFUSE and escalate to `legal-counsel`. |
+| **Annex A** (`hot-grower-annex-a-v1.docx`) | `de-site-hot/templates/` | Only via form-fill of yellow (FFFF99, required) and green (CCFFCC, conditional) shaded cells per `field-registry.json`. No structural edits. |
+
+### 12.2 Intake discipline
+
+- Ask questions in conversational batches per phase. Never dump all 48 fields at once.
+- Validate each phase before proceeding.
+- Use `field-registry.json` as the single source of truth for field IDs, validators, conditionals, and phase assignments.
+
+### 12.3 Validator escalations
+
+See `SKILL.md` §"Site HoT Escalation Matrix" (canonical). That table governs all validator-triggered routing. ASSEMBLY_GUIDE adds no rules of its own.
+
+### 12.4 Bilingual handling
+
+- Populate both EN and NL columns simultaneously per `field-registry.json`.
+- Preserve native Dutch terms where the field-registry specifies them (`opstalrecht`, `tekenbevoegdheid`, `energiebelasting`, `bestemmingsplan`, `erfpacht`, `hypotheek`).
+- Do not translate Dutch legal terms into English approximations.
+
+### 12.5 Conditional sections
+
+| Section | Trigger | Action |
+|---|---|---|
+| D.8–D.11, G.Landowner | `grower_is_not_landowner = true` | Populate; include landowner in signatory block |
+| D.10–D.11, G.Financier | `has_land_financier = true` | Populate; include financier in signatory block |
+| F.1a | F.1 CHP lease included | Populate CHP fee and period |
+| F.2a | F.2 co-investment included | Populate % (max 50); escalate to Jelmer |
+
+If a conditional trigger is false, strip the dependent cells entirely; do not leave empty yellow-shaded cells in the final Annex A.
+
+### 12.6 Policy reference
+
+The NDA/confidentiality policy in `_shared/nda-policy-positions.md` applies to the HoT's confidentiality clause (body Cl. 7 — not editable at this stage). If a grower proposes alternative confidentiality terms, that is a **body modification** request and must be escalated to `legal-counsel`.
+
+### 12.7 Generation caveat (2026-04-13)
+
+The form-fill engine `generate_site_hot.py` is **not yet built**. The versioned .docx templates in `de-site-hot/templates/` are Git LFS pointer stubs (130 B each); the real binaries must be fetched before the engine can be written. See `de-site-hot/templates/README.md` for fetch instructions. Until resolved: the intake runs to completion, `annex-a-data.json` is written, the Annex A docx step writes a `PENDING_ENGINE.md` placeholder, and the body is copied (also a stub until fetch).

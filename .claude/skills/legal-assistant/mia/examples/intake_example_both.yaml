@@ -1,0 +1,83 @@
+# MIA Intake — Master + Annex A + Annex B (Both)
+# Use case: Introducer will introduce both customers and investors to DE.
+# Example: Tal Katran / Arie Rastinger — first "both" executions.
+# IMPORTANT: Annex B requires legal-counsel skill review before issuing.
+# NOTE: Confirm with Carlos whether one signing event covers Master+A+B or staggered.
+
+type: "MIA"
+scope: "both"
+
+provider:
+  # NOTE MIA-Q7: B.V. for commercial, AG for capital. For "both" scope, confirm which entity
+  # signs the Master. One approach: Master + A signed by B.V., Annex B signed by AG separately.
+  # Alternative: AG signs everything (equity is the higher-order object).
+  # Default: B.V. signs Master + A; AG signs Annex B in a separate execution if entities differ.
+  legal_name: "Digital Energy Netherlands B.V."  # Master + Annex A entity
+  short_name: "Digital Energy"
+  address: "[Registered address — NL B.V.]"
+  reg_type: "KvK"
+  reg_number: "[KvK number]"
+  signatory_name: "[Confirm with Carlos]"
+  signatory_title: "[Confirm with Carlos]"
+
+# If Annex B is signed by a different DE entity (AG), fill this:
+provider_annex_b:
+  legal_name: "Digital Energy Group AG"
+  address: "[Registered address — Swiss AG]"
+  reg_type: "CHE-No."
+  reg_number: "CHE-408.639.320"
+  signatory_name: "[Confirm with Carlos]"
+  signatory_title: "[Confirm with Carlos]"
+
+introducer:
+  name: "[e.g., Tal Katran — confirm legal entity name]"
+  short: "[Short name]"
+  address: "[ADDRESS]"
+  jurisdiction: "[e.g., 'the Netherlands']"
+  reg_type: "[KvK / Company No.]"
+  reg_number: "[NUMBER]"
+  contact_name: "[Full name]"
+  contact_title: "[TITLE]"
+  salutation: "Dear [First name]"
+  signatory_name: "[Full name]"
+  signatory_title: "[TITLE]"
+  description: "[Factual description of the Introducer's market presence and dual capability (customer + investor network).]"
+
+activation:
+  annex_a: true
+  annex_b: true
+
+choices:
+  existing_nda: false  # true = ALT-A; false = ALT-B (embedded confidentiality)
+
+protection:
+  nc_duration: "12 months"
+  confidentiality_survival: "3 years"
+  lookback_months: "12 months"
+
+dates:
+  mia_date: "[e.g., '20 April 2026']"
+  effective_date: "[Same as mia_date]"
+  loi_date: ""  # Only if existing_nda = true
+
+annex_a:
+  tail: "12 months"
+  fee_election: "capitalised"  # "capitalised" | "tiered_residual" | "per_schedule"
+  schedule_a1:
+    invoicing_entity: "Digital Energy Netherlands B.V."
+    payable_to_entity: "[Introducer entity — confirm]"
+    currency: "EUR"
+    payment_terms: "Net 30"
+    vat_treatment: "[Reverse-charge / standard / per local rules]"
+
+annex_b:
+  tail: "12 months"
+  approval_window: "10 Business Days"
+  suspension_restructure_window: "60 days"
+  schedule_b1:
+    invoicing_entity: "Digital Energy Group AG"
+    payable_to_entity: "[Introducer entity — confirm]"
+    currency: "EUR"
+    payment_terms: "Net 30"
+    vat_treatment: "[Reverse-charge / standard / per local rules]"
+    counsel_review_confirmation: "[DATE / REVIEWER — must be completed before issuing]"

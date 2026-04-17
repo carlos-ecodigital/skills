@@ -1,6 +1,11 @@
-# LOI/NCNDA v3.0 — Feature Matrix
+# legal-assistant — Feature Matrix
 
-## Clause Structure by Type
+This matrix compares document types across both streams:
+
+- **Colocation Stream** — LOI/NCNDA v3.0 (3 sub-types). Sections below.
+- **Site Sourcing Stream** — DE Site HoT v1.0. Final section.
+
+## Clause Structure — Colocation LOI by Type
 
 | Clause | End User | Distributor | Wholesale |
 |--------|:---:|:---:|:---:|
@@ -54,13 +59,13 @@ One agreement, two severable annexes:
 |---|---|---|
 | **Master Framework** | Parties, confidentiality, non-circumvention, term, governing law, severability | Always |
 | **Annex A: Commercial** | Customer introductions. Residual % MRR (tiered) or one-time flat. | Partner introduces customers |
-| **Annex B: Capital** | Investor introductions. Flat fee or capped %. Named investor list. Strict activity limitations. Regulatory representations. Auto-suspension clause. Enhanced severability. | Partner introduces investors |
+| **Annex B: Capital** | Investor introductions. **Capped %** (2% of Capital Committed, EUR 250k cap per intro). Named investor list (on-demand). Strict activity limitations. Regulatory representations. Auto-suspension clause. Enhanced severability. | Partner introduces investors |
 
 Either or both annexes can be activated. Annex B is designed to stay outside the AFM/FCA/SEC regulatory perimeter through strict activity limitations, prohibition on solicitation/advice, and automatic suspension on regulatory change.
 
 If signed alongside a Distributor LOI: LOI's confidentiality covers both. If standalone: MIA has its own embedded confidentiality.
 
-**Status:** Structure designed. Templates to be built in separate task after LOI sign-off. See plan file for full Annex B regulatory safeguards.
+**Status:** Built v1.0 on 2026-04-13. Engine at `mia/generate_mia.py`; templates at `mia/templates/`; intake examples at `mia/examples/`; operator guide at `mia/MIA_ASSEMBLY_GUIDE.md`. Annex B MUST route through `legal-counsel` skill before first execution. Tail period harmonised at 12 months. Defensive pipeline carve-out replaces upfront exclusion list.
 
 ---
 
@@ -123,4 +128,36 @@ If signed alongside a Distributor LOI: LOI's confidentiality covers both. If sta
 | **Subject line** | "AI Compute Infrastructure Services" | "Strategic Infrastructure Partnership" | "Purpose-Built AI Colocation Capacity" |
 | **Counterparty term** | "Customer" | "Partner" | "Customer" |
 | **Decision-maker** | CTO, VP Infrastructure | CEO, BD Lead | Founder, CFO, VP Operations |
-| **Closing line** | "We look forward to working with you." + optional bespoke | "We look forward to working with you." + optional bespoke | "We look forward to working with you." + optional bespoke |
+| **Closing line** | "We look forward to working with you." | "We look forward to working with you." | "We look forward to working with you." |
+
+---
+
+## Site Sourcing Stream — DE Site HoT v1.0
+
+| Dimension | DE Site HoT |
+|---|---|
+| **Counterparty** | Dutch greenhouse grower (B.V., V.O.F., C.V., N.V., Coöperatie U.A.) |
+| **Structure** | Two-part: locked bilingual Body (EN/NL, never modified) + populated Annex A (form-filled) |
+| **Intake method** | 7-phase conversational (Identification → Signatory/Greenhouse → Electrical → Heat → Land → Commercial → Optional + Notices) |
+| **Field count** | 48 (35 required yellow-shaded + 13 conditional green-shaded) |
+| **Template version** | 1.0 (2026-03-13); bilingual; locked body |
+| **Engine** | `generate_site_hot.py` (NOT YET BUILT — blocked on LFS template fetch) |
+| **Validators** | KVK 8-digit, EAN `^871\d{15}$`, capacity base≤total, heat ΔT ≥15°C, co-investment ≤50%, entity suffix whitelist |
+| **Conditional blocks** | Grower ≠ landowner (D.8–11, G.Landowner); mortgaged land (D.10–11, G.Financier); CHP lease (F.1a); co-investment (F.2a) |
+| **Escalations** | Non-50:50 heat split → Carlos; co-investment → Jelmer; missing consent → Carlos + legal-counsel; body modification → REFUSE |
+| **Policy reference** | `_shared/nda-policy-positions.md` applies to body confidentiality (Cl. 7 — not editable) |
+| **Output artifacts** | `annex-a-data.json`, `DE-Site-HoT_Annex_A_{Company}.docx`, `DE-Site-HoT_Body_{Company}.docx` (copy), `intake-log.md`, `status.md` |
+| **Output location** | SSOT `contracts/hots/active/{grower-slug}/` |
+| **Post-gen action** | Git commit + push to SSOT (when working dir is a git checkout) |
+| **Companion agreements** | None at HoT stage — future MSA/SOF are post-HoT lifecycle (see `grower-relationship-mgr`) |
+
+### Engine asymmetry (vs. Colocation LOI)
+
+| | Colocation LOI | Site HoT |
+|---|---|---|
+| Intake format | YAML file | Conversational (7 phases) |
+| Engine status | Deterministic Python (`generate_loi.py`), shipping | NOT BUILT — blocked on LFS fetch |
+| Template storage | Markdown reference (not consumed by script) + Python-built .docx from scratch | Locked binary .docx, form-filled in place via zipfile + xml.etree |
+| Brand layer | Via `document-factory` (cover page, headers, footers) | Self-contained (pre-formatted bilingual template) |
+| Body mutability | Full (script builds from scratch) | Locked; REFUSE body modification |
+| Output name pattern | `YYYYMMDD_DEG_LOI-{Type}_{Company}_(STATUS).docx` | `DE-Site-HoT_Annex_A_{Company}.docx` + body copy |

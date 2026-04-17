@@ -20,9 +20,21 @@ from docx.shared import Pt, Cm, Mm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
+# Import shared cover page and branding from document-factory
+# Script now lives under legal-assistant/colocation/, one level deeper than the
+# original loi-generator/ layout, so resolve document-factory via parent.parent.
+SCRIPT_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPT_DIR.parent.parent / "document-factory"))
+from generate import (  # noqa: E402
+    add_cover, Party,
+    COBALT, SLATE, SLATE_800, SLATE_900, WHITE,
+    setup_first_page_header, setup_cont_header,
+    setup_first_footer, setup_cont_footer,
+)
+
 
 # ---------------------------------------------------------------------------
-# Configuration -- DE brand standards (aligned with document-templates skill)
+# Configuration -- LOI clause formatting (body text, not cover page)
 # ---------------------------------------------------------------------------
 
 FONT_NAME = "Inter"
@@ -32,19 +44,10 @@ FONT_HEADING2 = Pt(11)
 FONT_SMALL = Pt(8)
 LINE_SPACING = 1.15
 
-NAVY = RGBColor(0x14, 0x29, 0x45)    # DE brand heading color
-BLACK = RGBColor(0x1E, 0x29, 0x3B)   # DE brand body text
-GREY = RGBColor(0x64, 0x74, 0x8B)    # DE brand slate/secondary
-COBALT = RGBColor(0x00, 0x34, 0xAF)  # DE brand primary accent
-
-# Logo path -- shared with document-factory skill
-SCRIPT_DIR = Path(__file__).parent
-LOGO_PATH = SCRIPT_DIR.parent / "document-factory" / "assets" / "DE_Logo_Black.png"
-if not LOGO_PATH.exists():
-    LOGO_PATH = SCRIPT_DIR / "DE_Logo_Black.png"
-
-# DE entity footer text
-DE_FOOTER = "Digital Energy Group AG  |  Baarerstrasse 43, 6300 Zug  |  CHE-408.639.320  |  digital-energy.group"
+# Local aliases for clause body text (imported colors used for cover page)
+NAVY = SLATE_900
+BLACK = SLATE_800
+GREY = SLATE
 
 
 # ---------------------------------------------------------------------------
@@ -95,10 +98,25 @@ def validate(d: dict):
 # Document Builder
 # ---------------------------------------------------------------------------
 
+_AGREEMENT_TYPE_BY_LOI = {
+    "Distributor": "Letter of Intent and NCNDA",
+    "Wholesale": "Letter of Intent and NCNDA",
+    "EndUser": "Letter of Intent",
+}
+
+_SUBJECT_BY_LOI = {
+    "Distributor": "Strategic Infrastructure Partnership",
+    "Wholesale": "Purpose-Built AI Colocation Capacity",
+    "EndUser": "AI Compute Infrastructure Services",
+}
+
+
 class LOI:
     def __init__(self, data: dict):
         self.d = data
         self.t = data["type"]
+        self.agreement_type = _AGREEMENT_TYPE_BY_LOI[self.t]
+        self.subject = _SUBJECT_BY_LOI[self.t]
         self.doc = Document()
         self._setup()
         self.party = "Partner" if self.t == "Distributor" else "Customer"
@@ -118,44 +136,11 @@ class LOI:
             s.right_margin = Mm(20)
             s.different_first_page_header_footer = True
 
-            # First page header: DE logo
-            fph = s.first_page_header
-            fph.is_linked_to_previous = False
-            if LOGO_PATH.exists():
-                fph.paragraphs[0].add_run().add_picture(str(LOGO_PATH), height=Mm(12))
-
-            # Continuation header: small logo + document title
-            h = s.header
-            h.is_linked_to_previous = False
-            hp = h.paragraphs[0]
-            hp.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-            if LOGO_PATH.exists():
-                hp.add_run().add_picture(str(LOGO_PATH), height=Mm(8))
-            hp.add_run("\t")
-            tr = hp.add_run("Letter of Intent")
-            tr.font.size = Pt(9)
-            tr.font.name = FONT_NAME
-            tr.font.color.rgb = GREY
-
-            # First page footer
-            fpf = s.first_page_footer
-            fpf.is_linked_to_previous = False
-            fp = fpf.paragraphs[0]
-            fp.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-            r = fp.add_run("Confidential    " + DE_FOOTER)
-            r.font.size = Pt(8)
-            r.font.name = FONT_NAME
-            r.font.color.rgb = GREY
-
-            # Continuation footer
-            cf = s.footer
-            cf.is_linked_to_previous = False
-            cfp = cf.paragraphs[0]
-            cfp.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
-            r2 = cfp.add_run("Confidential    " + DE_FOOTER)
-            r2.font.size = Pt(8)
-            r2.font.name = FONT_NAME
-            r2.font.color.rgb = GREY
+            # Shared header/footer from document-factory
+            setup_first_page_header(s)
+            setup_cont_header(s, title=self.agreement_type)
+            setup_first_footer(s, classification="Confidential")
+            setup_cont_footer(s, classification="Confidential")
 
     # --- Helpers ---
 
@@ -228,43 +213,38 @@ class LOI:
     # --- Sections ---
 
     def letterhead(self):
-        # Cover page: Title, then both parties listed together
-        subjects = {
-            "Distributor": "Letter of Intent and Non-Circumvention Non-Disclosure Agreement \u2014 Strategic Infrastructure Partnership",
-            "Wholesale": "Letter of Intent and Non-Circumvention Non-Disclosure Agreement \u2014 Purpose-Built AI Colocation Capacity",
-            "EndUser": "Letter of Intent \u2014 AI Compute Infrastructure Services",
-        }
-        self.p(subjects[self.t], bold=True, size=FONT_HEADING1, color=NAVY)
-        self.p("")
+        """Render IB-standard cover page via document-factory's add_cover()."""
+        agreement_type = self.agreement_type
+        subject = self.subject
 
-        # Provider (Between:)
+        # Build Party objects from YAML data
         prov = self.d.get("provider", {})
-        self.p("Between:", color=BLACK)
-        self.p(prov.get("legal_name", ""), bold=True)
-        self.p(prov.get("address", ""), size=FONT_SMALL, color=GREY)
-        kvk = prov.get("kvk", "")
-        if kvk:
-            self.p(f"KvK: {kvk}", size=FONT_SMALL, color=GREY)
-        self.p(f"Date: {self.g('dates', 'loi_date')}", size=FONT_SMALL, color=GREY)
-        self.p("")
+        provider_party = Party(
+            legal_name=prov.get("legal_name", ""),
+            address=prov.get("address", ""),
+            registration_type="KvK" if prov.get("kvk") else None,
+            registration_number=prov.get("kvk"),
+            parent=prov.get("parent"),
+        )
 
-        # Counterparty (And:)
         cp = self.d.get("counterparty", {})
-        self.p("And:", color=BLACK)
-        self.p(cp.get("name", ""), bold=True)
-        self.p(cp.get("address", ""), size=FONT_SMALL, color=GREY)
-        rt = cp.get("reg_type", "")
-        rn = cp.get("reg_number", "")
-        if rt and rn:
-            self.p(f"{rt}: {rn}", size=FONT_SMALL, color=GREY)
+        counterparty = Party(
+            legal_name=cp.get("name", ""),
+            address=cp.get("address", ""),
+            registration_type=cp.get("reg_type"),
+            registration_number=cp.get("reg_number"),
+        )
 
-    def addressee(self):
-        # No longer used -- both parties are on cover page via letterhead()
-        pass
-
-    def subject(self):
-        # No longer used -- title is in letterhead()
-        pass
+        # Delegate to document-factory's shared cover page
+        add_cover(
+            self.doc,
+            agreement_type=agreement_type,
+            subject=subject,
+            date_str=self.g("dates", "loi_date"),
+            parties=[provider_party, counterparty],
+            formality="non_binding",
+            classification="Confidential",
+        )
 
     def recitals(self):
         self.h("Recitals")
@@ -814,11 +794,7 @@ class LOI:
 
     def signature(self):
         self.line()
-        closing = "We look forward to working with you."
-        bespoke = self.g("choices", "bespoke_closing")
-        if bespoke:
-            closing += f" {bespoke}"
-        self.p(closing)
+        self.p("We look forward to working with you.")
         self.p("")
         self.p("Yours faithfully,")
         self.p("")
@@ -916,8 +892,7 @@ class LOI:
 
     def build(self) -> Document:
         self.letterhead()
-        # Cover page ends here -- agreement body starts on next page
-        self.doc.add_page_break()
+        # add_cover() already ends with page break
         self.recitals()
         self.definitions()
         self.clause2()
