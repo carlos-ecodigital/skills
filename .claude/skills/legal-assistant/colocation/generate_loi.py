@@ -627,10 +627,17 @@ class LOI:
         cp = self.d.get("counterparty", {})
         loi_date = self.g("dates", "loi_date") or "____________________________"
 
+        # v3.5.5 spacing fix: prior implementation emitted explicit blank
+        # `self.p("")` paragraphs between each block, doubling the vertical
+        # gap (blank paragraph height + default 3pt space_after × 2). The
+        # preamble now uses `space_after=6` on the intro + party paragraphs
+        # (single consistent gap) and a default-spaced closing line. This
+        # matches the tighter cadence of the body clauses and keeps the
+        # preamble block proportional to the rest of the page.
         self.p(
-            f'THIS LETTER OF INTENT (the "LOI") is dated {loi_date} and entered into between:'
+            f'THIS LETTER OF INTENT (the "LOI") is dated {loi_date} and entered into between:',
+            space_after=6,
         )
-        self.p("")
 
         # Party 1 — Digital Energy (Provider)
         prov_legal = prov.get("legal_name", "")
@@ -651,8 +658,7 @@ class LOI:
         # Brand-name defined term — no "the" prefix; the brand name itself
         # is the defined short-form used throughout the body.
         party1_frag += f' ("{self.provider_term}"); and'
-        self.p(party1_frag)
-        self.p("")
+        self.p(party1_frag, space_after=6)
 
         # Party 2 — Counterparty
         cp_legal = cp.get("name", "")
@@ -669,11 +675,9 @@ class LOI:
         if cp_reg_type and cp_reg_number and not self._is_tbc(cp_reg_number):
             party2_frag += f" and registered with the {cp_reg_type} under number {cp_reg_number}"
         party2_frag += f' (the "{self.party}").'
-        self.p(party2_frag)
-        self.p("")
+        self.p(party2_frag, space_after=6)
 
         self.p('(each a "Party" and together the "Parties")')
-        self.p("")
 
     def recitals(self):
         self.h("Recitals")
