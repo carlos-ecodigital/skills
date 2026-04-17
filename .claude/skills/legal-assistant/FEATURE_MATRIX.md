@@ -2,24 +2,27 @@
 
 This matrix compares document types across both streams:
 
-- **Colocation Stream** — LOI/NCNDA v3.0 (3 sub-types). Sections below.
+- **Colocation Stream** — LOI/NCNDA v3.2 (5 sub-types). Sections below.
 - **Site Sourcing Stream** — DE Site HoT v1.0. Final section.
 
 ## Clause Structure — Colocation LOI by Type
 
-| Clause | End User | Distributor | Wholesale |
-|--------|:---:|:---:|:---:|
-| **Recitals** | Service platform | Integration platform | Scale infrastructure |
-| **Cl. 1 Definitions** | 10 terms | 17 terms (+PBI, +AC, +Competitor, +Site ID, +Whitespace, +SOF, +Transaction) | 15 terms (+AC, +Site ID, +SOF, +Services, +Whitespace) |
-| **Cl. 2 Purpose and Scope** | Standard | Standard | Standard |
-| **Cl. 3 Commercial Terms** | Service Requirements | Partnership and Combined Offering | Capacity and Commercial Terms |
-| **Cl. 4 Next Steps / Structure** | Next Steps (simple) | Relationship Structure + Protection | Relationship Structure + Next Steps |
-| **Cl. 5 Project Finance** | Standard (lighter touch) | Standard | Standard (heaviest context) |
-| **Cl. 6 Confidentiality** | Tier A (8 clauses) | Tier B (16 clauses) | Tier B (16 clauses) |
-| **Cl. 7 Non-Circumvention** | **OMITTED** | **FULL** (24mo, PBI 10yr) | **LIGHT** (supply-side only) |
-| **Cl. 8 / 7 General** | Cl. 7 (9 sub-clauses) | Cl. 8 (10 sub-clauses) | Cl. 8 (10 sub-clauses) |
-| **Schedule 1** | None | Partnership Details | Capacity + Technical Spec |
-| **Page count** | ~4 | ~7-8 | ~6-7 |
+| Clause | End User (EU) | Distributor (DS) | Wholesale (WS) | Strategic Supplier (SS) | Ecosystem Partnership (EP) |
+|--------|:---:|:---:|:---:|:---:|:---:|
+| **Recital A** | Library variant (default / sovereignty / integration / bespoke) | Library variant + DS tail | Library variant | Library variant + SS tail | Library variant + EP tail |
+| **Recital B** | 5-pillar framework (EU-tuned) | 5-pillar (DS-tuned) | 5-pillar (WS-tuned) | 5-pillar (SS-tuned) | 5-pillar (EP-tuned) |
+| **Cl. 1 Definitions** | 10 terms | 17 terms (+PBI, +AC, +Competitor, +Site ID, +SOF, +Transaction) | 15 terms (+AC, +Site ID, +SOF, +Services) | 13 terms (+AC, +Site ID, +Framework Agreement, optional +PBI) | 3 terms (CI, Collaboration, Representatives) |
+| **Cl. 2 Purpose and Scope** | Standard | Standard | Standard | Standard (supply framing) | Non-commercial framing |
+| **Cl. 3 Commercial / Scope** | Service Requirements | Partnership and Combined Offering | Indicative Capacity + Commercial Terms | Partnership Scope (purpose-driven) | Collaboration Scope |
+| **Cl. 4 Next Steps / Structure** | Next Steps (simple) | Relationship Structure + Protection | Relationship Structure + Contractual Sequence | Pipeline Engagement + Contractual Sequence | Announcements and Branding |
+| **Cl. 5** | Project Finance (lighter) | Project Finance | Project Finance (heaviest) | Project Finance (portfolio framing) | IP and Deliverables |
+| **Cl. 6 Confidentiality** | Tier A (8 clauses) | Tier B (16 clauses) | Tier B (16 clauses) | Tier B (16 clauses) | Tier A (7 clauses, mutual) |
+| **Cl. 7 Non-Circumvention** | **OMITTED** | **FULL** (24mo, PBI 10yr) | **LIGHT** (supply-side only) | **LIGHT** (supply-side only) | **OMITTED** |
+| **Cl. 8 / 7 General** | Cl. 7 (9 sub) | Cl. 8 (10 sub) | Cl. 8 (10 sub) | Cl. 8 (10 sub) | Cl. 7 (11 sub, non-commercial) |
+| **Schedule 1** | Service Requirements | Partnership Details | Capacity + Technical (MW IT) | Scope and Capability Matrix | Joint Activity Plan (optional) |
+| **Page count** | ~4 | ~7-8 | ~6-7 | ~7-8 (once fully wired) | ~4-5 |
+
+**v3.2 commonalities across all 5 types:** library-sourced Recital A; no "DEC Block" in customer-facing text (SS/EP never use); no "minimum 5 years" (indicative language instead); no Unicode arrows in Cl. 4.2 (prose + numbered list); no "(NON-BINDING)" suffix in headings or schedule titles (italic prefatory note instead); single-sentence default closing with linter-checked bespoke override.
 
 ---
 

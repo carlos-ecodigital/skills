@@ -49,9 +49,11 @@ choices:
   existing_nda: false
 
 # --- Programme ---
+# v3.2: recital_a_variant: default | sovereignty | integration | bespoke
 programme:
   platform_mw: "100+"
   site_count: "14"
+  recital_a_variant: "default"
 
 # --- Protection ---
 protection:

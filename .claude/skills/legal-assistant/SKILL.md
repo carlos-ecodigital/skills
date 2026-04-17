@@ -2,22 +2,23 @@
 name: legal-assistant
 description: >-
   DE-specific legal document production framework for Digital Energy's two
-  commercial streams. Colocation Capacity stream: generates End User,
-  Distributor, and Wholesale Letters of Intent (LOI/NCNDA, v3.0) with YAML
-  intake and Python .docx generation. Site Sourcing stream: guides the
-  operator through a 7-phase conversational intake to collect all 48 Annex A
-  fields for a DE Site HoT (grower Heads of Terms, v1.0) and produces the
-  populated Annex A alongside an unmodified locked body. Use when the user
-  says "generate an LOI", "draft an LOI", "create an LOI", "LOI for
-  [company]", "letter of intent for [company]", "LOI NCNDA", "prepare
-  commercial documents", "colocation agreement for", "partnership agreement
-  for", "generate a DE Site HoT", "Site HoT for [grower]", "start HoT
-  intake", "grower HoT", "new grower deal", "populate Annex A", or any
+  commercial streams. Colocation Capacity stream (LOI/NCNDA v3.2): generates
+  five LOI types — End User, Distributor (Mode A/B), Wholesale, Strategic
+  Supplier, and Ecosystem Partnership — with YAML intake, library-sourced
+  Recital A variants, institutional-grade Recital B methodology, and an
+  automated pre-save QA gate. Site Sourcing stream: 7-phase conversational
+  intake for 48 DE Site HoT Annex A fields (v1.0). Use when the user says
+  "generate an LOI", "draft an LOI", "LOI for [company]", "letter of intent
+  for [company]", "LOI NCNDA", "supplier LOI", "ecosystem partnership LOI",
+  "prepare commercial documents", "colocation agreement for", "partnership
+  agreement for", "generate a DE Site HoT", "Site HoT for [grower]", "start
+  HoT intake", "grower HoT", "new grower deal", "populate Annex A", or any
   request to produce a pre-contractual document for a DE colocation
-  customer, channel partner, or greenhouse grower. For M&A, investment, or
-  generic commercial LOIs/HoTs, use legal-counsel instead. For counterparty
-  redlines, negotiation, or legal advisory, use legal-counsel. For
-  CIA-CAP (capital introduction, regulated), use legal-counsel.
+  customer, channel partner, strategic supplier, ecosystem partner, or
+  greenhouse grower. For M&A, investment, or generic commercial LOIs/HoTs,
+  use legal-counsel instead. For counterparty redlines, negotiation, or
+  legal advisory, use legal-counsel. For CIA-CAP (capital introduction,
+  regulated), use legal-counsel.
 allowed-tools:
   - Read
   - Write
@@ -50,8 +51,12 @@ If a request falls outside the templated documents below, or requires legal judg
 
 | Stream | Document | Sub-types | Engine | Intake | Output |
 |---|---|---|---|---|---|
-| Colocation | LOI/NCNDA v3.0 | End User, Distributor (Mode A/B), Wholesale | `colocation/generate_loi.py` (Python, stdlib + python-docx) | YAML | Branded .docx |
+| Colocation | LOI/NCNDA v3.2 | End User (EU), Distributor Mode A/B (DS), Wholesale (WS), Strategic Supplier (SS, v1.0), Ecosystem Partnership (EP, v1.0) | `colocation/generate_loi.py` (Python, stdlib + python-docx) | YAML | Branded .docx + QA report |
 | Site Sourcing | DE Site HoT v1.0 | Grower (single variant) | Pending — see `de-site-hot/templates/README.md` | 7-phase conversational | Populated Annex A .docx + locked body copy |
+
+**v3.2 engine coverage:**
+- Full engine: EU, DS (Mode A / Mode B), WS (Clauses 1–8 + Schedule 1 auto-generated).
+- Partial engine: SS, EP (cover + Recital A + Recital B auto-generated; Clauses 1–8 + Schedule 1 drafted from the markdown template at `colocation/templates/DE-LOI-{SS|EP}-v1.0_TEMPLATE.md`). Full clause builders pending in v3.3 per `CHANGELOG.md`.
 
 ### Engine asymmetry (current state)
 
@@ -72,32 +77,43 @@ Extract: counterparty name, what they do, relationship type, key commercial term
 
 ### Step 2: Classify the LOI Type
 
-Apply the decision tree; tell the user which type was selected and why; confirm before proceeding.
+Apply the 5-type decision tree; tell the user which type was selected and why; confirm before proceeding.
 
 | If the counterparty... | Type |
 |---|---|
-| Buys compute directly for their own use | **End User** |
+| Buys compute directly for their own use | **End User (EU)** |
 | Packages DE capacity with their own services to sell to end users | **Distributor (Mode A)** |
 | Introduces customers to DE but doesn't deliver services | **Distributor (Mode B)** |
-| Buys capacity in bulk to resell to their own customers (neocloud/GPU cloud) | **Wholesale** |
+| Buys capacity in bulk to resell to their own customers (neocloud/GPU cloud) | **Wholesale (WS)** |
+| Supplies equipment, services, or build capability to DE (EPC, modular vendor, key supplier) | **Strategic Supplier (SS)** |
+| Ecosystem / co-positioning relationship with no commercial flow (standards body, university, research consortium) | **Ecosystem Partnership (EP)** |
+
+**If commercial flow contemplated within 12 months:** do not use EP. Use the commercial type that matches the direction of flow.
+**If counterparty is a consortium/federation:** the coordinating entity signs. Follow the consortium guidance in `_shared/counterpart-description-framework.md`.
 
 Full selection logic: `ASSEMBLY_GUIDE.md`.
 
 ### Step 3: Gather Missing Information
 
-Ask for all missing fields in one question, not iteratively. If counterparty is in HubSpot, search to pre-fill.
+Ask for all missing fields in one batched round, not iteratively. Use the **source-capture protocol** from `_shared/counterpart-description-framework.md` (website, HubSpot, ClickUp, LinkedIn, press, Fireflies, KVK/Companies House, deck) to pre-fill where possible. Do not hallucinate — if a pillar cannot be sourced, surface the gap.
 
-**Always required (all types):** Counterparty legal name, short name, address, jurisdiction, registration (KvK/Company No./EIN), contact person name + title, signatory name + title, brief counterparty description (for Recital B).
+**Minimum input floor:** Skill refuses to proceed without at least: counterparty legal name + one description source (any of website / HubSpot / ClickUp / deck / email thread). If below floor → emit specific list of what's missing.
+
+**Always required (all types):** Counterparty legal name, short name, address, jurisdiction, registration (KvK/Company No./EIN), contact person name + title, signatory name + title. Recital B is drafted per the 5-pillar methodology (see `_shared/counterpart-description-framework.md`).
 
 **Type-specific required:**
-- **End User:** Service model (Bare Metal / Shared Cloud / Tokens), indicative capacity, minimum term
-- **Wholesale:** DEC Block count / MW, minimum term, expansion target
-- **Distributor Mode A:** Bespoke Cl. 3 text (write this — see Step 4), territory, target segments, estimated capacity
-- **Distributor Mode B:** Territory, target segments, estimated capacity
+- **End User (EU):** Service model (Bare Metal / Shared Cloud / Tokens), indicative capacity, indicative term
+- **Wholesale (WS):** Indicative MW IT (no DEC Blocks — v3.2), indicative term, expansion target
+- **Distributor Mode A (DS-A):** Bespoke Cl. 3 text (write this — see Step 4), territory, target segments, estimated capacity
+- **Distributor Mode B (DS-B):** Territory, target segments, estimated capacity
+- **Strategic Supplier (SS):** Capability category, core capability, **1–2 strategic purposes** (from: capacity_lock_in, pricing_volume, supply_chain_de_risking, engineering_integration, pipeline_visibility), lead-time target (if capacity_lock_in), volume indicative (if pricing_volume), joint IP allocation (if engineering_integration), geographic coverage
+- **Ecosystem Partnership (EP):** Relationship type (standards_body / university / research_consortium / co_marketing / industry_association / policy_partner), collaboration themes, joint-activity categories (publications / events / pilots / advocacy / working_groups), announcement protocol, logo use
 
-**Choices to confirm:** indicative pricing (default: no, defer to MSA); existing NDA (default: no, embed NCNDA); Wholesale deployment phasing; Distributor exclusivity.
+**Recital A variant (all types):** Select from `default` / `sovereignty` / `integration` / `bespoke`. See `_shared/loi-recital-a-library.md` for which variant fits which counterparty.
 
-If user doesn't know a field, flag [TO BE CONFIRMED] — generation still proceeds.
+**Choices to confirm:** indicative pricing (default: no, defer to MSA); existing NDA (default: no, embed NCNDA); bespoke closing (default: no, use single-sentence default — linter-checked); Wholesale deployment phasing; Distributor exclusivity; SS exclusivity; EP announcement protocol.
+
+If user doesn't know a field, flag [TO BE CONFIRMED] — generation still proceeds. SS/EP intake proceeds to partial document generation (cover + Recitals) pending full clause-builder implementation in v3.3.
 
 ### Step 4: Write Bespoke Text (Distributor Only)
 
@@ -120,21 +136,268 @@ cd /Users/crmg/skills/.claude/skills/legal-assistant/colocation
 python3 generate_loi.py examples/intake.yaml --output /path/to/output.docx
 ```
 
-### Step 7: Quality Check (MANDATORY)
+### Step 7: Quality Check (MANDATORY — automated + manual)
 
-Run all checks from the LOI quality gate before presenting:
+**Automated (v3.2):** The generator runs a pre-save QA linter per `_shared/loi-qa-gate.md` (20 rules, severity `fail` / `warn` / `info`). On `fail`, the build is blocked unless `--override R-xx --override-reason "..."` is supplied. Every build emits `{output}_qa.txt`.
 
-**Completeness:** no unresolved `[PLACEHOLDER]`; counterparty name consistent; LOI type/mode correct; Recital A variant matches type; Recital B accurately describes counterparty; Cl. 3 matches actual relationship; Cl. 5 (Project Finance) present; Cl. 6 uses correct ALT; Cl. 7 (Non-Circumvention) present/absent as expected; signature blocks correct.
+Rules cover: banned tactical metrics in Recital A (R-1, R-2, R-3, R-20); "We are confident that" / duplicated "We look forward" / multi-sentence closings (R-5, R-6, R-9); Unicode arrows (R-7); "(NON-BINDING)" suffix in titles (R-8) and headings (R-19); "DEC Block" in customer-facing clauses (R-4); "Revenue Chain" heading regression (R-10); "minimum commitment term of 5 years" (R-1); ISO certification in Recital B (R-11, warn); salesy adjectives (R-14); formulaic patterns (R-15); Recital B word count (R-12); stacked parentheticals (R-13); deprecated YAML fields (R-18).
 
-**Brand compliance:** no "data center" (use "Digital Energy Center" / "DEC"); no "waste heat" (use "energy recycling"); no "Superpod" (use "DEC Block"); no geography lock in Recital A.
-
-**Legal consistency:** Dutch law, Amsterdam courts, CISG excluded; eIDAS electronic signatures referenced; good faith clause cites Art. 6:248 BW; binding/non-binding status correctly stated; survival periods match defaults (3yr confidentiality, 24mo NC, 10yr PBI).
-
-**Tone:** institutional calm register, no promotional language, first sentences do work, bespoke text reads as written for this partner.
+**Manual review (on top of linter PASS):**
+- **Completeness:** no unresolved `[PLACEHOLDER]` or `[TO BE CONFIRMED]` remaining; counterparty name consistent; LOI type/mode correct; Recital A variant matches counterparty profile per `_shared/loi-recital-a-library.md`; Recital B follows the 5-pillar methodology.
+- **Brand:** no "data center" (use "Digital Energy Center" / "DEC"); no "waste heat" (use "energy recycling"); no geography lock in Recital A.
+- **Legal consistency:** Dutch law, Amsterdam courts, CISG excluded; eIDAS signatures; Art. 6:248 BW good faith; binding/non-binding status correctly stated in Cl. 5.1 only; survival periods match defaults (3yr confidentiality, 24mo NC, 10yr PBI).
+- **Tone:** institutional calm register; first sentences do work; bespoke text reads as written for this partner; no value-prop restatement in closing (if required, companion cover letter via `executive-comms`).
 
 ### Step 8: Present to User
 
 State: LOI type selected and why; output file location; any [TO BE CONFIRMED] fields; any choices made on user's behalf and why. Remind them to review Cl. 3 (commercial terms) and Recital B before sending.
+
+## Phase 0–8 Intake SOP (v3.3)
+
+The v3.3 end-to-end SOP. Use this flow when a colleague triggers the skill conversationally or via `/loi`. Phases 0–8 are the canonical order; each phase has a trigger, an action the skill performs, a prompt template to surface to the user, and a handoff to the next phase.
+
+### Phase 0 — Trigger
+
+**Invocation:**
+- `/loi` (optional arg: counterparty short name), OR
+- Natural language ("Generate an LOI for [Company]", "Draft an LOI for [Company]", "LOI for [Company]").
+
+**Skill action:** Detect counterparty name (if provided), open working memory for this session.
+
+### Phase 1 — Triage (one batched round)
+
+**Skill action:** Ask for the minimum set needed to proceed. Refuse to continue below the minimum-input floor.
+
+**Prompt template:**
+```
+I'll help you draft an LOI for [CounterpartyName]. To produce this fast
+and accurately, I need:
+
+1. Counterparty short name (as used in prose, e.g., "Cudo", "InfraPartners")
+2. Website URL
+3. HubSpot company record ID — or company name to search
+4. ClickUp project / task IDs (if any)
+5. Paths to any of:
+   - Email threads (Gmail search query OK)
+   - Fireflies meeting IDs or transcripts
+   - Press / deck / pitch files
+6. Relationship context:
+   - Who owns this relationship? Why now? What triggered the LOI?
+7. Desired turnaround
+
+If a source doesn't exist, say "none". I will not invent data.
+```
+
+**Minimum-input floor:** counterparty legal name + at least one description source (any of website / HubSpot / ClickUp / deck / email thread). If below floor → list what's missing and stop.
+
+**Handoff to Phase 2** when user responds.
+
+### Phase 2 — Type Classification
+
+**Skill action:** Apply the 5-type decision tree (`ASSEMBLY_GUIDE.md` §1). Return proposed type + one-sentence rationale + red/yellow/green confidence. Ask clarifying question if yellow/red.
+
+**Prompt template (green):**
+```
+Proposed type: **[Type]** (full: [Full Name])
+Rationale: [one sentence — why this type based on counterparty profile]
+Confidence: 🟢 Green
+
+Proceeding to source capture. Say "stop" if you disagree.
+```
+
+**Prompt template (yellow/red):**
+```
+Proposed type: **[Type]** (full: [Full Name])
+Rationale: [one sentence]
+Confidence: 🟡 Yellow | 🔴 Red — [reason, e.g., "counterparty could be distributor or wholesale; the test is whether they add value or resell raw capacity"]
+
+Question to resolve: [one clarifying question]
+```
+
+**Handoff to Phase 3** when classification confirmed.
+
+### Phase 3 — Source Capture (autonomous, parallel)
+
+**Skill action:** Run these in parallel (where tools available):
+- `WebFetch` website (about / products / customers / leadership / news)
+- HubSpot MCP (`search_crm_objects`, `get_crm_objects`) for company + deals + engagement
+- ClickUp MCP (`clickup_search`) for associated tasks/docs
+- `WebFetch` LinkedIn company page
+- `WebSearch` for recent press/funding/customers (last 18 months)
+- `Read` user-provided email / Fireflies / deck paths
+- For NL counterparties: KVK lookup; for UK: Companies House
+
+**Skill action:** Extract structured facts into 5 pillars per `_shared/counterpart-description-framework.md`. Tag each material claim with its source. Surface unresolved gaps.
+
+**Internal scratch format:**
+```
+Pillar 1 (Identity & Scale):
+  - Legal entity: [source]
+  - HQ: [source]
+  - Years operating: [source]
+  - Funding stage: [source]
+
+Pillar 2 (Core business & positioning):
+  - Products: [source]
+  - Customers: [source]
+
+Pillar 3 (Track record & proof points):
+  - Metric X: [source]
+  - Metric Y: [source]
+
+Pillar 4 (Strategic fit with Provider):
+  - [inferred from Phase 1 context]
+
+Pillar 5 (Forward plans):
+  - [only if material to this LOI]
+
+Gaps:
+  - [field X]: could not source; ask user
+```
+
+**Handoff to Phase 4** with gap list.
+
+### Phase 4 — Batched Intake (one round, only for gaps)
+
+**Skill action:** Ask only for fields that Phase 3 did not resolve. Include type-specific required fields from `validate()`. For SS, force 1–2 strategic purpose selection. For DS Mode A and SS, request bespoke Cl. 3 language.
+
+**Prompt template (example for Wholesale):**
+```
+Resolved from sources:
+- Legal entity: Cudo Ventures Ltd (UK Company No. 11065412) [source: Companies House]
+- HQ: London, UK [source: website]
+- Deployed GPUs: 300,000+ globally [source: website, Reuters 2025-11]
+
+Gaps — please provide in one response:
+- **Indicative MW IT**: approximate capacity interest (no DEC Blocks)
+- **Indicative term**: years
+- **Expansion target**: MW IT
+- **Recital A variant**: default | sovereignty | integration — I suggest `default` (wholesale buyer profile); confirm?
+- **Pricing in LOI?** default: no, defer to MSA — confirm?
+- **Existing NDA?** default: no, embed NCNDA — confirm?
+
+Please respond in one message.
+```
+
+**Type-specific prompt additions:**
+- **SS**: strategic_purposes (1–2 from menu); lead_time_target (if capacity_lock_in); volume_indicative (if pricing_volume); joint_ip (if engineering_integration)
+- **EP**: relationship_type; collaboration_themes (list); joint_activity_categories (subset); announcement_protocol; logo_use
+- **DS Mode A**: bespoke Cl. 3.1 Partnership Overview; Cl. 3.2(b) Partner Service Scope
+
+**Handoff to Phase 5** when user responds with values.
+
+### Phase 5 — Recital B Draft
+
+**Skill action:** Apply 5-pillar framework, type-tuned per `_shared/counterpart-description-framework.md`. Produce 3–5 sentence paragraph, 80–150 words. Present draft + source map.
+
+**Prompt template:**
+```
+Recital B draft ([N] words):
+
+> [Counterparty] (the "Customer") is [Pillar 1 — identity & scale]. The
+> Customer [Pillar 2 — business & positioning]. [Pillar 3 — track record
+> & proof points]. [Pillar 4 — strategic fit with Provider]. [Pillar 5
+> — forward plans, if material]
+
+Source map:
+- Pillar 1 (Identity): [source: website /about, Companies House]
+- Pillar 2 (Business): [source: website /products, LinkedIn]
+- Pillar 3 (Track record): [source: website /capacity, press: Reuters 2025-11]
+- Pillar 4 (Strategic fit): [inferred from Phase 1 context]
+- Pillar 5 (Forward plans): [N/A | source: press]
+
+Accept, or request edits?
+```
+
+**Handoff to Phase 6** when user accepts Recital B.
+
+### Phase 6 — Assumption-Confirmation Gate
+
+**Skill action:** Present a single-screen summary of every decision that will go into the .docx. One last chance to catch errors before generation.
+
+**Prompt template:**
+```
+📋 Ready to generate. Final confirmation:
+
+Type: [Type]
+Provider: Digital Energy Netherlands B.V. (Jelmer ten Wolde, CPO)
+Counterparty: [Name], [address], [reg_type]: [reg_number]
+Signatory: [Name], [Title]
+Contact: [Name], [Title]
+
+Recital A variant: [variant]
+Recital B: [first 60 chars...] ([N] words)
+
+Commercial:
+- [type-specific key values]
+
+Choices:
+- pricing: [yes/no]
+- existing_nda: [yes/no]
+- [other choices per type]
+
+Dates:
+- LOI date: [date]
+- Validity: [date]
+
+Output file: YYYYMMDD_DEG_LOI-[Type]_[Company]_(DRAFT).docx
+
+Confirm (yes) or specify changes?
+```
+
+Any `no` → loop back to the relevant phase. `yes` → Phase 7.
+
+### Phase 7 — Generation + QA
+
+**Skill action:** Write YAML to `/tmp/intake_[company]_[timestamp].yaml`. Run `python generate_loi.py intake.yaml --output [path]`. Interpret QA status:
+
+- **PASS** → Phase 8.
+- **PASS_WITH_WARN** → surface warnings; ask user to accept.
+- **FAIL** → surface findings; offer auto-fix (regenerate with different variant or drop offending bespoke) or allow user to `--override R-xx` with reason.
+
+**Prompt template (FAIL):**
+```
+❌ QA FAIL — build blocked.
+
+Findings:
+[FAIL] R-11: ISO certification in Recital B — "ISO 27001"
+  → Suggested fix: remove certification from Recital B, or set choices.cert_relevant=true
+
+Options:
+(1) Apply suggested fix and regenerate
+(2) Override R-11 with reason: __________
+(3) Edit Recital B manually
+```
+
+### Phase 8 — Delivery
+
+**Skill action:** Emit path and next-step menu. Hand off to downstream skills as needed.
+
+**Prompt template (PASS):**
+```
+✅ Generated: [absolute path to .docx]
+    Type: DE-LOI-[Type]-v3.3
+    Recital A variant: [variant]
+    Recital B: [N] words
+    QA: PASS (warnings: [N], failures: 0)
+    QA report: [path to _qa.txt]
+    Remaining [TO BE CONFIRMED]: [list or "none"]
+
+Next step (pick one):
+(1) Open in Word for manual review
+(2) Export to PDF via document-factory pipeline
+(3) Hand off to executive-comms for DocuSign email draft
+(4) Log against HubSpot deal (stage: LOI Sent)
+(5) Done
+```
+
+### Invariants across phases
+
+- **Do not hallucinate.** If a pillar or field can't be sourced, ask the user or flag [TO BE CONFIRMED]. Fabrication is the biggest failure mode.
+- **Source-attribute every material claim** in Recital B. The source map in Phase 5 is not optional.
+- **One batched round per phase.** Do not iterate-ask. Phase 1 is one prompt. Phase 4 is one prompt. Phase 5 presents one draft.
+- **Linter is enforcing, not advisory.** `fail` blocks output. Override requires a recorded reason.
+- **Confirmation gate is non-negotiable.** Phase 6 exists specifically because downstream "just fix it" is worse than a 30-second pre-flight.
 
 ## Site Sourcing Stream Workflow — DE Site HoT
 
@@ -245,7 +508,10 @@ Escalate to the user — tell them to invoke `legal-counsel` — when:
 | Heat supply ΔT minimum | 15 °C (`C.3`) | Site HoT, fixed in template |
 | Heat split | 50:50 | Site HoT, non-standard escalates |
 | Co-investment cap | 50% | Site HoT |
-| Template versions | LOI v3.0 · Site HoT v1.0 | See `ASSEMBLY_GUIDE.md` + `de-site-hot/templates/template-version.md` |
+| Recital A variant | `default` (override per counterparty profile) | `_shared/loi-recital-a-library.md` |
+| Closing line | `We look forward to working with you.` (single sentence) | Linter-checked R-5/R-6/R-9; bespoke replaces default entirely |
+| Schedule title suffix | No `(NON-BINDING)` (v3.2) | Italic prefatory note instead |
+| Template versions | LOI v3.2 (EU/DS/WS) · SS v1.0 · EP v1.0 · Site HoT v1.0 | See `ASSEMBLY_GUIDE.md` + `CHANGELOG.md` + `de-site-hot/templates/template-version.md` |
 
 **Policy SSOT:** `_shared/nda-policy-positions.md` — single source of truth for NDA/NCNDA commercial positions (duration, scope, carve-outs, penalty). Referenced by `ASSEMBLY_GUIDE.md` Red-Line Protocol and by `legal-counsel`'s contract-review workflow.
 
@@ -272,6 +538,9 @@ Manual LOI templates (for non-technical users):
 - `grower-relationship-mgr` — post-HoT lifecycle (heat offtake coordination, SDE++, expectations).
 - `document-factory` — brand rendering engine for LOI covers/headers/footers. **Not** used for Site HoT.
 - `_shared/nda-policy-positions.md` — shared policy layer, read by both this skill and `legal-counsel`.
+- `_shared/loi-recital-a-library.md` — 3 canonical Recital A variants + bespoke (MPN v3.2-aligned). Single source of truth for Recital A.
+- `_shared/counterpart-description-framework.md` — 5-pillar Recital B methodology, source-capture protocol, consortium/federation guidance, per-type tuning, anti-patterns, worked examples.
+- `_shared/loi-qa-gate.md` — pre-save linter rule catalogue (20 rules), severity levels, override mechanism.
 
 ## Naming Conventions
 

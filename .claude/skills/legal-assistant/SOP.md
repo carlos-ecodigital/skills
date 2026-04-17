@@ -1,105 +1,163 @@
 # How to Request a DE Legal Document
 
-> **Previously `loi-generator`.** The skill was renamed `legal-assistant` on 2026-04-13 because it now covers both commercial streams (colocation LOIs + grower Site HoTs), not just LOIs. If you've been using `/loi-generator`, use `/legal-assistant` instead.
+> **Previously `loi-generator`.** Renamed `legal-assistant` on 2026-04-13. If you've been using `/loi-generator`, use `/legal-assistant` or `/loi` instead.
 
 ## What is this?
 
 Digital Energy has two streams of pre-contractual documents. `legal-assistant` produces both:
 
-- **Colocation LOIs** — End User, Distributor (Mode A/B), Wholesale. v3.0. YAML → branded .docx.
-- **DE Site HoTs** — grower Heads of Terms (Annex A). v1.0. Conversational 7-phase intake → populated Annex A + locked body copy.
+- **Colocation LOIs** — 5 types: End User, Distributor (Mode A/B), Wholesale, Strategic Supplier, Ecosystem Partnership. v3.2 (v1.0 for SS/EP). YAML → branded .docx + pre-save QA report.
+- **DE Site HoTs** — grower Heads of Terms (Annex A). v1.0. Conversational 7-phase intake.
 
-You provide the brief. Claude gathers missing info, generates the document, runs a quality check, and outputs files for your review.
+You provide the brief. Claude gathers context from your existing systems (HubSpot, ClickUp, website, press, email), asks for gaps in one batched round, drafts Recital B for your review, generates the document, runs a QA linter, and hands off.
 
 **For anything else — M&A LOIs, investment term sheets, counterparty redlines, legal advisory, CIA-CAP (capital introduction) — use `legal-counsel` instead.**
 
-## Requesting an LOI (Colocation)
+---
 
-### Step 1: Tell Claude what you need
+## Requesting a Colocation LOI (v3.3 flow)
 
-> "Generate an LOI for [Company]. They are [what they do]. They want [what they want from DE]."
+### Step 1 — Invoke
 
-Examples:
-- "Generate an LOI for Lambda. GPU cloud provider, 10 MW of colocation capacity."
-- "Generate an LOI for TechForce Solutions. SI wanting to integrate their managed services with our DEC platform."
-- "Generate an LOI for Meridian AI. Small startup, bare metal colocation for training."
-- "Generate an LOI for Nordic Advisors. They'll refer enterprise customers — referral arrangement."
+Either:
+- `/loi [CompanyName]` (recommended — slash command, pre-fills name), OR
+- Natural language: "Generate an LOI for [Company]", "Draft LOI for [Company]", etc.
 
-More detail = better output. Include capacity, territory, timeline, pricing if known.
+### Step 2 — Answer triage questions (one batched round)
 
-### Step 2: Answer Claude's questions
+Claude asks for:
+1. Counterparty short name
+2. Website URL
+3. HubSpot company record ID (or name to search)
+4. ClickUp project / task IDs (if any)
+5. Paths to relevant email threads / Fireflies meetings / decks / press
+6. Relationship context: who owns it, why now, what triggered the LOI
+7. Desired turnaround
 
-Claude asks for missing info in one batch, not iteratively: counterparty details (legal name, address, registration), contact person and signatory, commercial specifics. If you don't know, say so — Claude flags as `[TO BE CONFIRMED]` and still generates.
+**Minimum input floor:** counterparty legal name + **at least one** description source (website, HubSpot, ClickUp, deck, or email thread). Below the floor, Claude won't proceed — it will list what's missing.
 
-### Step 3: Review the output
+**Be honest about what you have.** If no website, say "no website". Claude will not invent data.
 
-Claude produces a .docx. **Review before sending.** Check:
-1. **Recital B** — counterparty description sounds right?
-2. **Clause 3** — commercial terms match what was discussed?
-3. **Signature block** — correct names and titles?
-4. **`[TO BE CONFIRMED]` fields** — fill before sending.
+### Step 3 — Confirm the type
 
-### Step 4: Send
+Claude applies the 5-type decision tree and proposes one:
 
-- Export to PDF if needed.
-- DocuSign or email for wet signature.
-- After signing, rename: `YYYYMMDD_DEG_LOI-{Type}_{Company}_(SIGNED).pdf`.
-- Attach to HubSpot deal.
-
-### Which LOI type?
-
-| If the counterparty... | Type |
+| Counterparty | Type |
 |---|---|
-| Buys compute for their own use (enterprise, AI lab, startup) | **End User** |
-| Packages DE capacity with their services to sell to others (SI, MSP, platform) | **Distributor** |
-| Just introduces customers, doesn't deliver services | **Distributor (Referral / Mode B)** |
-| Buys bulk capacity to resell (neocloud, GPU cloud) | **Wholesale** |
+| Buys compute for own use (enterprise, AI lab, startup) | **End User (EU)** |
+| Packages DE capacity with their own services (SI, MSP, platform) | **Distributor (DS)** — Mode A or B |
+| Buys bulk capacity to resell (neocloud, GPU cloud) | **Wholesale (WS)** |
+| Supplies equipment / services / build capability to DE (EPC, modular vendor) | **Strategic Supplier (SS)** |
+| Co-positioning / no commercial flow (standards body, university, research consortium) | **Ecosystem Partnership (EP)** |
 
-You don't specify the type — Claude figures it out from your description and confirms with you before generating.
+Green confidence → Claude proceeds. Yellow/red → Claude asks one clarifying question first.
+
+### Step 4 — Let Claude do source capture
+
+Claude fetches your website, HubSpot company + deals + engagement, ClickUp tasks, LinkedIn, recent press (18 months), KVK/Companies House, plus any files you named.
+
+You do nothing in this phase. Wait.
+
+### Step 5 — Answer gap questions (one batched round)
+
+Claude returns a list of facts it sourced, and a list of gaps it needs you to fill. Answer all in one message. Common gaps:
+- Exact legal entity form (B.V. / LLC / GmbH / etc.)
+- Signatory name and title
+- Indicative capacity (MW IT — no DEC Blocks)
+- Indicative term (years; "indicative only", no "minimum")
+- Recital A variant (default / sovereignty / integration) — Claude suggests one; confirm
+- Pricing in LOI? (default: no — deferred to MSA)
+- Existing NDA? (default: no — embed NCNDA)
+- **For Strategic Supplier**: 1–2 strategic purposes (capacity lock-in, pricing/volume, supply-chain de-risking, engineering integration, pipeline visibility), plus purpose-specific fields (lead-time target, volume, joint IP)
+- **For Ecosystem Partnership**: relationship type, collaboration themes, joint activity categories, announcement protocol, logo use
+
+### Step 6 — Review Recital B draft
+
+Claude presents a 3–5 sentence counterparty description (Recital B) with a source map showing which pillar each claim came from. Accept or request specific edits. The 5 pillars: Identity & Scale → Core business → Track record & proof points → Strategic fit → Forward plans (optional).
+
+### Step 7 — Confirm the pre-flight summary
+
+Claude presents a single-screen summary of every value that will go into the document. Confirm or request changes. This is your last chance to catch errors before generation.
+
+### Step 8 — Receive the output
+
+You get:
+- `.docx` at `YYYYMMDD_DEG_LOI-{Type}_{Company}_(DRAFT).docx`
+- `.docx_qa.txt` QA report (PASS / PASS_WITH_WARN / FAIL with details)
+
+**If QA FAIL**, Claude surfaces the specific rules that tripped and offers auto-fix, override, or manual edit. Do not push through without fixing — the rules exist because previous LOIs had those problems.
+
+### Step 9 — Next-step menu
+
+Claude offers: open in Word / export to PDF / draft DocuSign email via `executive-comms` / log in HubSpot / done.
+
+After signing: rename `_(DRAFT).docx` → `_(SIGNED).pdf`, attach to HubSpot deal, update stage to "LOI Signed".
+
+---
+
+## What Claude will NOT do
+
+- Invent data. If a fact isn't sourced, Claude either asks or flags `[TO BE CONFIRMED]`.
+- Negotiate or redline. If the counterparty returns redlines, stop and invoke `legal-counsel`.
+- Send anything. Human reviews and sends.
+- Modify the Site HoT body. Body is locked at v1.0.
+- Produce MSAs, Sales Order Forms, SLAs, post-LOI documents. Separate workstreams.
+- Put value-prop language in the closing. Closing is hardcoded "We look forward to working with you." If you need value-prop / near-signature content, ask for a companion cover letter via `executive-comms`.
+
+---
 
 ## Requesting a DE Site HoT (Site Sourcing)
 
-### Step 1: Start the intake
+### Step 1 — Start the intake
 
 > "Start a DE Site HoT intake for [Grower]. They're a [crop] grower in [location], currently [size] ha, [expansion plans]."
 
-Examples:
-- "Start a DE Site HoT for Moerman Paprika B.V. Paprika grower in Westland, 6 ha, looking to expand to 10 ha."
-- "Generate a Site HoT for Kwekerij Van Dijk. Tomato grower, De Lier, 8 ha."
+### Step 2 — Answer the 7-phase intake
 
-### Step 2: Answer the 7-phase intake
-
-Claude walks through 7 conversational phases covering 48 Annex A fields. Each phase is a small batch of questions, not a giant form:
+Claude walks through 7 conversational phases covering 48 Annex A fields. Each phase is a small batch, not a giant form.
 
 1. **Identification** — legal name, KVK, address, project name. Bring: KVK uittreksel.
 2. **Signatory & Greenhouse** — signer + authority (solo vs joint), greenhouse location, size, crops.
 3. **Electrical Connection** — DSO, EAN, ATO ref, three-tier capacities. Bring: ATO document.
 4. **Heat Supply** — outlet / return temps, price per MWh, EB calculation.
-5. **Land & Property** — Kadaster refs, title type, encumbrances, opstalrecht term. Bring: Kadaster uittreksel, bestemmingsplan. If grower isn't landowner or land is mortgaged, additional parties + consent letters.
+5. **Land & Property** — Kadaster refs, title type, encumbrances, opstalrecht term. Bring: Kadaster uittreksel, bestemmingsplan. If grower ≠ landowner or land is mortgaged, additional parties + consent letters.
 6. **Commercial Terms** — heat split (standard 50:50), payment term, effective date.
 7. **Optional Provisions + Notices** — CHP lease, co-investment, contact emails.
 
-Some conditions escalate automatically (non-standard heat split → Carlos; co-investment → Jelmer; grower ≠ landowner with no consent → Carlos + legal-counsel).
+Escalations are automatic (non-standard heat split → Carlos; co-investment → Jelmer; grower ≠ landowner with no consent → Carlos + legal-counsel).
 
-### Step 3: Confirm the summary
+### Step 3 — Confirm the summary
 
-Claude presents a full summary table before generating. Check everything. Ask for changes before generation.
+Claude presents a full summary table before generating. Check everything. Ask for changes.
 
-### Step 4: Review the output
+### Step 4 — Review the output
 
-Claude writes everything to the SSOT at `contracts/hots/active/{grower-slug}/`:
-- `annex-a-data.json` — all the structured field data
-- `DE-Site-HoT_Annex_A_{Company}.docx` — populated Annex A (NOTE: currently pending — see caveat below)
-- `DE-Site-HoT_Body_{Company}.docx` — the locked bilingual body, copied unmodified
-- `intake-log.md` — the full Q&A transcript
+Claude writes to the SSOT at `contracts/hots/active/{grower-slug}/`:
+- `annex-a-data.json` — structured field data
+- `DE-Site-HoT_Annex_A_{Company}.docx` — populated Annex A (currently pending LFS fetch — see caveat)
+- `DE-Site-HoT_Body_{Company}.docx` — locked bilingual body copy (also LFS-pending)
+- `intake-log.md` — Q&A transcript
 - `status.md` — draft status + escalations + missing docs + next step
 
 Carlos (or legal-counsel for legal questions) reviews before sending to the grower.
 
-### Current caveat (2026-04-13)
+### Current caveat
 
-The Site HoT `.docx` form-fill engine is pending a Git LFS fetch of the template binaries. Until it ships, the intake runs to completion and writes `annex-a-data.json`, but the Annex A docx step writes a placeholder marker file instead of a populated document. This is flagged in the completion report. Body copy is also pending an LFS fetch. See `de-site-hot/templates/README.md` for fetch instructions.
+The Site HoT `.docx` form-fill engine (`generate_site_hot.py`) is pending a Git LFS fetch of the template binaries. Until it ships, the intake runs to completion and writes `annex-a-data.json`, but the Annex A docx step writes a placeholder marker file. Body copy is also pending LFS. See `de-site-hot/templates/README.md`.
+
+---
 
 ## Questions?
 
-Ask Carlos or Jelmer. Full technical documentation in the `legal-assistant` skill directory (`ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, `field-registry.json`).
+Ask Carlos or Jelmer. Full technical documentation in the `legal-assistant` skill directory (`SKILL.md`, `ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, `CHANGELOG.md`, `_shared/loi-recital-a-library.md`, `_shared/counterpart-description-framework.md`, `_shared/loi-qa-gate.md`).
+
+## Naming conventions (preserved)
+
+| Document | Pattern |
+|---|---|
+| LOI (draft) | `YYYYMMDD_DEG_LOI-{Type}_{Company}_(DRAFT).docx` |
+| LOI (signed) | `YYYYMMDD_DEG_LOI-{Type}_{Company}_(SIGNED).pdf` |
+| Site HoT Annex A | `DE-Site-HoT_Annex_A_{Company}.docx` |
+| Site HoT Body | `DE-Site-HoT_Body_{Company}.docx` |
+
+Status values: `DRAFT` → `SENT` → `SIGNED` → `LAPSED` → `SUPERSEDED`.

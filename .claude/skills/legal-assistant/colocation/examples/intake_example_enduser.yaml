@@ -32,7 +32,7 @@ counterparty:
 commercial:
   service_type:
     - bare_metal
-  indicative_capacity: "120 kW (1 partial DEC Block)"
+  indicative_capacity: "approximately 120 kW IT"
   min_term: "12 months"
 
 # --- Choices ---
@@ -41,9 +41,12 @@ choices:
   existing_nda: false
 
 # --- Programme ---
+# v3.2: Recital A is library-sourced. recital_a_variant: default | sovereignty |
+# integration | bespoke. See _shared/loi-recital-a-library.md.
 programme:
   platform_mw: "100+"
   site_count: "14"
+  recital_a_variant: "sovereignty"
 
 # --- Protection ---
 protection:
