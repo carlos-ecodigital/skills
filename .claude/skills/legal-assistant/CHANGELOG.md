@@ -5,6 +5,20 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5 (consolidated release) — 2026-04-17
+
+Consolidation of v3.5.1 + v3.5.2 + v3.5.3 + v3.5.4 into a single shippable release, plus polish items knocked out during consolidation. See per-version entries below for full scope detail; summary of v3.5 polish additions:
+
+### v3.5 polish (added during consolidation)
+- **SKILL.md Phase 7.5 → callee link** — Phase 7.5 section now explicitly points at `legal-counsel/specializations/contract-review/loi-review-workflow.md` (the Scope C callee file) so a reader of the SKILL.md Phase 7.5 section immediately knows which workflow file to load.
+- **`self.provider_term`** now derives from `data["provider"]["short_name"]` with `"Digital Energy"` fallback. Was hardcoded to `"Digital Energy"`. Preserves brand when AG signs (short_name still "Digital Energy") and supports future subsidiary/JV instruments without another body-wide rename.
+- **`validate()` fails fast on unknown `provider.entity` key** — e.g. `entity: "de_nnl"` (typo) now prints `ERROR: provider.entity 'de_nnl' not found in config/entities.yaml. Available keys: de_ag, de_nl` and exits 1 before rendering. Previously fell through silently to backward-compat path and the user only noticed at document-render time.
+- **CI workflow** — `.github/workflows/legal-assistant-tests.yml` gates PRs on pytest (88 → 90 tests). Triggers on any PR touching `legal-assistant/**` or `_shared/counterpart-description-framework.md` or `_shared/loi-*.md` or `document-factory/generate.py`. Runs full test suite + smokes all 6 intake examples + all 3 regression fixtures.
+- **`docs/jonathan-memo-v3.5-delivery-map.md`** — closes the loop on Jonathan's 2026-04-17 memo with a table mapping each J-item (E1-E7 + W1-W8 + J17-J19) to the specific v3.5.x delivery commit / PR / scope.
+- **Test harness additions** — 2 new tests (v3.5 polish section in `test_v3_5_2.py`): provider_term derives from short_name; provider_term fallback when short_name missing. **Total: 90 tests, all passing.**
+
+---
+
 ## v3.5.4 — 2026-04-17
 
 Regression-regen anchor. Ships a reproducible Wholesale-type regression fixture for the Polarise use case that triggered the whole v3.5.x cycle, so any future v3.5.x change can be regressed against the known-good baseline. Sibling-docs-sync (Scope B) and full consolidated CHANGELOG (Scope M extension) deferred to a dedicated session — better to ship the regression anchor now than hold it behind docs.

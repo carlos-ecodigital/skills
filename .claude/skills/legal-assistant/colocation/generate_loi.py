@@ -162,6 +162,25 @@ def load_intake(path: str) -> dict:
     # v3.5.2 scope Q: expand provider.entity references BEFORE validation so
     # downstream validators see the fully-populated provider record.
     register = load_entities_register()
+
+    # v3.5 polish: fail fast on unknown `provider.entity` keys. Without this
+    # check, typos like `entity: "de_nnl"` would silently fall through to
+    # the backward-compat path (treating the YAML's explicit fields as
+    # ground truth) and the user would only notice at document-render time.
+    prov = data.get("provider", {}) or {}
+    entity_key = prov.get("entity")
+    if entity_key:
+        entities = register.get("entities", {}) or {}
+        if entity_key not in entities:
+            available = sorted(entities.keys())
+            print(
+                f"ERROR: provider.entity '{entity_key}' not found in "
+                f"config/entities.yaml. Available keys: "
+                f"{', '.join(available) if available else '(none — register missing or empty)'}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
     data = expand_provider_from_register(data, register)
     validate(data)
     return data
@@ -392,11 +411,17 @@ class LOI:
             "EndUser": "Customer",
         }
         self.party = party_by_type.get(self.t, "Customer")
-        # v3.5.2 (brand-name defined term): provider is defined as
-        # "Digital Energy" throughout the body, not "Digital Energy". Every
-        # clause that previously used `{self.party}` alongside "Digital Energy"
-        # now uses "Digital Energy" on the provider side.
-        self.provider_term = "Digital Energy"
+        # v3.5.2 (brand-name defined term): provider is defined by its
+        # short name throughout the body. The v3.5.2 brand rename replaced
+        # every prior "the Provider" reference with "Digital Energy".
+        #
+        # v3.5 polish: derive from `provider.short_name` with "Digital Energy"
+        # fallback — preserves brand when AG signs (short_name still
+        # "Digital Energy") while supporting future subsidiary/JV instruments
+        # with different short names without another body-wide rename.
+        self.provider_term = (
+            data.get("provider", {}).get("short_name") or "Digital Energy"
+        )
         # QA linter accumulators (populated during build)
         self.overrides = set(self.d.get("_overrides", []))
         self.override_reason = self.d.get("_override_reason", "")

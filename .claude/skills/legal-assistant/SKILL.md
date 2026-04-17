@@ -379,6 +379,8 @@ Options:
 
 **Skill action:** Invoke `legal-counsel` skill with a structured 4-point review question set. The skill passes the .docx, the intake YAML, the QA report, and the `counterparty.source_map`.
 
+**Callee workflow file (v3.5.2 Scope C):** `legal-counsel/specializations/contract-review/loi-review-workflow.md`. This file is the canonical target — load it in-context and follow its 4-phase structure. Returns strict `PASS` / `FLAG-FOR-REVISION` / `REJECT` envelopes that this skill parses deterministically.
+
 **The 4 review questions:**
 
 1. **Clause-type appropriateness** — Does each clause make sense for this counterparty type? (e.g., SS Cl. 5 must be "Supply Chain and Delivery Commitment", not revenue-bankability; EP must have no Cl. 5 Project Finance or Cl. 7 NC; customer-facing types must have revenue-counterparty Cl. 5.)

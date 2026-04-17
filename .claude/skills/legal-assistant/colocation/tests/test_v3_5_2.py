@@ -276,3 +276,35 @@ class TestV351InvariantsStillHold:
     def test_derive_footer_entity_still_maps_bv_to_nl(self):
         assert DocBuilder._derive_footer_entity("Digital Energy Netherlands B.V.") == "nl"
         assert DocBuilder._derive_footer_entity("Digital Energy Group AG") == "ag"
+
+
+# -----------------------------------------------------------------------------
+# v3.5 polish — provider_term from short_name + entity-key validation
+# -----------------------------------------------------------------------------
+
+class TestV35Polish:
+    """Polish items added during v3.5 consolidation."""
+
+    def test_provider_term_derives_from_short_name(self):
+        """v3.5 polish: provider_term should come from provider.short_name
+        with fallback to "Digital Energy" for backward compat."""
+        data = {
+            "type": "Wholesale",
+            "provider": {"short_name": "Custom Brand"},
+            "counterparty": {"name": "X", "short": "X", "description": "x"},
+            "programme": {}, "dates": {"loi_date": "1 Jan 2026"},
+            "commercial": {"indicative_mw": "1"},
+        }
+        builder = DocBuilder(data)
+        assert builder.provider_term == "Custom Brand"
+
+    def test_provider_term_fallback_when_short_name_missing(self):
+        data = {
+            "type": "Wholesale",
+            "provider": {"legal_name": "Some Corp"},   # no short_name
+            "counterparty": {"name": "X", "short": "X", "description": "x"},
+            "programme": {}, "dates": {"loi_date": "1 Jan 2026"},
+            "commercial": {"indicative_mw": "1"},
+        }
+        builder = DocBuilder(data)
+        assert builder.provider_term == "Digital Energy"
