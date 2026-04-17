@@ -13,26 +13,27 @@ v3.5.1 + v3.5.2 + v3.5.3 closed 20+ field-surfaced gaps. Before the next real LO
 
 ## Files
 
-| File | Type | Counterparty | v3.4 correction context |
+| File | Type | Counterparty | Tier-1 verification status |
 |---|---|---|---|
-| `polarise_wholesale_intake.yaml` | Wholesale | Polarise GmbH | Jonathan's actual LOI; `schedule_1.technical.gpu_platform: "NVIDIA GB200 NVL72"` is the regression smoke for v3.5.1 Scope N-subset; Recital B applies Signal Test with SWI Stoneweg Icona + Macquarie as named endorsers (not vanity-financial) |
+| `polarise_wholesale_intake.yaml` | Wholesale | Polarise GmbH | Agent-reported facts (polarise.com JS-gated at research time); source_map pillars all `[TBC]` pending direct WebFetch-verified re-source in v3.5.5 |
+| `cudo_wholesale_intake.yaml` | Wholesale | Cudo Compute Limited | Tier-1 verified via `cudocompute.com/about` (HQ, NVIDIA Preferred Partner status, NVIDIA-certified engineers, Supermicro/Dell/Lenovo/HPE/NetApp/Red Hat partners, Conapto deployment) |
+| `sag_distributor_intake.yaml` | Distributor Mode B | Man of Solutions B.V. (Sovereign AI Grid) | Tier-1 verified via `sovereignaigrid.nl` (Amstelveen HQ, consortium coordination role, EuroHPC JU, named member institutions, Nick Aldewereld Lead Coordinator). **v3.4-corrected language applied** — NO "centrale knooppunt" (v3.3 fabrication) |
 
 ## Regenerating
 
 ```bash
 cd /path/to/skills/.claude/skills/legal-assistant/colocation
 python3 generate_loi.py regression/v3.5/polarise_wholesale_intake.yaml
+python3 generate_loi.py regression/v3.5/cudo_wholesale_intake.yaml
+python3 generate_loi.py regression/v3.5/sag_distributor_intake.yaml
 ```
 
-Expected: QA PASS, 0 failures. Inspect rendered .docx to confirm the Parties Preamble, Recital B signal quality, Schedule 1 GPU platform, brand rename, sig block, footer are all correct.
+Expected for each: QA PASS, 0 failures. Inspect rendered .docx to confirm the Parties Preamble, Recital B signal quality, Schedule 1 GPU platform, brand rename, sig block, footer are all correct.
 
 ## Not included
 
-- Cudo Compute (Wholesale) — deferred; tier-1 source verification required before fixture
-- Sovereign AI Grid / Man of Solutions B.V. (Distributor Mode B) — deferred; KVK lookup + v3.4 corrected language require session time
-- InfraPartners LLC (Strategic Supplier) — deferred; tier-1 verification of Nscale / Caddis partnerships required
-
-These three will be added in subsequent v3.5.4 commits or v3.5.5 as a dedicated regression-completion scope.
+- **InfraPartners LLC (Strategic Supplier)** — deferred; tier-1 verification of Nscale / Caddis partnerships required before fixture. Will be added in v3.5.5.
+- **Direct re-fetch of Polarise tier-1 sources** — the polarise.com site was JS-gated at fixture-creation time; source_map pillars currently `[TBC]` pending retry (v3.5.5).
 
 ## Non-goals
 
