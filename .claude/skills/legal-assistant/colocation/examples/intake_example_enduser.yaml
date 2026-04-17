@@ -7,11 +7,11 @@ type: EndUser
 provider:
   legal_name: "Digital Energy Netherlands B.V."
   short_name: "Digital Energy"
-  address: "Baarerstrasse 43, 6300 Zug, Switzerland"
-  kvk: "XXXXXXXX"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  kvk: "98580086"
   parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Jelmer ten Wolde"
-  signatory_title: "Chief Platform Officer"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
 
 # --- Counterparty ---
 counterparty:

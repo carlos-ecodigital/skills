@@ -76,9 +76,112 @@ GREY = SLATE
 # YAML Loading + Validation
 # ---------------------------------------------------------------------------
 
+def load_entities_register() -> dict:
+    """Load the entities register from `config/entities.yaml`.
+
+    v3.5.2 scope Q: single source of truth for DE's legal entities. Returns
+    empty dict if register file is absent (backward-compat — intake YAMLs
+    can still use explicit `provider.legal_name`, `address`, `kvk` fields).
+    """
+    here = os.path.dirname(os.path.abspath(__file__))
+    register_path = os.path.join(here, "..", "config", "entities.yaml")
+    if not os.path.exists(register_path):
+        return {}
+    try:
+        with open(register_path, "r") as f:
+            return yaml.safe_load(f) or {}
+    except Exception:
+        return {}
+
+
+def expand_provider_from_register(data: dict, register: dict) -> dict:
+    """Expand `provider.entity: "de_nl"` references into full provider record.
+
+    v3.5.2 scope Q. Behaviour:
+      - If `provider.entity` is set and register has the key, expand it.
+        Any fields explicitly set on the intake YAML itself (e.g. signatory
+        overrides) take precedence over the register defaults.
+      - If `provider.entity` is not set, the provider dict is returned
+        unchanged (backward-compat with v3.5.1 and earlier).
+      - `signatory_mode` on the intake YAML selects the default signatory
+        variant from the register (pre_msa / post_msa for NL BV; ceo for AG).
+
+    Mutates and returns `data`.
+    """
+    prov = data.get("provider", {})
+    entity_key = prov.get("entity")
+    if not entity_key:
+        return data
+    entities = register.get("entities", {})
+    entity = entities.get(entity_key)
+    if not entity:
+        return data
+
+    # Build the expanded provider record. Explicit intake values WIN over
+    # register defaults — this lets intake YAMLs override signatory per-deal
+    # without touching the register.
+    expanded = {
+        "legal_name": entity.get("legal_name", ""),
+        "short_name": entity.get("short_name", ""),
+        "abbreviation": entity.get("abbreviation", ""),
+        "legal_form": entity.get("legal_form", ""),
+        "jurisdiction": entity.get("jurisdiction", ""),
+        "address": entity.get("address", ""),
+        "reg_type": entity.get("reg_type", ""),
+        "reg_number": entity.get("reg_number", ""),
+        "rsin": entity.get("rsin", ""),
+        "parent": entity.get("parent"),
+    }
+    # Pick signatory based on signatory_mode
+    mode = prov.get("signatory_mode", "pre_msa")
+    sig = None
+    if mode == "pre_msa" and "default_signatory_pre_msa" in entity:
+        sig = entity["default_signatory_pre_msa"]
+    elif mode == "post_msa" and "default_signatory_post_msa" in entity:
+        sig = entity["default_signatory_post_msa"]
+    elif "default_signatory" in entity:
+        sig = entity["default_signatory"]
+    if sig:
+        expanded["signatory_name"] = sig.get("name", "")
+        expanded["signatory_title"] = sig.get("title", "")
+
+    # Apply explicit intake overrides (intake wins)
+    for k, v in prov.items():
+        if k in ("entity", "signatory_mode"):
+            continue
+        if v:
+            expanded[k] = v
+
+    data["provider"] = expanded
+    return data
+
+
 def load_intake(path: str) -> dict:
     with open(path, "r") as f:
         data = yaml.safe_load(f)
+    # v3.5.2 scope Q: expand provider.entity references BEFORE validation so
+    # downstream validators see the fully-populated provider record.
+    register = load_entities_register()
+
+    # v3.5 polish: fail fast on unknown `provider.entity` keys. Without this
+    # check, typos like `entity: "de_nnl"` would silently fall through to
+    # the backward-compat path (treating the YAML's explicit fields as
+    # ground truth) and the user would only notice at document-render time.
+    prov = data.get("provider", {}) or {}
+    entity_key = prov.get("entity")
+    if entity_key:
+        entities = register.get("entities", {}) or {}
+        if entity_key not in entities:
+            available = sorted(entities.keys())
+            print(
+                f"ERROR: provider.entity '{entity_key}' not found in "
+                f"config/entities.yaml. Available keys: "
+                f"{', '.join(available) if available else '(none — register missing or empty)'}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+    data = expand_provider_from_register(data, register)
     validate(data)
     return data
 
@@ -202,40 +305,44 @@ def validate(d: dict):
 # (v3.3 only had tails for DS/SS/EP; EU/WS were empty strings).
 
 RECITAL_A_BODY = (
-    '{prov} (the "Provider") develops and operates Digital Energy Centers '
+    # v3.5.2 brand-name rename: defined term "Digital Energy" is established
+    # in the Parties Preamble; Recital A uses it directly (no "(the "Provider")"
+    # parenthetical). Any reference to "Digital Energy" in the body has been
+    # replaced with "Digital Energy".
+    '{prov} develops and operates Digital Energy Centers '
     '("DECs"), distributed energy hubs for liquid-cooled AI colocation, '
     "integrating accelerated compute with heat recycling and behind-the-meter "
-    "(BTM) power production, engineered as one integrated system. The Provider "
+    "(BTM) power production, engineered as one integrated system. Digital Energy "
     "is building an integrated sovereign AI infrastructure platform for "
     "enterprise and institutional customers, designed for edge inference."
 )
 
 # Per-type tail appended to the shared body. Customer-facing types (EU, WS)
-# use "The Provider's integrated platform [verb]" subject (procurement pattern);
-# relationship-facing types (DS, SS, EP) use "The Provider [verb]" subject.
+# use "Digital Energy's integrated platform [verb]" subject (procurement pattern);
+# relationship-facing types (DS, SS, EP) use "Digital Energy [verb]" subject.
 RECITAL_A_TAIL_BY_TYPE = {
     "EndUser": (
-        " The Provider's integrated platform supplies dedicated AI inference "
+        " Digital Energy's integrated platform supplies dedicated AI inference "
         "capacity to enterprises, AI labs, and research institutions requiring "
         "sovereign, high-density and low-latency infrastructure on European soil."
     ),
     "Distributor": (
-        " The Provider seeks qualified channel and integration partners to "
+        " Digital Energy seeks qualified channel and integration partners to "
         "extend its platform reach to end-user segments where the Partner "
         "holds established customer relationships and domain expertise."
     ),
     "Wholesale": (
-        " The Provider's integrated platform contracts liquid-cooled AI "
+        " Digital Energy's integrated platform contracts liquid-cooled AI "
         "colocation capacity at megawatt scale to NeoCloud operators and "
         "GPU cloud providers internationally."
     ),
     "StrategicSupplier": (
-        " The Provider seeks qualified EPC contractors, modular infrastructure "
+        " Digital Energy seeks qualified EPC contractors, modular infrastructure "
         "manufacturers, and OEM vendors to deliver the DEC platform and secure "
         "supply continuity across its active development pipeline."
     ),
     "EcosystemPartnership": (
-        " The Provider engages with ecosystem partners on sovereign AI "
+        " Digital Energy engages with ecosystem partners on sovereign AI "
         "infrastructure, sustainable datacentre design, and European "
         "industrial policy alignment."
     ),
@@ -298,12 +405,16 @@ class LOI:
         self._setup()
         party_by_type = {
             "Distributor": "Partner",
-            "StrategicSupplier": "Partner",
+            "StrategicSupplier": "Supplier",
             "EcosystemPartnership": "Partner",
             "Wholesale": "Customer",
             "EndUser": "Customer",
         }
         self.party = party_by_type.get(self.t, "Customer")
+        # v3.5.2 (brand-name defined term): provider is defined by its
+        # short name throughout the body. The v3.5.2 brand rename replaced
+        # every prior "the Provider" reference with "Digital Energy".
+        self.provider_term = self._derive_provider_term(data)
         # QA linter accumulators (populated during build)
         self.overrides = set(self.d.get("_overrides", []))
         self.override_reason = self.d.get("_override_reason", "")
@@ -315,6 +426,15 @@ class LOI:
         style.font.size = FONT_BODY
         style.paragraph_format.space_after = Pt(3)
         style.paragraph_format.line_spacing = LINE_SPACING
+        # v3.5 scope A'''': derive footer entity from provider.legal_name so
+        # BV-signed instruments render "Digital Energy Netherlands B.V."
+        # footer and AG-signed instruments render "Digital Energy Group AG"
+        # footer. Prior default of "ag" caused BV LOIs to ship with the
+        # Swiss parent's entity in the footer — material misidentification.
+        entity = self._derive_footer_entity(
+            self.d.get("provider", {}).get("legal_name", "")
+        )
+
         for s in self.doc.sections:
             s.page_width = Mm(210)
             s.page_height = Mm(297)
@@ -327,8 +447,8 @@ class LOI:
             # Shared header/footer from document-factory
             setup_first_page_header(s)
             setup_cont_header(s, title=self.agreement_type)
-            setup_first_footer(s, classification="Confidential")
-            setup_cont_footer(s, classification="Confidential")
+            setup_first_footer(s, classification="Confidential", entity=entity)
+            setup_cont_footer(s, classification="Confidential", entity=entity)
 
     # --- Helpers ---
 
@@ -340,6 +460,69 @@ class LOI:
 
     def choice(self, k):
         return bool(self.g("choices", k))
+
+    @staticmethod
+    def _is_tbc(value):
+        """Detect placeholder / unresolved sentinel values."""
+        if value is None:
+            return True
+        s = str(value).strip()
+        if not s:
+            return True
+        return s.upper() in ("[TBC]", "[TO BE CONFIRMED]", "TBC", "TO BE CONFIRMED", "XXXXXXXX")
+
+    @staticmethod
+    def _derive_provider_term(data):
+        """Return the defined-term short-name used throughout the body.
+
+        v3.5 polish: derive from `provider.short_name` with "Digital Energy"
+        fallback — preserves brand when AG signs (short_name still
+        "Digital Energy") while supporting future subsidiary/JV instruments
+        with different short names without another body-wide rename.
+
+        Extracted as a static helper (matches `_derive_footer_entity`) so
+        the derivation is unit-testable without constructing a full
+        DocBuilder (which triggers `_setup()` and document-factory image
+        loading — brittle in CI across different path layouts).
+        """
+        prov = (data or {}).get("provider") or {}
+        return prov.get("short_name") or "Digital Energy"
+
+    @staticmethod
+    def _derive_footer_entity(legal_name):
+        """Map provider legal name to document-factory footer entity key.
+
+        v3.5 scope A'''': dedicated helper so the derivation is unit-testable.
+        Returns "nl" for Digital Energy Netherlands B.V.; "ag" for Digital
+        Energy Group AG; "ag" as safe default for anything unrecognized.
+        """
+        if not legal_name:
+            return "ag"
+        name = str(legal_name)
+        if "Netherlands" in name or "B.V." in name or " BV" in name:
+            return "nl"
+        return "ag"
+
+    def _render_placeholder(self, value, context):
+        """Return render-appropriate string for a value that may be a placeholder.
+
+        context values:
+          - "sig_block_name"   → blank fillable line
+          - "sig_block_title"  → blank fillable line
+          - "body_clause"      → keep "[TBC]" as visible draft marker
+          - default            → return empty string
+
+        v3.5 scope J5 (Jonathan memo): `[TBC]` should never surface literally
+        in the sig block of an external-facing draft — renders as a fillable
+        blank line per standard legal instrument convention. The helper is
+        also used for other render contexts; behaviour is context-scoped.
+        """
+        is_tbc = self._is_tbc(value)
+        if context in ("sig_block_name", "sig_block_title"):
+            return "____________________________" if is_tbc else str(value)
+        if context == "body_clause":
+            return "[TBC]" if is_tbc else str(value)
+        return "" if is_tbc else str(value)
 
     def p(self, text, bold=False, italic=False, size=None, color=None, align=None, space_after=None):
         para = self.doc.add_paragraph()
@@ -434,6 +617,74 @@ class LOI:
             classification="Confidential",
         )
 
+    def parties(self):
+        """Render Parties Preamble — legal identification block in body.
+
+        v3.5.2 scope A''' (Jonathan memo / user directive): prior documents
+        identified parties only on the cover page. Cover page is a
+        presentation layer, not a legal identification layer. Proper
+        contract structure has parties named in the body of the instrument
+        itself. This block appears between the cover and Recital A; its
+        job is to make the legal identification of both parties verifiable
+        from the body alone, independent of the cover page.
+
+        Defined terms established here propagate to every clause:
+          - Provider defined term: "Digital Energy" (brand-name — v3.5.2)
+          - Counterparty defined term: "the Customer" / "the Partner" /
+            "the Supplier" per type
+        """
+        prov = self.d.get("provider", {})
+        cp = self.d.get("counterparty", {})
+        loi_date = self.g("dates", "loi_date") or "____________________________"
+
+        self.p(
+            f'THIS LETTER OF INTENT (the "LOI") is dated {loi_date} and entered into between:'
+        )
+        self.p("")
+
+        # Party 1 — Digital Energy (Provider)
+        prov_legal = prov.get("legal_name", "")
+        prov_form = prov.get("legal_form") or "a private limited liability company"
+        # Ensure form starts with an article — grammatical Parties Preamble
+        if prov_form and not prov_form.lower().startswith(("a ", "an ", "the ")):
+            prov_form = f"a {prov_form}"
+        prov_jur = prov.get("jurisdiction") or "the Netherlands"
+        prov_addr = prov.get("address", "")
+        prov_reg_type = prov.get("reg_type") or ("KvK" if prov.get("kvk") else "")
+        prov_reg_number = prov.get("reg_number") or prov.get("kvk", "")
+
+        party1_frag = f"(1) {prov_legal}, {prov_form} incorporated under the laws of {prov_jur}"
+        if prov_addr and not self._is_tbc(prov_addr):
+            party1_frag += f", with registered office at {prov_addr}"
+        if prov_reg_type and prov_reg_number and not self._is_tbc(prov_reg_number):
+            party1_frag += f" and registered with the {prov_reg_type} under number {prov_reg_number}"
+        # Brand-name defined term — no "the" prefix; the brand name itself
+        # is the defined short-form used throughout the body.
+        party1_frag += f' ("{self.provider_term}"); and'
+        self.p(party1_frag)
+        self.p("")
+
+        # Party 2 — Counterparty
+        cp_legal = cp.get("name", "")
+        cp_jur = cp.get("jurisdiction") or self._render_placeholder(
+            cp.get("jurisdiction"), "body_clause"
+        )
+        cp_addr = cp.get("address", "")
+        cp_reg_type = cp.get("reg_type", "")
+        cp_reg_number = cp.get("reg_number", "")
+
+        party2_frag = f"(2) {cp_legal}, an entity incorporated under the laws of {cp_jur or '[TBC]'}"
+        if cp_addr and not self._is_tbc(cp_addr):
+            party2_frag += f", with registered office at {cp_addr}"
+        if cp_reg_type and cp_reg_number and not self._is_tbc(cp_reg_number):
+            party2_frag += f" and registered with the {cp_reg_type} under number {cp_reg_number}"
+        party2_frag += f' (the "{self.party}").'
+        self.p(party2_frag)
+        self.p("")
+
+        self.p('(each a "Party" and together the "Parties")')
+        self.p("")
+
     def recitals(self):
         self.h("Recitals")
         cp = self.g("counterparty", "short")
@@ -447,7 +698,7 @@ class LOI:
         if self.t == "Distributor":
             self.p(
                 f"(C) The Parties wish to record their mutual interest in establishing a strategic "
-                f"partnership under which the {self.party} would collaborate with the Provider to deliver "
+                f"partnership under which the {self.party} would collaborate with Digital Energy to deliver "
                 f"AI colocation services to end-user customers, on the indicative terms set out below. "
                 f'This letter of intent and non-circumvention non-disclosure agreement (the "LOI") '
                 f"is subject to the negotiation and execution of a definitive partnership "
@@ -460,8 +711,8 @@ class LOI:
             )
         elif self.t == "Wholesale":
             self.p(
-                f"(C) The Parties wish to record their mutual interest in the Provider making available, "
-                f"and the {self.party} procuring, dedicated AI colocation capacity at the Provider's DEC "
+                f"(C) The Parties wish to record their mutual interest in Digital Energy making available, "
+                f"and the {self.party} procuring, dedicated AI colocation capacity at Digital Energy's DEC "
                 f"facilities, on the indicative terms set out below. This letter of intent and "
                 f'non-circumvention non-disclosure agreement (the "LOI") is subject to the '
                 f'negotiation and execution of a Master Services Agreement (the "MSA").'
@@ -476,7 +727,7 @@ class LOI:
             self.p(
                 f"(C) The Parties wish to record their mutual interest in establishing a strategic "
                 f"supply partnership under which the {self.party} would contribute to the delivery of "
-                f"the Provider's DEC platform, on the indicative terms set out below. This letter of "
+                f"Digital Energy's DEC platform, on the indicative terms set out below. This letter of "
                 f'intent and non-circumvention non-disclosure agreement (the "LOI") is subject '
                 f"to the negotiation and execution of a Framework Agreement and statements of "
                 f"work for named Provider projects."
@@ -498,14 +749,14 @@ class LOI:
                 f"the Parties."
             )
             self.p(
-                "(D) The Parties may exchange commercially sensitive or non-public information in "
+                "(D) The Parties will exchange commercially sensitive or non-public information in "
                 "connection with research, policy, or programme activities under this LOI, and agree "
                 "to the mutual confidentiality provisions set out in Clause 6."
             )
         else:  # EndUser
             self.p(
                 f"(C) The Parties wish to record their mutual interest in the {self.party} procuring "
-                f"AI compute infrastructure services at the Provider's DEC facilities, on the indicative "
+                f"AI compute infrastructure services at Digital Energy's DEC facilities, on the indicative "
                 f'terms set out below. This letter of intent (the "LOI") is subject to the '
                 f'negotiation and execution of a service agreement (the "MSA").'
             )
@@ -520,7 +771,7 @@ class LOI:
         if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             ac_text = (
                 '"Associated Counterparty" means, in relation to a Site Identifier, any of the following '
-                "with whom the Provider has a contractual, commercial, or active non-public engagement "
+                "with whom Digital Energy has a contractual, commercial, or active non-public engagement "
                 "in connection with that site: (a) landowners and land lessors; (b) greenhouse operators "
                 "and agricultural partners; (c) heat offtake counterparties; (d) energy procurement "
                 "counterparties; (e) engineering, procurement, and construction contractors engaged or "
@@ -536,7 +787,7 @@ class LOI:
             else:
                 ac_text += (
                     " For the avoidance of doubt, government agencies and regulatory bodies are "
-                    "excluded unless the Provider has made a specific named introduction;"
+                    "excluded unless Digital Energy has made a specific named introduction;"
                 )
             defs.append(("", ac_text))
 
@@ -556,10 +807,10 @@ class LOI:
         ci_text += ". The existence and contents of this LOI are Confidential Information;"
         defs.append(("", ci_text))
 
-        defs.append(('"DEC"', "means a Digital Energy Center: a liquid-cooled AI colocation facility developed and operated by the Provider;"))
+        defs.append(('"DEC"', "means a Digital Energy Center: a liquid-cooled AI colocation facility developed and operated by Digital Energy;"))
         # v3.2: "DEC Block" removed from customer-facing definitions. Capacity expressed in MW IT + Designated Sites.
-        defs.append(('"Designated Site"', "means any DEC or DEC site designated by the Provider for the delivery of capacity to the " + self.party + ", as confirmed in the MSA;"))
-        defs.append(('"Financing Party"', "means any bank, financial institution, fund, security trustee, or other entity providing or arranging " + ("debt, mezzanine, or structured " if self.t != "EndUser" else "") + "finance to the Provider or any of its Affiliates in connection with the development or operation of any DEC;"))
+        defs.append(('"Designated Site"', "means any DEC or DEC site designated by Digital Energy for the delivery of capacity to the " + self.party + ", as confirmed in the MSA;"))
+        defs.append(('"Financing Party"', "means any bank, financial institution, fund, security trustee, or other entity providing or arranging " + ("debt, mezzanine, or structured " if self.t != "EndUser" else "") + "finance to Digital Energy or any of its Affiliates in connection with the development or operation of any DEC;"))
 
         if self.t == "StrategicSupplier":
             defs.append((
@@ -576,13 +827,13 @@ class LOI:
         # StrategicSupplier uses Framework Agreement (above) — no MSA definition.
 
         if self.t == "Distributor":
-            defs.append(('"Protected Business Information" or "PBI"', "means the Provider's proprietary methodologies, strategies, and frameworks including: (a) site-sourcing and land-acquisition methodology; (b) energy procurement and grid connection strategy; (c) regulatory and permitting playbook; (d) heat offtake and energy recycling commercial model; (e) financial and operational modelling frameworks; (f) DEC design specifications and engineering standards; and (g) colocation pricing methodology and deal economics;"))
+            defs.append(('"Protected Business Information" or "PBI"', "means Digital Energy's proprietary methodologies, strategies, and frameworks including: (a) site-sourcing and land-acquisition methodology; (b) energy procurement and grid connection strategy; (c) regulatory and permitting playbook; (d) heat offtake and energy recycling commercial model; (e) financial and operational modelling frameworks; (f) DEC design specifications and engineering standards; and (g) colocation pricing methodology and deal economics;"))
 
         # SS: PBI only if engineering_integration in strategic purposes
         if self.t == "StrategicSupplier":
             purposes = set(self.d.get("supplier", {}).get("strategic_purposes", []))
             if "engineering_integration" in purposes:
-                defs.append(('"Protected Business Information" or "PBI"', "means the Provider's proprietary design, engineering, and infrastructure integration methodologies, interface specifications, and technical reference architectures disclosed in connection with the design integration collaboration under Clause 3.7;"))
+                defs.append(('"Protected Business Information" or "PBI"', "means Digital Energy's proprietary design, engineering, and infrastructure integration methodologies, interface specifications, and technical reference architectures disclosed in connection with the design integration collaboration under Clause 3.7;"))
 
         if self.t == "Distributor":
             defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of an MSA for the Transaction, including all activities under any companion agreements between the Parties (such as a Referral Agreement);"))
@@ -602,9 +853,9 @@ class LOI:
             defs.append(('"Sales Order Form"', "means the document that will form the basis for each binding service order under the MSA" + (", setting out confirmed capacity, pricing, site allocation, and RFS date;" if self.t == "Wholesale" else ";")))
 
         if self.t == "Wholesale":
-            defs.append(('"Services"', "means the AI colocation services to be provided by the Provider, comprising power supply and distribution, liquid cooling infrastructure, physical security, building management, and facility operations;"))
+            defs.append(('"Services"', "means the AI colocation services to be provided by Digital Energy, comprising power supply and distribution, liquid cooling infrastructure, physical security, building management, and facility operations;"))
         elif self.t == "EndUser":
-            defs.append(('"Services"', "means the AI compute infrastructure services to be provided by the Provider, the scope of which will depend on the service model selected under Clause 3.1."))
+            defs.append(('"Services"', "means the AI compute infrastructure services to be provided by Digital Energy, the scope of which will depend on the service model selected under Clause 3.1."))
 
         if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             defs.append(('"Site Identifier"', "means any information that identifies or could reasonably be used to identify a specific DEC location, including: address, GPS coordinates, cadastral reference, project codename, photographs, aerial imagery, file names, folder names, metadata, and any information derived from the foregoing;"))
@@ -624,13 +875,13 @@ class LOI:
     def clause2(self):
         self.h("2. Purpose and Scope")
         if self.t == "Distributor":
-            self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic partnership under which the {self.party} would participate in the delivery of AI colocation services to end-user customers through the Provider's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
+            self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic partnership under which the {self.party} would participate in the delivery of AI colocation services to end-user customers through Digital Energy's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
         elif self.t == "Wholesale":
-            self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring dedicated AI colocation capacity at the Provider's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
+            self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring dedicated AI colocation capacity at Digital Energy's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
         elif self.t == "StrategicSupplier":
-            self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic supply partnership under which the {self.party} would contribute to the delivery of the Provider's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
+            self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic supply partnership under which the {self.party} would contribute to the delivery of Digital Energy's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
         else:
-            self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring AI compute infrastructure services at the Provider's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
+            self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring AI compute infrastructure services at Digital Energy's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
 
         if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             if self.t == "Distributor":
@@ -654,33 +905,33 @@ class LOI:
         # 3.1
         self.bp("3.1 Partnership Overview. ",
                 f"{self.g('counterparty', 'short')} provides {comm.get('partner_core_capability', '')}. "
-                f"The Provider develops and operates liquid-cooled AI colocation facilities with secured "
+                f"Digital Energy develops and operates liquid-cooled AI colocation facilities with secured "
                 f"energy and grid access, liquid cooling, and full energy recovery infrastructure.")
         if mode == "combined":
             self.p(
                 f"The Parties intend to combine the {self.party}'s {comm.get('partner_contribution', '')} "
-                f"with the Provider's AI colocation platform to deliver {comm.get('combined_offering', '')} "
+                f"with Digital Energy's AI colocation platform to deliver {comm.get('combined_offering', '')} "
                 f"to {comm.get('target_end_users', '')}."
             )
         else:
             self.p(
                 f"The Parties intend to establish a referral arrangement under which the {self.party} "
-                f"would introduce qualified end-user customers to the Provider's DEC platform, leveraging "
+                f"would introduce qualified end-user customers to Digital Energy's DEC platform, leveraging "
                 f"the {self.party}'s established client relationships and market presence."
             )
 
         # 3.2
         if mode == "combined":
             self.bp("3.2 Combined Offering. ", "Under the envisaged partnership:")
-            self.p("(a) the Provider would supply dedicated AI colocation capacity at its DEC facilities, including power distribution, liquid cooling, physical security, and facility operations;")
+            self.p("(a) Digital Energy would supply dedicated AI colocation capacity at its DEC facilities, including power distribution, liquid cooling, physical security, and facility operations;")
             self.p(f"(b) the {self.party} would contribute {comm.get('partner_service_scope', '')}; and")
-            self.p(f"(c) the end-user customer would procure a single, integrated solution through the {self.party}, with the Provider's DEC platform as the infrastructure foundation.")
+            self.p(f"(c) the end-user customer would procure a single, integrated solution through the {self.party}, with Digital Energy's DEC platform as the infrastructure foundation.")
             self.p("The precise service boundaries, responsibility matrix, SLA allocation, and commercial terms of the combined offering will be defined in the MSA.")
         else:
             self.bp("3.2 Referral Arrangement. ",
                      f"The {self.party} would identify and introduce qualified end-user customers to the "
                      f"Provider's DEC platform, leveraging the {self.party}'s market presence, customer "
-                     f"relationships, and domain credibility. The Provider would manage all commercial, "
+                     f"relationships, and domain credibility. Digital Energy would manage all commercial, "
                      f"technical, and contractual relationships with introduced customers directly. The "
                      f"{self.party}'s ongoing role following an introduction \u2014 including relationship "
                      f"support, account management, or technical liaison \u2014 will be agreed on a "
@@ -711,13 +962,13 @@ class LOI:
             self.p("All economic terms are indicative and subject to the terms of the MSA.")
         else:
             self.bp("3.4 Indicative Economics. ",
-                     "The economic framework for the partnership will be determined during commercial scoping and set out in the MSA. The Provider will issue indicative terms upon agreement of partnership scope, capacity estimates, and contract structure.")
+                     "The economic framework for the partnership will be determined during commercial scoping and set out in the MSA. Digital Energy will issue indicative terms upon agreement of partnership scope, capacity estimates, and contract structure.")
 
         # 3.5
         if self.choice("exclusivity"):
             scope = self.d.get("choices", {}).get("exclusivity_scope", "")
             self.bp("3.5 Preferred Partner. ",
-                     f"Subject to execution of the MSA and achievement of the minimum capacity commitments set out therein, the Provider intends to designate the {self.party} as a preferred partner within the following scope: {scope}. This designation means the Provider will offer the {self.party} priority participation in opportunities within the defined scope before engaging other channel partners for the same opportunity. This LOI does not create any exclusivity obligation; the terms of any such designation will be agreed in the MSA.")
+                     f"Subject to execution of the MSA and achievement of the minimum capacity commitments set out therein, Digital Energy intends to designate the {self.party} as a preferred partner within the following scope: {scope}. This designation means Digital Energy will offer the {self.party} priority participation in opportunities within the defined scope before engaging other channel partners for the same opportunity. This LOI does not create any exclusivity obligation; the terms of any such designation will be agreed in the MSA.")
         else:
             self.bp("3.5 Non-Exclusivity. ", "The partnership contemplated by this LOI is non-exclusive. Both Parties retain the right to enter into similar arrangements with third parties.")
 
@@ -730,7 +981,19 @@ class LOI:
         # v3.2: capacity expressed in MW IT + Designated Sites; no "DEC Block" customer-facing.
         self.bp("3.1 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {mw} MW IT of liquid-cooled AI colocation capacity, to be delivered across one or more Designated Sites. Site configuration, phasing, and delivery milestones will be set out in the MSA.")
 
-        self.bp("3.2 Technical Specification. ", "All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, direct liquid cooling infrastructure supporting rack densities of 40 kW and above, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.")
+        # v3.5 scope J1 (Jonathan memo): Cl. 3.2 parametrized. Default density
+        # bumped from "40 kW and above" to "approximately 130 kW and above"
+        # matching NVIDIA GB200/GB300 NVL72 reference architectures. Cooling
+        # topology explicit. Both overridable via YAML for non-AI workloads.
+        rack_density = comm.get("rack_density_kw", "130")
+        cooling_topology = comm.get(
+            "cooling_topology",
+            "direct-to-chip liquid cooling (consistent with NVIDIA GB200 NVL72 and GB300 NVL72 reference architectures, which target approximately 120\u2013140 kW per rack at full configuration)",
+        )
+        self.bp(
+            "3.2 Technical Specification. ",
+            f"All DEC facilities are designed for high-density AI compute workloads and are expected to include, at minimum: facility power supply and distribution, {cooling_topology} supporting rack densities of approximately {rack_density} kW and above, rear-door heat exchangers or equivalent where applicable, building management, physical security, and 24/7 facility operations. The exact capacity, rack configuration, power density, and cooling requirements will be determined during the technical scoping phase following this LOI.",
+        )
 
         if self.choice("phasing"):
             self.bp("3.3 Deployment Phasing. ", f"The {self.party} has indicated the following high-level phasing interest:")
@@ -738,11 +1001,27 @@ class LOI:
             rows = [[f"Phase {i+1}", f"{p.get('mw', '')} MW IT", p.get("timeline", "")] for i, p in enumerate(phases)]
             self.table(["Phase", "Approximate Capacity", "Indicative Timeline"], rows)
 
+        # v3.5 scope J3 (Jonathan memo): Cl. 3.4 Expansion branches on value
+        # type. Numeric values render the approximate-MW sentence; empty,
+        # [TBC], "to be discussed" and non-numeric strings render a generic
+        # forward-expansion clause that doesn't insert broken grammar into
+        # the instrument.
         exp = comm.get("expansion_mw", "")
-        self.bp("3.4 Expansion. ", f"The {self.party} has expressed interest in future expansion to approximately {exp} MW IT, subject to availability, commercial agreement, and the terms of the MSA. The Provider will use reasonable endeavours to accommodate expansion requirements within its DEC programme.")
+        exp_str = str(exp).strip() if exp is not None else ""
+        is_numeric_exp = bool(exp_str) and exp_str.lstrip("~<>= ").split()[0].split(".")[0].isdigit()
+        if is_numeric_exp and not self._is_tbc(exp_str):
+            self.bp(
+                "3.4 Expansion. ",
+                f"The {self.party} has expressed interest in future expansion to approximately {exp_str} MW IT, subject to availability, commercial agreement, and the terms of the MSA. Digital Energy will use reasonable endeavours to accommodate expansion requirements within its DEC programme.",
+            )
+        else:
+            self.bp(
+                "3.4 Expansion. ",
+                f"The {self.party} has expressed interest in future expansion beyond the initial deployment, with scale to be determined following technical scoping and subject to availability, commercial agreement, and the terms of the MSA. Digital Energy will use reasonable endeavours to accommodate expansion requirements within its DEC programme.",
+            )
 
         if self.choice("pricing"):
-            self.bp("3.5 Indicative Pricing. ", f"Based on the {self.party}'s indicated capacity and term preferences, the Provider's indicative pricing is as follows:")
+            self.bp("3.5 Indicative Pricing. ", f"Based on the {self.party}'s indicated capacity and term preferences, Digital Energy's indicative pricing is as follows:")
             self.table(
                 ["Parameter", "Indicative Terms"],
                 [
@@ -756,15 +1035,15 @@ class LOI:
             )
             self.p(f"All commercial terms are indicative and subject to the outcome of the technical scoping phase, the {self.party}'s final capacity requirements, contract term, and credit profile.")
         else:
-            self.bp("3.5 Indicative Pricing. ", f"Pricing for the Services will be determined following the technical scoping phase and set out in the Sales Order Form. The Provider will provide indicative pricing upon completion of the {self.party}'s capacity, density, and term requirements.")
+            self.bp("3.5 Indicative Pricing. ", f"Pricing for the Services will be determined following the technical scoping phase and set out in the Sales Order Form. Digital Energy will provide indicative pricing upon completion of the {self.party}'s capacity, density, and term requirements.")
 
         term = comm.get("min_term", "")
         # v3.2: "minimum commitment term" replaced with "approximately X, indicative only".
-        self.bp("3.6 Indicative Term. ", f"The {self.party} anticipates a commitment term of approximately {term}, indicative only and subject to confirmation in the MSA. Actual term may be longer or shorter depending on final commercial terms. The {self.party} acknowledges that the Provider intends the MSA to include take-or-pay provisions commensurate with the committed capacity, the terms of which will be negotiated in good faith.")
+        self.bp("3.6 Indicative Term. ", f"The {self.party} anticipates a commitment term of approximately {term}, indicative only and subject to confirmation in the MSA. Actual term may be longer or shorter depending on final commercial terms. The {self.party} acknowledges that Digital Energy intends the MSA to include take-or-pay provisions commensurate with the committed capacity, the terms of which will be negotiated in good faith.")
 
-        self.bp("3.7 Credit Assessment. ", f"The Provider will complete a credit assessment of the {self.party} (or the entity that will execute the MSA) as part of the commercial process. The {self.party} agrees to cooperate with such assessment, which may include provision of audited financial statements, credit references, evidence of parent company support, or other financial information as reasonably requested. Where the {self.party} does not hold an investment-grade credit rating (or equivalent), the Parties will discuss appropriate credit support mechanisms, which may include a parent company guarantee, security deposit, or letter of credit.")
+        self.bp("3.7 Credit Assessment. ", f"Digital Energy will complete a credit assessment of the {self.party} (or the entity that will execute the MSA) as part of the commercial process. The {self.party} agrees to cooperate with such assessment, which may include provision of audited financial statements, credit references, evidence of parent company support, or other financial information as reasonably requested. Where the {self.party} does not hold an investment-grade credit rating (or equivalent), the Parties will discuss appropriate credit support mechanisms, which may include a parent company guarantee, security deposit, or letter of credit.")
 
-        self.bp("3.8 Site Allocation. ", f"The Provider is developing DEC facilities across multiple locations. The Provider will allocate capacity to the {self.party} based on the DEC(s) best suited to the {self.party}'s requirements, taking into account development readiness, grid availability, RFS timeline, and the {self.party}'s latency and connectivity needs. Site allocation will be confirmed during the technical scoping phase and formalised in the Sales Order Form.")
+        self.bp("3.8 Site Allocation. ", f"Digital Energy is developing DEC facilities across multiple locations. Digital Energy will allocate capacity to the {self.party} based on the DEC(s) best suited to the {self.party}'s requirements, taking into account development readiness, grid availability, RFS timeline, and the {self.party}'s latency and connectivity needs. Site allocation will be confirmed during the technical scoping phase and formalised in the Sales Order Form.")
 
     def clause3_eu(self):
         self.h("3. Service Requirements")
@@ -776,17 +1055,17 @@ class LOI:
         descs = {
             "bare_metal": (
                 "Bare Metal Colocation \u2014 Dedicated, liquid-cooled rack space within a DEC, supporting "
-                "densities of 40 kW per rack and above. The Provider supplies power distribution, direct "
+                "densities of 40 kW per rack and above. Digital Energy supplies power distribution, direct "
                 "liquid cooling, physical security, and 24/7 facility operations. The Customer deploys and "
                 "manages its own hardware and software. The demarcation point is at the rack: everything "
-                "below (facility infrastructure) is the Provider's responsibility; everything above (compute "
+                "below (facility infrastructure) is Digital Energy's responsibility; everything above (compute "
                 "hardware, operating system, workloads) is the Customer's. Billed monthly on a per-kW basis "
                 "with a committed term."
             ),
             "shared_cloud": (
                 "Shared Cloud \u2014 Managed GPU compute capacity hosted on sovereign European infrastructure "
-                "at the Provider's DEC facilities. The Customer accesses reserved or on-demand compute "
-                "resources without procuring, deploying, or managing hardware. The Provider or a designated "
+                "at Digital Energy's DEC facilities. The Customer accesses reserved or on-demand compute "
+                "resources without procuring, deploying, or managing hardware. Digital Energy or a designated "
                 "delivery partner operates the compute platform, including hardware lifecycle, scheduling, "
                 "and platform software. The Customer manages workloads, data, and application layers. Billed "
                 "on reserved capacity or metered usage, with a committed term or minimum spend."
@@ -794,8 +1073,8 @@ class LOI:
             "tokens": (
                 "Token-Based GPU Access \u2014 Flexible, on-demand access to GPU compute measured in GPU-hours "
                 "or equivalent units. The Customer purchases compute tokens \u2014 pre-paid or pay-as-you-go "
-                "\u2014 redeemable against available capacity across the Provider's DEC network. No dedicated "
-                "hardware allocation or minimum infrastructure commitment. The Provider or a designated "
+                "\u2014 redeemable against available capacity across Digital Energy's DEC network. No dedicated "
+                "hardware allocation or minimum infrastructure commitment. Digital Energy or a designated "
                 "delivery partner manages all infrastructure and scheduling. The Customer submits workloads "
                 "and consumes capacity as needed. Lowest entry threshold; designed for variable or exploratory "
                 "workloads."
@@ -806,16 +1085,16 @@ class LOI:
                 self.p(descs[st])
 
         if any(st in ("shared_cloud", "tokens") for st in types):
-            self.p("For Shared Cloud and Token-Based models: the Provider may deliver these services in partnership with a qualified delivery partner. The specific delivery partner, platform, and commercial terms will be confirmed in the MSA.", italic=True)
+            self.p("For Shared Cloud and Token-Based models: Digital Energy may deliver these services in partnership with a qualified delivery partner. The specific delivery partner, platform, and commercial terms will be confirmed in the MSA.", italic=True)
 
         cap = comm.get("indicative_capacity", "")
         self.bp("3.2 Indicative Capacity. ", f"The {self.party} has indicated interest in approximately {cap} of compute capacity. The exact capacity, configuration, and technical requirements will be determined during the technical scoping phase.")
 
-        self.bp("3.3 Technical Requirements. ", f"The Provider's DEC facilities support rack densities of 40 kW and above with direct liquid cooling, designed for GPU-intensive training and inference workloads. The {self.party}'s specific requirements \u2014 including GPU type, rack density, network connectivity, and data sovereignty needs \u2014 will be confirmed during technical scoping and formalised in the MSA.")
+        self.bp("3.3 Technical Requirements. ", f"Digital Energy's DEC facilities support rack densities of 40 kW and above with direct liquid cooling, designed for GPU-intensive training and inference workloads. The {self.party}'s specific requirements \u2014 including GPU type, rack density, network connectivity, and data sovereignty needs \u2014 will be confirmed during technical scoping and formalised in the MSA.")
 
         if self.choice("pricing"):
             ch = self.d.get("choices", {})
-            self.bp("3.4 Indicative Pricing. ", "Based on preliminary discussions, the Provider's indicative pricing is as follows:")
+            self.bp("3.4 Indicative Pricing. ", "Based on preliminary discussions, Digital Energy's indicative pricing is as follows:")
             self.table(
                 ["Parameter", "Indicative Terms"],
                 [
@@ -826,7 +1105,7 @@ class LOI:
             )
             self.p(f"All terms are indicative and subject to the outcome of technical scoping and the {self.party}'s final requirements.")
         else:
-            self.bp("3.4 Indicative Pricing. ", f"Pricing will be determined following the technical scoping phase and set out in the MSA. The Provider will provide indicative pricing upon agreement of the {self.party}'s capacity, density, and service model requirements.")
+            self.bp("3.4 Indicative Pricing. ", f"Pricing will be determined following the technical scoping phase and set out in the MSA. Digital Energy will provide indicative pricing upon agreement of the {self.party}'s capacity, density, and service model requirements.")
 
         term = comm.get("min_term", "")
         # v3.2: indicative, not "minimum commitment"
@@ -852,9 +1131,9 @@ class LOI:
             "Under the envisaged partnership:"
         )
         self.p(
-            "(a) the Provider would contribute the site, energy procurement, grid "
+            "(a) Digital Energy would contribute the site, energy procurement, grid "
             "connection, land and regulatory compliance, long-term operational "
-            "responsibility, and integration into the Provider's broader DEC "
+            "responsibility, and integration into Digital Energy's broader DEC "
             "platform for each Designated Site; and"
         )
         self.p(
@@ -872,10 +1151,10 @@ class LOI:
             lead_time = supplier.get("lead_time_target", "[LEAD TIME TO BE CONFIRMED]")
             self.bp(
                 "3.2 Capacity Reservation. ",
-                f"The Provider has indicated a projected demand across its active "
+                f"Digital Energy has indicated a projected demand across its active "
                 f"development pipeline. Subject to commercial agreement, the "
                 f"{self.party} will reserve capacity in its manufacturing or "
-                f"service-delivery plan to support the Provider's indicative "
+                f"service-delivery plan to support Digital Energy's indicative "
                 f"pipeline, with specific volumes and delivery windows set out in "
                 f"the Framework Agreement."
             )
@@ -910,7 +1189,7 @@ class LOI:
         if "supply_chain_de_risking" in purposes:
             self.bp(
                 "3.6 Dual-Source and Continuity Commitments. ",
-                f"The {self.party} acknowledges the Provider's requirement for "
+                f"The {self.party} acknowledges Digital Energy's requirement for "
                 f"supply-chain resilience. The Parties will discuss, and document "
                 f"in the Framework Agreement: (a) component substitution and "
                 f"second-source provisions; (b) continuity commitments, including "
@@ -943,7 +1222,7 @@ class LOI:
             self.bp(
                 "3.7 Design Integration and IP Allocation. ",
                 f"The Parties will collaborate on design integration across the "
-                f"specified interfaces between the Provider's DEC platform and "
+                f"specified interfaces between Digital Energy's DEC platform and "
                 f"the {self.party}'s contribution. IP allocation: (a) {ip_clause} "
                 f"(b) no Party assigns pre-existing IP by reason of this LOI or "
                 f"any discussions under it; and (c) the full IP framework will be "
@@ -957,9 +1236,9 @@ class LOI:
                 f"Subject to commercial agreement in the Framework Agreement, the "
                 f"Provider intends to grant the {self.party} a right of first "
                 f"refusal on the procurement of the supply scope set out in "
-                f"Clause 3.1(b) across the Provider's active development pipeline. "
+                f"Clause 3.1(b) across Digital Energy's active development pipeline. "
                 f"The right of first refusal requires the {self.party} to submit "
-                f"a compliant proposal within 20 Business Days of the Provider's "
+                f"a compliant proposal within 20 Business Days of Digital Energy's "
                 f"invitation. This LOI does not create any binding right of first "
                 f"refusal; the terms will be set out in the Framework Agreement."
             )
@@ -977,7 +1256,7 @@ class LOI:
         if "pipeline_visibility" in purposes:
             self.bp(
                 "4.1 Project Introduction Process. ",
-                f"Following execution of this LOI, the Provider intends to "
+                f"Following execution of this LOI, Digital Energy intends to "
                 f"maintain a pipeline register of Designated Sites. The "
                 f"{self.party} will be invited to participate in named project "
                 f"opportunities on the cadence and criteria set out in the "
@@ -995,7 +1274,7 @@ class LOI:
         self.p("(d) site-specific deliverables, schedules, or operational annexes executed under each Statement of Work.")
         self.p(
             "Each stage is designed to provide increasing commercial certainty "
-            "and to support the Provider's project finance activities."
+            "and to support Digital Energy's project finance activities."
         )
 
         # 4.3 Joint-Development Governance — IF engineering_integration
@@ -1015,7 +1294,7 @@ class LOI:
             f"Provider (as determined by reference to its primary business being "
             f"the development, ownership, or operation of colocation facilities "
             f"for high-density compute workloads) acquires Control of the "
-            f"{self.party}, the Provider may terminate this LOI by written notice "
+            f"{self.party}, Digital Energy may terminate this LOI by written notice "
             f"with immediate effect. Upon such termination, the confidentiality "
             f"and non-circumvention obligations in Clauses 6 and 7 shall "
             f"continue for their stated survival periods."
@@ -1038,7 +1317,7 @@ class LOI:
             "Following execution of this LOI, the Parties intend to proceed as follows:"
         )
         self.p("(a) Technical and commercial scoping (target: 30 days post-LOI) — detailed discovery on scope, capability, lead times, pricing framework, and IP allocation.")
-        self.p("(b) Draft Framework Agreement (target: 60 days post-LOI) — the Provider will issue a draft Framework Agreement incorporating the agreed terms.")
+        self.p("(b) Draft Framework Agreement (target: 60 days post-LOI) — Digital Energy will issue a draft Framework Agreement incorporating the agreed terms.")
         self.p("(c) Framework Agreement negotiation and execution (target: 90 days post-LOI) — the Parties will negotiate and execute the Framework Agreement.")
         self.p("These timelines are indicative and non-binding.")
 
@@ -1047,15 +1326,15 @@ class LOI:
             self.h("4. Relationship Structure and Protection")
             pbi = self.g("protection", "pbi_survival", default="10 years")
             self.bp("4.1 Protected Business Information. ",
-                     f"The {self.party} acknowledges that the Provider's competitive position depends on the confidentiality of its Protected Business Information as defined in Clause 1. The {self.party} agrees that, for a period of {pbi} from the date of this LOI, it shall not directly or indirectly use any PBI to replicate, reverse-engineer, or independently develop any material element of the Provider's business model, site-sourcing methodology, energy procurement strategy, or commercial framework, whether for itself or for any third party. This obligation survives termination or expiry of this LOI and of any MSA.")
+                     f"The {self.party} acknowledges that Digital Energy's competitive position depends on the confidentiality of its Protected Business Information as defined in Clause 1. The {self.party} agrees that, for a period of {pbi} from the date of this LOI, it shall not directly or indirectly use any PBI to replicate, reverse-engineer, or independently develop any material element of Digital Energy's business model, site-sourcing methodology, energy procurement strategy, or commercial framework, whether for itself or for any third party. This obligation survives termination or expiry of this LOI and of any MSA.")
             self.bp("4.2 Change of Control. ",
-                     f"If, during the term of this LOI, a Competitor acquires Control (as defined in Clause 1.1, \u201cAffiliate\u201d) of the {self.party}, the Provider may terminate this LOI by written notice with immediate effect. Upon such termination, the confidentiality and non-circumvention obligations in Clauses 6 and 7 shall continue for their stated survival periods.")
+                     f"If, during the term of this LOI, a Competitor acquires Control (as defined in Clause 1.1, \u201cAffiliate\u201d) of the {self.party}, Digital Energy may terminate this LOI by written notice with immediate effect. Upon such termination, the confidentiality and non-circumvention obligations in Clauses 6 and 7 shall continue for their stated survival periods.")
             self.bp("4.3 Associated Counterparties. ",
-                     f"The {self.party} acknowledges that the Provider maintains relationships with Associated Counterparties at each DEC site. The sharing of any Site Identifier by the Provider shall be deemed an introduction of all Associated Counterparties for that site for the purposes of Clause 7.")
+                     f"The {self.party} acknowledges that Digital Energy maintains relationships with Associated Counterparties at each DEC site. The sharing of any Site Identifier by Digital Energy shall be deemed an introduction of all Associated Counterparties for that site for the purposes of Clause 7.")
             self.bp("4.4 Governance. ", "The Parties intend to establish a joint steering committee or equivalent governance mechanism, the terms of which will be set out in the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Commercial scoping (target: 30 days post-LOI) \u2014 The Parties will define the partnership scope, target customer segments, capacity estimates, and economic framework.", bold=False)
-            self.p("(b) Draft Partnership Agreement (target: 60 days post-LOI) \u2014 The Provider will issue a draft MSA or partnership agreement incorporating the agreed commercial terms.")
+            self.p("(b) Draft Partnership Agreement (target: 60 days post-LOI) \u2014 Digital Energy will issue a draft MSA or partnership agreement incorporating the agreed commercial terms.")
             self.p("(c) MSA negotiation and execution (target: 90 days post-LOI) \u2014 The Parties will negotiate and execute the MSA.")
             self.p("These timelines are indicative and non-binding.")
 
@@ -1068,13 +1347,13 @@ class LOI:
             self.p("(b) a Sales Order Form or equivalent binding capacity commitment with indicative pricing;")
             self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
             self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
-            self.p("Each stage is designed to provide increasing commercial certainty and to support the Provider's project finance activities.")
-            self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with the Provider's Financing Parties if requested under Clause 5.3. The {self.party}'s cooperation in this regard materially supports delivery of the committed capacity on the indicative timeline.")
-            self.bp("4.4 Expansion and Priority. ", f"The Provider will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
+            self.p("Each stage is designed to provide increasing commercial certainty and to support Digital Energy's project finance activities.")
+            self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with Digital Energy's Financing Parties if requested under Clause 5.3. The {self.party}'s cooperation in this regard materially supports delivery of the committed capacity on the indicative timeline.")
+            self.bp("4.4 Expansion and Priority. ", f"Digital Energy will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Technical scoping (target: 30 days post-LOI) \u2014 Detailed technical discovery to determine exact capacity, rack layout, power distribution, cooling specifications, and connectivity requirements.")
-            self.p(f"(b) Credit assessment (target: 30 days post-LOI, concurrent with technical scoping) \u2014 The Provider will complete a credit assessment of the {self.party} or the entity that will execute the MSA.")
-            self.p("(c) Sales Order Form (target: 60 days post-LOI) \u2014 Upon completion of technical scoping, the Provider will issue a Sales Order Form setting out confirmed commercial terms, facility specifications, and service level framework.")
+            self.p(f"(b) Credit assessment (target: 30 days post-LOI, concurrent with technical scoping) \u2014 Digital Energy will complete a credit assessment of the {self.party} or the entity that will execute the MSA.")
+            self.p("(c) Sales Order Form (target: 60 days post-LOI) \u2014 Upon completion of technical scoping, Digital Energy will issue a Sales Order Form setting out confirmed commercial terms, facility specifications, and service level framework.")
             self.p("(d) MSA negotiation and execution (target: 90 days post-LOI) \u2014 The Parties will negotiate and execute the MSA.")
             self.p("These timelines are indicative and non-binding.")
             self.bp("4.6 No Capacity Reservation. ", "This LOI does not reserve capacity at any DEC. Capacity allocation is on a first-come, first-served basis and will only be confirmed upon execution of the MSA.")
@@ -1083,7 +1362,7 @@ class LOI:
             self.h("4. Next Steps")
             self.p("4.1 Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Technical scoping (target: 30 days post-LOI) \u2014 Detailed discovery to determine capacity, configuration, connectivity, and service model requirements.")
-            self.p("(b) Commercial proposal (target: 60 days post-LOI) \u2014 The Provider will issue a commercial proposal setting out confirmed pricing, service scope, and SLA framework.")
+            self.p("(b) Commercial proposal (target: 60 days post-LOI) \u2014 Digital Energy will issue a commercial proposal setting out confirmed pricing, service scope, and SLA framework.")
             self.p("(c) MSA negotiation and execution (target: 90 days post-LOI) \u2014 The Parties will negotiate and execute the MSA.")
             self.p("These timelines are indicative and non-binding.")
             self.p("4.2 This LOI does not reserve capacity at any DEC. Capacity allocation will be confirmed upon execution of the MSA.")
@@ -1096,15 +1375,15 @@ class LOI:
         self.h("5. Project Finance and Assignment (BINDING)")
         self.bp(
             "5.1 Project Finance Context. ",
-            "The Provider is developing the DEC programme under a combination "
+            "Digital Energy is developing the DEC programme under a combination "
             "of equity investment and non-recourse project finance. This LOI "
             "is binding in Clauses 5, 6, 7, and 8 to support that financing "
             "structure."
         )
         self.bp("5.2 Assignment. ", f"Neither Party may assign its rights or obligations under this LOI without the prior written consent of the other Party, except that:")
-        self.p("(a) the Provider may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
-        self.p(f"(b) the Provider may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided the Provider remains liable for the performance of the assignee's obligations.")
-        self.bp("5.3 Lender Acknowledgment. ", f"The {self.party} acknowledges and agrees that, upon the Provider's written request, the {self.party} shall negotiate in good faith and execute a direct agreement (or lender acknowledgment letter) with the Provider's Financing Party within 30 Business Days of such request. Such direct agreement may include, as is customary in project finance transactions: (a) step-in rights for the Financing Party upon a Provider default; (b) cure periods in favour of the Financing Party; and (c) information rights enabling the Financing Party to monitor the commercial relationship. The terms of any such direct agreement shall be commercially reasonable and consistent with market practice for project finance transactions.")
+        self.p("(a) Digital Energy may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
+        self.p(f"(b) Digital Energy may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided Digital Energy remains liable for the performance of the assignee's obligations.")
+        self.bp("5.3 Lender Acknowledgment. ", f"The {self.party} acknowledges and agrees that, upon Digital Energy's written request, the {self.party} shall negotiate in good faith and execute a direct agreement (or lender acknowledgment letter) with Digital Energy's Financing Party within 30 Business Days of such request. Such direct agreement may include, as is customary in project finance transactions: (a) step-in rights for the Financing Party upon a Provider default; (b) cure periods in favour of the Financing Party; and (c) information rights enabling the Financing Party to monitor the commercial relationship. The terms of any such direct agreement shall be commercially reasonable and consistent with market practice for project finance transactions.")
 
     def clause5_ss(self):
         """v3.4: Cl. 5 for Strategic Supplier — Supply Chain and Delivery Commitment.
@@ -1121,7 +1400,7 @@ class LOI:
         self.bp(
             "5.1 Delivery Intent. ",
             f"The {self.party} confirms its intent to reserve manufacturing "
-            f"and service-delivery capacity to support the Provider's active "
+            f"and service-delivery capacity to support Digital Energy's active "
             f"development pipeline, on the terms to be agreed in the Framework "
             f"Agreement and accompanying statements of work. This LOI is "
             f"binding in Clauses 5, 6, 7, and 8 to support that supply "
@@ -1133,15 +1412,15 @@ class LOI:
             f"LOI without the prior written consent of the other Party (such "
             f"consent not to be unreasonably withheld), except that:"
         )
-        self.p("(a) the Provider may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
-        self.p(f"(b) the Provider may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided the Provider remains liable for the performance of the assignee's obligations.")
+        self.p("(a) Digital Energy may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
+        self.p(f"(b) Digital Energy may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided Digital Energy remains liable for the performance of the assignee's obligations.")
         self.bp(
             "5.3 Financing Continuity Acknowledgment. ",
-            f"The {self.party} acknowledges that the Provider's DEC programme "
+            f"The {self.party} acknowledges that Digital Energy's DEC programme "
             f"is financed on a non-recourse, per-site basis, and that supply "
             f"continuity from qualified suppliers materially supports that "
-            f"financing. Upon the Provider's written request, the {self.party} "
-            f"shall negotiate in good faith with the Provider's Financing "
+            f"financing. Upon Digital Energy's written request, the {self.party} "
+            f"shall negotiate in good faith with Digital Energy's Financing "
             f"Party to confirm supply arrangements on financed projects, "
             f"including reasonable cooperation with customary direct-agreement "
             f"or acknowledgment mechanics (step-in, cure periods, information "
@@ -1218,32 +1497,32 @@ class LOI:
         # v3.3: for SS, downstream agreement is "Framework Agreement"; otherwise "MSA".
         downstream = "Framework Agreement" if self.t == "StrategicSupplier" else "MSA"
 
-        self.p(f"7.1 The {self.party} shall not, directly or indirectly, without the prior written consent of the Provider:")
+        self.p(f"7.1 The {self.party} shall not, directly or indirectly, without the prior written consent of Digital Energy:")
 
         if self.t == "Distributor":
-            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with the Purpose or the Transaction;")
-            self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty; or")
-            self.p(f"(c) attempt to divert or appropriate any business opportunity disclosed by the Provider in connection with the Purpose or the Transaction.")
+            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by Digital Energy in connection with the Purpose or the Transaction;")
+            self.p(f"(b) circumvent, avoid, or bypass Digital Energy in order to deal directly or indirectly with any Associated Counterparty; or")
+            self.p(f"(c) attempt to divert or appropriate any business opportunity disclosed by Digital Energy in connection with the Purpose or the Transaction.")
         elif self.t == "StrategicSupplier":
-            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with this LOI or any Provider project; or")
-            self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by the Provider.")
+            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by Digital Energy in connection with this LOI or any Provider project; or")
+            self.p(f"(b) circumvent, avoid, or bypass Digital Energy in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by Digital Energy.")
         else:  # Wholesale — lighter scope
-            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with this LOI or the Services; or")
-            self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by the Provider.")
+            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by Digital Energy in connection with this LOI or the Services; or")
+            self.p(f"(b) circumvent, avoid, or bypass Digital Energy in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by Digital Energy.")
 
         self.bp("7.2 Duration. ", f"The obligations in this Clause 7 shall continue for {nc_dur} after the earlier of: (a) the expiry or termination of this LOI; or (b) the expiry or termination of the {downstream}, if one is executed.")
-        self.bp("7.3 Deemed Introduction. ", f"The Provider's sharing of any Site Identifier with the {self.party} shall constitute a deemed introduction of all Associated Counterparties for that site. The Provider is not required to separately name each Associated Counterparty.")
+        self.bp("7.3 Deemed Introduction. ", f"Digital Energy's sharing of any Site Identifier with the {self.party} shall constitute a deemed introduction of all Associated Counterparties for that site. Digital Energy is not required to separately name each Associated Counterparty.")
 
         if self.t == "Distributor":
             self.bp("7.4 Scope \u2014 Private and Public Bodies. ", "The non-circumvention obligations in Clause 7.1 apply to:")
-            self.p("(a) Private Associated Counterparties (landowners, greenhouse operators, heat offtakers, energy counterparties, EPCs): in all cases where the Provider has introduced or disclosed their identity or involvement; and")
-            self.p("(b) Public Bodies (government agencies, municipalities, regulatory bodies, distribution system operators): only where the Provider has made a specific, named introduction to an individual or department within that body. General knowledge that the Provider engages with a public body does not trigger non-circumvention protection.")
+            self.p("(a) Private Associated Counterparties (landowners, greenhouse operators, heat offtakers, energy counterparties, EPCs): in all cases where Digital Energy has introduced or disclosed their identity or involvement; and")
+            self.p("(b) Public Bodies (government agencies, municipalities, regulatory bodies, distribution system operators): only where Digital Energy has made a specific, named introduction to an individual or department within that body. General knowledge that Digital Energy engages with a public body does not trigger non-circumvention protection.")
         elif self.t == "StrategicSupplier":
-            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future customers, including other AI colocation operators, cloud service providers, or enterprise customers.")
+            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to Digital Energy's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future customers, including other AI colocation operators, cloud service providers, or enterprise customers.")
         else:
-            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future end-user customers, cloud service customers, or compute buyers.")
+            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to Digital Energy's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future end-user customers, cloud service customers, or compute buyers.")
 
-        self.bp("7.5 Independent Knowledge Exception. ", f"The obligations in Clause 7.1 do not apply to any Associated Counterparty with whom the {self.party} can demonstrate, by contemporaneous written evidence, that it had an existing business relationship or substantive commercial contact before the date of this LOI or before the Provider's disclosure.")
+        self.bp("7.5 Independent Knowledge Exception. ", f"The obligations in Clause 7.1 do not apply to any Associated Counterparty with whom the {self.party} can demonstrate, by contemporaneous written evidence, that it had an existing business relationship or substantive commercial contact before the date of this LOI or before Digital Energy's disclosure.")
         self.bp(f"7.6 {downstream} Supersession. ", f"If the Parties execute a {downstream}, the non-circumvention provisions of the {downstream} shall replace this Clause 7 upon execution of the {downstream}, except that the survival period in Clause 7.2 shall apply to any introduction made before the {downstream} effective date that is not separately covered by the {downstream}.")
 
     def clause_general(self):
@@ -1294,6 +1573,12 @@ class LOI:
         # the closing line. Hardcoded single-sentence closing matches main.
         # If choices.bespoke_closing is present in YAML, it is silently ignored
         # for backward compatibility.
+        #
+        # v3.5 scope A' (signature block cleanup): removed KvK / registration
+        # lines (duplicate Parties Preamble — scope A''') and removed the
+        # "ACKNOWLEDGED AND AGREED" header (unnecessary on bilateral
+        # instruments; signing = agreement). Added Place: field per Dutch/EU
+        # execution convention (jurisdictional + eIDAS relevance).
         self.p("We look forward to working with you.")
         self.p("")
         self.p("Yours faithfully,")
@@ -1301,30 +1586,25 @@ class LOI:
 
         prov = self.d.get("provider", {})
         self.p(f"For and on behalf of {prov.get('legal_name', '')}", bold=True)
-        self.p(f"KvK: {prov.get('kvk', '')}")
         self.p("")
         self.p("Signature: ____________________________")
-        self.p(f"Name: {prov.get('signatory_name', '')}")
-        self.p(f"Title: {prov.get('signatory_title', '')}")
+        self.p(f"Name: {self._render_placeholder(prov.get('signatory_name'), 'sig_block_name')}")
+        self.p(f"Title: {self._render_placeholder(prov.get('signatory_title'), 'sig_block_title')}")
         self.p("Date: ____________________________")
+        self.p("Place: ____________________________")
 
         self.p("")
         self.line()
         self.p("")
-        self.p("ACKNOWLEDGED AND AGREED:", bold=True)
-        self.p("")
 
         cp = self.d.get("counterparty", {})
         self.p(f"For and on behalf of {cp.get('name', '')}", bold=True)
-        rt = cp.get("reg_type", "")
-        rn = cp.get("reg_number", "")
-        if rt and rn:
-            self.p(f"{rt}: {rn}")
         self.p("")
         self.p("Signature: ____________________________")
-        self.p(f"Name: {cp.get('signatory_name', '')}")
-        self.p(f"Title: {cp.get('signatory_title', '')}")
+        self.p(f"Name: {self._render_placeholder(cp.get('signatory_name'), 'sig_block_name')}")
+        self.p(f"Title: {self._render_placeholder(cp.get('signatory_title'), 'sig_block_title')}")
         self.p("Date: ____________________________")
+        self.p("Place: ____________________________")
 
     def schedule(self):
         # Schedule starts on its own page.
@@ -1380,15 +1660,36 @@ class LOI:
             self.h("Schedule 1 \u2014 Capacity and Technical Requirements")
             self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
-            # v3.2: no DEC Block count; MW IT + Designated Sites only.
+            tech = self.d.get("schedule_1", {}).get("technical", {}) or self.d.get("technical", {})
+            # v3.5 scope N (Jonathan memo): Schedule 1 now reads technical
+            # fields from intake YAML. Previously hardcoded "[To be confirmed]"
+            # placeholders regardless of intake content — caused GPU platform
+            # commitments established in email/user intake to be lost in the
+            # Polarise LOI. Default values kept for backward-compat when
+            # intake omits `schedule_1.technical.*`.
+            gpu_platform = self._render_placeholder(
+                tech.get("gpu_platform"), "body_clause"
+            ) or "[To be confirmed during technical scoping]"
+            rack_density = tech.get("rack_density_kw") or comm.get("rack_density_kw")
+            rack_density_cell = (
+                f"{rack_density} kW/rack"
+                if rack_density and not self._is_tbc(rack_density)
+                else "[To be confirmed]"
+            )
+            cooling = tech.get("cooling") or comm.get(
+                "cooling_topology", "Direct-to-chip liquid cooling"
+            )
+            designated_sites = tech.get("designated_sites") or self._render_placeholder(
+                tech.get("designated_sites"), "body_clause"
+            ) or "To be confirmed during technical scoping"
             self.table(
                 ["Item", "Detail"],
                 [
                     ["Indicative Capacity", f"{comm.get('indicative_mw', '')} MW IT"],
-                    ["Designated Sites", "To be confirmed during technical scoping"],
-                    ["GPU / Accelerator Type", "[To be confirmed during technical scoping]"],
-                    ["Target Rack Density", "[To be confirmed]"],
-                    ["Cooling Requirement", "Direct liquid cooling"],
+                    ["Designated Sites", designated_sites],
+                    ["GPU / Accelerator Type", gpu_platform],
+                    ["Target Rack Density", rack_density_cell],
+                    ["Cooling Requirement", cooling],
                     ["Technical scoping complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Credit assessment complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Sales Order Form issued", f"{self.g('dates', 'loi_date')} + 60 days"],
@@ -1401,15 +1702,22 @@ class LOI:
             self.h("Schedule 1 \u2014 Service Requirements")
             self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
             comm = self.d.get("commercial", {})
+            tech = self.d.get("schedule_1", {}).get("technical", {}) or self.d.get("technical", {})
             types = comm.get("service_type", [])
             type_str = ", ".join(t.replace("_", " ").title() for t in types)
+            gpu_platform = self._render_placeholder(
+                tech.get("gpu_platform"), "body_clause"
+            ) or "[To be confirmed during technical scoping]"
+            data_sovereignty = self._render_placeholder(
+                tech.get("data_sovereignty"), "body_clause"
+            ) or "[To be confirmed]"
             self.table(
                 ["Item", "Detail"],
                 [
                     ["Service Model", type_str],
                     ["Indicative Capacity", comm.get("indicative_capacity", "")],
-                    ["GPU / Accelerator Type", "[To be confirmed during technical scoping]"],
-                    ["Data Sovereignty", "[To be confirmed]"],
+                    ["GPU / Accelerator Type", gpu_platform],
+                    ["Data Sovereignty", data_sovereignty],
                     ["Technical scoping complete", f"{self.g('dates', 'loi_date')} + 30 days"],
                     ["Commercial proposal issued", f"{self.g('dates', 'loi_date')} + 60 days"],
                     ["MSA executed", f"{self.g('dates', 'loi_date')} + 90 days"],
@@ -1775,6 +2083,9 @@ class LOI:
 
         self.letterhead()
         # add_cover() already ends with page break
+        # v3.5.2 scope A''': Parties Preamble renders legal identification
+        # in the body before recitals — cover page is presentation only.
+        self.parties()
         self.recitals()
         self.definitions()
         self.clause2()
@@ -1813,6 +2124,8 @@ class LOI:
         Cl. 5 is IP & Deliverables, Cl. 6 is Tier A light mutual, Cl. 7 is General.
         """
         self.letterhead()
+        # v3.5.2 scope A''': Parties Preamble for EP too.
+        self.parties()
         self.recitals()
         self.definitions_ep()
         self.clause2_ep()
@@ -1859,6 +2172,42 @@ _FAIL_RULES = {
              "'programme spans N...' language regression"),
     # R-23 (v3.4): fabrication gate — implemented as a custom check in qa_lint,
     # not a simple regex. See _check_fabrication_gate() below.
+    # v3.5.2 scope 0 additions:
+    "R-24": (
+        r"\[[A-Za-z][A-Za-z0-9._-]*\.(?:com|eu|de|co\.uk|org|nl|io|ai|ch)\]",
+        "Recital B",
+        "Inline source citation in Recital B (e.g. [polarise.eu]) — source attribution lives in counterparty.source_map YAML, not in rendered prose. Strip brackets.",
+    ),
+    "R-25": (
+        # Vanity-financial patterns — catches unattributed capital-raise language
+        # and valuation vanity. Does NOT catch named-endorser financings like
+        # "backed by Macquarie" or "strategic investment from NVIDIA".
+        #
+        # Patterns (any match = FAIL):
+        #   • "Series A/B/C/D/E/F" (not followed by "from" — that would be a
+        #     specific named investor round and should be Signal-Test-judged)
+        #   • "valuation of" (standalone valuation phrase)
+        #   • "at a €500m valuation" or "at EUR 500m valuation" (valuation adj)
+        #   • "raised $150M" / "raised EUR 117m" (unattributed raise)
+        #   • "growth commitment" (pure financial headline)
+        #   • "SAFE round" / "convertible note"
+        r"\b("
+        r"Series\s+[A-F](?!\s+from\s+\w)"
+        r"|valuation of"
+        r"|at\s+(?:a\s+)?(?:\$|€|£|USD|EUR|GBP)?\s*\d[\d.,]*\s*(?:bn|m|million|billion)\s+valuation"
+        r"|raised\s+(?:\$|€|£|USD|EUR|GBP)?\s*\d[\d.,]*(?:\s*(?:M|B|m|bn|million|billion))?"
+        r"|growth commitment"
+        r"|SAFE round"
+        r"|convertible note"
+        r")\b",
+        "Recital B",
+        "Vanity-financial claim in Recital B — valuation numbers / generic VC labels / unattributed capital-raise language fail Signal Test gate 1. Named-endorser financings (e.g. 'backed by Macquarie') are signal and remain allowed; pure vanity metrics are not.",
+    ),
+    "R-27": (
+        r"(?:Name|Title):\s*\[TBC\]",
+        "sig-block",
+        "'[TBC]' rendered literally in signature-block Name or Title line — must route through _render_placeholder so the line becomes a fillable blank on external-facing drafts.",
+    ),
 }
 
 _WARN_RULES = {
@@ -1882,14 +2231,16 @@ _WARN_RULES = {
         r"depends in part on|"
         r"is intended to evidence|"
         r"while non-binding in its commercial terms|"
-        r"to support the Provider's financing|"
+        r"to support Digital Energy's financing|"
         r"will require the exchange of|"
-        r"The Parties acknowledge that the Provider intends|"
+        r"The Parties acknowledge that Digital Energy intends|"
         r"is intended to form the basis"
         r")",
         "body",
         "Meta-commentary pattern — explains the LOI rather than creating obligations (v3.4)"
     ),
+    # v3.5.2 scope 0 note: R-28 is implemented as a density custom-check in
+    # qa_lint(), not a simple regex (needs occurrence count). See _check_tbc_density().
 }
 
 # R-23 fabrication gate: regex targets material numeric-metric claims in
@@ -2023,6 +2374,19 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
         lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
         fail_count += 1
 
+    # R-28 (v3.5.2) — [TBC] density check in body. A few [TBC] markers are
+    # expected on drafts (signatory title, counterparty reg number pre-
+    # signing); > 5 suggests the intake was not fully prepared and the draft
+    # should loop back to Phase 4/5 for completion before external delivery.
+    if "R-28" not in overrides:
+        tbc_count = text.count("[TBC]")
+        if tbc_count > 5:
+            lines.append(
+                f"  [WARN] R-28  body   [TBC] count ({tbc_count}) exceeds 5 "
+                f"\u2014 intake likely incomplete; consider Phase 4/5 revision before external delivery"
+            )
+            warn_count += 1
+
     if not data.get("programme", {}).get("recital_a_variant"):
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
     if not data.get("choices", {}).get("bespoke_closing"):
@@ -2047,13 +2411,62 @@ def _parse_arg(flag: str) -> str:
     return ""
 
 
+def _migrate_check(path: str) -> int:
+    """v3.5.3 scope K: legacy intake YAML migration pre-flight.
+
+    Inspects intake YAML for missing `counterparty.source_map` (required by
+    v3.4 R-23 fabrication gate). If absent or empty, emits a ready-to-paste
+    snippet with all 5 pillars marked `[TBC]` and exits 0 (non-blocking —
+    the user copies the snippet, pastes into their YAML, and re-runs the
+    generator). If `source_map` is already present, reports that and exits 0.
+
+    Uses raw yaml.safe_load (bypasses full validate()) so legacy YAMLs that
+    would fail other v3.4/v3.5 validators can still be migration-checked.
+    """
+    try:
+        with open(path, "r") as f:
+            raw = yaml.safe_load(f) or {}
+    except Exception as e:
+        print(f"[--migrate-check] Could not read {path}: {e}")
+        return 0
+    cp = raw.get("counterparty", {}) or {}
+    source_map = cp.get("source_map")
+    if source_map and isinstance(source_map, dict) and any(source_map.values()):
+        print(f"[--migrate-check] {path}")
+        print("  OK: counterparty.source_map present with entries.")
+        print("  R-23 fabrication gate will evaluate URL attribution per pillar.")
+        return 0
+    # Missing or empty — emit snippet
+    print(f"[--migrate-check] {path}")
+    print("  counterparty.source_map NOT SET — legacy v3.3 intake.")
+    print("  Paste the following into your YAML under `counterparty:`:")
+    print()
+    print("  source_map:")
+    print("    pillar_1: \"[TBC]\"   # Identity & scale — own website, registry")
+    print("    pillar_2: \"[TBC]\"   # Core business — own website")
+    print("    pillar_3: \"[TBC]\"   # Track record / proof points — named customer press")
+    print("    pillar_4: \"inferred from Phase 1 context\"")
+    print("    pillar_5: \"[TBC]\"   # Forward plans — only if anchored to named third party")
+    print()
+    print("  Replace [TBC] with tier-1 URLs where available. See")
+    print("  _shared/counterpart-description-framework.md for the Signal")
+    print("  Test and tier hierarchy policy.")
+    return 0
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python generate_loi.py <intake.yaml>")
         print("  [--output path.docx]")
         print("  [--override R-11,R-14]")
         print("  [--override-reason \"...\"]")
+        print("  [--migrate-check]          (v3.5.3: inspect YAML for v3.4 source_map; non-blocking)")
         sys.exit(1)
+
+    # v3.5.3 scope K: --migrate-check runs before load_intake so legacy
+    # YAMLs that would fail full validation can still be inspected.
+    if "--migrate-check" in sys.argv:
+        sys.exit(_migrate_check(sys.argv[1]))
 
     data = load_intake(sys.argv[1])
 

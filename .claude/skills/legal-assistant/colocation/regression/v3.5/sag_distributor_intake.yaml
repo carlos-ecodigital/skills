@@ -1,0 +1,104 @@
+# Sovereign AI Grid (SAG) — Distributor Mode B regression intake
+#
+# Tier-1 facts verified via sovereignaigrid.nl:
+#   - Counterparty: Man of Solutions B.V. (NL) operating as the
+#     coordinating entity for the Sovereign AI Grid consortium
+#   - HQ: Amstelveen, Netherlands
+#   - Role: "Consortium coördinatie & governance" (v3.4 corrected wording —
+#     NOT "centrale knooppunt" which was a v3.3 fabrication)
+#   - EuroHPC JU framework participation
+#   - Named member institutions: Easy Solar Group, Digital Energy Group AG,
+#     SourceParts.eu, Desert.Solutions
+#   - Lead Coordinator: Nick Aldewereld
+#
+# This is a consortium-branch Signal Test application: the counterparty IS
+# the coordinating entity, so Gate 1/2/3 apply to members + framework
+# sponsors + public-sector underwriters rather than to the coordinator
+# itself. See _shared/counterpart-description-framework.md Signal Test §
+# "Coordinating-entity branch".
+
+type: Distributor
+
+# --- Provider ---
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  kvk: "98580086"
+  reg_number: "98580086"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
+
+# --- Counterparty ---
+# v3.4 correction: Distributor Mode B (referral / programme coordination —
+# NOT channel reseller Mode A). Counterparty is the consortium's legal
+# coordinating entity, not the consortium as an abstraction.
+counterparty:
+  name: "Man of Solutions B.V."
+  short: "Sovereign AI Grid"
+  address: "Amstelveen, Netherlands [TBC — full street address at signing]"
+  jurisdiction: "the Netherlands"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  reg_type: "KvK"
+  reg_number: "[TBC]"
+  contact_name: "Nick Aldewereld"
+  contact_title: "Lead Coordinator"
+  salutation: "Mr Aldewereld"
+  signatory_name: "Nick Aldewereld"
+  signatory_title: "[TBC — Managing Director]"
+  # Coordinating-entity branch of the Signal Test: named members + named
+  # framework + named public-sector affiliation carry the bankable-
+  # validation signal. Zero "centrale knooppunt" (v3.3 fabrication).
+  # DE Group AG named as a member honestly (intra-group disclosure).
+  description: >-
+    is a Netherlands-based consortium coordination and governance entity
+    operating under the Sovereign AI Grid initiative. Sovereign AI Grid
+    participates in the EuroHPC Joint Undertaking framework and convenes
+    named member institutions including Easy Solar Group, Digital Energy
+    Group AG, SourceParts.eu, and Desert.Solutions under a coordinated
+    programme for sovereign European AI infrastructure. The initiative is
+    led from Amstelveen under Lead Coordinator Nick Aldewereld
+  source_map:
+    pillar_1:
+      - "https://www.sovereignaigrid.nl/"
+    pillar_2:
+      - "https://www.sovereignaigrid.nl/"
+    pillar_3:
+      - "https://www.sovereignaigrid.nl/"
+    pillar_4: "intra-group (DE Group AG named as SAG member — disclosed openly)"
+    pillar_5: "[TBC]"
+
+# --- Distributor-specific (Mode B — programme coordination / referral) ---
+partnership_mode: "referral"
+commercial:
+  # Mode B — referral / coordination, not combined offering
+  territory: "European Union (EuroHPC JU geographies)"
+  target_segments: "public-sector and research institutions procuring sovereign AI compute under EuroHPC-adjacent frameworks"
+  indicative_mw: "to be scoped by consortium demand aggregation"
+
+# --- Choices ---
+choices:
+  pricing: false
+  exclusivity: false
+  existing_nda: false
+  partner_rate: ""
+
+# --- Programme ---
+programme:
+  platform_mw: "100+"
+  recital_a_variant: "sovereignty"   # matches the consortium's own positioning
+
+# --- Protection ---
+protection:
+  nc_duration: "24 months"
+  confidentiality_survival: "3 years"
+
+# --- Dates ---
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
