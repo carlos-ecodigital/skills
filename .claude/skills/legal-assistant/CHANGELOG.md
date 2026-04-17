@@ -5,6 +5,42 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.3 — 2026-04-16
+
+Full LOI engine for all five types. Ships on a single branch with v3.2, after reconciling `bespoke_closing` with OPEN-1 (commit `2097f52`).
+
+### Added
+
+- **Strategic Supplier (SS) full engine** — `clause3_ss()` with purpose-driven sub-clause inclusion (capacity_lock_in → 3.2/3.3; pricing_volume → 3.4/3.5; supply_chain_de_risking → 3.6; engineering_integration → 3.7 with joint_ip choice; pipeline_visibility → 3.8 ROFR with 20-BD window). `clause4_ss()` with 4.1 (conditional), 4.2 (always — Contractual Sequence: LOI → Framework Agreement → SOWs → deliverables), 4.3 (conditional on engineering_integration), 4.4 (always — CoC), 4.5 (conditional), 4.6 (always — roadmap). SS branches in `definitions`, `clause2`, `clause7_nc` (light supply-side, references Framework Agreement), `clause_general`, `schedule` (Scope and Capability Matrix), `recitals` (Recitals C and D). SS-specific `validate()` block (1–2 strategic_purposes required; lead_time_target / volume_indicative / joint_ip required conditionally).
+- **Ecosystem Partnership (EP) full engine** — separate `_build_ep()` pipeline because EP has different structure (no Cl. 5 Project Finance; no Cl. 7 Non-Circumvention; Cl. 5 is IP & Deliverables; Cl. 6 is Tier A light mutual with 7 sub-clauses; Cl. 7 is General with 11 sub-clauses). New methods: `definitions_ep()` (3 terms: CI, Collaboration, Representatives), `clause2_ep()` (non-commercial framing, 4 sub-clauses), `clause3_ep()` (5 sub-clauses — Themes, Activity Categories, Governance, Working-Group Participation, Non-Exclusivity), `clause4_ep()` (Announcements and Branding — 4.1 conditional on `announcement_protocol`, 4.2 conditional on `logo_use`, 4.3 attribution), `clause5_ep()` (IP & Deliverables — 5.1 Background IP, 5.2 Joint Deliverables, 5.3 No Assignment, 5.4 Publication), `clause6_ep()` (Tier A light — 7 sub-clauses mutual), `clause7_ep_general()` (General — 11 sub-clauses with explicit "No Commercial Commitment" in 7.2), `schedule_ep()` (optional Joint Activity Plan — only rendered if `ecosystem.joint_activity_plan` provided). EP-specific `validate()` block.
+- **Recital C/D branches** for SS and EP in `recitals()`.
+- **SKILL.md Phase 0–8 SOP** — structured phases with prompt templates at executable-by-a-colleague detail. Covers trigger, triage (minimum-input floor), type classification, source capture (WebFetch / HubSpot / ClickUp / LinkedIn / press / KVK / Companies House), batched intake, Recital B draft with source map, assumption-confirmation gate, generation + QA, delivery with next-step menu. 300+ lines of new guidance.
+- **SOP.md rewrite** — team-facing 9-step workflow aligned with Phase 0–8. Minimum-input floor documented. What Claude will NOT do spelled out.
+- **`/loi` slash command** — `.claude/commands/loi.md`. Registered at tier-0. Optional counterparty-name argument pre-fills Phase 1.
+- **Per-type version footer** — `DE-LOI-{Type}-v3.2` for EU/DS/WS; `DE-LOI-{Type}-v1.0` for SS/EP.
+- **Regression report** — `regression-v3.3-report.md`. Cudo (WS) + SAG (DS Mode B) + InfraPartners (SS) regenerated against v3.3. 9 + 7 + 4 anti-pattern hits in originals → 0 + 0 + 0 in regenerations. Word-count reduction: Cudo flat (trimmed Recital B balanced by Cl. 4.2 expansion), SAG −576 (−14%, consortium rework), InfraPartners −421 (−11%, SS-native chassis).
+
+### Changed
+
+- **`bespoke_closing` removed from `signature()` per OPEN-1** — commit `2097f52` on main closed OPEN-1 by removing `choices.bespoke_closing` with the rationale that operational near-signature content belongs in the letter body, not the closing line. v3.2 re-added it with a dedupe handler to solve a v3.1 duplicate-phrase bug; v3.3 honors OPEN-1 by removing the dedupe handler entirely. Closing is hardcoded single-sentence "We look forward to working with you." The `choices.bespoke_closing` YAML field is silently ignored for backward compat (no error).
+- **Framework Agreement vocabulary for SS** — SS Cl. 7 and Cl. 8 use "Framework Agreement" as the downstream binding document name, not "MSA". New definition entry for "Framework Agreement" in SS Cl. 1.
+- **`build()` routing** — SS and EP now route through dedicated clause builders instead of falling through to `clause3_eu()` or the v3.2 partial engine.
+- **`validate()`** — extended with type-specific blocks for SS (purpose validation, conditional field requirements) and EP (relationship_type enum, mandatory collaboration_themes and joint_activity_categories).
+
+### Fixed
+
+- **OPEN-1 reconciliation** — v3.2 `da8ad63` added `bespoke_closing` dedupe in conflict with main's `2097f52`. v3.3 removes the dedupe block, restoring main's simple `signature()` behaviour. The handover at `~/.claude/plans/sync-messages-2026-04-16.md` asked for this drop explicitly.
+- **SS partial engine path (v3.2)** — v3.2 had SS and EP route through a placeholder "engine note" branch in `build()`. v3.3 replaces this with full clause execution.
+
+### Verified
+
+- All 6 intake examples (EU / DS Mode A / DS Mode B / WS / SS / EP) regenerate with QA `PASS` status.
+- Body content audit across all 6 produced .docx confirms zero hits for: "14 identified sites", "12 months of commercial commitment", "DEC Block", "minimum commitment term of 5", "We are confident that", Unicode arrows, "Revenue Chain", "(NON-BINDING)" in schedule title, duplicated "We look forward", "(NON-BINDING)" in clause heading.
+- Regression: 3 reviewed LOIs regenerated against v3.3 with anti-pattern hits eliminated (9→0, 7→0, 4→0).
+- Deprecation error (R-18) fires on legacy YAML with `commercial.dec_block_count`.
+
+---
+
 ## v3.2 — 2026-04-16
 
 LOI framework v3.2. Post-mortem on five LOIs produced in 2026-04 (Cerebro, Aldewereld, SAG, InfraPartners, Cudo) surfaced a cluster of template content issues, methodological gaps, and missing relationship types. This release addresses them.
@@ -58,16 +94,12 @@ Add `programme.recital_a_variant: default` (or `sovereignty` / `integration`) to
 - All four existing intake examples (`intake_example_enduser`, `intake_example_distributor`, `intake_example_distributor_referral`, `intake_example_wholesale`) regenerate cleanly under v3.2 with QA `PASS` status.
 - Body content audit confirms: zero hits for "14 identified sites", "12 months of commercial commitment", "DEC Block", "minimum commitment term of 5", "We are confident that", Unicode arrows, "Revenue Chain", "(NON-BINDING) in Schedule title", or duplicated "We look forward" across all four generated documents.
 
-### Unreleased (pending in v3.3)
+### Unreleased
 
-- Full clause builders for Strategic Supplier (Cl. 3.1–3.8 per-purpose + Cl. 4 engagement + Schedule 1 capability matrix).
-- Full clause builders for Ecosystem Partnership (Cl. 1–7 + optional Schedule 1 joint-activity plan).
-- `/loi` slash command registration as user-invocable entry point.
-- SKILL.md Phase 0–8 end-to-end intake SOP (triage → classification → source capture → batched intake → Recital B → confirmation gate → generation + QA → delivery).
-- ASSEMBLY_GUIDE.md 5-type decision tree; SS purpose selector matrix; EP variant guidance; consortium/federation descriptor pattern.
-- FEATURE_MATRIX.md SS + EP columns.
-- SOP.md team-facing workflow rewrite.
-- Regression regeneration of the 5 reviewed LOIs (Cerebro, Aldewereld, SAG, InfraPartners, Cudo) against v3.2 with diff report.
+Everything from the v3.2 § Unreleased was shipped in v3.3 (see above). No open items for the legal-assistant skill beyond the pre-existing blockers noted below.
+
+- `generate_site_hot.py` — Site HoT form-fill engine still pending Git LFS binary fetch. Tracked separately in `~/.claude/plans/temporal-dreaming-meerkat.md` Phase 1.5.
+- SAR md cover bug in `document-factory/generate.py` — out of scope for this skill; diagnosed in a separate session's plan file. ~30 min of Python work.
 
 ---
 

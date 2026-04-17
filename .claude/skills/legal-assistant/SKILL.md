@@ -152,6 +152,253 @@ Rules cover: banned tactical metrics in Recital A (R-1, R-2, R-3, R-20); "We are
 
 State: LOI type selected and why; output file location; any [TO BE CONFIRMED] fields; any choices made on user's behalf and why. Remind them to review Cl. 3 (commercial terms) and Recital B before sending.
 
+## Phase 0–8 Intake SOP (v3.3)
+
+The v3.3 end-to-end SOP. Use this flow when a colleague triggers the skill conversationally or via `/loi`. Phases 0–8 are the canonical order; each phase has a trigger, an action the skill performs, a prompt template to surface to the user, and a handoff to the next phase.
+
+### Phase 0 — Trigger
+
+**Invocation:**
+- `/loi` (optional arg: counterparty short name), OR
+- Natural language ("Generate an LOI for [Company]", "Draft an LOI for [Company]", "LOI for [Company]").
+
+**Skill action:** Detect counterparty name (if provided), open working memory for this session.
+
+### Phase 1 — Triage (one batched round)
+
+**Skill action:** Ask for the minimum set needed to proceed. Refuse to continue below the minimum-input floor.
+
+**Prompt template:**
+```
+I'll help you draft an LOI for [CounterpartyName]. To produce this fast
+and accurately, I need:
+
+1. Counterparty short name (as used in prose, e.g., "Cudo", "InfraPartners")
+2. Website URL
+3. HubSpot company record ID — or company name to search
+4. ClickUp project / task IDs (if any)
+5. Paths to any of:
+   - Email threads (Gmail search query OK)
+   - Fireflies meeting IDs or transcripts
+   - Press / deck / pitch files
+6. Relationship context:
+   - Who owns this relationship? Why now? What triggered the LOI?
+7. Desired turnaround
+
+If a source doesn't exist, say "none". I will not invent data.
+```
+
+**Minimum-input floor:** counterparty legal name + at least one description source (any of website / HubSpot / ClickUp / deck / email thread). If below floor → list what's missing and stop.
+
+**Handoff to Phase 2** when user responds.
+
+### Phase 2 — Type Classification
+
+**Skill action:** Apply the 5-type decision tree (`ASSEMBLY_GUIDE.md` §1). Return proposed type + one-sentence rationale + red/yellow/green confidence. Ask clarifying question if yellow/red.
+
+**Prompt template (green):**
+```
+Proposed type: **[Type]** (full: [Full Name])
+Rationale: [one sentence — why this type based on counterparty profile]
+Confidence: 🟢 Green
+
+Proceeding to source capture. Say "stop" if you disagree.
+```
+
+**Prompt template (yellow/red):**
+```
+Proposed type: **[Type]** (full: [Full Name])
+Rationale: [one sentence]
+Confidence: 🟡 Yellow | 🔴 Red — [reason, e.g., "counterparty could be distributor or wholesale; the test is whether they add value or resell raw capacity"]
+
+Question to resolve: [one clarifying question]
+```
+
+**Handoff to Phase 3** when classification confirmed.
+
+### Phase 3 — Source Capture (autonomous, parallel)
+
+**Skill action:** Run these in parallel (where tools available):
+- `WebFetch` website (about / products / customers / leadership / news)
+- HubSpot MCP (`search_crm_objects`, `get_crm_objects`) for company + deals + engagement
+- ClickUp MCP (`clickup_search`) for associated tasks/docs
+- `WebFetch` LinkedIn company page
+- `WebSearch` for recent press/funding/customers (last 18 months)
+- `Read` user-provided email / Fireflies / deck paths
+- For NL counterparties: KVK lookup; for UK: Companies House
+
+**Skill action:** Extract structured facts into 5 pillars per `_shared/counterpart-description-framework.md`. Tag each material claim with its source. Surface unresolved gaps.
+
+**Internal scratch format:**
+```
+Pillar 1 (Identity & Scale):
+  - Legal entity: [source]
+  - HQ: [source]
+  - Years operating: [source]
+  - Funding stage: [source]
+
+Pillar 2 (Core business & positioning):
+  - Products: [source]
+  - Customers: [source]
+
+Pillar 3 (Track record & proof points):
+  - Metric X: [source]
+  - Metric Y: [source]
+
+Pillar 4 (Strategic fit with Provider):
+  - [inferred from Phase 1 context]
+
+Pillar 5 (Forward plans):
+  - [only if material to this LOI]
+
+Gaps:
+  - [field X]: could not source; ask user
+```
+
+**Handoff to Phase 4** with gap list.
+
+### Phase 4 — Batched Intake (one round, only for gaps)
+
+**Skill action:** Ask only for fields that Phase 3 did not resolve. Include type-specific required fields from `validate()`. For SS, force 1–2 strategic purpose selection. For DS Mode A and SS, request bespoke Cl. 3 language.
+
+**Prompt template (example for Wholesale):**
+```
+Resolved from sources:
+- Legal entity: Cudo Ventures Ltd (UK Company No. 11065412) [source: Companies House]
+- HQ: London, UK [source: website]
+- Deployed GPUs: 300,000+ globally [source: website, Reuters 2025-11]
+
+Gaps — please provide in one response:
+- **Indicative MW IT**: approximate capacity interest (no DEC Blocks)
+- **Indicative term**: years
+- **Expansion target**: MW IT
+- **Recital A variant**: default | sovereignty | integration — I suggest `default` (wholesale buyer profile); confirm?
+- **Pricing in LOI?** default: no, defer to MSA — confirm?
+- **Existing NDA?** default: no, embed NCNDA — confirm?
+
+Please respond in one message.
+```
+
+**Type-specific prompt additions:**
+- **SS**: strategic_purposes (1–2 from menu); lead_time_target (if capacity_lock_in); volume_indicative (if pricing_volume); joint_ip (if engineering_integration)
+- **EP**: relationship_type; collaboration_themes (list); joint_activity_categories (subset); announcement_protocol; logo_use
+- **DS Mode A**: bespoke Cl. 3.1 Partnership Overview; Cl. 3.2(b) Partner Service Scope
+
+**Handoff to Phase 5** when user responds with values.
+
+### Phase 5 — Recital B Draft
+
+**Skill action:** Apply 5-pillar framework, type-tuned per `_shared/counterpart-description-framework.md`. Produce 3–5 sentence paragraph, 80–150 words. Present draft + source map.
+
+**Prompt template:**
+```
+Recital B draft ([N] words):
+
+> [Counterparty] (the "Customer") is [Pillar 1 — identity & scale]. The
+> Customer [Pillar 2 — business & positioning]. [Pillar 3 — track record
+> & proof points]. [Pillar 4 — strategic fit with Provider]. [Pillar 5
+> — forward plans, if material]
+
+Source map:
+- Pillar 1 (Identity): [source: website /about, Companies House]
+- Pillar 2 (Business): [source: website /products, LinkedIn]
+- Pillar 3 (Track record): [source: website /capacity, press: Reuters 2025-11]
+- Pillar 4 (Strategic fit): [inferred from Phase 1 context]
+- Pillar 5 (Forward plans): [N/A | source: press]
+
+Accept, or request edits?
+```
+
+**Handoff to Phase 6** when user accepts Recital B.
+
+### Phase 6 — Assumption-Confirmation Gate
+
+**Skill action:** Present a single-screen summary of every decision that will go into the .docx. One last chance to catch errors before generation.
+
+**Prompt template:**
+```
+📋 Ready to generate. Final confirmation:
+
+Type: [Type]
+Provider: Digital Energy Netherlands B.V. (Jelmer ten Wolde, CPO)
+Counterparty: [Name], [address], [reg_type]: [reg_number]
+Signatory: [Name], [Title]
+Contact: [Name], [Title]
+
+Recital A variant: [variant]
+Recital B: [first 60 chars...] ([N] words)
+
+Commercial:
+- [type-specific key values]
+
+Choices:
+- pricing: [yes/no]
+- existing_nda: [yes/no]
+- [other choices per type]
+
+Dates:
+- LOI date: [date]
+- Validity: [date]
+
+Output file: YYYYMMDD_DEG_LOI-[Type]_[Company]_(DRAFT).docx
+
+Confirm (yes) or specify changes?
+```
+
+Any `no` → loop back to the relevant phase. `yes` → Phase 7.
+
+### Phase 7 — Generation + QA
+
+**Skill action:** Write YAML to `/tmp/intake_[company]_[timestamp].yaml`. Run `python generate_loi.py intake.yaml --output [path]`. Interpret QA status:
+
+- **PASS** → Phase 8.
+- **PASS_WITH_WARN** → surface warnings; ask user to accept.
+- **FAIL** → surface findings; offer auto-fix (regenerate with different variant or drop offending bespoke) or allow user to `--override R-xx` with reason.
+
+**Prompt template (FAIL):**
+```
+❌ QA FAIL — build blocked.
+
+Findings:
+[FAIL] R-11: ISO certification in Recital B — "ISO 27001"
+  → Suggested fix: remove certification from Recital B, or set choices.cert_relevant=true
+
+Options:
+(1) Apply suggested fix and regenerate
+(2) Override R-11 with reason: __________
+(3) Edit Recital B manually
+```
+
+### Phase 8 — Delivery
+
+**Skill action:** Emit path and next-step menu. Hand off to downstream skills as needed.
+
+**Prompt template (PASS):**
+```
+✅ Generated: [absolute path to .docx]
+    Type: DE-LOI-[Type]-v3.3
+    Recital A variant: [variant]
+    Recital B: [N] words
+    QA: PASS (warnings: [N], failures: 0)
+    QA report: [path to _qa.txt]
+    Remaining [TO BE CONFIRMED]: [list or "none"]
+
+Next step (pick one):
+(1) Open in Word for manual review
+(2) Export to PDF via document-factory pipeline
+(3) Hand off to executive-comms for DocuSign email draft
+(4) Log against HubSpot deal (stage: LOI Sent)
+(5) Done
+```
+
+### Invariants across phases
+
+- **Do not hallucinate.** If a pillar or field can't be sourced, ask the user or flag [TO BE CONFIRMED]. Fabrication is the biggest failure mode.
+- **Source-attribute every material claim** in Recital B. The source map in Phase 5 is not optional.
+- **One batched round per phase.** Do not iterate-ask. Phase 1 is one prompt. Phase 4 is one prompt. Phase 5 presents one draft.
+- **Linter is enforcing, not advisory.** `fail` blocks output. Override requires a recorded reason.
+- **Confirmation gate is non-negotiable.** Phase 6 exists specifically because downstream "just fix it" is worse than a 30-second pre-flight.
+
 ## Site Sourcing Stream Workflow — DE Site HoT
 
 This stream uses the 7-phase conversational intake pattern. The intake is the valuable part; document generation is a single shot at the end. **The HoT body is NEVER modified** — it is a legally reviewed bilingual document. Only Annex A fields are populated. If a request implies body modification, REFUSE and escalate to `legal-counsel`.

@@ -124,6 +124,55 @@ def validate(d: dict):
     if t == "EndUser":
         if not d.get("commercial", {}).get("service_type"):
             errors.append("commercial.service_type required for EndUser")
+    if t == "StrategicSupplier":
+        supplier = d.get("supplier", {})
+        if not supplier.get("capability_category"):
+            errors.append("supplier.capability_category required for StrategicSupplier")
+        if not supplier.get("core_capability"):
+            errors.append("supplier.core_capability required for StrategicSupplier")
+        purposes = supplier.get("strategic_purposes", [])
+        if not purposes or not (1 <= len(purposes) <= 2):
+            errors.append("supplier.strategic_purposes required for StrategicSupplier (1-2 items)")
+        valid_purposes = {"capacity_lock_in", "pricing_volume",
+                           "supply_chain_de_risking", "engineering_integration",
+                           "pipeline_visibility"}
+        for p in purposes:
+            if p not in valid_purposes:
+                errors.append(
+                    f"supplier.strategic_purposes: invalid '{p}'. "
+                    f"Valid: {sorted(valid_purposes)}"
+                )
+        if "capacity_lock_in" in purposes and not supplier.get("lead_time_target"):
+            errors.append(
+                "supplier.lead_time_target required when strategic_purposes "
+                "includes capacity_lock_in"
+            )
+        if "pricing_volume" in purposes and not supplier.get("volume_indicative"):
+            errors.append(
+                "supplier.volume_indicative required when strategic_purposes "
+                "includes pricing_volume"
+            )
+        if ("engineering_integration" in purposes
+                and not d.get("choices", {}).get("joint_ip")):
+            errors.append(
+                "choices.joint_ip required when strategic_purposes "
+                "includes engineering_integration (none | background | foreground)"
+            )
+    if t == "EcosystemPartnership":
+        eco = d.get("ecosystem", {})
+        if not eco.get("relationship_type"):
+            errors.append("ecosystem.relationship_type required for EcosystemPartnership")
+        valid_rel = {"standards_body", "university", "research_consortium",
+                      "co_marketing", "industry_association", "policy_partner",
+                      "other"}
+        if eco.get("relationship_type") and eco.get("relationship_type") not in valid_rel:
+            errors.append(
+                f"ecosystem.relationship_type must be one of {sorted(valid_rel)}"
+            )
+        if not eco.get("collaboration_themes"):
+            errors.append("ecosystem.collaboration_themes required for EcosystemPartnership")
+        if not eco.get("joint_activity_categories"):
+            errors.append("ecosystem.joint_activity_categories required for EcosystemPartnership")
 
     # Recital A variant validation
     variant = d.get("programme", {}).get("recital_a_variant", "default")
@@ -436,6 +485,39 @@ class LOI:
                 "data, pricing models, and infrastructure specifications, and wish to establish binding "
                 "confidentiality and non-circumvention protections to facilitate those discussions."
             )
+        elif self.t == "StrategicSupplier":
+            self.p(
+                f"(C) The Parties wish to record their mutual interest in establishing a strategic "
+                f"supply partnership under which the {self.party} would contribute to the delivery of "
+                f"the Provider's DEC platform, on the indicative terms set out below. This letter of "
+                f'intent and non-circumvention non-disclosure agreement (the "LOI") reflects both '
+                f"Parties' strategic intent and is intended to form the basis for further technical and "
+                f"commercial negotiation toward a Framework Agreement and statements of work for named "
+                f"Provider projects."
+            )
+            self.p(
+                "(D) The Parties recognise that the discussions contemplated by this LOI will require "
+                "the exchange of commercially sensitive and competitively valuable information, including "
+                "site-specific information about Provider projects and Partner design and manufacturing "
+                "methodology, and wish to establish binding confidentiality and non-circumvention "
+                "protections to facilitate those discussions."
+            )
+        elif self.t == "EcosystemPartnership":
+            themes_list = self.d.get("ecosystem", {}).get("collaboration_themes", [])
+            themes_str = ", ".join(themes_list) if themes_list else "[COLLABORATION_THEMES]"
+            self.p(
+                f"(C) The Parties wish to record their mutual interest in a non-commercial ecosystem "
+                f"collaboration focused on {themes_str}, on the framework set out in Clauses 3 through 5. "
+                f'This letter of intent (the "LOI") reflects both Parties\' strategic intent to collaborate '
+                f"on a non-commercial basis and does not contemplate any payment, capacity purchase, or "
+                f"commercial commitment between the Parties."
+            )
+            self.p(
+                "(D) The Parties recognise that the discussions and joint activities contemplated by "
+                "this LOI may involve the exchange of commercially sensitive or non-public information "
+                "in connection with research, policy, or programme activities, and wish to establish "
+                "mutual confidentiality protections to facilitate that collaboration."
+            )
         else:
             self.p(
                 f"(C) The Parties wish to record their mutual interest in the {self.party} procuring AI "
@@ -452,7 +534,7 @@ class LOI:
         defs = []
         defs.append(('"Affiliate"', 'means, in relation to a Party, any entity that directly or indirectly controls, is controlled by, or is under common control with that Party, where "control" means the ownership of more than 50% of the voting rights or equivalent ownership interest;'))
 
-        if self.t in ("Distributor", "Wholesale"):
+        if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             ac_text = (
                 '"Associated Counterparty" means, in relation to a Site Identifier, any of the following '
                 "with whom the Provider has a contractual, commercial, or active non-public engagement "
@@ -486,7 +568,7 @@ class LOI:
             "writing, orally, electronically, or by inspection, including any information that by its "
             "nature or the circumstances of disclosure would reasonably be understood to be confidential"
         )
-        if self.t in ("Distributor", "Wholesale"):
+        if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             ci_text += ", and including metadata, EXIF data, digital artifacts, file names, folder names, and any derivative information"
         ci_text += ". The existence and contents of this LOI are Confidential Information;"
         defs.append(("", ci_text))
@@ -496,24 +578,39 @@ class LOI:
         defs.append(('"Designated Site"', "means any DEC or DEC site designated by the Provider for the delivery of capacity to the " + self.party + ", as confirmed in the MSA;"))
         defs.append(('"Financing Party"', "means any bank, financial institution, fund, security trustee, or other entity providing or arranging " + ("debt, mezzanine, or structured " if self.t != "EndUser" else "") + "finance to the Provider or any of its Affiliates in connection with the development or operation of any DEC;"))
 
+        if self.t == "StrategicSupplier":
+            defs.append((
+                '"Framework Agreement"',
+                "means the definitive Framework Agreement and accompanying statements of work to be negotiated between the Parties, setting out the commercial and operational framework for the supply relationship;"
+            ))
+
         if self.t == "Distributor":
             defs.append(('"MSA"', "means the definitive Master Services Agreement or partnership agreement to be negotiated between the Parties;"))
         elif self.t == "Wholesale":
             defs.append(('"MSA"', "means the definitive Master Services Agreement to be negotiated between the Parties, incorporating the Sales Order Form, SLA Schedule, and Pricing Framework;"))
-        else:
+        elif self.t == "EndUser":
             defs.append(('"MSA"', "means the definitive service agreement to be negotiated between the Parties;"))
+        # StrategicSupplier uses Framework Agreement (above) — no MSA definition.
 
         if self.t == "Distributor":
             defs.append(('"Protected Business Information" or "PBI"', "means the Provider's proprietary methodologies, strategies, and frameworks including: (a) site-sourcing and land-acquisition methodology; (b) energy procurement and grid connection strategy; (c) regulatory and permitting playbook; (d) heat offtake and energy recycling commercial model; (e) financial and operational modelling frameworks; (f) DEC design specifications and engineering standards; and (g) colocation pricing methodology and deal economics;"))
+
+        # SS: PBI only if engineering_integration in strategic purposes
+        if self.t == "StrategicSupplier":
+            purposes = set(self.d.get("supplier", {}).get("strategic_purposes", []))
+            if "engineering_integration" in purposes:
+                defs.append(('"Protected Business Information" or "PBI"', "means the Provider's proprietary design, engineering, and infrastructure integration methodologies, interface specifications, and technical reference architectures disclosed in connection with the design integration collaboration under Clause 3.7;"))
 
         if self.t == "Distributor":
             defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of an MSA for the Transaction, including all activities under any companion agreements between the Parties (such as a Referral Agreement);"))
         elif self.t == "Wholesale":
             defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of an MSA for the provision of AI colocation services;"))
+        elif self.t == "StrategicSupplier":
+            defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of a Framework Agreement and accompanying statements of work for the supply relationship;"))
         else:
             defs.append(('"Purpose"', "means evaluating, negotiating, and progressing toward the execution of an MSA;"))
 
-        if self.t in ("Distributor", "Wholesale"):
+        if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             defs.append(('"Ready-for-Service" or "RFS"', "means the date on which a DEC (or a discrete capacity allocation within a DEC) has been commissioned and is available for the provision of colocation services;"))
 
         defs.append(('"Representatives"', "means, in relation to a Party, its Affiliates, and its and their respective directors, officers, employees, agents, and professional advisers;"))
@@ -526,7 +623,7 @@ class LOI:
         elif self.t == "EndUser":
             defs.append(('"Services"', "means the AI compute infrastructure services to be provided by the Provider, the scope of which will depend on the service model selected under Clause 3.1."))
 
-        if self.t in ("Distributor", "Wholesale"):
+        if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
             defs.append(('"Site Identifier"', "means any information that identifies or could reasonably be used to identify a specific DEC location, including: address, GPS coordinates, cadastral reference, project codename, photographs, aerial imagery, file names, folder names, metadata, and any information derived from the foregoing;"))
 
         if self.t == "Distributor":
@@ -547,11 +644,19 @@ class LOI:
             self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic partnership under which the {self.party} would participate in the delivery of AI colocation services to end-user customers through the Provider's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
         elif self.t == "Wholesale":
             self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring dedicated AI colocation capacity at the Provider's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
+        elif self.t == "StrategicSupplier":
+            self.p(f"2.1 This LOI records the Parties' mutual interest in establishing a strategic supply partnership under which the {self.party} would contribute to the delivery of the Provider's DEC platform, on the indicative terms set out in Clauses 3 and 4.")
         else:
             self.p(f"2.1 This LOI records the Parties' mutual interest in the {self.party} procuring AI compute infrastructure services at the Provider's DEC facilities, on the indicative terms set out in Clauses 3 and 4.")
 
-        if self.t in ("Distributor", "Wholesale"):
-            self.p("2.2 The Parties intend this LOI to provide " + ("a framework for further commercial discussion and negotiation" if self.t == "Distributor" else "the basis for technical scoping and commercial negotiation") + " toward a definitive MSA. The commercial terms in Clauses 3 and 4 are non-binding expressions of intent.")
+        if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
+            if self.t == "Distributor":
+                scoping_phrase = "a framework for further commercial discussion and negotiation toward a definitive MSA"
+            elif self.t == "Wholesale":
+                scoping_phrase = "the basis for technical scoping and commercial negotiation toward a definitive MSA"
+            else:  # StrategicSupplier
+                scoping_phrase = "a framework for further technical and commercial discussion toward a definitive Framework Agreement"
+            self.p(f"2.2 The Parties intend this LOI to provide {scoping_phrase}. The commercial terms in Clauses 3 and 4 are non-binding expressions of intent.")
             self.p("2.3 The confidentiality, non-circumvention, and general provisions in Clauses 5 through 8 are legally binding and enforceable from the date of execution.")
         else:
             self.p("2.2 The commercial terms in Clauses 3 and 4 are non-binding expressions of intent. The confidentiality and general provisions in Clauses 5 through 7 are legally binding and enforceable from the date of execution.")
@@ -744,6 +849,216 @@ class LOI:
         # v3.2: indicative, not "minimum commitment"
         self.bp("3.5 Indicative Term. ", f"The {self.party} anticipates a commitment term of approximately {term}, indicative only and subject to confirmation in the MSA.")
 
+    def clause3_ss(self):
+        """v3.3: Strategic Supplier Cl. 3 — Partnership Scope.
+
+        3.1 Capability Contribution (ALWAYS). Then 3.2-3.8 are purpose-driven:
+        - capacity_lock_in       -> 3.2 Capacity Reservation, 3.3 Lead-Time Targets
+        - pricing_volume         -> 3.4 Pricing Framework, 3.5 Volume Tiers
+        - supply_chain_de_risking-> 3.6 Dual-Source + Continuity
+        - engineering_integration-> 3.7 Design Integration + IP Allocation
+        - pipeline_visibility    -> 3.8 Preferred-Supplier / ROFR
+        """
+        self.h("3. Partnership Scope")
+        supplier = self.d.get("supplier", {})
+        purposes = set(supplier.get("strategic_purposes", []))
+
+        # 3.1 Capability Contribution (ALWAYS)
+        self.bp(
+            "3.1 Capability Contribution. ",
+            "Under the envisaged partnership:"
+        )
+        self.p(
+            "(a) the Provider would contribute the site, energy procurement, grid "
+            "connection, land and regulatory compliance, long-term operational "
+            "responsibility, and integration into the Provider's broader DEC "
+            "platform for each Designated Site; and"
+        )
+        self.p(
+            f"(b) the {self.party} would contribute "
+            f"{supplier.get('core_capability', '[CAPABILITY DESCRIPTION TO BE CONFIRMED]')}."
+        )
+        self.p(
+            "The precise scope boundaries, responsibility matrix, and commercial "
+            "terms will be defined in the Framework Agreement and accompanying "
+            "statements of work."
+        )
+
+        # 3.2 Capacity Reservation — IF capacity_lock_in
+        if "capacity_lock_in" in purposes:
+            lead_time = supplier.get("lead_time_target", "[LEAD TIME TO BE CONFIRMED]")
+            self.bp(
+                "3.2 Capacity Reservation. ",
+                f"The Provider has indicated a projected demand across its active "
+                f"development pipeline. Subject to commercial agreement, the "
+                f"{self.party} will reserve capacity in its manufacturing or "
+                f"service-delivery plan to support the Provider's indicative "
+                f"pipeline, with specific volumes and delivery windows set out in "
+                f"the Framework Agreement."
+            )
+            # 3.3 Lead-Time Targets — same trigger
+            self.bp(
+                "3.3 Lead-Time Targets. ",
+                f"The {self.party} targets {lead_time}. The Framework Agreement "
+                f"will set the binding lead-time commitments, performance "
+                f"measurement, and remedies for delay."
+            )
+
+        # 3.4 Pricing Framework — IF pricing_volume
+        if "pricing_volume" in purposes:
+            volume = supplier.get("volume_indicative", "[VOLUME TO BE CONFIRMED]")
+            self.bp(
+                "3.4 Pricing Framework. ",
+                "The pricing framework will be structured as cost-plus, unit "
+                "economics, or volume-tier model as appropriate to the supply "
+                "category. Specific pricing, volume thresholds, and escalation "
+                "mechanisms will be set out in the Framework Agreement."
+            )
+            # 3.5 Volume Tiers — same trigger
+            self.bp(
+                "3.5 Volume Tiers. ",
+                f"Indicative volume contemplated: {volume}. The Framework "
+                f"Agreement will set out final volume tiers and the commercial "
+                f"principles applicable at each tier. All volumes and pricing "
+                f"in this LOI are non-binding."
+            )
+
+        # 3.6 Dual-Source and Continuity — IF supply_chain_de_risking
+        if "supply_chain_de_risking" in purposes:
+            self.bp(
+                "3.6 Dual-Source and Continuity Commitments. ",
+                f"The {self.party} acknowledges the Provider's requirement for "
+                f"supply-chain resilience. The Parties will discuss, and document "
+                f"in the Framework Agreement: (a) component substitution and "
+                f"second-source provisions; (b) continuity commitments, including "
+                f"obligations to provide advance notice of discontinuation and to "
+                f"support orderly transition; and (c) delivery service-level "
+                f"commitments and remedies for failure to meet them."
+            )
+
+        # 3.7 Design Integration and IP Allocation — IF engineering_integration
+        if "engineering_integration" in purposes:
+            joint_ip = self.g("choices", "joint_ip", default="background").lower()
+            if joint_ip == "none":
+                ip_clause = (
+                    "no foreground IP is contemplated as a deliverable of the "
+                    "collaboration, and any IP developed will remain with the "
+                    "Party that created it;"
+                )
+            elif joint_ip == "foreground":
+                ip_clause = (
+                    "foreground IP developed jointly in the course of the "
+                    "collaboration will be jointly owned, with cross-licences on "
+                    "terms to be agreed in the Framework Agreement;"
+                )
+            else:  # background (default)
+                ip_clause = (
+                    "each Party retains all right, title, and interest in its "
+                    "background IP; any foreground IP developed jointly will be "
+                    "allocated per the principles set out in the Framework Agreement;"
+                )
+            self.bp(
+                "3.7 Design Integration and IP Allocation. ",
+                f"The Parties will collaborate on design integration across the "
+                f"specified interfaces between the Provider's DEC platform and "
+                f"the {self.party}'s contribution. IP allocation: (a) {ip_clause} "
+                f"(b) no Party assigns pre-existing IP by reason of this LOI or "
+                f"any discussions under it; and (c) the full IP framework will be "
+                f"set out in the Framework Agreement."
+            )
+
+        # 3.8 Preferred-Supplier / ROFR — IF pipeline_visibility
+        if "pipeline_visibility" in purposes:
+            self.bp(
+                "3.8 Preferred-Supplier and Right of First Refusal. ",
+                f"Subject to commercial agreement in the Framework Agreement, the "
+                f"Provider intends to grant the {self.party} a right of first "
+                f"refusal on the procurement of the supply scope set out in "
+                f"Clause 3.1(b) across the Provider's active development pipeline. "
+                f"The right of first refusal requires the {self.party} to submit "
+                f"a compliant proposal within 20 Business Days of the Provider's "
+                f"invitation. This LOI does not create any binding right of first "
+                f"refusal; the terms will be set out in the Framework Agreement."
+            )
+
+    def clause4_ss(self):
+        """v3.3: Strategic Supplier Cl. 4 — Pipeline Engagement.
+
+        4.2 Contractual Sequence, 4.4 Change of Control, 4.6 Implementation
+        Roadmap are ALWAYS. Others are purpose-driven.
+        """
+        self.h("4. Pipeline Engagement")
+        purposes = set(self.d.get("supplier", {}).get("strategic_purposes", []))
+
+        # 4.1 Project Introduction Process — IF pipeline_visibility
+        if "pipeline_visibility" in purposes:
+            self.bp(
+                "4.1 Project Introduction Process. ",
+                f"Following execution of this LOI, the Provider intends to "
+                f"maintain a pipeline register of Designated Sites. The "
+                f"{self.party} will be invited to participate in named project "
+                f"opportunities on the cadence and criteria set out in the "
+                f"Framework Agreement."
+            )
+
+        # 4.2 Contractual Sequence (ALWAYS) — mirrors WS Cl. 4.2 pattern
+        self.bp(
+            "4.2 Contractual Sequence. ",
+            "The Parties acknowledge the intended progression of commercial instruments:"
+        )
+        self.p("(a) this LOI, setting out non-binding commercial intent and binding confidentiality and non-circumvention;")
+        self.p("(b) a Framework Agreement, setting out the definitive commercial and operational framework for the supply relationship;")
+        self.p("(c) one or more Statements of Work for named Provider projects, each executed under the Framework Agreement; and")
+        self.p("(d) site-specific deliverables, schedules, or operational annexes executed under each Statement of Work.")
+        self.p(
+            "Each stage is designed to provide increasing commercial certainty "
+            "and to support the Provider's project finance activities."
+        )
+
+        # 4.3 Joint-Development Governance — IF engineering_integration
+        if "engineering_integration" in purposes:
+            self.bp(
+                "4.3 Joint-Development Governance. ",
+                "The Parties intend to establish a joint design and engineering "
+                "working group to coordinate interfaces, design reviews, and "
+                "lifecycle decisions. The governance structure, decision rights, "
+                "and escalation paths will be set out in the Framework Agreement."
+            )
+
+        # 4.4 Change of Control (ALWAYS)
+        self.bp(
+            "4.4 Change of Control. ",
+            f"If, during the term of this LOI, a direct competitor of the "
+            f"Provider (as determined by reference to its primary business being "
+            f"the development, ownership, or operation of colocation facilities "
+            f"for high-density compute workloads) acquires Control of the "
+            f"{self.party}, the Provider may terminate this LOI by written notice "
+            f"with immediate effect. Upon such termination, the confidentiality "
+            f"and non-circumvention obligations in Clauses 6 and 7 shall "
+            f"continue for their stated survival periods."
+        )
+
+        # 4.5 Exclusivity — IF capacity_lock_in AND choices.exclusivity
+        if "capacity_lock_in" in purposes and self.choice("exclusivity"):
+            self.bp(
+                "4.5 Exclusivity. ",
+                "Subject to execution of the Framework Agreement and achievement "
+                "of the reservation commitments set out therein, the Parties "
+                "intend to agree a scope of mutual exclusivity. This LOI does "
+                "not create any exclusivity; the terms will be agreed in the "
+                "Framework Agreement."
+            )
+
+        # 4.6 Implementation Roadmap (ALWAYS)
+        self.bp(
+            "4.6 Implementation Roadmap. ",
+            "Following execution of this LOI, the Parties intend to proceed as follows:"
+        )
+        self.p("(a) Technical and commercial scoping (target: 30 days post-LOI) — detailed discovery on scope, capability, lead times, pricing framework, and IP allocation.")
+        self.p("(b) Draft Framework Agreement (target: 60 days post-LOI) — the Provider will issue a draft Framework Agreement incorporating the agreed terms.")
+        self.p("(c) Framework Agreement negotiation and execution (target: 90 days post-LOI) — the Parties will negotiate and execute the Framework Agreement.")
+        self.p("These timelines are indicative and non-binding.")
+
     def clause4(self):
         if self.t == "Distributor":
             self.h("4. Relationship Structure and Protection")
@@ -856,11 +1171,14 @@ class LOI:
                 self.bp("6.16 Remedies. ", "Each Party acknowledges that a breach of this Clause 6 may cause the disclosing Party irreparable harm for which damages would not be an adequate remedy. The disclosing Party shall be entitled to seek injunctive or other equitable relief from any court of competent jurisdiction, without the need to prove actual loss and without prejudice to any other rights or remedies.")
 
     def clause7_nc(self):
-        if self.t == "EndUser":
-            return  # No NC for End Users
+        if self.t == "EndUser" or self.t == "EcosystemPartnership":
+            return  # No NC for End Users or Ecosystem Partnerships
 
         self.h("7. Non-Circumvention (BINDING)")
         nc_dur = self.g("protection", "nc_duration", default="24 months")
+
+        # v3.3: for SS, downstream agreement is "Framework Agreement"; otherwise "MSA".
+        downstream = "Framework Agreement" if self.t == "StrategicSupplier" else "MSA"
 
         self.p(f"7.1 The {self.party} shall not, directly or indirectly, without the prior written consent of the Provider:")
 
@@ -868,22 +1186,27 @@ class LOI:
             self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with the Purpose or the Transaction;")
             self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty; or")
             self.p(f"(c) attempt to divert or appropriate any business opportunity disclosed by the Provider in connection with the Purpose or the Transaction.")
+        elif self.t == "StrategicSupplier":
+            self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with this LOI or any Provider project; or")
+            self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by the Provider.")
         else:  # Wholesale — lighter scope
             self.p(f"(a) contact, solicit, deal with, or enter into any business relationship with any Associated Counterparty introduced by the Provider in connection with this LOI or the Services; or")
             self.p(f"(b) circumvent, avoid, or bypass the Provider in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by the Provider.")
 
-        self.bp("7.2 Duration. ", f"The obligations in this Clause 7 shall continue for {nc_dur} after the earlier of: (a) the expiry or termination of this LOI; or (b) the expiry or termination of the MSA, if one is executed.")
+        self.bp("7.2 Duration. ", f"The obligations in this Clause 7 shall continue for {nc_dur} after the earlier of: (a) the expiry or termination of this LOI; or (b) the expiry or termination of the {downstream}, if one is executed.")
         self.bp("7.3 Deemed Introduction. ", f"The Provider's sharing of any Site Identifier with the {self.party} shall constitute a deemed introduction of all Associated Counterparties for that site. The Provider is not required to separately name each Associated Counterparty.")
 
         if self.t == "Distributor":
             self.bp("7.4 Scope \u2014 Private and Public Bodies. ", "The non-circumvention obligations in Clause 7.1 apply to:")
             self.p("(a) Private Associated Counterparties (landowners, greenhouse operators, heat offtakers, energy counterparties, EPCs): in all cases where the Provider has introduced or disclosed their identity or involvement; and")
             self.p("(b) Public Bodies (government agencies, municipalities, regulatory bodies, distribution system operators): only where the Provider has made a specific, named introduction to an individual or department within that body. General knowledge that the Provider engages with a public body does not trigger non-circumvention protection.")
+        elif self.t == "StrategicSupplier":
+            self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future customers, including other colocation operators, cloud service providers, or enterprise customers.")
         else:
             self.bp("7.4 Scope Limitation. ", f"The non-circumvention obligations in this Clause 7 are limited to the Provider's supply-side relationships (site partners, energy counterparties, and infrastructure providers). Nothing in this Clause 7 restricts the {self.party} from conducting its own business with its existing or future end-user customers, cloud service customers, or compute buyers.")
 
         self.bp("7.5 Independent Knowledge Exception. ", f"The obligations in Clause 7.1 do not apply to any Associated Counterparty with whom the {self.party} can demonstrate, by contemporaneous written evidence, that it had an existing business relationship or substantive commercial contact before the date of this LOI or before the Provider's disclosure.")
-        self.bp("7.6 MSA Supersession. ", "If the Parties execute an MSA, the non-circumvention provisions of the MSA shall replace this Clause 7 upon execution of the MSA, except that the survival period in Clause 7.2 shall apply to any introduction made before the MSA effective date that is not separately covered by the MSA.")
+        self.bp(f"7.6 {downstream} Supersession. ", f"If the Parties execute a {downstream}, the non-circumvention provisions of the {downstream} shall replace this Clause 7 upon execution of the {downstream}, except that the survival period in Clause 7.2 shall apply to any introduction made before the {downstream} effective date that is not separately covered by the {downstream}.")
 
     def clause_general(self):
         cl = "8" if self.t != "EndUser" else "7"
@@ -892,27 +1215,35 @@ class LOI:
         if not val_date:
             val_date = "[12 months from LOI date]"
 
+        # v3.3: SS refers to "Framework Agreement" as downstream binding document.
+        downstream = "Framework Agreement" if self.t == "StrategicSupplier" else "MSA"
+
         self.bp(f"{cl}.1 Non-Binding Status. ", "")
         if self.t != "EndUser":
-            self.p(f"(a) Non-binding provisions. Clauses 2 through 4 and Schedule 1 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the MSA.")
+            self.p(f"(a) Non-binding provisions. Clauses 2 through 4 and Schedule 1 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the {downstream}.")
             self.p(f"(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confidentiality), 7 (Non-Circumvention), and {cl} (General Provisions) are legally binding and enforceable obligations.")
         else:
             self.p("(a) Non-binding provisions. Clauses 2 through 4 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the MSA.")
             self.p(f"(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confidentiality), and {cl} (General Provisions) are legally binding and enforceable obligations.")
 
         scoping_phrase = "commercial scoping and negotiation" if self.t == "Distributor" else "technical scoping and commercial negotiation"
-        self.bp(f"{cl}.2 Good Faith. ", f"The Parties agree to engage in the {scoping_phrase} process in good faith (te goeder trouw) and in accordance with the principles of reasonableness and fairness (redelijkheid en billijkheid) as contemplated by Article 6:248 of the Dutch Civil Code (Burgerlijk Wetboek). " + ("" if self.t == "EndUser" else "For the avoidance of doubt, t") + ("T" if self.t == "EndUser" else "t") + f"he good faith obligation does not oblige either Party to enter into the MSA. Either Party may discontinue negotiations at any time, provided it does so in good faith. Any liability arising from a breach of this good faith obligation shall be limited to verifiable reliance damages (negatief contractsbelang)" + ("." if self.t == "EndUser" else " and shall not extend to loss of profit or expectation damages (positief contractsbelang)."))
+        self.bp(f"{cl}.2 Good Faith. ", f"The Parties agree to engage in the {scoping_phrase} process in good faith (te goeder trouw) and in accordance with the principles of reasonableness and fairness (redelijkheid en billijkheid) as contemplated by Article 6:248 of the Dutch Civil Code (Burgerlijk Wetboek). " + ("" if self.t == "EndUser" else "For the avoidance of doubt, t") + ("T" if self.t == "EndUser" else "t") + f"he good faith obligation does not oblige either Party to enter into the {downstream}. Either Party may discontinue negotiations at any time, provided it does so in good faith. Any liability arising from a breach of this good faith obligation shall be limited to verifiable reliance damages (negatief contractsbelang)" + ("." if self.t == "EndUser" else " and shall not extend to loss of profit or expectation damages (positief contractsbelang)."))
 
         survive = "Clauses 5.2, 5.3, 6, and 7" if self.t != "EndUser" else "Clauses 5.2, 5.3, and 6"
         self.bp(f"{cl}.3 Validity. ", f"This LOI shall remain valid until {val_date}, after which it shall lapse automatically unless extended by mutual written agreement. Upon lapse, {survive} shall survive for their respective stated periods.")
-        self.bp(f"{cl}.4 Costs. ", "Each Party shall bear its own costs in connection with this LOI" + (" and the negotiation of the MSA." if self.t != "EndUser" else "."))
+        self.bp(f"{cl}.4 Costs. ", "Each Party shall bear its own costs in connection with this LOI" + (f" and the negotiation of the {downstream}." if self.t != "EndUser" else "."))
         self.bp(f"{cl}.5 Counterparts. ", "This LOI may be executed in counterparts, including by electronic signature within the meaning of the eIDAS Regulation (EU) No 910/2014." + (" Each counterpart constitutes an original." if self.t != "EndUser" else ""))
         self.bp(f"{cl}.6 Notices. ", "All notices under this LOI shall be in writing (including email) and addressed to the contact details in the preamble. A notice is effective upon receipt." + (" Each Party shall promptly notify the other of any change to its contact details." if self.t != "EndUser" else ""))
         self.bp(f"{cl}.7 Governing Law. ", "This LOI shall be governed by and construed in accordance with the laws of the Netherlands. The United Nations Convention on Contracts for the International Sale of Goods (CISG) is expressly excluded.")
         self.bp(f"{cl}.8 Jurisdiction. ", "The courts of Amsterdam (Rechtbank Amsterdam) shall have exclusive jurisdiction over any dispute arising out of or in connection with the binding provisions of this LOI.")
 
         if self.t != "EndUser":
-            transaction_ref = "the Transaction" if self.t == "Distributor" else "the proposed transaction"
+            if self.t == "Distributor":
+                transaction_ref = "the Transaction"
+            elif self.t == "StrategicSupplier":
+                transaction_ref = "the proposed supply relationship"
+            else:
+                transaction_ref = "the proposed transaction"
             self.bp(f"{cl}.9 Entire Agreement. ", f"This LOI, together with any NDA referenced in Clause 6 (ALT-A), constitutes the entire agreement between the Parties in relation to its subject matter and supersedes all prior negotiations, representations, and agreements relating to {transaction_ref}. Nothing in this Clause limits liability for fraud.")
             self.bp(f"{cl}.10 Partnership Disclaimer. ", "Nothing in this LOI shall be construed as creating a partnership, joint venture, agency, or employment relationship between the Parties. Neither Party has authority to bind the other or to incur any obligation on the other's behalf.")
         else:
@@ -982,6 +1313,30 @@ class LOI:
                     ["MSA executed", f"{self.g('dates', 'loi_date')} + 90 days"],
                 ]
             )
+        elif self.t == "StrategicSupplier":
+            self.line()
+            self.h("Schedule 1 \u2014 Scope and Capability Matrix")
+            self.p(prefatory, italic=True, color=GREY, size=FONT_SMALL)
+            supplier = self.d.get("supplier", {})
+            purposes = supplier.get("strategic_purposes", [])
+            rows = [
+                ["Capability Category", supplier.get("capability_category", "")],
+                ["Core Capability", supplier.get("core_capability", "")],
+                ["Strategic Purposes", ", ".join(purposes)],
+                ["Geographic Coverage", supplier.get("geographic_coverage", "")],
+            ]
+            if "capacity_lock_in" in purposes:
+                rows.append(["Lead-Time Target", supplier.get("lead_time_target", "")])
+            if "pricing_volume" in purposes:
+                rows.append(["Indicative Volume", supplier.get("volume_indicative", "")])
+            if "engineering_integration" in purposes:
+                rows.append(["Joint IP Allocation", self.g("choices", "joint_ip", default="background")])
+            rows += [
+                ["Scoping complete", f"{self.g('dates', 'loi_date')} + 30 days"],
+                ["Framework Agreement issued", f"{self.g('dates', 'loi_date')} + 60 days"],
+                ["Framework Agreement executed", f"{self.g('dates', 'loi_date')} + 90 days"],
+            ]
+            self.table(["Item", "Detail"], rows)
         elif self.t == "Wholesale":
             self.line()
             self.h("Schedule 1 \u2014 Capacity and Technical Requirements")
@@ -1026,12 +1381,360 @@ class LOI:
     def footer(self):
         # Real Word footers are set up in _setup(). Add version reference at end of body.
         self.p("")
+        # v3.3: version string per-type. New types (SS, EP) are v1.0.
+        version_by_type = {
+            "EndUser": "v3.2",
+            "Distributor": "v3.2",
+            "Wholesale": "v3.2",
+            "StrategicSupplier": "v1.0",
+            "EcosystemPartnership": "v1.0",
+        }
+        vsn = version_by_type.get(self.t, "v3.2")
         self.p(
-            f"DE-LOI-{self.t}-v3.0",
+            f"DE-LOI-{self.t}-{vsn}",
             italic=True, size=FONT_SMALL, color=GREY
         )
 
+    # ----- EP (Ecosystem Partnership) clause builders -----
+    # v3.3: EP uses a dedicated, lighter structure. No Cl. 5 Project Finance,
+    # no Cl. 7 NC. Cl. 5 is IP & Deliverables. Cl. 6 is Tier A mutual light
+    # (7 sub-clauses). Cl. 7 is General (11 sub-clauses).
+
+    def definitions_ep(self):
+        self.h("1. Definitions")
+        self.p("1.1 In this LOI, unless the context requires otherwise:")
+        self.bp(
+            '"Confidential Information" ',
+            "means all information (whether technical, commercial, financial, or "
+            "otherwise) disclosed by a Party to the other in connection with the "
+            "Collaboration, whether in writing, orally, electronically, or by "
+            "inspection, including any information that by its nature or the "
+            "circumstances of disclosure would reasonably be understood to be "
+            "confidential. The existence and contents of this LOI are Confidential "
+            "Information."
+        )
+        self.bp(
+            '"Collaboration" ',
+            "means the ecosystem activities and joint work contemplated by this "
+            "LOI as described in Clause 3."
+        )
+        self.bp(
+            '"Representatives" ',
+            "means, in relation to a Party, its Affiliates and its and their "
+            "respective directors, officers, employees, agents, and professional "
+            "advisers."
+        )
+
+    def clause2_ep(self):
+        self.h("2. Purpose and Scope")
+        eco = self.d.get("ecosystem", {})
+        themes = ", ".join(eco.get("collaboration_themes", [])) or "[COLLABORATION_THEMES]"
+        self.p(
+            f"2.1 This LOI records the Parties' mutual interest in a "
+            f"non-commercial ecosystem collaboration around {themes}."
+        )
+        self.p(
+            "2.2 The collaboration is strictly non-commercial. No Party shall be "
+            "entitled to any fee, payment, capacity, discount, or commercial "
+            "benefit from the other Party by reason of this LOI or any activity "
+            "under it."
+        )
+        self.p(
+            "2.3 The commercial implications of any future activity \u2014 including "
+            "any joint offering, research licensing, commercialisation of joint "
+            "output, or provision of services by either Party to the other \u2014 shall "
+            "be the subject of a separate agreement and are expressly outside the "
+            "scope of this LOI."
+        )
+        self.p(
+            "2.4 The confidentiality and general provisions in Clauses 6 and 7 "
+            "are legally binding and enforceable from the date of execution. "
+            "Clauses 3 through 5 are non-binding expressions of collaborative intent."
+        )
+
+    def clause3_ep(self):
+        self.h("3. Collaboration Scope")
+        eco = self.d.get("ecosystem", {})
+        themes = eco.get("collaboration_themes", [])
+        categories = eco.get("joint_activity_categories", [])
+
+        self.bp("3.1 Collaboration Themes. ", "The Parties intend to collaborate on the following themes:")
+        if themes:
+            for theme in themes:
+                self.p(f"\u2014 {theme}")
+        else:
+            self.p("\u2014 [THEMES TO BE CONFIRMED]")
+
+        self.bp(
+            "3.2 Joint Activity Categories. ",
+            "Subject to resources and mutual agreement, the Parties intend to "
+            "engage in one or more of the following categories of activity:"
+        )
+        if categories:
+            cat_labels = {
+                "publications": "publications (joint white papers, research articles, reports)",
+                "events": "events (conferences, roundtables, workshops)",
+                "pilots": "pilots (joint demonstrations, proofs of concept)",
+                "advocacy": "advocacy (policy input, consultation responses)",
+                "working_groups": "working groups (standards and technical coordination)",
+            }
+            for cat in categories:
+                self.p(f"(\u2014) {cat_labels.get(cat, cat)}")
+        else:
+            self.p("\u2014 [ACTIVITY CATEGORIES TO BE CONFIRMED]")
+
+        self.bp(
+            "3.3 Governance and Cadence. ",
+            "The Parties intend to establish a lightweight governance mechanism "
+            "\u2014 typically an initial set-up meeting and quarterly check-ins \u2014 to "
+            "review activity, align on priorities, and resolve any coordination "
+            "issues. No binding governance structure is created by this LOI."
+        )
+        self.bp(
+            "3.4 Working-Group Participation. ",
+            "Where either Party hosts or convenes a working group relevant to the "
+            "collaboration themes, the other Party shall have a standing "
+            "invitation to participate on mutually agreed terms."
+        )
+        self.bp(
+            "3.5 Non-Exclusivity. ",
+            "The collaboration contemplated by this LOI is non-exclusive. Both "
+            "Parties retain the right to enter into similar or competing "
+            "collaborations with third parties."
+        )
+
+    def clause4_ep(self):
+        self.h("4. Announcements and Branding")
+        announcement = self.g("choices", "announcement_protocol", default="mutual_approval")
+        logo_use = self.g("choices", "logo_use", default="reciprocal")
+
+        if announcement == "notify_only":
+            self.bp(
+                "4.1 Announcement Protocol. ",
+                "Each Party shall give the other Party reasonable prior notice "
+                "(target: 5 Business Days) before making any public announcement "
+                "referring to the collaboration. Consent is not required."
+            )
+        else:  # mutual_approval (default)
+            self.bp(
+                "4.1 Announcement Protocol. ",
+                "Any public announcement, press release, published article, or "
+                "social media post referring to the collaboration, the other "
+                "Party, or joint activity under this LOI shall require the prior "
+                "written consent of the other Party. Consent shall not be "
+                "unreasonably withheld."
+            )
+
+        if logo_use == "none":
+            self.bp(
+                "4.2 Logo Use. ",
+                "Neither Party shall use the other Party's name, logo, or trade "
+                "mark in any public context without the prior written consent of "
+                "the other Party."
+            )
+        elif logo_use == "one_way":
+            self.bp(
+                "4.2 Logo Use. ",
+                "One-way logo use is contemplated between the Parties; the "
+                "Party, scope, and terms will be specified in a separate "
+                "schedule or letter."
+            )
+        else:  # reciprocal (default)
+            self.bp(
+                "4.2 Logo Use. ",
+                "Each Party grants the other a limited, non-exclusive, revocable "
+                "licence to use its name and logo solely in the context of the "
+                "collaboration and subject to the branding guidelines each Party "
+                "provides. No other use is permitted."
+            )
+
+        self.bp(
+            "4.3 Attribution. ",
+            "Where either Party refers to the collaboration in any public "
+            "context, it shall: (a) describe the collaboration accurately and "
+            "without overstatement; (b) refrain from implying any commercial "
+            "relationship, endorsement, or joint venture; and (c) include the "
+            "other Party's preferred attribution language when supplied."
+        )
+
+    def clause5_ep(self):
+        self.h("5. Intellectual Property and Deliverables")
+        self.bp(
+            "5.1 Background IP. ",
+            "Each Party retains all right, title, and interest in its background "
+            "intellectual property. Nothing in this LOI transfers or licenses any "
+            "intellectual property between the Parties except as expressly set "
+            "out in Clause 4.2."
+        )
+        self.bp(
+            "5.2 Joint Deliverables. ",
+            "Any intellectual property jointly developed by the Parties in the "
+            "course of the collaboration (including joint publications, "
+            "working-group outputs, and jointly authored materials) shall be "
+            "governed by a separate agreement to be executed before the joint "
+            "activity produces any material output."
+        )
+        self.bp(
+            "5.3 No Assignment by Participation. ",
+            "Nothing in this LOI or in any activity conducted under it shall be "
+            "construed as an assignment, licence, or transfer of intellectual "
+            "property."
+        )
+        self.bp(
+            "5.4 Publication. ",
+            "Each Party retains the right to publish, present, and disseminate "
+            "its own work, subject to the confidentiality provisions in Clause 6."
+        )
+
+    def clause6_ep(self):
+        self.h("6. Confidentiality (BINDING)")
+        surv = self.g("protection", "confidentiality_survival", default="2 years")
+        self.p(
+            "6.1 Each Party shall keep confidential all Confidential Information "
+            "received from the other Party and shall use such information solely "
+            "for the Collaboration."
+        )
+        self.p(
+            "6.2 Each Party may disclose Confidential Information only to its "
+            "Representatives who have a genuine need to know for the "
+            "Collaboration and who are bound by confidentiality obligations no "
+            "less restrictive than this Clause 6."
+        )
+        self.p(
+            "6.3 The obligations in Clauses 6.1 and 6.2 do not apply to "
+            "information that the receiving Party can demonstrate: (a) is or "
+            "becomes publicly available through no fault of the receiving Party; "
+            "(b) was already in the receiving Party's possession without "
+            "restriction; (c) was independently developed without use of the "
+            "Confidential Information; or (d) was received from a third party "
+            "without breach of any confidentiality obligation."
+        )
+        self.p(
+            "6.4 A Party may disclose Confidential Information to the extent "
+            "required by applicable law, regulation, or court order, provided "
+            "that (where legally permitted) the disclosing Party gives the other "
+            "Party prior written notice and discloses only the minimum required."
+        )
+        self.p(
+            "6.5 Upon written request or expiry of this LOI, the receiving Party "
+            "shall promptly return or destroy all Confidential Information and "
+            "certify such return or destruction in writing. Copies required by "
+            "applicable law or internal compliance policies may be retained, "
+            "subject to continued confidentiality."
+        )
+        self.p(
+            "6.6 Public statements about this LOI are governed by Clause 4."
+        )
+        self.p(
+            f"6.7 The obligations in this Clause 6 shall survive for {surv} from "
+            f"the date of termination or expiry of this LOI."
+        )
+
+    def clause7_ep_general(self):
+        self.h("7. General Provisions (BINDING)")
+        val_date = self.g("dates", "validity_date") or "[12 months from LOI date]"
+
+        self.bp("7.1 Non-Binding Status. ", "")
+        self.p(
+            "(a) Non-binding provisions. Clauses 2, 3, 4, and 5 of this LOI are "
+            "non-binding expressions of collaborative intent."
+        )
+        self.p(
+            "(b) Binding provisions. Clauses 6 (Confidentiality) and 7 (General "
+            "Provisions) are legally binding and enforceable obligations."
+        )
+        self.bp(
+            "7.2 No Commercial Commitment. ",
+            "Nothing in this LOI creates any obligation on either Party to pay, "
+            "purchase, supply, or grant anything of commercial value to the "
+            "other. Any such arrangement requires a separate agreement."
+        )
+        self.bp(
+            "7.3 Non-Exclusivity. ",
+            "As per Clause 3.5."
+        )
+        self.bp(
+            "7.4 Term and Validity. ",
+            f"This LOI shall remain valid until {val_date}, after which it shall "
+            f"lapse automatically unless extended by mutual written agreement. "
+            f"Upon lapse, Clause 6 (Confidentiality) shall survive for its "
+            f"stated period."
+        )
+        self.bp(
+            "7.5 Costs. ",
+            "Each Party shall bear its own costs in connection with this LOI "
+            "and the Collaboration."
+        )
+        self.bp(
+            "7.6 Counterparts. ",
+            "This LOI may be executed in counterparts, including by electronic "
+            "signature within the meaning of the eIDAS Regulation (EU) No 910/2014."
+        )
+        self.bp(
+            "7.7 Notices. ",
+            "All notices under this LOI shall be in writing (including email) "
+            "and addressed to the contact details in the preamble. A notice is "
+            "effective upon receipt."
+        )
+        self.bp(
+            "7.8 Governing Law. ",
+            "This LOI shall be governed by the laws of the Netherlands. The "
+            "United Nations Convention on Contracts for the International Sale "
+            "of Goods (CISG) is expressly excluded."
+        )
+        self.bp(
+            "7.9 Jurisdiction. ",
+            "The courts of Amsterdam (Rechtbank Amsterdam) shall have exclusive "
+            "jurisdiction over any dispute arising out of or in connection with "
+            "the binding provisions of this LOI."
+        )
+        self.bp(
+            "7.10 Entire Agreement. ",
+            "This LOI constitutes the entire agreement between the Parties in "
+            "relation to its subject matter and supersedes all prior "
+            "negotiations, representations, and agreements. Nothing in this "
+            "Clause limits liability for fraud."
+        )
+        self.bp(
+            "7.11 Partnership Disclaimer. ",
+            "Nothing in this LOI shall be construed as creating a partnership, "
+            "joint venture, agency, or employment relationship between the "
+            "Parties. Neither Party has authority to bind the other or to incur "
+            "any obligation on the other's behalf."
+        )
+
+    def schedule_ep(self):
+        """v3.3: Optional Joint Activity Plan schedule for EP.
+        Only rendered if intake provides ecosystem.joint_activity_plan (list of
+        dicts with keys: activity, category, lead, target_date).
+        """
+        plan = self.d.get("ecosystem", {}).get("joint_activity_plan", [])
+        if not plan:
+            return
+        self.doc.add_page_break()
+        self.line()
+        self.h("Schedule 1 \u2014 Joint Activity Plan")
+        self.p(
+            "This schedule expresses the Parties' current intentions and is "
+            "non-binding, in accordance with Clause 2.4.",
+            italic=True, color=GREY, size=FONT_SMALL,
+        )
+        rows = []
+        for item in plan:
+            rows.append([
+                item.get("activity", ""),
+                item.get("category", ""),
+                item.get("lead", ""),
+                item.get("target_date", ""),
+            ])
+        self.table(["Activity", "Category", "Lead", "Target Date"], rows)
+
     def build(self) -> Document:
+        # v3.3: EP uses its own clause builders (will be added next); until wired,
+        # fall back to partial engine output.
+        if self.t == "EcosystemPartnership":
+            return self._build_ep()
+
         self.letterhead()
         # add_cover() already ends with page break
         self.recitals()
@@ -1042,16 +1745,43 @@ class LOI:
             self.clause3_ds()
         elif self.t == "Wholesale":
             self.clause3_ws()
+        elif self.t == "StrategicSupplier":
+            self.clause3_ss()
         else:
             self.clause3_eu()
 
-        self.clause4()
+        if self.t == "StrategicSupplier":
+            self.clause4_ss()
+        else:
+            self.clause4()
+
         self.clause5()
         self.clause6()
         self.clause7_nc()
         self.clause_general()
         self.signature()
         self.schedule()
+        self.footer()
+        return self.doc
+
+    def _build_ep(self) -> Document:
+        """v3.3: Ecosystem Partnership build pipeline.
+        Different structure: no Cl. 5 Project Finance, no Cl. 7 NC.
+        Cl. 5 is IP & Deliverables, Cl. 6 is Tier A light mutual, Cl. 7 is General.
+        """
+        self.letterhead()
+        self.recitals()
+        self.definitions_ep()
+        self.clause2_ep()
+        self.clause3_ep()
+        self.clause4_ep()
+        self.clause5_ep()
+        self.clause6_ep()
+        self.clause7_ep_general()
+        self.signature()
+        # Schedule 1 is optional for EP — only rendered if the intake provides one.
+        if self.d.get("ecosystem", {}).get("joint_activity_plan"):
+            self.schedule_ep()
         self.footer()
         return self.doc
 
