@@ -283,28 +283,28 @@ class TestV351InvariantsStillHold:
 # -----------------------------------------------------------------------------
 
 class TestV35Polish:
-    """Polish items added during v3.5 consolidation."""
+    """Polish items added during v3.5 consolidation.
+
+    These tests exercise the `_derive_provider_term` static helper directly
+    rather than constructing a full DocBuilder — DocBuilder construction
+    triggers document-factory image loading which is brittle across CI
+    path layouts (see v3.5 CI-failure fix).
+    """
 
     def test_provider_term_derives_from_short_name(self):
-        """v3.5 polish: provider_term should come from provider.short_name
-        with fallback to "Digital Energy" for backward compat."""
-        data = {
-            "type": "Wholesale",
-            "provider": {"short_name": "Custom Brand"},
-            "counterparty": {"name": "X", "short": "X", "description": "x"},
-            "programme": {}, "dates": {"loi_date": "1 Jan 2026"},
-            "commercial": {"indicative_mw": "1"},
-        }
-        builder = DocBuilder(data)
-        assert builder.provider_term == "Custom Brand"
+        """v3.5 polish: provider_term should come from provider.short_name."""
+        data = {"provider": {"short_name": "Custom Brand"}}
+        assert DocBuilder._derive_provider_term(data) == "Custom Brand"
 
     def test_provider_term_fallback_when_short_name_missing(self):
-        data = {
-            "type": "Wholesale",
-            "provider": {"legal_name": "Some Corp"},   # no short_name
-            "counterparty": {"name": "X", "short": "X", "description": "x"},
-            "programme": {}, "dates": {"loi_date": "1 Jan 2026"},
-            "commercial": {"indicative_mw": "1"},
-        }
-        builder = DocBuilder(data)
-        assert builder.provider_term == "Digital Energy"
+        """v3.5 polish: fallback to 'Digital Energy' when short_name absent."""
+        data = {"provider": {"legal_name": "Some Corp"}}  # no short_name
+        assert DocBuilder._derive_provider_term(data) == "Digital Energy"
+
+    def test_provider_term_fallback_when_provider_missing(self):
+        """Defensive: no provider section at all."""
+        assert DocBuilder._derive_provider_term({}) == "Digital Energy"
+
+    def test_provider_term_fallback_when_data_none(self):
+        """Defensive: None input."""
+        assert DocBuilder._derive_provider_term(None) == "Digital Energy"

@@ -414,14 +414,7 @@ class LOI:
         # v3.5.2 (brand-name defined term): provider is defined by its
         # short name throughout the body. The v3.5.2 brand rename replaced
         # every prior "the Provider" reference with "Digital Energy".
-        #
-        # v3.5 polish: derive from `provider.short_name` with "Digital Energy"
-        # fallback — preserves brand when AG signs (short_name still
-        # "Digital Energy") while supporting future subsidiary/JV instruments
-        # with different short names without another body-wide rename.
-        self.provider_term = (
-            data.get("provider", {}).get("short_name") or "Digital Energy"
-        )
+        self.provider_term = self._derive_provider_term(data)
         # QA linter accumulators (populated during build)
         self.overrides = set(self.d.get("_overrides", []))
         self.override_reason = self.d.get("_override_reason", "")
@@ -477,6 +470,23 @@ class LOI:
         if not s:
             return True
         return s.upper() in ("[TBC]", "[TO BE CONFIRMED]", "TBC", "TO BE CONFIRMED", "XXXXXXXX")
+
+    @staticmethod
+    def _derive_provider_term(data):
+        """Return the defined-term short-name used throughout the body.
+
+        v3.5 polish: derive from `provider.short_name` with "Digital Energy"
+        fallback — preserves brand when AG signs (short_name still
+        "Digital Energy") while supporting future subsidiary/JV instruments
+        with different short names without another body-wide rename.
+
+        Extracted as a static helper (matches `_derive_footer_entity`) so
+        the derivation is unit-testable without constructing a full
+        DocBuilder (which triggers `_setup()` and document-factory image
+        loading — brittle in CI across different path layouts).
+        """
+        prov = (data or {}).get("provider") or {}
+        return prov.get("short_name") or "Digital Energy"
 
     @staticmethod
     def _derive_footer_entity(legal_name):
