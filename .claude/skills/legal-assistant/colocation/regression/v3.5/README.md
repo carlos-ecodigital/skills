@@ -15,9 +15,10 @@ v3.5.1 + v3.5.2 + v3.5.3 closed 20+ field-surfaced gaps. Before the next real LO
 
 | File | Type | Counterparty | Tier-1 verification status |
 |---|---|---|---|
-| `polarise_wholesale_intake.yaml` | Wholesale | Polarise GmbH | Agent-reported facts (polarise.com JS-gated at research time); source_map pillars all `[TBC]` pending direct WebFetch-verified re-source in v3.5.5 |
+| `polarise_wholesale_intake.yaml` | Wholesale | Polarise. GmbH | **v3.5.5: tier-1 updated.** HRB 17714 Amtsgericht Paderborn verified (online-handelsregister.de). Pillars 1+2+3 now cite online-handelsregister.de + swi.com direct investor release (SWI Stoneweg Icona majority stake; Deutsche Telekom Industrial AI Cloud anchor; NVIDIA Cloud Preferred Partner). Signatory pool: Michel Boutouil or Tirat Demir (Geschäftsführer, Einzelvertretung). Pillar 5 `[TBC]` — polarise.com still JS-gated across 5 path attempts. |
 | `cudo_wholesale_intake.yaml` | Wholesale | Cudo Compute Limited | Tier-1 verified via `cudocompute.com/about` (HQ, NVIDIA Preferred Partner status, NVIDIA-certified engineers, Supermicro/Dell/Lenovo/HPE/NetApp/Red Hat partners, Conapto deployment) |
 | `sag_distributor_intake.yaml` | Distributor Mode B | Man of Solutions B.V. (Sovereign AI Grid) | Tier-1 verified via `sovereignaigrid.nl` (Amstelveen HQ, consortium coordination role, EuroHPC JU, named member institutions, Nick Aldewereld Lead Coordinator). **v3.4-corrected language applied** — NO "centrale knooppunt" (v3.3 fabrication) |
+| `infrapartners_supplier_intake.yaml` | Strategic Supplier | InfraPartners LLC | **v3.5.5 NEW.** Tier-1 verified via nscale.com press release (60 MW Glomfjord partnership; announced 25 Mar 2025; InfraPartners role = modular prefab construction) + GlobeNewswire press release (Caddis Cloud Solutions strategic partnership; 100+ MW EMEA+NA pipeline; US+Romania manufacturing). CEO Michalis Grigoratos verified. **v3.4 correction applied** — NO "90-day RFS" claim; NO unqualified "80% off-site completion" (tier-1 unverifiable). |
 
 ## Regenerating
 
@@ -26,14 +27,16 @@ cd /path/to/skills/.claude/skills/legal-assistant/colocation
 python3 generate_loi.py regression/v3.5/polarise_wholesale_intake.yaml
 python3 generate_loi.py regression/v3.5/cudo_wholesale_intake.yaml
 python3 generate_loi.py regression/v3.5/sag_distributor_intake.yaml
+python3 generate_loi.py regression/v3.5/infrapartners_supplier_intake.yaml
 ```
 
 Expected for each: QA PASS, 0 failures. Inspect rendered .docx to confirm the Parties Preamble, Recital B signal quality, Schedule 1 GPU platform, brand rename, sig block, footer are all correct.
 
-## Not included
+## Remaining [TBC] markers
 
-- **InfraPartners LLC (Strategic Supplier)** — deferred; tier-1 verification of Nscale / Caddis partnerships required before fixture. Will be added in v3.5.5.
-- **Direct re-fetch of Polarise tier-1 sources** — the polarise.com site was JS-gated at fixture-creation time; source_map pillars currently `[TBC]` pending retry (v3.5.5).
+- **Polarise pillar 5** — polarise.com direct site JS-gated; awaiting future direct WebFetch.
+- **InfraPartners jurisdiction / reg_type / reg_number** — the US-registered LLC structure requires Delaware/State-level lookup; not yet done.
+- **Polarise signatory selection** — either Michel Boutouil or Tirat Demir (both have Einzelvertretung per Handelsregister); deal-specific choice at signing.
 
 ## Non-goals
 

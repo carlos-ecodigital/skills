@@ -5,6 +5,46 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.5 — 2026-04-17
+
+Regression fixture completion + Polarise tier-1 re-verification + **engineering principles doc** + Parties Preamble spacing fix. Sibling-docs sync (~51 edits) remains deferred.
+
+### Added
+- **`colocation/regression/v3.5/infrapartners_supplier_intake.yaml`** — 4th regression fixture. Tier-1 verified: Nscale Glomfjord 60 MW partnership (nscale.com 25 Mar 2025); Caddis Cloud Solutions 100+ MW EMEA+NA pipeline (GlobeNewswire 5 Mar 2025); CEO Michalis Grigoratos. v3.4 correction applied (no "90-day RFS", no unqualified "80% off-site").
+- **`docs/PRINCIPLES.md`** — 12 engineering principles for the skill with per-principle tripwires. Written in response to the "house of cards" observation — codifies the rules that prevent the recurring failure modes seen across v3.4 → v3.5.5. Status table of tripwires: 5 implemented, 3 partial, 4 pending (v3.6 target).
+
+### Changed
+- **`polarise_wholesale_intake.yaml`** tier-1 upgraded:
+  - Legal name `"Polarise GmbH"` → `"Polarise. GmbH"` (verified via Handelsregister)
+  - `reg_type` `"Handelsregister"` → `"HRB (Amtsgericht Paderborn)"`, `reg_number` `"[TBC]"` → `"17714"`
+  - Signatory pool documented: Michel Boutouil or Tirat Demir (Geschäftsführer Einzelvertretung)
+  - `source_map.pillar_1` now cites online-handelsregister.de (tier-1 official registry)
+  - `source_map.pillar_2` + `pillar_3` cite swi.com direct investor release (tier-1; Deutsche Telekom + NVIDIA Cloud Preferred Partner status confirmed)
+  - `pillar_5` remains `[TBC]` — polarise.com JS-gated across 5 paths
+- **Parties Preamble spacing fix** (v3.5.2 Scope A''' follow-up): prior implementation used explicit `self.p("")` blank paragraphs between party blocks, doubling vertical gap. Now uses `space_after=6` on intro + party paragraphs. Proportional to rest of body.
+- **`README.md`** updated to list 4 fixtures with per-fixture verification status
+
+### Corporate-structure finding (Polarise)
+Handelsregister lookup confirmed Polarise is legally **three GmbHs**:
+- `Polarise. GmbH` (Paderborn, HRB 17714) — holdco; v3.5 regression fixture counterparty
+- `Polarise MUC DC GmbH` — Munich facility operator
+- `Polarise AUG DC GmbH` (Düsseldorf, HRB 112190) — Augsburg facility operator
+- Holdco founded 6 Mar 2025; Geschäftsführer Michel Boutouil + Tirat Demir
+
+### Scope deferred to v3.5.6
+- **Scope B sibling docs sync** (ASSEMBLY_GUIDE / FEATURE_MATRIX / SOP, ~51 discrete edits per `~/.claude/plans/v3.5.4-sibling-docs-sync.md`). Requires focused 4h session.
+- **Polish principle tripwires**: golden-file tests (principle #5), visual-layout tests (#6), mirror-hash pre-commit check (#1), structural-shape linter for intake examples (#12) — v3.6 priority.
+- **Polarise.com direct tier-1** — site JS-gated; awaiting future access.
+- **InfraPartners jurisdiction / reg_number** — US LLC State-level lookup pending.
+
+### Verified
+- 90/90 pytest tests pass in both repos
+- All 9 intakes regenerate with QA PASS (6 examples + 4 regression fixtures)
+- Parties Preamble spacing verified: 6pt between blocks (was ~15pt); proportional to rest of body
+- Polarise fixture renders HRB 17714 in Parties Preamble
+
+---
+
 ## v3.5 (consolidated release) — 2026-04-17
 
 Consolidation of v3.5.1 + v3.5.2 + v3.5.3 + v3.5.4 into a single shippable release, plus polish items knocked out during consolidation. See per-version entries below for full scope detail; summary of v3.5 polish additions:
