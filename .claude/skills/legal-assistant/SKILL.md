@@ -308,10 +308,24 @@ Source map:
 - Pillar 4 (Strategic fit): [inferred from Phase 1 context]
 - Pillar 5 (Forward plans): [N/A | source: press]
 
-Accept, or request edits?
+Choose one of the following:
+
+  (a) Accept — proceed to Phase 6 confirmation gate with this Recital B as drafted
+  (b) Redraft with notes — describe what to change (framing, emphasis, tone,
+      tier-2 content to strip, named endorsers to add/remove, etc.) and I'll
+      regenerate following your notes; loop back to the 3-lender-question
+      self-check + Signal Test 3-gate
+  (c) Paste replacement text — provide verbatim replacement Recital B text;
+      I'll run R-24 (inline citation), R-25 (vanity financial), R-27
+      (sig-block TBC), and R-28 ([TBC] density) against your text, then
+      loop back to confirmation
+
+Respond with (a), (b) [notes], or (c) followed by the replacement text.
 ```
 
-**Handoff to Phase 6** when user accepts Recital B.
+**Handoff to Phase 6** when user accepts Recital B (option a) or returns an R-24/R-25/R-27/R-28-clean replacement via option (c). Option (b) keeps the flow in Phase 5 until acceptance.
+
+**v3.5.3-cont scope J9**: prior Phase 5 prompt offered only "Accept, or request edits?" — user had to manually edit YAML and re-run the generator for each redraft. Three-option prompt above makes redraft and paste-replacement first-class actions inside the Phase 5 loop.
 
 ### Phase 6 — Assumption-Confirmation Gate
 
@@ -328,7 +342,15 @@ Signatory: [Name], [Title]
 Contact: [Name], [Title]
 
 Recital A variant: [variant]
-Recital B: [first 60 chars...] ([N] words)
+Recital B ([N] words, [K] sentences):
+    [full paragraph — verbatim, not truncated]
+
+source_map pillars (tier-1 URLs):
+    pillar_1: [URL or "[TBC]"]
+    pillar_2: [URL or "[TBC]"]
+    pillar_3: [URL or "[TBC]"]
+    pillar_4: [inferred note or "[TBC]"]
+    pillar_5: [URL, "[TBC]", or "N/A — omitted per Signal Test gate 1"]
 
 Commercial:
 - [type-specific key values]
@@ -346,6 +368,8 @@ Output file: YYYYMMDD_DEG_LOI-[Type]_[Company]_(DRAFT).docx
 
 Confirm (yes) or specify changes?
 ```
+
+**v3.5.3-cont scope J8**: prior Phase 6 prompt truncated Recital B to 60 chars, so the user could not audit inline citations, framing, tone, or `[TBC]` markers from the confirmation screen — they had to open the generated `.docx` to see the full paragraph, which defeated the gate's purpose. Phase 6 now surfaces the full Recital B paragraph verbatim, the word + sentence count, and the full source_map pillar URLs for one-screen audit. If Recital B has changed since Phase 5 acceptance, the prompt should prepend a diff-highlight block showing what changed (reviewer discipline; not yet enforced programmatically).
 
 Any `no` → loop back to the relevant phase. `yes` → Phase 7.
 

@@ -101,15 +101,47 @@ def expand_provider_from_register(data: dict, register: dict) -> dict:
       - If `provider.entity` is set and register has the key, expand it.
         Any fields explicitly set on the intake YAML itself (e.g. signatory
         overrides) take precedence over the register defaults.
-      - If `provider.entity` is not set, the provider dict is returned
-        unchanged (backward-compat with v3.5.1 and earlier).
+      - If `provider.entity` is not set but the register has a
+        `type_defaults` block with an entry for the intake's `type`,
+        populate the entity + signatory_mode from that per-type default
+        (v3.5.3-cont scope J12 wiring). A minimal intake YAML with only
+        `type: Wholesale` now auto-expands to NL BV / Carlos / Director.
+      - If neither is set, the provider dict is returned unchanged
+        (backward-compat with v3.5.1 and earlier).
       - `signatory_mode` on the intake YAML selects the default signatory
         variant from the register (pre_msa / post_msa for NL BV; ceo for AG).
 
     Mutates and returns `data`.
     """
-    prov = data.get("provider", {})
+    prov = data.get("provider", {}) or {}
     entity_key = prov.get("entity")
+
+    # v3.5.3-cont scope J12: if no explicit entity is set AND the provider
+    # dict is "minimal" (contains at most entity/signatory_mode/short_name —
+    # i.e. no explicit identity fields that the user clearly set themselves),
+    # apply the per-LOI-type default from the register's `type_defaults`
+    # block. This is a pure fallback — explicit `provider.entity` wins, and
+    # explicit-fields intakes (legal_name/address/kvk/etc. set) are
+    # preserved untouched for backward-compat with v3.5.1.
+    if not entity_key:
+        # "Identity fields" — presence of ANY of these means the user wrote
+        # an explicit-fields intake and type_defaults must NOT override.
+        _EXPLICIT_IDENTITY_FIELDS = (
+            "legal_name", "address", "kvk", "reg_number",
+            "reg_type", "jurisdiction", "legal_form",
+        )
+        is_minimal = not any(prov.get(f) for f in _EXPLICIT_IDENTITY_FIELDS)
+        if is_minimal:
+            type_defaults = register.get("type_defaults", {}) or {}
+            type_key = data.get("type")
+            td = type_defaults.get(type_key)
+            if td and isinstance(td, dict):
+                entity_key = td.get("entity")
+                if entity_key and "signatory_mode" not in prov:
+                    prov = dict(prov)
+                    prov["signatory_mode"] = td.get("signatory_mode", "pre_msa")
+                    data["provider"] = prov
+
     if not entity_key:
         return data
     entities = register.get("entities", {})
@@ -2220,18 +2252,33 @@ _WARN_RULES = {
     "R-21": (r"\b(purpose-built|state-of-the-art)\b", "body",
              "Marketing adjective — 'purpose-built' / 'state-of-the-art' banned body-wide (v3.4)"),
     "R-22": (
+        # v3.5.3-cont scope E: patterns narrowed to clause-context signatures
+        # to reduce false positives. Prior regex flagged bare phrases like
+        # "Provider's ability to" and "will require the exchange of" which
+        # can legitimately appear in operative clauses (e.g. information-
+        # exchange provisions in Recital E of NDAs). Narrowed forms below
+        # require the meta-commentary *verb* context that only meta-
+        # commentary uses (secure/obtain/access for abilities; Confidential
+        # Information/material for exchanges).
+        #
+        # Allowlist — these patterns are NOT meta-commentary and MUST NOT
+        # fire R-22 even though they contain similar tokens:
+        #   • "ability to deliver" / "ability to scale" (operational capability)
+        #   • "will require the exchange of information" (without
+        #     "Confidential Information" qualifier — could be legitimate)
+        #   • "depends on" (without "in part" modifier)
         r"("
-        r"Provider's ability to|"
+        r"(?:Provider's|Digital Energy's) ability to (?:secure|obtain|access)|"
         r"depends in part on|"
         r"is intended to evidence|"
         r"while non-binding in its commercial terms|"
-        r"to support Digital Energy's financing|"
-        r"will require the exchange of|"
-        r"The Parties acknowledge that Digital Energy intends|"
+        r"to support (?:the Provider's|Digital Energy's) financing|"
+        r"will require the exchange of (?:Confidential Information|material)|"
+        r"The Parties acknowledge that (?:the Provider|Digital Energy) intends|"
         r"is intended to form the basis"
         r")",
         "body",
-        "Meta-commentary pattern — explains the LOI rather than creating obligations (v3.4)"
+        "Meta-commentary pattern — explains the LOI rather than creating obligations (v3.4; narrowed v3.5.3-cont)"
     ),
     # v3.5.2 scope 0 note: R-28 is implemented as a density custom-check in
     # qa_lint(), not a simple regex (needs occurrence count). See _check_tbc_density().
@@ -2357,9 +2404,18 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
             warn_count += 1
 
     # R-23 (v3.4) — fabrication gate on Recital B
-    # Extract Recital B text (starts with "(B) ", ends at next recital marker or blank line)
+    # v3.5.3-cont scope F: multi-paragraph Recital B extraction. Prior regex
+    # stopped at the first blank line (`\n\n`), which partially scanned any
+    # Recital B that legitimately spanned multiple paragraphs (rare but
+    # possible for counterparties with consortium / holdco-subsidiary
+    # disclosure needs). New regex extracts until the next recital marker
+    # "(C)" or "(D)" or a section header (line starting with "## ") or EOF.
     recital_b_text = ""
-    m = re.search(r"\(B\)\s*(.*?)(?=\(C\)|\(D\)|\n\n|$)", text, re.DOTALL)
+    m = re.search(
+        r"\(B\)\s*(.*?)(?=\(C\)\s|\(D\)\s|\n##\s|\Z)",
+        text,
+        re.DOTALL,
+    )
     if m:
         recital_b_text = m.group(1)
     source_map = data.get("counterparty", {}).get("source_map", {})

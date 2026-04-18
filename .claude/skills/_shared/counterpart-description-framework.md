@@ -326,6 +326,43 @@ Full rule catalogue: `_shared/loi-qa-gate.md`.
 
 v3.4 replaces synthetic / partially-verified v3.2–v3.3 examples with four verified real counterparties. Every claim below is traceable to a tier-1 source (counterparty's own website + official registry + direct-quoted press). Corrections marked where v3.3 drafts contained fabrication.
 
+### Tier-2 qualifier pattern (v3.5.3-cont scope H — reference pattern, no live counterparty)
+
+When a material claim is only verifiable via tier-2 press (FT / Reuters / Bloomberg / DCD / Structure Research / etc.) and is **not** corroborated on the counterparty's own tier-1 channels, the claim is still citable — but the Recital B wording must carry a publisher-attributed qualifier, and the `source_map` entry must encode the tier explicitly so QA can validate the pairing.
+
+**Pattern in Recital B prose** (always the counterparty + "as publicly reported by [Publisher]" or "according to [Publisher]"):
+
+> *"As publicly reported by [Structure Research], [Counterparty] has deployed more than 8,000 GPUs across its Nordic facilities."*
+
+> *"According to [Financial Times], [Counterparty] has signed framework agreements with two European sovereign funds."*
+
+> *"[Counterparty] has reportedly secured 40 MW of grid capacity in Dublin (as reported by [Data Center Dynamics])."*
+
+**Pattern in `source_map` YAML** (new v3.5.x schema — when a pillar value is a dict rather than a bare URL, the entry carries `tier` + `qualifier` fields so the QA linter can validate that the Recital B prose contains the matching qualifier phrase next to the claim):
+
+```yaml
+counterparty:
+  source_map:
+    pillar_3:
+      # Tier-1 primary: counterparty's own newsroom confirmation
+      - "https://counterparty.example/newsroom/partnership-announcement"
+      # Tier-2 supplementary: third-party press, only citable with qualifier
+      - url: "https://www.structureresearch.net/2025/11/counterparty-nordic-expansion/"
+        tier: 2
+        qualifier: "as publicly reported by Structure Research"
+```
+
+**Rule** (enforced by the Signal Test, documented in v3.5.x plan; future v3.6 tier-qualifier QA rule will grep Recital B prose for the qualifier phrase adjacent to the claim):
+
+- Tier-1 claim → bare URL in `source_map` pillar; Recital B wording asserts the fact directly.
+- Tier-2 claim → dict entry with `tier: 2` + `qualifier` string; Recital B wording prepends / embeds the publisher-attributed qualifier. Provider never asserts tier-2 content as its own judgement.
+- Tier-2-only claims that **cannot** be corroborated with at least one tier-1 source in the same pillar must be **omitted** — tier-2 press is supplementary to tier-1, never a substitute.
+- Publisher identity matters: reputable tier-2 outlets (FT, Reuters, Bloomberg, DCD, Structure Research) carry different weight than aggregators or paywalled summaries — the qualifier names the outlet so the lender can apply their own weighting.
+
+**Why a reference pattern instead of a live counterparty**: the four live examples below are all tier-1-fully-verified. Inventing a tier-2 example against a real entity would introduce fabrication risk. The pattern is shown abstractly so writers recognize the shape; when a real counterparty requires tier-2 citation, the writer substitutes the real URL + publisher into the pattern.
+
+---
+
 ### ✅ Polarise GmbH (Wholesale — fully verified)
 
 **Source map (tier-1 unless noted):**
