@@ -5,6 +5,34 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.3-cont — 2026-04-17
+
+Continuation of v3.5.3 — implements the scopes that v3.5.3 deferred because they needed v3.5.2-context to be landed first. Six of the nine originally-deferred scopes ship here (F / J12 / E / J8 / J9 / H); three (D / G / I) remain deferred pending explicit design decisions documented below.
+
+### Added
+- **Scope H — tier-2 qualifier worked-example pattern** in `_shared/counterpart-description-framework.md`. Documents the prose form ("as publicly reported by [Publisher]" / "according to [Publisher]" / "reportedly (as reported by [Publisher])"), the YAML dict-form `source_map` schema (`tier: 2` + `qualifier` fields alongside tier-1 URLs), and the rule that tier-2-only claims without tier-1 corroboration must be omitted. Reference pattern only (no live counterparty — inventing one would introduce fabrication risk).
+- **30 new unit tests** in `colocation/tests/test_v3_5_3_cont.py` (6 for Scope F + 5 for J12 + 8 for E + 4 for J9 + 3 for J8 + 4 for H). **Total: 120 pytest tests all passing.**
+
+### Changed
+- **Scope F — Recital B multi-paragraph extraction** (`qa_lint()`): prior regex stopped at `\n\n`. Legitimate multi-paragraph Recital B (consortium / holdco-subsidiary disclosure) was partially scanned. New regex extracts until `(C)` / `(D)` / `\n## ` / EOF.
+- **Scope J12 — type_defaults auto-expansion** (`expand_provider_from_register()`): `config/entities.yaml::type_defaults` now wired. Minimal intake (no explicit identity fields) → auto-populates from per-type default; backward-compat preserved for explicit-fields intakes.
+- **Scope E — R-22 regex narrowing + allowlist comment**: prior patterns caught bare phrases (`Provider's ability to`, `will require the exchange of`) that legitimately appear in operative clauses. Narrowed to meta-commentary verb contexts only. Allowlist comment documents known-legitimate non-firing phrases.
+- **Scope J8 — Phase 6 full Recital B** (`SKILL.md`): prior prompt truncated Recital B to 60 chars — user couldn't audit inline citations / `[TBC]` markers. New prompt surfaces full paragraph verbatim + word/sentence count + full source_map pillars.
+- **Scope J9 — Phase 5 redraft-as-first-class** (`SKILL.md`): three-option prompt replaces "Accept, or request edits?" binary. (a) Accept; (b) Redraft with notes; (c) Paste replacement text — R-24/R-25/R-27/R-28 run against the paste before confirmation.
+
+### Deferred (need design decision before implementation)
+- **Scope D** — R-23 pillar-specific granularity + override reason validation. Open: claim→pillar heuristic completeness; `[TBC]` proximity-window definition (char vs sentence-boundary); override reason threshold.
+- **Scope G** — Phase 7.5 fail-closed code-level spec. Open: sentinel-file replay behaviour; opt-in mechanism (env var vs flag); exit code.
+- **Scope I** — Framework worked-examples direct WebFetch re-verification. Needs allocated time + retry budget for JS-gated URLs (polarise.com still gated per v3.5.5 attempts).
+
+### Verified
+- 120/120 pytest tests pass in both repos
+- All 10 intakes regenerate with QA PASS (6 examples + 4 regression fixtures)
+- R-22 false-positive fix: `"Digital Energy's ability to deliver the Services"` no longer fires; `"...ability to secure financing"` still fires
+- J12 backward-compat: explicit-fields intakes unchanged; minimal intakes auto-expand
+
+---
+
 ## v3.5.5 — 2026-04-17
 
 Regression fixture completion + Polarise tier-1 re-verification + **engineering principles doc** + Parties Preamble spacing fix. Sibling-docs sync (~51 edits) remains deferred.
