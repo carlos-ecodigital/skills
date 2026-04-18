@@ -2295,53 +2295,195 @@ _R23_CLAIM_PATTERN = re.compile(
 )
 
 
+# v3.5.6 scope D: diagnostic accumulator populated by _check_fabrication_gate
+# on PASS paths so qa_lint can surface pillar-attribution info in the QA
+# report even when no findings fire. Module-level list (cleared at start of
+# each qa_lint run) keeps the return-type of _check_fabrication_gate stable.
+_R23_PILLAR_DIAGNOSTIC: list = []
+
+
+def _split_recital_b_sentences(text: str) -> list:
+    """v3.5.6 scope D.2: split Recital B on sentence / paragraph boundaries.
+
+    A `[TBC]` marker only covers claims in the same split segment (not the
+    whole Recital B as v3.5.x did). Splits on `[.?!]` + whitespace, and on
+    blank-line (`\\n\\n`) paragraph boundaries.
+    """
+    if not text:
+        return []
+    # Split on sentence-ending punctuation followed by whitespace, OR on blank lines
+    parts = re.split(r"(?<=[.?!])\s+|\n\n+", text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def _claim_is_tbc_covered(claim_start: int, recital_b: str) -> bool:
+    """v3.5.6 scope D.2: `[TBC]` covers claim only in the same sentence-
+    boundary segment, OR when `[TBC]` sits at Recital-B-end and the claim
+    is in the final segment (common trailing-`[TBC]` pattern).
+    """
+    if not recital_b:
+        return False
+    segments = _split_recital_b_sentences(recital_b)
+    if not segments:
+        return False
+    # Rebuild an offset map to find which segment contains claim_start.
+    # Walk segments through the original text, tracking running offset.
+    pos = 0
+    claim_segment_idx = None
+    for i, seg in enumerate(segments):
+        # Find this segment in the remaining text (from pos onwards)
+        idx = recital_b.find(seg, pos)
+        if idx < 0:
+            continue
+        seg_end = idx + len(seg)
+        if idx <= claim_start <= seg_end:
+            claim_segment_idx = i
+            break
+        pos = seg_end
+    if claim_segment_idx is None:
+        return False
+    # Primary: [TBC] (or [TO BE CONFIRMED]) in the same segment
+    seg_text = segments[claim_segment_idx]
+    if "[TBC]" in seg_text or "[TO BE CONFIRMED]" in seg_text:
+        return True
+    # Special case (design decision D.2): [TBC] in final segment covers
+    # final-segment claims (common trailing-[TBC] drafting pattern).
+    if claim_segment_idx == len(segments) - 1 and (
+        "[TBC]" in segments[-1] or "[TO BE CONFIRMED]" in segments[-1]
+    ):
+        return True
+    return False
+
+
+def _pillar_with_urls(source_map: dict):
+    """Return the first pillar key (e.g. 'pillar_3') that has at least one
+    URL entry, or None if no pillar has any. Used for the permissive any-
+    pillar match and the diagnostic emission (v3.5.6 D.1).
+    """
+    if not isinstance(source_map, dict):
+        return None
+    # Preserve iteration order — typically pillar_1..pillar_5.
+    for pillar_key, pillar_val in source_map.items():
+        if isinstance(pillar_val, list) and any(
+            isinstance(u, str) and u.startswith(("http://", "https://"))
+            for u in pillar_val
+        ):
+            return pillar_key
+        if isinstance(pillar_val, str) and pillar_val.startswith(
+            ("http://", "https://")
+        ):
+            return pillar_key
+    return None
+
+
+# v3.5.6 scope D.3: thin-reason + structured-short-code patterns for
+# override-reason validation. See _validate_override_reason().
+_THIN_OVERRIDE_REASON_RE = re.compile(
+    r"^\s*(?:ok|fine|yes|done|sure|good|n/?a|tbd)\s*$",
+    re.IGNORECASE,
+)
+_STRUCTURED_OVERRIDE_REASON_RE = re.compile(
+    r"^(?:OK|FINE|APPROVED|PREAPPROVED)-\d{4}-\d{2}-\d{2}\s+[A-Z]{2,4}$"
+)
+
+
+def _validate_override_reason(reason: str):
+    """v3.5.6 scope D.3: hybrid override-reason validator.
+
+    Accepts:
+      - free-text rationale (≥15 chars after strip, NOT a thin-pattern match), OR
+      - structured audit short-code: `<STATUS>-<YYYY-MM-DD> <INITIALS>`
+        where STATUS in (OK, FINE, APPROVED, PREAPPROVED) and INITIALS is
+        2–4 uppercase letters.
+
+    Returns (is_valid: bool, error_message: str). error_message is empty
+    when is_valid is True.
+    """
+    if reason is None:
+        return False, "override reason required when --override is set"
+    r = str(reason).strip()
+    if not r:
+        return False, "override reason cannot be empty"
+    # Reject thin patterns regardless of length
+    if _THIN_OVERRIDE_REASON_RE.match(r):
+        return False, (
+            "override reason is a thin-pattern phrase (e.g. 'ok', 'fine'). "
+            "Provide either:\n"
+            "  - free-text rationale (minimum 15 characters), OR\n"
+            "  - structured audit short-code: <STATUS>-<YYYY-MM-DD> <INITIALS>\n"
+            "    where STATUS in (OK, FINE, APPROVED, PREAPPROVED) and\n"
+            "    INITIALS is 2-4 uppercase letters.\n"
+            "    Example: OK-2026-04-17 JG"
+        )
+    # Accept structured short-code regardless of length
+    if _STRUCTURED_OVERRIDE_REASON_RE.match(r):
+        return True, ""
+    # Accept free-text if length >= 15
+    if len(r) >= 15:
+        return True, ""
+    return False, (
+        f"override reason too short ({len(r)} chars). Provide either:\n"
+        "  - free-text rationale (minimum 15 characters), OR\n"
+        "  - structured audit short-code: <STATUS>-<YYYY-MM-DD> <INITIALS>\n"
+        "    Example: OK-2026-04-17 JG"
+    )
+
+
 def _check_fabrication_gate(text_recital_b: str, source_map: dict,
                              overrides: set) -> list:
     """R-23: every material numeric claim in Recital B must be attributable.
 
     Returns a list of (rule_id, scope, message) findings. Empty list = pass.
 
+    v3.5.6 scope D.1 + D.2 updates:
+    - `[TBC]` proximity is sentence-boundary-scoped (not wildcard across
+      whole Recital B). See _claim_is_tbc_covered().
+    - On PASS, populates the module-level `_R23_PILLAR_DIAGNOSTIC` list
+      with (claim_text, pillar_matched_or_'TBC-covered') tuples so qa_lint
+      can surface the attribution info in the QA report.
+
     A claim is considered attributed if ANY of:
-    - Recital B text contains a literal '[TBC]' marker near the claim
+    - the claim is `[TBC]`-covered within the same sentence segment, OR
     - counterparty.source_map has at least one URL entry in ANY pillar
       (pillar-level granularity; reviewer's Phase 7.5 handles pillar-to-claim
-      mapping)
-    - the rule R-23 is in overrides (user ran with --override R-23 ...)
+      mapping), OR
+    - the rule R-23 is in overrides (user ran with --override R-23 ...).
     """
+    _R23_PILLAR_DIAGNOSTIC.clear()
     findings = []
     if "R-23" in overrides:
         return findings  # overridden
     claims = list(_R23_CLAIM_PATTERN.finditer(text_recital_b))
     if not claims:
         return findings  # no material claims
-    # If ALL claims are accompanied by [TBC] within 50 chars, that's acceptable
-    has_tbc = "[TBC]" in text_recital_b or "[TO BE CONFIRMED]" in text_recital_b
-    # If source_map exists and has at least one URL entry in any pillar,
-    # attribution is present at document level.
-    sm_has_urls = False
-    if isinstance(source_map, dict):
-        for pillar_val in source_map.values():
-            if isinstance(pillar_val, list) and any(
-                isinstance(u, str) and u.startswith(("http://", "https://"))
-                for u in pillar_val
-            ):
-                sm_has_urls = True
-                break
-            if isinstance(pillar_val, str) and pillar_val.startswith(
-                ("http://", "https://")
-            ):
-                sm_has_urls = True
-                break
-    if not has_tbc and not sm_has_urls:
-        # No source_map URLs and no [TBC] markers — flag every claim
-        sample = [c.group(0) for c in claims[:3]]
+
+    pillar_key = _pillar_with_urls(source_map)
+
+    # Walk each claim; if neither sentence-scoped [TBC] nor any pillar URL,
+    # it's an unattributed claim. Collect diagnostic on the pass path.
+    unattributed_claims = []
+    for c in claims:
+        claim_text = c.group(0)
+        if _claim_is_tbc_covered(c.start(), text_recital_b):
+            _R23_PILLAR_DIAGNOSTIC.append((claim_text, "TBC-covered"))
+            continue
+        if pillar_key:
+            _R23_PILLAR_DIAGNOSTIC.append((claim_text, pillar_key))
+            continue
+        unattributed_claims.append(claim_text)
+
+    if unattributed_claims:
+        # Clear diagnostic on FAIL — reviewer focuses on the failures
+        _R23_PILLAR_DIAGNOSTIC.clear()
+        sample = unattributed_claims[:3]
         findings.append((
             "R-23", "Recital B",
-            f"Fabrication gate: {len(claims)} material claim(s) in Recital B "
-            f"without source_map attribution or [TBC] marker (e.g. "
-            f"{', '.join(repr(s) for s in sample)}). Add counterparty.source_map "
-            f"pillar_N: ['https://tier-1-url'] to intake YAML, mark claims "
-            f"[TBC], or pass --override R-23 --override-reason."
+            f"Fabrication gate: {len(unattributed_claims)} material claim(s) "
+            f"in Recital B without pillar attribution or sentence-scoped "
+            f"[TBC] marker (e.g. {', '.join(repr(s) for s in sample)}). "
+            f"Add counterparty.source_map pillar_N: ['https://tier-1-url'] "
+            f"to intake YAML, mark claims [TBC] within the same sentence, "
+            f"or pass --override R-23 --override-reason \"<verbose>\"."
         ))
     return findings
 
@@ -2423,6 +2565,34 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
     for rid, scope, msg in r23_findings:
         lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
         fail_count += 1
+
+    # v3.5.6 scope D.1: on PASS, emit pillar-attribution diagnostic so the
+    # QA report documents WHICH pillar matched each claim (or that it was
+    # sentence-scoped [TBC]-covered). Makes the attribution auditable
+    # without tightening the gate itself.
+    if not r23_findings and _R23_PILLAR_DIAGNOSTIC:
+        n = len(_R23_PILLAR_DIAGNOSTIC)
+        lines.append(
+            f"  [INFO] R-23  Recital B   attribution diagnostic: "
+            f"{n} claim(s) matched"
+        )
+        for claim_text, pillar_or_tbc in _R23_PILLAR_DIAGNOSTIC[:5]:
+            lines.append(
+                f"         {pillar_or_tbc}: {claim_text[:80]}"
+            )
+        if n > 5:
+            lines.append(f"         (and {n - 5} more — see fixture for full list)")
+
+    # v3.5.6 scope D.3: log active overrides + validated reason + timestamp
+    # in QA report so the audit trail captures "who bypassed what when".
+    if overrides:
+        from datetime import datetime as _dt, timezone as _tz
+        lines.append(
+            f"  [INFO] R-override  meta   overrides active: "
+            f"{', '.join(sorted(overrides))}; reason: "
+            f"{(override_reason or '<none>')[:200]}; logged: "
+            f"{_dt.now(_tz.utc).isoformat()}"
+        )
 
     # R-28 (v3.5.2) — [TBC] density check in body. A few [TBC] markers are
     # expected on drafts (signatory title, counterparty reg number pre-
@@ -2524,6 +2694,14 @@ def main():
     if override_str:
         data["_overrides"] = [r.strip() for r in override_str.split(",") if r.strip()]
     override_reason = _parse_arg("--override-reason")
+    # v3.5.6 scope D.3: validate override-reason shape when --override is used.
+    # Hybrid rule: accept free-text ≥15 chars OR structured short code
+    # `<STATUS>-<YYYY-MM-DD> <INITIALS>`. Reject thin patterns unconditionally.
+    if override_str:
+        ok, err = _validate_override_reason(override_reason)
+        if not ok:
+            print(f"ERROR (--override-reason): {err}", file=sys.stderr)
+            sys.exit(1)
     if override_reason:
         data["_override_reason"] = override_reason
 
