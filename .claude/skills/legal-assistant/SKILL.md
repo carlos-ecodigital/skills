@@ -405,6 +405,18 @@ Options:
 
 **Callee workflow file (v3.5.2 Scope C):** `legal-counsel/specializations/contract-review/loi-review-workflow.md`. This file is the canonical target — load it in-context and follow its 4-phase structure. Returns strict `PASS` / `FLAG-FOR-REVISION` / `REJECT` envelopes that this skill parses deterministically.
 
+**Two-pass review (v3.5.6 Scope G-bis — senior counsel refinement):** the callee workflow runs a **junior-tier 4-point structured review**, then a **senior-counsel refinement pass** (see `loi-senior-review-pass.md`) reviews the junior's envelope, catches what the junior missed, upgrades / downgrades the verdict where warranted, and produces the final envelope the `legal-assistant` skill consumes. This mirrors standard law-firm practice (associate draft → partner review) and is how Phase 7.5 meaningfully adds value beyond the automated QA linter.
+
+> ⚠️ **Phase 7.5 enforcement (v3.5.6 Scope G) — opt-in, strongly recommended for production LOI runs:**
+> - Enable via env var: `export DE_LOI_ENFORCE_PHASE_7_5=1`
+> - OR via CLI flag: `python generate_loi.py intake.yaml --enforce-phase-7-5`
+> - **Default is fail-open** (preserves v3.5.x behaviour; avoids breaking existing workflows).
+> - **Enforcement workflow (two runs):**
+>   1. First run generates the `.docx` + a sentinel file `<docx>.phase_7_5_required` with SHA-256 of the .docx contents, and exits **3** (distinct from 1 = validation, 2 = QA FAIL).
+>   2. Operator loads the callee workflow (`loi-review-workflow.md` → `loi-senior-review-pass.md`), runs both passes, obtains final PASS.
+>   3. Second run with `--phase-7-5-pass`: consumes the sentinel after verifying the hash still matches the current .docx (prevents replay + post-approval tampering), then permits delivery.
+> - **If the .docx is modified between the two runs**, the hash check rejects and the operator must re-run Phase 7.5 against the current content.
+
 **The 4 review questions:**
 
 1. **Clause-type appropriateness** — Does each clause make sense for this counterparty type? (e.g., SS Cl. 5 must be "Supply Chain and Delivery Commitment", not revenue-bankability; EP must have no Cl. 5 Project Finance or Cl. 7 NC; customer-facing types must have revenue-counterparty Cl. 5.)

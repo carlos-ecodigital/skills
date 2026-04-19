@@ -100,9 +100,24 @@ Three samples total; overall step passes if all three are clean (or marked `[TBC
 
 ---
 
+## Two-pass review (v3.5.6 Scope G-bis)
+
+**Important**: as of v3.5.6, this junior workflow is the **first pass** of a two-pass Phase 7.5 review. The envelope you produce below is a **draft** that feeds into the senior counsel refinement pass at `loi-senior-review-pass.md` (sibling file in this directory). The senior pass reviews your envelope, catches what you missed across six senior-review axes (commercial posture, precedent consistency, counterparty-reading, Signal-Test deep check, identity/execution hygiene, deliverability/aftermath), and produces the **final** envelope that `legal-assistant` consumes.
+
+**When you return your envelope below, do not assume it is final.** The senior pass may:
+- **Upgrade** your `FLAG` or `REJECT` to `PASS` if it finds the issue you flagged is a false positive — with a documented reason.
+- **Downgrade** your `PASS` to `FLAG` or `REJECT` if it finds a deeper issue across the six senior axes that your 4-point checklist did not cover.
+- **Consolidate** multiple junior flags into a single prioritised fix list.
+
+Your job in the junior pass is to produce an **honest and complete** 4-point-checklist envelope. The senior's job is to review it. Do not try to pre-empt the senior's judgement calls — that is not what a junior pass is for.
+
+**Flow**: this file (junior) → `loi-senior-review-pass.md` (senior) → final envelope returned to `legal-assistant`.
+
+---
+
 ## Return envelope
 
-Produce one of three outputs. Format is strict so `legal-assistant` Phase 7.5 can parse deterministically.
+Produce one of three outputs. Format is strict so `legal-assistant` Phase 7.5 can parse deterministically. **This envelope is the junior pass output — it feeds into the senior pass, not directly to `legal-assistant`.**
 
 ### PASS
 
