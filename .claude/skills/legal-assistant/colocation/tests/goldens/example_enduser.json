@@ -1,0 +1,1032 @@
+{
+  "footer": [
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "first_page_footer"
+    },
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "footer"
+    }
+  ],
+  "n_paragraphs": 106,
+  "n_tables": 1,
+  "paragraphs": [
+    {
+      "alignment": null,
+      "i": 0,
+      "space_after_pt": 0.0,
+      "space_before_pt": 200.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 1,
+      "space_after_pt": 4.0,
+      "space_before_pt": 8.0,
+      "text_hash": "ce9098b1971e2d42",
+      "text_len": 16,
+      "text_prefix": "Letter of Intent"
+    },
+    {
+      "alignment": null,
+      "i": 2,
+      "space_after_pt": 0.0,
+      "space_before_pt": 2.0,
+      "text_hash": "0f696fda31dfc691",
+      "text_len": 34,
+      "text_prefix": "AI Compute Infrastructure Services"
+    },
+    {
+      "alignment": null,
+      "i": 3,
+      "space_after_pt": 0.0,
+      "space_before_pt": 16.0,
+      "text_hash": "a74ef075a8854b7e",
+      "text_len": 10,
+      "text_prefix": "1 May 2026"
+    },
+    {
+      "alignment": null,
+      "i": 4,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 5,
+      "space_after_pt": 2.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d05e9343a6dcb14b",
+      "text_len": 8,
+      "text_prefix": "Between:"
+    },
+    {
+      "alignment": null,
+      "i": 6,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "c9349500950c3890",
+      "text_len": 31,
+      "text_prefix": "Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 7,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "332b48e1b663deee",
+      "text_len": 56,
+      "text_prefix": "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+    },
+    {
+      "alignment": null,
+      "i": 8,
+      "space_after_pt": 2.0,
+      "space_before_pt": 12.0,
+      "text_hash": "ab131b737d68ecb9",
+      "text_len": 4,
+      "text_prefix": "And:"
+    },
+    {
+      "alignment": null,
+      "i": 9,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "4d08db33dd608c62",
+      "text_len": 16,
+      "text_prefix": "Meridian AI B.V."
+    },
+    {
+      "alignment": null,
+      "i": 10,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "385af8851e2dc035",
+      "text_len": 49,
+      "text_prefix": "Keizersgracht 500, 1017 EK Amsterdam, Netherlands"
+    },
+    {
+      "alignment": null,
+      "i": 11,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 12,
+      "space_after_pt": 2.0,
+      "space_before_pt": 2.0,
+      "text_hash": "90e0afd8c5a8cc05",
+      "text_len": 29,
+      "text_prefix": "Classification:  Confidential"
+    },
+    {
+      "alignment": null,
+      "i": 13,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 14,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "2d7880970d21f6d6",
+      "text_len": 79,
+      "text_prefix": "THIS LETTER OF INTENT (the \"LOI\") is dated 1 May 2026 and entered into between:"
+    },
+    {
+      "alignment": null,
+      "i": 15,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "e32542f7736e5a6c",
+      "text_len": 277,
+      "text_prefix": "(1) Digital Energy Netherlands B.V., a private limited liability company incorpo"
+    },
+    {
+      "alignment": null,
+      "i": 16,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "7a0836311c24b487",
+      "text_len": 223,
+      "text_prefix": "(2) Meridian AI B.V., an entity incorporated under the laws of the Netherlands, "
+    },
+    {
+      "alignment": null,
+      "i": 17,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94139f6e4095abc6",
+      "text_len": 43,
+      "text_prefix": "(each a \"Party\" and together the \"Parties\")"
+    },
+    {
+      "alignment": null,
+      "i": 18,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2cbe40dde0c1847e",
+      "text_len": 8,
+      "text_prefix": "Recitals"
+    },
+    {
+      "alignment": null,
+      "i": 19,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "73ba0e1a0a0fa844",
+      "text_len": 627,
+      "text_prefix": "(A) Digital Energy develops and operates Digital Energy Centers (\"DECs\"), distri"
+    },
+    {
+      "alignment": null,
+      "i": 20,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2767491ce0365d2b",
+      "text_len": 210,
+      "text_prefix": "(B) Meridian (the \"Customer\") is a Netherlands-based AI startup developing large"
+    },
+    {
+      "alignment": null,
+      "i": 21,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0ba4e3effa4457d1",
+      "text_len": 302,
+      "text_prefix": "(C) The Parties wish to record their mutual interest in the Customer procuring A"
+    },
+    {
+      "alignment": null,
+      "i": 22,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "54376bf016bcf4f0",
+      "text_len": 14,
+      "text_prefix": "1. Definitions"
+    },
+    {
+      "alignment": null,
+      "i": 23,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ef6020d34bb104a9",
+      "text_len": 55,
+      "text_prefix": "1.1 In this LOI, unless the context requires otherwise:"
+    },
+    {
+      "alignment": null,
+      "i": 24,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9a5a99700f487610",
+      "text_len": 261,
+      "text_prefix": "\"Affiliate\" means, in relation to a Party, any entity that directly or indirectl"
+    },
+    {
+      "alignment": null,
+      "i": 25,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8ca3eb97c417f2aa",
+      "text_len": 95,
+      "text_prefix": "\"Business Day\" means a day other than a Saturday, Sunday, or public holiday in t"
+    },
+    {
+      "alignment": null,
+      "i": 26,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "07a148f1cd575c4e",
+      "text_len": 433,
+      "text_prefix": "\"Confidential Information\" means all information (whether technical, commercial,"
+    },
+    {
+      "alignment": null,
+      "i": 27,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2af5e4d8eef007f2",
+      "text_len": 117,
+      "text_prefix": "\"DEC\" means a Digital Energy Center: a liquid-cooled AI colocation facility deve"
+    },
+    {
+      "alignment": null,
+      "i": 28,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "3c012c216b0a0ca3",
+      "text_len": 143,
+      "text_prefix": "\"Designated Site\" means any DEC or DEC site designated by Digital Energy for the"
+    },
+    {
+      "alignment": null,
+      "i": 29,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "da99ba35e70e472c",
+      "text_len": 230,
+      "text_prefix": "\"Financing Party\" means any bank, financial institution, fund, security trustee,"
+    },
+    {
+      "alignment": null,
+      "i": 30,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b6e0bdf0383bf569",
+      "text_len": 82,
+      "text_prefix": "\"MSA\" means the definitive service agreement to be negotiated between the Partie"
+    },
+    {
+      "alignment": null,
+      "i": 31,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "64ba42489d641b68",
+      "text_len": 88,
+      "text_prefix": "\"Purpose\" means evaluating, negotiating, and progressing toward the execution of"
+    },
+    {
+      "alignment": null,
+      "i": 32,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "404eb1c0a753ee87",
+      "text_len": 160,
+      "text_prefix": "\"Representatives\" means, in relation to a Party, its Affiliates, and its and the"
+    },
+    {
+      "alignment": null,
+      "i": 33,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e1934bdc258966c3",
+      "text_len": 168,
+      "text_prefix": "\"Services\" means the AI compute infrastructure services to be provided by Digita"
+    },
+    {
+      "alignment": null,
+      "i": 34,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "161d3d1e8b66c72d",
+      "text_len": 20,
+      "text_prefix": "2. Purpose and Scope"
+    },
+    {
+      "alignment": null,
+      "i": 35,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "26bb3a2e4623b1f4",
+      "text_len": 198,
+      "text_prefix": "2.1 This LOI records the Parties' mutual interest in the Customer procuring AI c"
+    },
+    {
+      "alignment": null,
+      "i": 36,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f247f9d8d0131142",
+      "text_len": 212,
+      "text_prefix": "2.2 The commercial terms in Clauses 3 and 4 are non-binding expressions of inten"
+    },
+    {
+      "alignment": null,
+      "i": 37,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "eef943e4b6d05087",
+      "text_len": 23,
+      "text_prefix": "3. Service Requirements"
+    },
+    {
+      "alignment": null,
+      "i": 38,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1b2c659fa8d59150",
+      "text_len": 86,
+      "text_prefix": "3.1 Service Model. The Customer has indicated interest in the following service "
+    },
+    {
+      "alignment": null,
+      "i": 39,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "56e736790f31c526",
+      "text_len": 560,
+      "text_prefix": "Bare Metal Colocation \u2014 Dedicated, liquid-cooled rack space within a DEC, suppor"
+    },
+    {
+      "alignment": null,
+      "i": 40,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f49b62e877444349",
+      "text_len": 239,
+      "text_prefix": "3.2 Indicative Capacity. The Customer has indicated interest in approximately ap"
+    },
+    {
+      "alignment": null,
+      "i": 41,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6122fea9892c7c1a",
+      "text_len": 384,
+      "text_prefix": "3.3 Technical Requirements. Digital Energy's DEC facilities support rack densiti"
+    },
+    {
+      "alignment": null,
+      "i": 42,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "107197c37d97a5c5",
+      "text_len": 243,
+      "text_prefix": "3.4 Indicative Pricing. Pricing will be determined following the technical scopi"
+    },
+    {
+      "alignment": null,
+      "i": 43,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bf3a5a47164f4429",
+      "text_len": 147,
+      "text_prefix": "3.5 Indicative Term. The Customer anticipates a commitment term of approximately"
+    },
+    {
+      "alignment": null,
+      "i": 44,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "603d3e423bd9f43a",
+      "text_len": 13,
+      "text_prefix": "4. Next Steps"
+    },
+    {
+      "alignment": null,
+      "i": 45,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b57a311542fe50d7",
+      "text_len": 78,
+      "text_prefix": "4.1 Following execution of this LOI, the Parties intend to proceed as follows:"
+    },
+    {
+      "alignment": null,
+      "i": 46,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f3d2f71cef025fbc",
+      "text_len": 153,
+      "text_prefix": "(a) Technical scoping (target: 30 days post-LOI) \u2014 Detailed discovery to determi"
+    },
+    {
+      "alignment": null,
+      "i": 47,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2d2331d624c08f36",
+      "text_len": 165,
+      "text_prefix": "(b) Commercial proposal (target: 60 days post-LOI) \u2014 Digital Energy will issue a"
+    },
+    {
+      "alignment": null,
+      "i": 48,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d5b0ef5524fc28de",
+      "text_len": 110,
+      "text_prefix": "(c) MSA negotiation and execution (target: 90 days post-LOI) \u2014 The Parties will "
+    },
+    {
+      "alignment": null,
+      "i": 49,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d26ce3e7ecfa2443",
+      "text_len": 47,
+      "text_prefix": "These timelines are indicative and non-binding."
+    },
+    {
+      "alignment": null,
+      "i": 50,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7842f5a875b322ad",
+      "text_len": 115,
+      "text_prefix": "4.2 This LOI does not reserve capacity at any DEC. Capacity allocation will be c"
+    },
+    {
+      "alignment": null,
+      "i": 51,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a52544972ada1476",
+      "text_len": 43,
+      "text_prefix": "5. Project Finance and Assignment (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 52,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "93ddf9bd62df75fe",
+      "text_len": 233,
+      "text_prefix": "5.1 Project Finance Context. Digital Energy is developing the DEC programme unde"
+    },
+    {
+      "alignment": null,
+      "i": 53,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9ee88effd6f0a95c",
+      "text_len": 148,
+      "text_prefix": "5.2 Assignment. Neither Party may assign its rights or obligations under this LO"
+    },
+    {
+      "alignment": null,
+      "i": 54,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "60c3c51bf5fdff18",
+      "text_len": 155,
+      "text_prefix": "(a) Digital Energy may assign this LOI, or any rights under it, to any Financing"
+    },
+    {
+      "alignment": null,
+      "i": 55,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "3350cbbd42435baf",
+      "text_len": 231,
+      "text_prefix": "(b) Digital Energy may assign this LOI to any Affiliate or special-purpose vehic"
+    },
+    {
+      "alignment": null,
+      "i": 56,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0311d9a7a5c2e06d",
+      "text_len": 736,
+      "text_prefix": "5.3 Lender Acknowledgment. The Customer acknowledges and agrees that, upon Digit"
+    },
+    {
+      "alignment": null,
+      "i": 57,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cc05a810fc17d2a9",
+      "text_len": 28,
+      "text_prefix": "6. Confidentiality (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 58,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6e55a22ba6693661",
+      "text_len": 152,
+      "text_prefix": "6.1 Each Party shall keep confidential all Confidential Information received fro"
+    },
+    {
+      "alignment": null,
+      "i": 59,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e1c4e5c703ef617e",
+      "text_len": 217,
+      "text_prefix": "6.2 Each Party may disclose Confidential Information only to its Representatives"
+    },
+    {
+      "alignment": null,
+      "i": 60,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7790c63e078e98e5",
+      "text_len": 429,
+      "text_prefix": "6.3 The obligations in Clauses 6.1 and 6.2 do not apply to information that the "
+    },
+    {
+      "alignment": null,
+      "i": 61,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9fb09c5e186da898",
+      "text_len": 264,
+      "text_prefix": "6.4 A Party may disclose Confidential Information to the extent required by appl"
+    },
+    {
+      "alignment": null,
+      "i": 62,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "00426c0e9425f83c",
+      "text_len": 316,
+      "text_prefix": "6.5 Upon written request or expiry of this LOI, the receiving Party shall prompt"
+    },
+    {
+      "alignment": null,
+      "i": 63,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "568a6d2439c34b75",
+      "text_len": 163,
+      "text_prefix": "6.6 Neither Party shall make any public announcement regarding this LOI without "
+    },
+    {
+      "alignment": null,
+      "i": 64,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a2b23e1c71483872",
+      "text_len": 183,
+      "text_prefix": "6.7 The obligations in this Clause 6 shall survive for 3 years from the date of "
+    },
+    {
+      "alignment": null,
+      "i": 65,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b947a40291f4070c",
+      "text_len": 259,
+      "text_prefix": "6.8 Each Party acknowledges that a breach of this Clause 6 may cause irreparable"
+    },
+    {
+      "alignment": null,
+      "i": 66,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "31f044c9817e1588",
+      "text_len": 31,
+      "text_prefix": "7. General Provisions (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 67,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "628a9b8ed809fc80",
+      "text_len": 24,
+      "text_prefix": "7.1 Non-Binding Status. "
+    },
+    {
+      "alignment": null,
+      "i": 68,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c2f92d6f0edb21ef",
+      "text_len": 235,
+      "text_prefix": "(a) Non-binding provisions. Clauses 2 through 4 of this LOI are non-binding expr"
+    },
+    {
+      "alignment": null,
+      "i": 69,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c7579e259c01838c",
+      "text_len": 164,
+      "text_prefix": "(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confident"
+    },
+    {
+      "alignment": null,
+      "i": 70,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f9bf4b2958a497e2",
+      "text_len": 623,
+      "text_prefix": "7.2 Good Faith. The Parties agree to engage in the technical scoping and commerc"
+    },
+    {
+      "alignment": null,
+      "i": 71,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f09ff9a99625214e",
+      "text_len": 232,
+      "text_prefix": "7.3 Validity. This LOI shall remain valid until 1 May 2027, after which it shall"
+    },
+    {
+      "alignment": null,
+      "i": 72,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7718a45d7df1fbfc",
+      "text_len": 75,
+      "text_prefix": "7.4 Costs. Each Party shall bear its own costs in connection with this LOI."
+    },
+    {
+      "alignment": null,
+      "i": 73,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "dbd04f9a52f8d2d6",
+      "text_len": 154,
+      "text_prefix": "7.5 Counterparts. This LOI may be executed in counterparts, including by electro"
+    },
+    {
+      "alignment": null,
+      "i": 74,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9403131b4e5b6b4e",
+      "text_len": 167,
+      "text_prefix": "7.6 Notices. All notices under this LOI shall be in writing (including email) an"
+    },
+    {
+      "alignment": null,
+      "i": 75,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "87490380d833b22b",
+      "text_len": 219,
+      "text_prefix": "7.7 Governing Law. This LOI shall be governed by and construed in accordance wit"
+    },
+    {
+      "alignment": null,
+      "i": 76,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8b629e5d96fc6b97",
+      "text_len": 187,
+      "text_prefix": "7.8 Jurisdiction. The courts of Amsterdam (Rechtbank Amsterdam) shall have exclu"
+    },
+    {
+      "alignment": null,
+      "i": 77,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "797aeb03f4805f16",
+      "text_len": 240,
+      "text_prefix": "7.9 Entire Agreement. This LOI constitutes the entire agreement between the Part"
+    },
+    {
+      "alignment": null,
+      "i": 78,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 79,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e016b5ff9042dc0f",
+      "text_len": 36,
+      "text_prefix": "We look forward to working with you."
+    },
+    {
+      "alignment": null,
+      "i": 80,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 81,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6d12ed914c5cc1df",
+      "text_len": 17,
+      "text_prefix": "Yours faithfully,"
+    },
+    {
+      "alignment": null,
+      "i": 82,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 83,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cdec56b0de46da45",
+      "text_len": 52,
+      "text_prefix": "For and on behalf of Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 84,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 85,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 86,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fbcd35b74947c6c4",
+      "text_len": 19,
+      "text_prefix": "Name: Carlos Reuven"
+    },
+    {
+      "alignment": null,
+      "i": 87,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "24aa4235c62622bd",
+      "text_len": 15,
+      "text_prefix": "Title: Director"
+    },
+    {
+      "alignment": null,
+      "i": 88,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 89,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 90,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 91,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 92,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 93,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "efe8ce2bf1551e2b",
+      "text_len": 37,
+      "text_prefix": "For and on behalf of Meridian AI B.V."
+    },
+    {
+      "alignment": null,
+      "i": 94,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 95,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 96,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "704097b85af7bb00",
+      "text_len": 17,
+      "text_prefix": "Name: Lisa Bakker"
+    },
+    {
+      "alignment": null,
+      "i": 97,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f34144c8ea96aa80",
+      "text_len": 31,
+      "text_prefix": "Title: Chief Technology Officer"
+    },
+    {
+      "alignment": null,
+      "i": 98,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 99,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 100,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 101,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 102,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e9aee097d77ff028",
+      "text_len": 33,
+      "text_prefix": "Schedule 1 \u2014 Service Requirements"
+    },
+    {
+      "alignment": null,
+      "i": 103,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "35d24067309afce1",
+      "text_len": 106,
+      "text_prefix": "This schedule expresses the Parties' current intentions and is non-binding, in a"
+    },
+    {
+      "alignment": null,
+      "i": 104,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 105,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d5a1ca748ff58c0a",
+      "text_len": 19,
+      "text_prefix": "DE-LOI-EndUser-v3.2"
+    }
+  ],
+  "sections": [
+    {
+      "bottom_margin_mm": 35.0,
+      "diff_first_page_header_footer": true,
+      "left_margin_mm": 24.99,
+      "page_height_mm": 297.0,
+      "page_width_mm": 210.01,
+      "right_margin_mm": 20.0,
+      "top_margin_mm": 20.0
+    }
+  ],
+  "tables": [
+    {
+      "i": 0,
+      "n_cols": 2,
+      "n_rows": 8,
+      "rows": [
+        [
+          "Item",
+          "Detail"
+        ],
+        [
+          "Service Model",
+          "Bare Metal"
+        ],
+        [
+          "Indicative Capacity",
+          "approximately 120 kW IT"
+        ],
+        [
+          "GPU / Accelerator Type",
+          "[TBC]"
+        ],
+        [
+          "Data Sovereignty",
+          "[TBC]"
+        ],
+        [
+          "Technical scoping complete",
+          "1 May 2026 + 30 days"
+        ],
+        [
+          "Commercial proposal issued",
+          "1 May 2026 + 60 days"
+        ],
+        [
+          "MSA executed",
+          "1 May 2026 + 90 days"
+        ]
+      ]
+    }
+  ]
+}

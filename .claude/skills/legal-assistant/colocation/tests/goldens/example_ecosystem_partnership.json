@@ -1,0 +1,956 @@
+{
+  "footer": [
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "first_page_footer"
+    },
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "footer"
+    }
+  ],
+  "n_paragraphs": 102,
+  "n_tables": 0,
+  "paragraphs": [
+    {
+      "alignment": null,
+      "i": 0,
+      "space_after_pt": 0.0,
+      "space_before_pt": 200.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 1,
+      "space_after_pt": 4.0,
+      "space_before_pt": 8.0,
+      "text_hash": "ce9098b1971e2d42",
+      "text_len": 16,
+      "text_prefix": "Letter of Intent"
+    },
+    {
+      "alignment": null,
+      "i": 2,
+      "space_after_pt": 0.0,
+      "space_before_pt": 2.0,
+      "text_hash": "eb4f918786eb07fe",
+      "text_len": 33,
+      "text_prefix": "Strategic Ecosystem Collaboration"
+    },
+    {
+      "alignment": null,
+      "i": 3,
+      "space_after_pt": 0.0,
+      "space_before_pt": 16.0,
+      "text_hash": "a74ef075a8854b7e",
+      "text_len": 10,
+      "text_prefix": "1 May 2026"
+    },
+    {
+      "alignment": null,
+      "i": 4,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 5,
+      "space_after_pt": 2.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d05e9343a6dcb14b",
+      "text_len": 8,
+      "text_prefix": "Between:"
+    },
+    {
+      "alignment": null,
+      "i": 6,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "c9349500950c3890",
+      "text_len": 31,
+      "text_prefix": "Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 7,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "332b48e1b663deee",
+      "text_len": 56,
+      "text_prefix": "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+    },
+    {
+      "alignment": null,
+      "i": 8,
+      "space_after_pt": 2.0,
+      "space_before_pt": 12.0,
+      "text_hash": "ab131b737d68ecb9",
+      "text_len": 4,
+      "text_prefix": "And:"
+    },
+    {
+      "alignment": null,
+      "i": 9,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "4522d85ec0d3c68c",
+      "text_len": 55,
+      "text_prefix": "European Institute for Sovereign AI Infrastructure e.V."
+    },
+    {
+      "alignment": null,
+      "i": 10,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "5002761640441339",
+      "text_len": 39,
+      "text_prefix": "Alexanderplatz 1, 10178 Berlin, Germany"
+    },
+    {
+      "alignment": null,
+      "i": 11,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 12,
+      "space_after_pt": 2.0,
+      "space_before_pt": 2.0,
+      "text_hash": "90e0afd8c5a8cc05",
+      "text_len": 29,
+      "text_prefix": "Classification:  Confidential"
+    },
+    {
+      "alignment": null,
+      "i": 13,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 14,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "2d7880970d21f6d6",
+      "text_len": 79,
+      "text_prefix": "THIS LETTER OF INTENT (the \"LOI\") is dated 1 May 2026 and entered into between:"
+    },
+    {
+      "alignment": null,
+      "i": 15,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "e32542f7736e5a6c",
+      "text_len": 277,
+      "text_prefix": "(1) Digital Energy Netherlands B.V., a private limited liability company incorpo"
+    },
+    {
+      "alignment": null,
+      "i": 16,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "4cfee8c566daff2a",
+      "text_len": 255,
+      "text_prefix": "(2) European Institute for Sovereign AI Infrastructure e.V., an entity incorpora"
+    },
+    {
+      "alignment": null,
+      "i": 17,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94139f6e4095abc6",
+      "text_len": 43,
+      "text_prefix": "(each a \"Party\" and together the \"Parties\")"
+    },
+    {
+      "alignment": null,
+      "i": 18,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2cbe40dde0c1847e",
+      "text_len": 8,
+      "text_prefix": "Recitals"
+    },
+    {
+      "alignment": null,
+      "i": 19,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6b567abc0bb5acfc",
+      "text_len": 567,
+      "text_prefix": "(A) Digital Energy develops and operates Digital Energy Centers (\"DECs\"), distri"
+    },
+    {
+      "alignment": null,
+      "i": 20,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4686338cfd60d412",
+      "text_len": 734,
+      "text_prefix": "(B) EISAI (the \"Partner\") is a European research and policy institute founded in"
+    },
+    {
+      "alignment": null,
+      "i": 21,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cc083ca190451795",
+      "text_len": 453,
+      "text_prefix": "(C) The Parties wish to record their mutual interest in a non-commercial ecosyst"
+    },
+    {
+      "alignment": null,
+      "i": 22,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1dac297de7a64e46",
+      "text_len": 227,
+      "text_prefix": "(D) The Parties will exchange commercially sensitive or non-public information i"
+    },
+    {
+      "alignment": null,
+      "i": 23,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "54376bf016bcf4f0",
+      "text_len": 14,
+      "text_prefix": "1. Definitions"
+    },
+    {
+      "alignment": null,
+      "i": 24,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ef6020d34bb104a9",
+      "text_len": 55,
+      "text_prefix": "1.1 In this LOI, unless the context requires otherwise:"
+    },
+    {
+      "alignment": null,
+      "i": 25,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "096c5fb1723d6822",
+      "text_len": 439,
+      "text_prefix": "\"Confidential Information\" means all information (whether technical, commercial,"
+    },
+    {
+      "alignment": null,
+      "i": 26,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "41a3033ba6177838",
+      "text_len": 112,
+      "text_prefix": "\"Collaboration\" means the ecosystem activities and joint work contemplated by th"
+    },
+    {
+      "alignment": null,
+      "i": 27,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "60a0b9940c5f7304",
+      "text_len": 159,
+      "text_prefix": "\"Representatives\" means, in relation to a Party, its Affiliates and its and thei"
+    },
+    {
+      "alignment": null,
+      "i": 28,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "161d3d1e8b66c72d",
+      "text_len": 20,
+      "text_prefix": "2. Purpose and Scope"
+    },
+    {
+      "alignment": null,
+      "i": 29,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9d9c9ec0df7a69b5",
+      "text_len": 233,
+      "text_prefix": "2.1 This LOI records the Parties' mutual interest in a non-commercial ecosystem "
+    },
+    {
+      "alignment": null,
+      "i": 30,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d88f66ae0fb6f9ca",
+      "text_len": 208,
+      "text_prefix": "2.2 The collaboration is strictly non-commercial. No Party shall be entitled to "
+    },
+    {
+      "alignment": null,
+      "i": 31,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8e7b591e2265ed2d",
+      "text_len": 291,
+      "text_prefix": "2.3 The commercial implications of any future activity \u2014 including any joint off"
+    },
+    {
+      "alignment": null,
+      "i": 32,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2e2b63e0b5045aad",
+      "text_len": 202,
+      "text_prefix": "2.4 The confidentiality and general provisions in Clauses 6 and 7 are legally bi"
+    },
+    {
+      "alignment": null,
+      "i": 33,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ccdd24e65debd19a",
+      "text_len": 22,
+      "text_prefix": "3. Collaboration Scope"
+    },
+    {
+      "alignment": null,
+      "i": 34,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c41f49e2fff44f42",
+      "text_len": 84,
+      "text_prefix": "3.1 Collaboration Themes. The Parties intend to collaborate on the following the"
+    },
+    {
+      "alignment": null,
+      "i": 35,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0700506f6ee747e5",
+      "text_len": 29,
+      "text_prefix": "\u2014 sovereign AI infrastructure"
+    },
+    {
+      "alignment": null,
+      "i": 36,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d893595372a1bb02",
+      "text_len": 31,
+      "text_prefix": "\u2014 sustainable datacentre design"
+    },
+    {
+      "alignment": null,
+      "i": 37,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e4f4a6966919837f",
+      "text_len": 41,
+      "text_prefix": "\u2014 energy-recycling integration in compute"
+    },
+    {
+      "alignment": null,
+      "i": 38,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a826012e0dfa66f3",
+      "text_len": 32,
+      "text_prefix": "\u2014 EU industrial policy alignment"
+    },
+    {
+      "alignment": null,
+      "i": 39,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "22d4cedc7dbdefb9",
+      "text_len": 158,
+      "text_prefix": "3.2 Joint Activity Categories. Subject to resources and mutual agreement, the Pa"
+    },
+    {
+      "alignment": null,
+      "i": 40,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a68a58d4819e0cd2",
+      "text_len": 65,
+      "text_prefix": "(\u2014) publications (joint white papers, research articles, reports)"
+    },
+    {
+      "alignment": null,
+      "i": 41,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2ebfb313930eeb63",
+      "text_len": 48,
+      "text_prefix": "(\u2014) events (conferences, roundtables, workshops)"
+    },
+    {
+      "alignment": null,
+      "i": 42,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b6a3e25002eddd93",
+      "text_len": 57,
+      "text_prefix": "(\u2014) working groups (standards and technical coordination)"
+    },
+    {
+      "alignment": null,
+      "i": 43,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b7f26d3c29359917",
+      "text_len": 51,
+      "text_prefix": "(\u2014) advocacy (policy input, consultation responses)"
+    },
+    {
+      "alignment": null,
+      "i": 44,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "717c045776232e4c",
+      "text_len": 292,
+      "text_prefix": "3.3 Governance and Cadence. The Parties intend to establish a lightweight govern"
+    },
+    {
+      "alignment": null,
+      "i": 45,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ac45fe68cfc3d373",
+      "text_len": 213,
+      "text_prefix": "3.4 Working-Group Participation. Where either Party hosts or convenes a working "
+    },
+    {
+      "alignment": null,
+      "i": 46,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0aad4970584a876b",
+      "text_len": 181,
+      "text_prefix": "3.5 Non-Exclusivity. The collaboration contemplated by this LOI is non-exclusive"
+    },
+    {
+      "alignment": null,
+      "i": 47,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c0f0894c12d0b955",
+      "text_len": 29,
+      "text_prefix": "4. Announcements and Branding"
+    },
+    {
+      "alignment": null,
+      "i": 48,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "15473fe928c8d7bf",
+      "text_len": 292,
+      "text_prefix": "4.1 Announcement Protocol. Any public announcement, press release, published art"
+    },
+    {
+      "alignment": null,
+      "i": 49,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "43f499aa8fb7573b",
+      "text_len": 240,
+      "text_prefix": "4.2 Logo Use. Each Party grants the other a limited, non-exclusive, revocable li"
+    },
+    {
+      "alignment": null,
+      "i": 50,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "5ac6a7175a42bbd1",
+      "text_len": 331,
+      "text_prefix": "4.3 Attribution. Where either Party refers to the collaboration in any public co"
+    },
+    {
+      "alignment": null,
+      "i": 51,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8778fd8f8b6a286b",
+      "text_len": 41,
+      "text_prefix": "5. Intellectual Property and Deliverables"
+    },
+    {
+      "alignment": null,
+      "i": 52,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "392333bfa15985c6",
+      "text_len": 240,
+      "text_prefix": "5.1 Background IP. Each Party retains all right, title, and interest in its back"
+    },
+    {
+      "alignment": null,
+      "i": 53,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4e51e77a0fc7a732",
+      "text_len": 316,
+      "text_prefix": "5.2 Joint Deliverables. Any intellectual property jointly developed by the Parti"
+    },
+    {
+      "alignment": null,
+      "i": 54,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c56a20f0bc8e0823",
+      "text_len": 177,
+      "text_prefix": "5.3 No Assignment by Participation. Nothing in this LOI or in any activity condu"
+    },
+    {
+      "alignment": null,
+      "i": 55,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "57fcf4456b7b6859",
+      "text_len": 151,
+      "text_prefix": "5.4 Publication. Each Party retains the right to publish, present, and dissemina"
+    },
+    {
+      "alignment": null,
+      "i": 56,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cc05a810fc17d2a9",
+      "text_len": 28,
+      "text_prefix": "6. Confidentiality (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 57,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4005440447d84e23",
+      "text_len": 158,
+      "text_prefix": "6.1 Each Party shall keep confidential all Confidential Information received fro"
+    },
+    {
+      "alignment": null,
+      "i": 58,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4dd3347e28738368",
+      "text_len": 223,
+      "text_prefix": "6.2 Each Party may disclose Confidential Information only to its Representatives"
+    },
+    {
+      "alignment": null,
+      "i": 59,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7790c63e078e98e5",
+      "text_len": 429,
+      "text_prefix": "6.3 The obligations in Clauses 6.1 and 6.2 do not apply to information that the "
+    },
+    {
+      "alignment": null,
+      "i": 60,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9fb09c5e186da898",
+      "text_len": 264,
+      "text_prefix": "6.4 A Party may disclose Confidential Information to the extent required by appl"
+    },
+    {
+      "alignment": null,
+      "i": 61,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4e36f7d9c768028d",
+      "text_len": 301,
+      "text_prefix": "6.5 Upon written request or expiry of this LOI, the receiving Party shall prompt"
+    },
+    {
+      "alignment": null,
+      "i": 62,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "346b235a6e47af4b",
+      "text_len": 62,
+      "text_prefix": "6.6 Public statements about this LOI are governed by Clause 4."
+    },
+    {
+      "alignment": null,
+      "i": 63,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4ba7d98f34bcace8",
+      "text_len": 114,
+      "text_prefix": "6.7 The obligations in this Clause 6 shall survive for 2 years from the date of "
+    },
+    {
+      "alignment": null,
+      "i": 64,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "31f044c9817e1588",
+      "text_len": 31,
+      "text_prefix": "7. General Provisions (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 65,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "628a9b8ed809fc80",
+      "text_len": 24,
+      "text_prefix": "7.1 Non-Binding Status. "
+    },
+    {
+      "alignment": null,
+      "i": 66,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d63cfdca4610537d",
+      "text_len": 115,
+      "text_prefix": "(a) Non-binding provisions. Clauses 2, 3, 4, and 5 of this LOI are non-binding e"
+    },
+    {
+      "alignment": null,
+      "i": 67,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "467a44a0bec69905",
+      "text_len": 127,
+      "text_prefix": "(b) Binding provisions. Clauses 6 (Confidentiality) and 7 (General Provisions) a"
+    },
+    {
+      "alignment": null,
+      "i": 68,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c26a23389839b692",
+      "text_len": 218,
+      "text_prefix": "7.2 No Commercial Commitment. Nothing in this LOI creates any obligation on eith"
+    },
+    {
+      "alignment": null,
+      "i": 69,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "014751600915dc61",
+      "text_len": 39,
+      "text_prefix": "7.3 Non-Exclusivity. As per Clause 3.5."
+    },
+    {
+      "alignment": null,
+      "i": 70,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "705e95bfbd47a89a",
+      "text_len": 230,
+      "text_prefix": "7.4 Term and Validity. This LOI shall remain valid until 1 May 2027, after which"
+    },
+    {
+      "alignment": null,
+      "i": 71,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8f0c33b3c3b87f6d",
+      "text_len": 97,
+      "text_prefix": "7.5 Costs. Each Party shall bear its own costs in connection with this LOI and t"
+    },
+    {
+      "alignment": null,
+      "i": 72,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0f5218942b4630df",
+      "text_len": 154,
+      "text_prefix": "7.6 Counterparts. This LOI may be executed in counterparts, including by electro"
+    },
+    {
+      "alignment": null,
+      "i": 73,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1437195ed143311f",
+      "text_len": 167,
+      "text_prefix": "7.7 Notices. All notices under this LOI shall be in writing (including email) an"
+    },
+    {
+      "alignment": null,
+      "i": 74,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "314375c11c374980",
+      "text_len": 186,
+      "text_prefix": "7.8 Governing Law. This LOI shall be governed by the laws of the Netherlands. Th"
+    },
+    {
+      "alignment": null,
+      "i": 75,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "19e2461f7fc7223a",
+      "text_len": 187,
+      "text_prefix": "7.9 Jurisdiction. The courts of Amsterdam (Rechtbank Amsterdam) shall have exclu"
+    },
+    {
+      "alignment": null,
+      "i": 76,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9220e1f29de6dd03",
+      "text_len": 241,
+      "text_prefix": "7.10 Entire Agreement. This LOI constitutes the entire agreement between the Par"
+    },
+    {
+      "alignment": null,
+      "i": 77,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "92048e7dc151fab2",
+      "text_len": 261,
+      "text_prefix": "7.11 Partnership Disclaimer. Nothing in this LOI shall be construed as creating "
+    },
+    {
+      "alignment": null,
+      "i": 78,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 79,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e016b5ff9042dc0f",
+      "text_len": 36,
+      "text_prefix": "We look forward to working with you."
+    },
+    {
+      "alignment": null,
+      "i": 80,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 81,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6d12ed914c5cc1df",
+      "text_len": 17,
+      "text_prefix": "Yours faithfully,"
+    },
+    {
+      "alignment": null,
+      "i": 82,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 83,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cdec56b0de46da45",
+      "text_len": 52,
+      "text_prefix": "For and on behalf of Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 84,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 85,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 86,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fbcd35b74947c6c4",
+      "text_len": 19,
+      "text_prefix": "Name: Carlos Reuven"
+    },
+    {
+      "alignment": null,
+      "i": 87,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "24aa4235c62622bd",
+      "text_len": 15,
+      "text_prefix": "Title: Director"
+    },
+    {
+      "alignment": null,
+      "i": 88,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 89,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 90,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 91,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 92,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 93,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9bb3b5268a769b6a",
+      "text_len": 76,
+      "text_prefix": "For and on behalf of European Institute for Sovereign AI Infrastructure e.V."
+    },
+    {
+      "alignment": null,
+      "i": 94,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 95,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 96,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ddbe3330ea17db6c",
+      "text_len": 34,
+      "text_prefix": "Name: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 97,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9b40a92c05aadb04",
+      "text_len": 25,
+      "text_prefix": "Title: Executive Director"
+    },
+    {
+      "alignment": null,
+      "i": 98,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 99,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 100,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 101,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4bce4e1e8956089a",
+      "text_len": 32,
+      "text_prefix": "DE-LOI-EcosystemPartnership-v1.0"
+    }
+  ],
+  "sections": [
+    {
+      "bottom_margin_mm": 35.0,
+      "diff_first_page_header_footer": true,
+      "left_margin_mm": 24.99,
+      "page_height_mm": 297.0,
+      "page_width_mm": 210.01,
+      "right_margin_mm": 20.0,
+      "top_margin_mm": 20.0
+    }
+  ],
+  "tables": []
+}

@@ -5,6 +5,54 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.8 — 2026-04-19
+
+PRINCIPLES.md tripwire closure. Five principles (#1 / #4 / #5 / #6 / #12) moved from "pending v3.6" to implemented. Closes the items Jonathan + Carlos flagged as "house-of-cards" risk after the v3.5.5 post-mortem. Test harness grows from 139 → 250 passing checks in both repos. No render-logic change; no intake YAML change; no sibling docs change beyond PRINCIPLES.md.
+
+### Added — #5 Golden-file integration tests
+- `tests/_fingerprint.py` — deterministic .docx digest (paragraph count + per-paragraph text hash + space_before/after + alignment; table shape + cells; section margins in mm; footer alignment + text). Skips volatile fields (timestamps, absolute paths, UUIDs).
+- `tests/test_golden_files.py` — parametrised across 10 intakes (6 examples + 4 regression fixtures). For each, regenerates .docx, fingerprints it, diffs against committed `tests/goldens/<slug>.json`. Mismatch = test fails with human-readable paragraph-level diff.
+- `tests/conftest.py` — registers `--update-goldens` pytest flag. Workflow: edit render logic → `pytest --update-goldens` → review `git diff tests/goldens/` → commit alongside code. CI default (no flag) fails on any unexplained diff.
+- 10 goldens seeded in `tests/goldens/` per repo. Staging goldens were seeded from staging's own generator output (not mirrored from upstream) because the two generators have legitimate cosmetic divergence (`document-factory` vs `de-document-factory` import path).
+
+### Added — #6 Visual layout invariant tests
+- `tests/test_visual_layout.py` — module-scoped fixture generates one Polarise Wholesale LOI reference doc; 15 tests assert concrete `paragraph_format.space_after`, `alignment`, and section geometry values. Direct guard against the v3.5.5 Parties Preamble spacing bug (blank-paragraph spacers → ~15pt gap, vs 6pt via `space_after`).
+- Coverage: section geometry (A4 / margins 20-35-25-20 mm / `different_first_page_header_footer`), footer (CENTER alignment + NL entity + no Swiss AG leak), Parties Preamble (4 paragraphs, intro + 2 parties at 6pt `space_after`, opener/closing text), signature block (no KvK: label, no ACKNOWLEDGED AND AGREED, Place: field present twice), brand rename (zero `the Provider`, Digital Energy ≥ 20 occurrences).
+
+### Added — #12 Intake structural-shape linter
+- `tests/test_intake_structural_shape.py` — 79 tests asserting all 6 `intake_example_*.yaml` files share the consistent top-level contract (type / provider / counterparty / dates / programme / protection / choices) plus per-type additions (commercial / schedule_1 / partnership_mode / supplier / ecosystem).
+- Second-level shape checks: `provider` must carry the required identity fields; `counterparty` must carry `source_map`; dates + programme + recital_a_variant enum validated; source_map pillar keys + value types enforced. Regression guard against v3.5.2-era bug where one intake shipped with a missing sub-field and the generator tolerated it silently for one type only.
+- Positive-band checks: provider addresses must NOT contain "Zug" (v3.5.1 A'' — Swiss AG parent address leak guard); provider signatory_name must NOT be "Jelmer ten Wolde" (v3.5.1 A — default NL-BV pre-MSA signer is Carlos Reuven / Director).
+
+### Added — #4 Branch-specific test enforcement (CI)
+- Both repos' `legal-assistant-tests.yml` now carry an `Enforce test-changes-with-generator-changes` step that runs on every PR. Compares `git diff --name-only origin/<base>...HEAD`; if `generate_loi.py` appears in the diff but no file under `tests/` does, fails the job.
+- Escape hatch for documentation-only or pure-comment generator edits: include the literal marker `[skip-test-check]` in any commit message on the branch. Rationale: rare but real case (e.g., docstring-only edits), and the marker forces explicit acknowledgement of test skip.
+- CI checkout now uses `fetch-depth: 0` to make the merge-base diff reliable.
+
+### Added — #1 Mirror-edit discipline sentinel
+- `tests/mirror-manifest.txt` — sha256sum manifest of the test-harness files that must be byte-identical across upstream + staging. Committed verbatim in both repos.
+- `tests/test_mirror_integrity.py` — 7 tests verifying each manifest-listed file hashes to the expected value. Mismatch = silent drift caught in CI.
+- `tests/regen-mirror-manifest.sh` — upstream-only regeneration script. Workflow: mirror-edit upstream → regen → copy manifest to staging → commit to both.
+- **Scope decision:** `generate_loi.py` is intentionally excluded from the manifest because staging uses `de-document-factory/` import path (legitimate DEGitOS divergence); byte-level hashing would false-positive. Tripwire targets the silent-drift class — test-harness files that don't get the same PR-review scrutiny as generator edits. Generator drift is covered by the standard review process plus the new golden-file tests.
+
+### Changed — `docs/PRINCIPLES.md`
+- Status table updated: items 1 / 4 / 5 / 6 / 12 flipped from ⏳/🟡 to ✅. Only items 3 (additive-first) and 10 (layer contracts) remain at partial/pending — both are review-discipline items where automation is lower-leverage than checklist rigor.
+- "Priority for v3.6" sentence replaced with "Remaining work" pointing at items 3 and 10.
+
+### Verified
+- Upstream: 250/250 pytest tests pass (139 baseline + 10 goldens + 15 visual + 79 shape + 7 mirror-integrity).
+- Staging: 250/250 pytest tests pass (same split).
+- All 10 intake regens still QA PASS; regression fixtures unchanged.
+- Golden mismatch detection verified end-to-end by tampering a golden entry (set `n_paragraphs` 151 → 152): test failed with "paragraph count: expected 152 got 151". Restored → green. Replayed the same loop with a visual-layout assertion (changed expected margin): failed as expected. Restored → green.
+- Mirror-integrity drift detection verified: initial mirror exposed pre-existing cosmetic drift between upstream and staging `generate_loi.py` (~121 diff lines, all comment/wording plus the legitimate document-factory path). The drift is being tracked separately; mirror-manifest scope was narrowed to tests/ only for v3.5.8 to avoid false positives on legitimate generator-import divergence.
+
+### Not in scope
+- **#3 additive-first** — review-discipline; no automated tripwire proposed yet.
+- **#10 layer contracts** — versioning-rigor; partially covered by existing commit-message convention.
+- **Generator drift reconciliation** between upstream and staging `generate_loi.py` — surfaced by the mirror-integrity work; scheduled as a separate targeted PR so v3.5.8 stays additive-only.
+
+---
+
 ## v3.5.7 — 2026-04-17
 
 Sibling docs sync — brings `ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, and `SOP.md` to v3.5.6 state. Documentation-only change; no code change; all 139 pytest tests remain passing; all 10 intakes regenerate QA PASS.
