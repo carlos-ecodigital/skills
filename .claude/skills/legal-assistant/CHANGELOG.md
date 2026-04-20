@@ -5,6 +5,162 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5 (consolidated release) — 2026-04-17
+
+Consolidation of v3.5.1 + v3.5.2 + v3.5.3 + v3.5.4 into a single shippable release, plus polish items knocked out during consolidation. See per-version entries below for full scope detail; summary of v3.5 polish additions:
+
+### v3.5 polish (added during consolidation)
+- **SKILL.md Phase 7.5 → callee link** — Phase 7.5 section now explicitly points at `legal-counsel/specializations/contract-review/loi-review-workflow.md` (the Scope C callee file) so a reader of the SKILL.md Phase 7.5 section immediately knows which workflow file to load.
+- **`self.provider_term`** now derives from `data["provider"]["short_name"]` with `"Digital Energy"` fallback. Was hardcoded to `"Digital Energy"`. Preserves brand when AG signs (short_name still "Digital Energy") and supports future subsidiary/JV instruments without another body-wide rename.
+- **`validate()` fails fast on unknown `provider.entity` key** — e.g. `entity: "de_nnl"` (typo) now prints `ERROR: provider.entity 'de_nnl' not found in config/entities.yaml. Available keys: de_ag, de_nl` and exits 1 before rendering. Previously fell through silently to backward-compat path and the user only noticed at document-render time.
+- **CI workflow** — `.github/workflows/legal-assistant-tests.yml` gates PRs on pytest (88 → 90 tests). Triggers on any PR touching `legal-assistant/**` or `_shared/counterpart-description-framework.md` or `_shared/loi-*.md` or `document-factory/generate.py`. Runs full test suite + smokes all 6 intake examples + all 3 regression fixtures.
+- **`docs/jonathan-memo-v3.5-delivery-map.md`** — closes the loop on Jonathan's 2026-04-17 memo with a table mapping each J-item (E1-E7 + W1-W8 + J17-J19) to the specific v3.5.x delivery commit / PR / scope.
+- **Test harness additions** — 2 new tests (v3.5 polish section in `test_v3_5_2.py`): provider_term derives from short_name; provider_term fallback when short_name missing. **Total: 90 tests, all passing.**
+
+---
+
+## v3.5.4 — 2026-04-17
+
+Regression-regen anchor. Ships a reproducible Wholesale-type regression fixture for the Polarise use case that triggered the whole v3.5.x cycle, so any future v3.5.x change can be regressed against the known-good baseline. Sibling-docs-sync (Scope B) and full consolidated CHANGELOG (Scope M extension) deferred to a dedicated session — better to ship the regression anchor now than hold it behind docs.
+
+### Added
+- **Regression fixture directory**: `colocation/regression/v3.5/` with `README.md` explaining purpose, regen command, and non-goals.
+- **`polarise_wholesale_intake.yaml`** — synthetic-but-realistic intake reconstructed from Jonathan's 2026-04-17 memo. Exercises:
+  - v3.5.1 Scope J5 (`[TBC]` handling in counterparty sig block)
+  - v3.5.1 Scope J3 (Cl. 3.4 non-numeric `expansion_mw: "to be discussed"` → fallback clause)
+  - v3.5.1 Scope J1 (Cl. 3.2 rack density default — 130 kW + DLC)
+  - v3.5.1 Scope N-subset (Schedule 1 `technical.gpu_platform: "NVIDIA GB200 NVL72 (2× SU, ~1,152 GPUs total)"` renders from YAML)
+  - v3.5.2 Scope A''' (Parties Preamble)
+  - v3.5.2 brand rename (Digital Energy throughout; no "the Provider")
+  - v3.5.2 Scope 0 Signal Test: Recital B names SWI Stoneweg Icona (Euronext-listed controlling owner), Macquarie (infra-credit third-party DD), NVIDIA Cloud Partner (credentialled partnership), Deutsche Telekom Industrial AI Cloud (named marquee customer). **Zero inline citations. Zero fundraising-vanity. Augsburg forward pipeline omitted from Recital B** (fails Signal Test gate 1 — no named endorser — moved to Cl. 3 commercial context where self-reported sizing belongs).
+
+### Scope deferred to v3.5.5 / sibling-docs session
+- **L (remaining 3 fixtures)** — Cudo Compute (Wholesale), Sovereign AI Grid / Man of Solutions B.V. (Distributor Mode B), InfraPartners LLC (Strategic Supplier). Each requires tier-1 source verification + v3.4-corrected language application before fixture lands.
+- **B** (sibling docs sync — ASSEMBLY_GUIDE / FEATURE_MATRIX / SOP) — 17+ discrete v3.4→v3.5 language updates across 694 lines of sibling docs. Scoped mapping doc and edit sprint carry to dedicated session.
+- **M** (full consolidated CHANGELOG) — this file currently has four separate v3.5.x entries; a final consolidation pass aligning all entries with forward/backward navigation anchors carries to when all v3.5.x PRs merge.
+
+### Verified
+- Polarise regression regen: QA PASS, 0 warnings, 0 failures
+- Rendered `.docx` verified end-to-end:
+  - Parties Preamble renders with Polarise GmbH + `(1) Digital Energy Netherlands B.V.` + Macquarie / SWI Stoneweg named in Recital B
+  - Schedule 1 renders `NVIDIA GB200 NVL72 (2× SU, ~1,152 GPUs total)` from intake YAML (not hardcoded TBC)
+  - Cl. 3.4 fires non-numeric fallback for `expansion_mw: "to be discussed"`
+  - Zero `[polarise.eu]` / `[swi.com]` / `[companyhouse.de]` inline citations (R-24 OK)
+  - Zero `raised` / `valuation` vanity (R-25 OK)
+  - Zero `the Provider` in body; `Digital Energy` appears 43× (brand rename OK)
+- 88/88 pytest tests still pass
+
+---
+
+## v3.5.3 — 2026-04-17
+
+Workflow + governance increment. Ships the independent portions of the v3.5.3 plan — Scope J (EP Recital D polish), Scope K (legacy YAML migration pre-flight), Scope J14 (Gmail MCP fallback), Scope J13 (Drive routing — doc-only, deferred until `artifact_storage.py` lands). Dependent scopes (D/E/F linter refinements, G Phase 7.5 fail-closed code spec, J8/J9 Phase-5/6 UX, J12 per-type defaults matrix) carry forward to v3.5.3 continuation.
+
+### Added
+- **Scope K — `--migrate-check` CLI flag** in `generate_loi.py::main()`. Inspects intake YAML for missing `counterparty.source_map` (v3.4 R-23 requirement); if absent, emits a ready-to-paste snippet with all 5 pillars marked `[TBC]`; exits 0 (non-blocking). Uses `yaml.safe_load` directly so legacy YAMLs that would fail full `validate()` can still be migration-checked. Covered by `test_v3_5_3.py::TestMigrateCheck` (3 tests).
+- **Scope J14 — Gmail MCP fallback paragraph** in `SKILL.md` Phase 3: documents schema-error detection (`"False is not of type 'array'"`) and the PDF-export / thread-paste fallback. Explicit note that silent omission is NOT acceptable — email threads often carry technical commitments (GPU platform, rack density, RFS) that must reach Schedule 1.
+- **Scope J13 — Drive-routing spec** in `SKILL.md` Phase 8: documents the `scripts/artifact_storage.py::upload_artifact()` integration pattern with CLAUDE.md §4 rationale. Status: deferred — script does not yet exist. Wire-up occurs when `artifact_storage.py` lands.
+- **8 new unit tests** in `tests/test_v3_5_3.py` (EP Recital D polish + --migrate-check + v3.5.2 regression). Total harness: **88 tests all passing**.
+
+### Changed
+- **Scope J — EP Recital D**: `"The Parties may exchange..."` → `"The Parties will exchange..."` (consistency with other-type confidentiality framing; EP now matches EU/DS/WS/SS).
+
+### Deferred to v3.5.3 continuation (needs v3.5.2-dependent context)
+- **D**: R-23 pillar-specific granularity + override reason validation
+- **E**: R-22 regex refinement (narrow to clause-context; allowlist for false positives)
+- **F**: Recital B multi-paragraph extraction regex fix
+- **G**: Phase 7.5 fail-closed operational spec (beyond the contract already documented in v3.5.2's `loi-review-workflow.md`)
+- **J8 / J9**: Phase 6 full-Recital-B display + Phase 5 redraft-as-first-class UX
+- **J12**: Per-type defaults matrix (depends on Scope Q entities register already landed in v3.5.2)
+- **H / I**: Tier-2 qualifier worked examples + direct WebFetch re-verification of 4 framework examples
+
+### Verified
+- 88/88 pytest tests pass in both repos
+- EP Recital D renders `"will exchange"` in generated .docx
+- `--migrate-check` verified with legacy-style YAML (emits snippet) and v3.4-style YAML (reports OK)
+- All 6 intake examples regenerate with QA PASS
+
+---
+
+## v3.5.2 — 2026-04-17
+
+Foundations layer: the architectural scopes v3.5.1 deferred. Four big pieces — entities register, Parties Preamble + brand-name defined term, Signal Test methodology + new linter rules, legal-counsel Phase 7.5 callee — plus continued test-harness expansion.
+
+### Added
+- **Scope Q — entities register (`config/entities.yaml`)**: single source of truth for DE's legal entities. `de_nl` (Digital Energy Netherlands B.V., KvK 98580086) + `de_ag` (Digital Energy Group AG, CHE-408.639.320). Contains legal_name / short_name / abbreviation / legal_form / jurisdiction / address / reg_type / reg_number / RSIN / parent / footer_key / default signatories (pre_msa / post_msa for BV; ceo for AG) + per-type defaults matrix.
+- **`load_entities_register()` + `expand_provider_from_register()`** helpers in `generate_loi.py`. Intake YAMLs can now use `provider.entity: "de_nl"` + `provider.signatory_mode: "pre_msa"` and the loader expands the full record at runtime. Explicit intake field values override register defaults (intake wins). Backward-compat with v3.5.1 explicit-fields pattern preserved.
+- **Scope A''' — `parties()` method**: renders Parties Preamble legal-identification block in document body between cover page and Recital A. Pattern: `THIS LETTER OF INTENT (the "LOI") is dated [Date] and entered into between: (1) [Provider legal name], [form] incorporated under the laws of [jurisdiction], with registered office at [address] and registered with [registry] under number [reg_number] ("Digital Energy"); and (2) [Counterparty], [...] (the "[Customer/Partner/Supplier]"). (each a "Party" and together the "Parties")`. Invoked in `build()` and `_build_ep()`.
+- **Scope C — legal-counsel LOI review workflow callee** (`legal-counsel/specializations/contract-review/loi-review-workflow.md`): single-phase 4-point structured review matching `legal-assistant` Phase 7.5 caller contract. Reference-only markdown (per codebase cross-skill convention — zero runtime coupling). Returns strict `PASS` / `FLAG-FOR-REVISION` / `REJECT` envelopes parseable by the caller. Fail-closed on incomplete review. `legal-counsel/SKILL.md` router updated.
+- **Scope 0 — Signal Test methodology section** in `_shared/counterpart-description-framework.md`: 3-gate test (Attribution / Operational relevance / Freshness-health) supersedes v3.4 topic-based filtering. Writer discipline rule (named third parties must be tier-1-attributed before draft enters Phase 5). Fundraising-specific rule (corrects v3.4 crude exclusion — named-endorser financings pass; unattributed vanity fails). Customer / ownership specific rules.
+- **Scope 0 — four new linter rules** (`generate_loi.py` `_FAIL_RULES` + `_WARN_RULES`):
+  - **R-24 (fail)**: inline bracket citation in Recital B (`[polarise.eu]` pattern) — source attribution lives in YAML, never in prose
+  - **R-25 (fail)**: vanity-financial pattern in Recital B (valuation-of / raised $X / generic Series-X) — does NOT match named-endorser financing like "backed by Macquarie"
+  - **R-27 (fail)**: `[TBC]` rendered literally in sig-block Name/Title (`Name: [TBC]`) — must route through `_render_placeholder`
+  - **R-28 (warn, count-based)**: `[TBC]` count exceeds 5 body-wide — intake likely incomplete
+- **Scope T expansion** — `tests/test_v3_5_2.py` with 33 additional unit tests covering: entities-register contents, provider expansion (de_nl/de_ag + override wins + backward-compat), Parties Preamble output contract, brand rename invariants, R-24/25/27 pattern matching, and v3.5.1 regression checks. Total harness: 80 tests, all passing.
+
+### Changed
+- **Brand-name defined term — body-wide rename**: `"the Provider"` / `"The Provider"` → `"Digital Energy"` across all 99 occurrences in `generate_loi.py` (Recital A constants, type-specific tails, clause templates, meta-commentary regex). Recital A no longer opens with `'{prov} (the "Provider") develops...'`; now opens with `'{prov} develops...'`. Parties Preamble establishes `"Digital Energy"` as the defined short-name used throughout.
+- **`self.party` for Strategic Supplier**: changed from `"Partner"` to `"Supplier"` — semantically correct (counterparty in SS LOI IS the supplier; DE is the buying principal).
+- **Parties Preamble grammar**: `legal_form` auto-prefixed with "a" if missing article (renders as "a Besloten Vennootschap (B.V.)" when YAML has "Besloten Vennootschap (B.V.)").
+- **`intake_example_wholesale.yaml`**: fleshed out Provider block with `jurisdiction`, `legal_form`, `reg_type`, `reg_number` for the explicit-fields pattern; comment block documenting both patterns (explicit + entities-register).
+
+### Fixed
+- (no corrective fixes — v3.5.2 is architectural additions; v3.5.1 shipped the correctness fixes)
+
+### Scope still deferred (per 4-way split)
+- **v3.5.3**: linter refinements D/E/F (R-22 narrow, R-23 pillar-specific, Recital B multi-paragraph extraction) + Phase 7.5 fail-closed spec (G) + J8/J9/J12/J13/J14 (workflow UX, Drive routing, Gmail fallback) + H/I/J/K (tier-2 qualifier, re-verification, EP polish, migration pre-flight). v3.5.3-prep agent has drafted the independent items.
+- **v3.5.4**: Scope B (sibling docs sync — ASSEMBLY_GUIDE / FEATURE_MATRIX / SOP) + Scope L (regression regen of Cudo / SAG / InfraPartners / Polarise) + Scope M (full CHANGELOG consolidation). v3.5.4-prep agent has drafted regression intake YAMLs and sibling-docs-sync mapping.
+
+### Verified
+- 80/80 pytest unit tests pass in both repos (47 v3.5.1 + 33 v3.5.2)
+- All 6 intake examples regenerate with QA PASS (0 warn, 0 fail) under v3.5.2
+- Parties Preamble renders correctly between cover and Recital A (structural verify: `THIS LETTER OF INTENT` present, `(1) (2)` party enumeration present, `each a "Party"` defined-term block present)
+- Brand rename end-to-end: zero `the Provider` / `The Provider` in rendered body; `Digital Energy` appears ~43× per Wholesale LOI
+- Entities register backward-compat: intake YAMLs without `provider.entity` key unchanged; YAMLs with `entity: "de_nl"` expand correctly; override mechanism verified
+
+---
+
+## v3.5.1 — 2026-04-17
+
+First production use of v3.4 on the Polarise Wholesale LOI (Jonathan memo 2026-04-17) surfaced 19 concrete field findings. v3.5.1 is the correctness critical-path sprint — makes the next-run LOI sendable without post-gen manual editing. Architectural scopes (entities register, full test harness, Recital B methodology rewrite, Parties Preamble + brand-name rename, legal-counsel callee, workflow UX) defer to v3.5.2 / v3.5.3 / v3.5.4 per the 4-way PR split in `plans/expressive-cooking-flamingo.md`.
+
+### Added
+- **Scope T seed**: `colocation/tests/` pytest harness with 47 unit tests for every v3.5.1 code path — `_is_tbc`, `_render_placeholder`, `_derive_footer_entity`, Cl. 3.4 numeric detection, signature-block output contract (no KvK, no "ACKNOWLEDGED AND AGREED", Place field present, placeholder helper used). Discipline rule for all subsequent PRs: no render-logic change ships without a unit test exercising the new branch.
+- **`_is_tbc(value)`** static helper — detects placeholder sentinels: `None`, empty, `[TBC]`, `[TO BE CONFIRMED]`, `TBC`, `XXXXXXXX`.
+- **`_render_placeholder(value, context)`** helper — context-scoped rendering; `sig_block_name` / `sig_block_title` render `____________________________` for placeholder values; `body_clause` preserves `[TBC]` as visible draft marker.
+- **`_derive_footer_entity(legal_name)`** static helper — maps `provider.legal_name` to document-factory footer entity key (`"nl"` for B.V. / Netherlands; `"ag"` default).
+- **Scope N-subset**: Schedule 1 now reads `schedule_1.technical.gpu_platform` / `rack_density_kw` / `cooling` / `designated_sites` from intake YAML (Wholesale + End User). Prior behaviour hardcoded `[To be confirmed]` regardless of intake content.
+- **Place: field** in both provider + counterparty sig blocks (Dutch/EU execution convention, jurisdictional + eIDAS relevance).
+
+### Changed
+- **Scope A (signatory default)**: NL BV default signatory changed from `Jelmer ten Wolde` / `Chief Platform Officer` to `Carlos Reuven` / `Director` across 5 intake YAMLs + `SKILL.md:323`. Statutory capacity ("Director") — legally authoritative to bind Digital Energy Netherlands B.V. under Dutch corporate law; CEO is a functional title, not statutory.
+- **Scope A'' (NL BV address + KvK)**: all 6 intake YAMLs updated from `Baarerstrasse 43, 6300 Zug, Switzerland` (the Swiss AG parent's address) to `Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands` + `kvk: "98580086"` (was placeholder `"XXXXXXXX"`). Confirmed NL B.V. registered seat.
+- **Scope A' (signature block cleanup)**: `DocBuilder.signature()` stripped (i) unconditional `KvK:` line (duplicate of Parties clause / cover page), (ii) `ACKNOWLEDGED AND AGREED:` header (unnecessary on bilateral instruments — signing = agreement), (iii) counterparty `{reg_type}: {reg_number}` block. Signatory `Name` and `Title` lines now route through `_render_placeholder(..., "sig_block_name"|"sig_block_title")` so `[TBC]` renders as fillable blank.
+- **Scope A'''' (footer)**: `document-factory/generate.py::setup_footer` now CENTER-aligned (was default left). `generate_loi.py::_setup` derives entity from `provider.legal_name` via `_derive_footer_entity()` and passes to `setup_first_footer(entity=...)` / `setup_cont_footer(entity=...)`. Prior behaviour defaulted to `"ag"` causing BV-signed LOIs to ship with Swiss parent's entity in the footer.
+- **Scope J1 (Cl. 3.2 rack density + cooling)**: Wholesale Cl. 3.2 Technical Specification default updated from `"40 kW and above"` (obsolete for AI compute) to `"approximately 130 kW and above"` + `"direct-to-chip liquid cooling (consistent with NVIDIA GB200 NVL72 and GB300 NVL72 reference architectures, which target approximately 120–140 kW per rack at full configuration)"`. Both parametrized via `commercial.rack_density_kw` + `commercial.cooling_topology` for non-GB workloads.
+- **Scope J3 (Cl. 3.4 Expansion branching)**: template now detects numeric vs non-numeric `expansion_mw` values. Numeric → original sentence. Empty / `[TBC]` / `"to be discussed"` / non-numeric → fallback sentence: *"The Customer has expressed interest in future expansion beyond the initial deployment, with scale to be determined following technical scoping and subject to availability, commercial agreement, and the terms of the MSA."* Prior behaviour interpolated non-numeric values verbatim, producing ungrammatical output (*"approximately to be discussed MW IT"*).
+- **Scope J7 (source_map format documentation)**: `intake_example_wholesale.yaml` updated with comment block documenting R-23 URL-list requirement + schedule_1.technical block showing GPU platform pattern.
+
+### Fixed
+- **NL B.V. LOIs no longer ship with Swiss AG address** on cover / footer (root cause: YAML defaults + footer entity default — both fixed).
+- **Sig block no longer displays `Title: [TBC]`** as literal string on external-facing drafts (root cause: no placeholder hygiene — fixed via `_render_placeholder` helper).
+- **Cl. 3.4 no longer produces ungrammatical output** when `expansion_mw` is non-numeric.
+- **Cl. 3.2 no longer ships obsolete 40 kW rack density** for AI-compute LOIs.
+- **Schedule 1 now renders GPU platform from intake** instead of hardcoded `[To be confirmed]`.
+
+### Scope deferred to later v3.5.x PRs (per plan `expressive-cooking-flamingo.md`)
+- **v3.5.2**: Scope Q (entities register — `config/entities.yaml`); full Scope T (golden-file integration tests + CI hook); Scope 0 (Recital B methodology + Signal Test + R-24/25/27/28); Scope A''' (Parties Preamble + body-wide `"the Provider"` → `"Digital Energy"` rename); Scope C (legal-counsel Phase 7.5 callee).
+- **v3.5.3**: Scope D/E/F/G (linter refinements + Phase 7.5 fallback); J8/J9/J12/J13/J14 (workflow UX + Drive routing + MCP fallback); H/I/J/K (tier-2 + re-verification + EP polish + migration).
+- **v3.5.4**: Scope B (sibling docs sync); Scope L (regression regen); full CHANGELOG.
+
+### Verified
+- All 6 intake example YAMLs regenerate with QA PASS, 0 warnings, 0 failures
+- Rendered .docx verified: sig block clean; footer centred + NL entity; Cl. 3.2 + 3.4 correct; no `KvK:` in body; no `ACKNOWLEDGED AND AGREED` in body
+- 47/47 pytest unit tests pass in both repos
+
+---
+
 ## v3.4 — 2026-04-17
 
 Post-v3.3-merge review surfaced five gaps. v3.4 closes all five.

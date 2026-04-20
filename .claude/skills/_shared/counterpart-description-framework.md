@@ -36,6 +36,97 @@ Every Recital B is built from these five pillars, in this order. Pillars 1–4 a
 
 ---
 
+## The Signal Test (v3.5.2 — supersedes topic-based filtering)
+
+**Why this supersedes v3.4 topic filtering**: topic-based allow/deny lists over-exclude valid signal (a NeoCloud with a named hyperscaler as strategic investor — fundraising content that IS signal) and under-exclude noise (a Fortune-500 customer count "serves 500+ enterprises" — customer content that is NOT signal because it's unattributed). The real filter is on **signal quality**, not topic.
+
+### Definition
+
+A **signal** is a third-party-testable operational fact whose attached identity carries endorsement weight. A signal passes ALL THREE gates below. Claims that fail any gate are noise — strip.
+
+### Gate 1 — Attribution
+
+> Is the claim attached to a named, verifiable third party whose identity a lender would recognize as operationally endorsing?
+
+| Passes gate 1 | Fails gate 1 |
+|---|---|
+| "majority-owned by Euronext-listed SWI Stoneweg Icona" | "EUR 0.5bn valuation" (no endorsing 3rd party) |
+| "backed by senior infrastructure financing from Macquarie" | "raised $150M in Series C" (generic, no endorsing investor named) |
+| "supports Microsoft Azure's enterprise cloud" | "serves Fortune 500 clients" (class-level, untestable) |
+| "NVIDIA Cloud Partner deploying GB200 NVL72" | "industry-leading AI platform" (self-slogan) |
+| "co-developed with BMW, Bosch, and Siemens" | "150+ enterprise customers" (unattributed count) |
+
+### Gate 2 — Operational relevance
+
+> Does the attached identity speak to solvency/seriousness (Q1), commercial-fit logic (Q2), or bankable third-party validation (Q3)?
+
+| Passes gate 2 | Fails gate 2 |
+|---|---|
+| "Macquarie senior debt" → Macquarie ran operational DD | "Twitter-followed by 20k" (social metric, not operational) |
+| "OpenAI customer" → marquee platform vetting | "won 2023 AI Startup of the Year" (awards — reputational not operational) |
+| "EuroHPC JU framework participant" → public-sector credentialling | "listed in Gartner Magic Quadrant" (analyst placement — tier-3) |
+
+### Gate 3 — Freshness / health
+
+> Is the attached third party currently operational, solvent, and in an undistressed relationship with the counterparty?
+
+**Gate 3 fires only when:**
+1. The **primary counterparty itself** is in distress (bankruptcy, regulatory enforcement, dissolution proceedings) — disclose factually or drop the claim; or
+2. An **attached third party's distress is operationally material to the counterparty** (wholly-dependent financing where parent is in default; currently-relied-upon credentials that have been revoked; active litigation between counterparty and named endorser)
+3. Signals > 24 months old without public continuation (stale contracts without renewal)
+
+**Gate 3 does NOT fire** when an attached party is merely undergoing unrelated restructuring / management change / stock-price decline / quarterly miss. Arm's-length attached-party distress = no commentary. Recital B is a factual introduction, not a risk memo; lender DD reaches attached parties independently; volunteering distress commentary undermines the LOI.
+
+### Writer discipline rule (runs BEFORE the signal test)
+
+For every named third party in the draft, the writer must point to a specific tier-1 source in `counterparty.source_map` establishing the current relationship. If the name "feels right" but can't be tier-1-attributed, it is a **fabrication — even if the named party is real and plausible**. Brand recognition compounds fabrication cost; it does not reduce it.
+
+**Real failure pattern** (v3.5 development): "Cohere" proposed as a CoreWeave customer from memory without tier-1 source — Cohere's public compute partnerships are GCP/Oracle, not CoreWeave. Fix: only name what you can attribute.
+
+### Fundraising-specific rule (corrects v3.4 crude exclusion)
+
+| Financial claim | Signal? | Reasoning |
+|---|---|---|
+| "EUR 117m senior financing from Macquarie" | **Signal** (gates 1+2 pass) | Macquarie's infra-credit team ran operational DD; third-party credit validation |
+| "strategic investment from NVIDIA" | **Signal** | Platform-partner endorsement |
+| "backed by SWI Stoneweg Icona (Euronext-listed)" | **Signal** | Listed-entity control + implicit credit backstop |
+| "EUR 0.5bn valuation" | Noise | No endorsing 3rd party attached; investor-pitch vanity |
+| "Series B from Accel" | Noise | Generic VC-round label; Accel identity does not carry operational endorsement for DE's colocation relationship |
+| "raised $150M" | Noise | Unattributed; no investor named |
+
+**Rule**: fundraising content passes the signal test only when a named endorsing third party is attached (strategic investor identity, infra-credit lender). "Raised at valuation X" alone is vanity; "backed by Macquarie" is signal. Same capital, different signal attribution.
+
+### Customer-specific rule
+
+| Customer claim | Signal? |
+|---|---|
+| "supports Microsoft Azure" | **Signal** — named hyperscaler |
+| "supports Deutsche Telekom Industrial AI Cloud" | **Signal** — named marquee enterprise customer |
+| "serves Fortune 500 clients" | Noise — class-level, untestable |
+| "150+ customers" | Noise — unattributed count |
+| "supports a leading US hyperscaler" | Noise — anonymized; un-nameable = un-signal-able |
+
+**NDA-bound customers**: if the best customer cannot be named due to NDA, **do not anonymize — omit**. The value-prop goes in Cl. 3 as a Customer statement, not Recital B as an endorsement.
+
+### Ownership-specific rule
+
+Name the controlling shareholder in one clause in S1 only when at least one trigger fires:
+- (a) publicly listed
+- (b) sovereign fund or state-owned
+- (c) acquired within past 24 months (continuity/CoC risk)
+- (d) materially relevant to LOI positioning (sovereignty, FDI review, regulated sector)
+
+Valuation, debt facility size, and growth-commitment numbers do NOT go in Recital B — those are investor-pitch metrics, not operational evidence.
+
+### Enforcement
+
+- **R-24 (fail)**: inline bracket citation (`[polarise.eu]`) in `counterparty.description` field. Source attribution lives in `source_map` YAML; NEVER in prose.
+- **R-25 (fail)**: vanity-financial pattern (valuation of / raised $X at $Y / generic Series-X labels) in Recital B. Named-endorser financing (e.g. "backed by Macquarie") passes because the regex requires vanity patterns.
+- **R-27 (fail)**: `[TBC]` rendered literally in sig-block Name/Title — must route through `_render_placeholder` so the line becomes a fillable blank.
+- **R-28 (warn)**: `[TBC]` count exceeds 5 body-wide — intake likely incomplete; consider Phase 4/5 revision before external delivery.
+
+---
+
 ## Tier Hierarchy Policy (v3.4)
 
 Every material factual claim in Recital B must be grounded in a source of an appropriate tier. Source tier determines whether the claim can be cited directly, requires a qualifier, or must be excluded.

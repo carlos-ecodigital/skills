@@ -735,15 +735,20 @@ def setup_cont_header(section, title=""):
 
 
 def setup_footer(footer, classification=None, entity="ag"):
-    """Footer: entity details left, page number right.
+    """Footer: entity details, centre-aligned.
 
     Classification is intentionally NOT prefixed into the footer — it appears
     once on the cover page's metadata block. Repeating "Confidential" on every
     page footer is redundant noise. The `classification` arg is retained for
     signature compatibility but ignored here.
+
+    v3.5 scope A'''' (LOI): footer now centre-aligned (was left). Entity
+    selection (`entity="ag"` or `"nl"`) must match the signing Provider —
+    callers pass `entity="nl"` for Digital Energy Netherlands B.V.
+    instruments and `entity="ag"` for Digital Energy Group AG instruments.
     """
     p = footer.paragraphs[0]
-    p.paragraph_format.tab_stops.add_tab_stop(Mm(165), WD_TAB_ALIGNMENT.RIGHT)
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = p.add_run(_footer_text(entity))
     r.font.size = Pt(7)
     r.font.name = FONT
