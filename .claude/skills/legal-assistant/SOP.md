@@ -6,7 +6,7 @@
 
 Digital Energy has two streams of pre-contractual documents. `legal-assistant` produces both:
 
-- **Colocation LOIs** — 5 types: End User, Distributor (Mode A/B), Wholesale, Strategic Supplier, Ecosystem Partnership. v3.2 (v1.0 for SS/EP). YAML → branded .docx + pre-save QA report.
+- **Colocation LOIs** — 5 types: End User, Distributor (Mode A/B), Wholesale, Strategic Supplier, Ecosystem Partnership. v3.5 engine (v1.0 for SS/EP). YAML → branded .docx + pre-save QA report + Phase 7.5 legal-counsel two-pass review (opt-in fail-closed enforcement from v3.5.6).
 - **DE Site HoTs** — grower Heads of Terms (Annex A). v1.0. Conversational 7-phase intake.
 
 You provide the brief. Claude gathers context from your existing systems (HubSpot, ClickUp, website, press, email), asks for gaps in one batched round, drafts Recital B for your review, generates the document, runs a QA linter, and hands off.
@@ -15,7 +15,7 @@ You provide the brief. Claude gathers context from your existing systems (HubSpo
 
 ---
 
-## Requesting a Colocation LOI (v3.3 flow)
+## Requesting a Colocation LOI (v3.5 flow)
 
 ### Step 1 — Invoke
 
@@ -65,7 +65,7 @@ Claude returns a list of facts it sourced, and a list of gaps it needs you to fi
 - Signatory name and title
 - Indicative capacity (MW IT — no DEC Blocks)
 - Indicative term (years; "indicative only", no "minimum")
-- Recital A variant (default / sovereignty / integration) — Claude suggests one; confirm
+- Recital A variant (v3.4: single canonical body + type-specific tail; legacy keys `default` / `sovereignty` / `integration` accepted for backward-compat but all select the same v3.4 canonical body) — Claude suggests one; confirm
 - Pricing in LOI? (default: no — deferred to MSA)
 - Existing NDA? (default: no — embed NCNDA)
 - **For Strategic Supplier**: 1–2 strategic purposes (capacity lock-in, pricing/volume, supply-chain de-risking, engineering integration, pipeline visibility), plus purpose-specific fields (lead-time target, volume, joint IP)
@@ -97,12 +97,77 @@ After signing: rename `_(DRAFT).docx` → `_(SIGNED).pdf`, attach to HubSpot dea
 
 ## What Claude will NOT do
 
-- Invent data. If a fact isn't sourced, Claude either asks or flags `[TO BE CONFIRMED]`.
+- **Invent data.** If a fact isn't sourced, Claude either asks or flags `[TBC]`. The R-23 fabrication gate (v3.4) enforces this at QA time — every material numeric claim in Recital B must have an entry in `counterparty.source_map` or a sentence-scoped `[TBC]` marker (v3.5.6 D.2). Brand recognition compounds fabrication cost — a named party that "feels right" is still a fabrication if you can't point to a tier-1 URL (Signal Test writer-discipline rule, v3.5.2 Scope 0). See `_shared/counterpart-description-framework.md`.
+- **Inline-cite sources in Recital B prose.** Source attribution lives in `counterparty.source_map` YAML; it MUST NOT appear in the rendered prose. R-24 (fail) catches bracket citations like `[polarise.eu]` in `counterparty.description`.
+- **Use vanity financials as signal.** Valuation numbers / generic VC round labels (`"Series B"`) / unattributed capital-raise language fail R-25 (v3.5.2). **Named-endorser financings** (`"backed by senior financing from Macquarie"`) pass the Signal Test and remain allowed — they carry third-party DD validation.
+- **Leave `[TBC]` in the sig block.** `_render_placeholder` (v3.5.1 J5) routes `[TBC]` Name/Title to fillable blank lines; R-27 (fail) catches any literal `[TBC]` remaining.
 - Negotiate or redline. If the counterparty returns redlines, stop and invoke `legal-counsel`.
 - Send anything. Human reviews and sends.
 - Modify the Site HoT body. Body is locked at v1.0.
 - Produce MSAs, Sales Order Forms, SLAs, post-LOI documents. Separate workstreams.
 - Put value-prop language in the closing. Closing is hardcoded "We look forward to working with you." If you need value-prop / near-signature content, ask for a companion cover letter via `executive-comms`.
+
+---
+
+## Phase 7.5 — Mandatory legal-counsel two-pass review (v3.4 + v3.5.6)
+
+After Phase 7 QA PASS and before Phase 8 delivery, every LOI runs a two-pass legal review in the `legal-counsel` skill:
+
+1. **Junior pass** — `legal-counsel/specializations/contract-review/loi-review-workflow.md` — 4-point structured review:
+   - Clause-type appropriateness (e.g. SS Cl. 5 must be Supply Chain, not revenue bankability)
+   - Meta-commentary scan
+   - Cross-clause consistency
+   - Source-verification sample (3 random material claims vs `source_map`)
+2. **Senior pass** — `legal-counsel/specializations/contract-review/loi-senior-review-pass.md` — six-axis refinement:
+   - Commercial posture & proportionality
+   - Precedent consistency
+   - Counterparty-reading (read as opposing counsel would)
+   - Signal-Test deep check
+   - Identity / execution hygiene
+   - Deliverability / aftermath
+
+The senior envelope is the **final** envelope `legal-assistant` acts on. Senior may upgrade or downgrade the junior's verdict (e.g. dismiss a junior false-positive flag or escalate a missed REJECT).
+
+**Enforcement (v3.5.6 Scope G)** — opt-in via `--enforce-phase-7-5` flag OR `DE_LOI_ENFORCE_PHASE_7_5=1` env var. Default fail-open (current v3.5.x behaviour preserved).
+
+When enforcement is active:
+1. First run writes `.docx` + `.phase_7_5_required` sentinel (SHA-256 of .docx) and exits **3**.
+2. Operator runs the two-pass review.
+3. Second run with `--phase-7-5-pass` consumes the sentinel after verifying the hash still matches the current .docx; proceeds to delivery on match, rejects on mismatch with exit 3.
+
+Hash verification prevents both replay (consumption on match) and post-approval tampering (mismatch detected).
+
+---
+
+## CLI reference
+
+```bash
+# Standard run (v3.5.x default — fail-open on Phase 7.5)
+python3 generate_loi.py intake.yaml
+
+# Legacy v3.3 YAML inspection (non-blocking; emits source_map snippet if missing)
+python3 generate_loi.py legacy_intake.yaml --migrate-check
+
+# Override a linter rule (hybrid reason required — ≥15 chars OR structured short-code)
+python3 generate_loi.py intake.yaml \
+  --override R-23 \
+  --override-reason "pre-approved for Q3 batch per Jonathan memo 2026-04-17"
+# OR structured short-code:
+python3 generate_loi.py intake.yaml \
+  --override R-23 \
+  --override-reason "OK-2026-04-17 JG"
+
+# Phase 7.5 enforcement (opt-in — recommended for production runs)
+# Step 1: first run writes sentinel + exits 3
+python3 generate_loi.py intake.yaml --enforce-phase-7-5
+# (or: DE_LOI_ENFORCE_PHASE_7_5=1 python3 generate_loi.py intake.yaml)
+
+# Step 2: run the two-pass review (load the junior + senior workflow files in Claude)
+# Step 3: if senior returns PASS, re-run to consume sentinel and permit delivery
+python3 generate_loi.py intake.yaml --enforce-phase-7-5 --phase-7-5-pass
+```
+
+Exit codes: 0 = success; 1 = intake validation error; 2 = QA FAIL; 3 = Phase 7.5 enforcement block.
 
 ---
 
@@ -149,7 +214,20 @@ The Site HoT `.docx` form-fill engine (`generate_site_hot.py`) is pending a Git 
 
 ## Questions?
 
-Ask Carlos or Jelmer. Full technical documentation in the `legal-assistant` skill directory (`SKILL.md`, `ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, `CHANGELOG.md`, `_shared/loi-recital-a-library.md`, `_shared/counterpart-description-framework.md`, `_shared/loi-qa-gate.md`).
+Ask Carlos or Jelmer. Full technical documentation in the `legal-assistant` skill directory:
+- `SKILL.md` — phase-by-phase workflow, invariants, defaults
+- `ASSEMBLY_GUIDE.md` — type selection, defined terms, Parties Preamble, Signal Test, Phase 7.5, signing entity (NL BV defaults + entities register Pattern A/B/C)
+- `FEATURE_MATRIX.md` — clause-structure matrix, v3.5.x feature additions, QA linter rule catalogue (R-1 → R-28)
+- `CHANGELOG.md` — per-release change history
+- `docs/PRINCIPLES.md` — 12 engineering principles for the skill with per-principle tripwires (v3.5.5)
+- `docs/jonathan-memo-v3.5-delivery-map.md` — mapping from Jonathan's 2026-04-17 field-findings memo to v3.5.x deliverables
+- `config/entities.yaml` — canonical entity register (de_nl + de_ag) with per-type defaults (v3.5.2)
+- `_shared/loi-recital-a-library.md` — Recital A canonical body + 5 type-specific tails (v3.4)
+- `_shared/counterpart-description-framework.md` — Signal Test methodology (v3.5.2), source-attribution tier hierarchy, tier-2 qualifier pattern (v3.5.3-cont H), 4 verified worked examples (Polarise / Civo / InfraPartners / SAG — URLs re-verified v3.5.6 I)
+- `_shared/loi-qa-gate.md` — QA linter rule definitions
+- `legal-counsel/specializations/contract-review/loi-review-workflow.md` — junior 4-point review (Phase 7.5 pass 1)
+- `legal-counsel/specializations/contract-review/loi-senior-review-pass.md` — senior six-axis refinement (Phase 7.5 pass 2, v3.5.6 G-bis)
+- `colocation/regression/v3.5/` — 4 tier-1-verified regression fixtures (Polarise, Cudo, SAG, InfraPartners) exercising every v3.5.x fix path
 
 ## Naming conventions (preserved)
 
