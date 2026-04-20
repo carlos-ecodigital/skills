@@ -23,7 +23,7 @@ v3.5.1 + v3.5.2 + v3.5.3 closed 20+ field-surfaced gaps. Before the next real LO
 ## Regenerating
 
 ```bash
-cd /path/to/skills/.claude/skills/legal-assistant/colocation
+cd /path/to/skills/.claude/skills/legal-assistant/sales
 python3 generate_loi.py regression/v3.5/polarise_wholesale_intake.yaml
 python3 generate_loi.py regression/v3.5/cudo_wholesale_intake.yaml
 python3 generate_loi.py regression/v3.5/sag_distributor_intake.yaml

@@ -143,7 +143,7 @@ Carlos (or legal-counsel for legal questions) reviews before sending to the grow
 
 ### Current caveat
 
-The Site HoT `.docx` form-fill engine (`generate_site_hot.py`) is pending a Git LFS fetch of the template binaries. Until it ships, the intake runs to completion and writes `annex-a-data.json`, but the Annex A docx step writes a placeholder marker file. Body copy is also pending LFS. See `de-site-hot/templates/README.md`.
+The Site HoT `.docx` form-fill engine (`generate_site_hot.py`) is pending a Git LFS fetch of the template binaries. Until it ships, the intake runs to completion and writes `annex-a-data.json`, but the Annex A docx step writes a placeholder marker file. Body copy is also pending LFS. See `sites/hot/templates/README.md`.
 
 ---
 

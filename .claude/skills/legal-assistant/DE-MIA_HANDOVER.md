@@ -215,7 +215,7 @@ LOI v3.0 chose B.V. for jurisdictional alignment. MIA may need to differ when th
 ### MIA-Q8 [DEFERRABLE] — Build into loi-generator or wait for legal-assistant?
 The restructure plan already absorbs loi-generator into legal-assistant. Building MIA into loi-generator now creates migration debt.
 
-**Answer:** Build into `legal-assistant`. Per repo convention (mirroring `legal-assistant/colocation/`), files land at:
+**Answer:** Build into `legal-assistant`. Per repo convention (mirroring `legal-assistant/sales/`), files land at:
 - `~/skills/.claude/skills/legal-assistant/mia/templates/`
 - `~/skills/.claude/skills/legal-assistant/mia/examples/`
 - `~/skills/.claude/skills/legal-assistant/mia/generate_mia.py`
@@ -367,7 +367,7 @@ Operational follow-ups before first execution:
 
 ## Cross-references
 
-- LOI v3.0 system: `~/skills/.claude/skills/legal-assistant/colocation/`
+- LOI v3.0 system: `~/skills/.claude/skills/legal-assistant/sales/`
 - LOI assembly guide: `~/skills/.claude/skills/legal-assistant/ASSEMBLY_GUIDE.md`
 - MIA files: `~/skills/.claude/skills/legal-assistant/mia/` (templates, examples, generate_mia.py, MIA_ASSEMBLY_GUIDE.md)
 - Plan: `/Users/crmg/.claude/plans/cuddly-doodling-donut.md` (Phase 2 → Section D documents the MIA architecture in full)
