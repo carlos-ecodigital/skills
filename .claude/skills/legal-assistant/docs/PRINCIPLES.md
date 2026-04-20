@@ -154,21 +154,21 @@ These principles are **enforceable** — each has a tripwire (test, linter rule,
 - **At review time**: reviewer uses this doc as the checklist; any "not applicable" justifications are explicit in PR description.
 - **At post-mortem** (after any field-surfaced defect): update this doc. New failure mode = new principle. This doc compounds; it does not shrink.
 
-## Status of tripwires as of v3.5.5
+## Status of tripwires as of v3.5.8
 
 | # | Principle | Tripwire implemented? |
 |---|---|---|
-| 1 | Mirror-edit discipline | ⏳ Pre-commit hash check pending |
+| 1 | Mirror-edit discipline | ✅ `tests/mirror-manifest.txt` + `test_mirror_integrity.py` (v3.5.8) |
 | 2 | Static helpers | ✅ Current helpers conform |
 | 3 | Additive-first | ⏳ No automated check yet (review discipline) |
-| 4 | Branch-specific tests | 🟡 Partial (unit tests yes, visual tests no) |
-| 5 | Golden-file tests | ⏳ v3.6 target |
-| 6 | Visual invariants | ⏳ v3.6 target |
+| 4 | Branch-specific tests | ✅ CI step fails if `generate_loi.py` changes without `tests/` (escape: `[skip-test-check]`) (v3.5.8) |
+| 5 | Golden-file tests | ✅ `tests/test_golden_files.py` + `tests/goldens/*.json`; `pytest --update-goldens` to rebaseline (v3.5.8) |
+| 6 | Visual invariants | ✅ `tests/test_visual_layout.py` asserts `paragraph_format` + alignment + margins (v3.5.8) |
 | 7 | Cross-env docs | ✅ LFS comment landed in CI workflow |
 | 8 | Scope = commit | ✅ Commit-message convention enforced |
 | 9 | Defect → methodology | ✅ PR template (to add to repo) |
 | 10 | Layer contracts | 🟡 Contracts exist; versioning discipline partial |
 | 11 | Regression fixtures | ✅ CI smoke-regen gates |
-| 12 | Breadth coverage | ⏳ Structural-shape linter pending |
+| 12 | Breadth coverage | ✅ `tests/test_intake_structural_shape.py` asserts every `intake_example_*.yaml` shares top-level + party shape (v3.5.8) |
 
-**Priority for v3.6**: close items 1 / 4 / 5 / 6 / 12 — that's the discipline gate we need to stop the "house of cards" pattern.
+**Remaining work**: items 3 and 10. Both are about discipline + versioning rigor; automation is lower-leverage than review-time checklists.
