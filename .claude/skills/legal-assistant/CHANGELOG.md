@@ -5,6 +5,50 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.7 — 2026-04-17
+
+Sibling docs sync — brings `ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, and `SOP.md` to v3.5.6 state. Documentation-only change; no code change; all 139 pytest tests remain passing; all 10 intakes regenerate QA PASS.
+
+Executes the scoped edit plan in `~/.claude/plans/v3.5.4-sibling-docs-sync.md` (originally ~51 edits targeted), consolidated into coherent new sections rather than mechanical line-by-line patches.
+
+### Changed — ASSEMBLY_GUIDE.md
+- Section 1 heading: "LOI Type Selection (5 types, v3.2)" → "(5 types, v3.5)"; template versions DE-LOI-*-v3.2 → -v3.5
+- Bespoke-language examples (Distributor Cl. 3, 6 sub-examples): removed all `the Provider` / `The Provider` (brand rename — 6 occurrences replaced with `Digital Energy`); stripped `purpose-built AI colocation facilities` (7 occurrences; v3.4 banned body-wide)
+- "Signing Entity" section expanded with v3.5.1 canonical entity data table (NL BV + AG) and v3.5.2 entities-register pattern (A: explicit fields / B: `provider.entity` lookup / C: minimal `type:` only auto-expansion)
+- New section: **Parties Preamble** (v3.5.2 Scope A''') — structure, output format, brand-name defined term, v3.5.5 spacing fix
+- New section: **Recital B — Signal Test methodology** (v3.5.2 Scope 0) — 3-gate test, writer discipline, R-24/R-25/R-27/R-28 rules, v3.5.6 Scope D refinements (pillar diagnostic + sentence-boundary `[TBC]`)
+- New section: **Phase 7.5 — Mandatory legal-counsel two-pass review** (v3.4 + v3.5.6) — junior 4-point + senior six-axis; enforcement opt-in; sentinel hash mechanics
+- "Version Control" section: all five template rows bumped to v3.5 / 2026-04-17; `**v3.2 changes:**` one-line note replaced with **full changelog summary v3.2 → v3.5.7** covering every interim release
+
+### Changed — FEATURE_MATRIX.md
+- Stream header: "LOI/NCNDA v3.2 (5 sub-types)" → "v3.5 (5 sub-types)"
+- Clause Structure matrix: added **Parties Preamble** row (v3.5.2); **Recital B** row annotated with Signal Test 3-gate reference; **Cl. 5** row updated for SS (now "Supply Chain and Delivery Commitment", not revenue bankability) and EP (now "N/A — IP and Deliverables"); **Cl. 6** row annotated with EP "will exchange" (v3.5.3); **Schedule 1** row annotated with v3.5.1 `technical.gpu_platform` read from YAML
+- "v3.2 commonalities" section expanded to **per-release commonalities** (v3.2 / v3.4 / v3.5.1 / v3.5.2 / v3.5.3-cont / v3.5.6)
+- "Project Finance Features by Type" matrix: added SS + EP columns (was EU/DS/WS only); SS Cl. 5.1 marked "N/A — supply-side bankability (v3.4)"; EP marked "N/A — no Cl. 5 Finance"
+- "Commercial Features by Type" matrix: "Capacity in DEC Blocks" row → "Capacity in MW IT (v3.2 — DEC Blocks deprecated)"; all rows extended to SS + EP columns; expansion rights row annotated with v3.5.1 J3 non-numeric branch
+- New section: **v3.5.x Feature Additions — Cross-Type** — tabular summary of every new cross-type feature (Parties Preamble / brand term / entities register / minimal intake auto-expansion / Signal Test / footer entity derivation / Schedule 1 from YAML / Phase 7.5 enforcement / two-pass review / hybrid override-reason / R-23 pillar diagnostic / sentence-boundary `[TBC]` / `--migrate-check`) with "where it lives / introduced in / opt-in" columns
+- New section: **QA Linter Rules (R-1 → R-28) — coverage by type** — full catalogue table with severity / scope / version / notes
+
+### Changed — SOP.md
+- "v3.2 (v1.0 for SS/EP)" → "v3.5 engine (v1.0 for SS/EP)"
+- "Requesting a Colocation LOI (v3.3 flow)" → "(v3.5 flow)"
+- Recital A variant legacy-keys note added (v3.4 collapsed 3 variants to single canonical body + 5 tails; legacy keys accepted for backward-compat)
+- "What Claude will NOT do" section expanded with v3.4/v3.5.2/v3.5.6 anti-patterns (fabrication, inline citations, vanity financials, sig-block `[TBC]`) cross-referenced to R-23/R-24/R-25/R-27 + Signal Test writer discipline
+- New section: **Phase 7.5 — Mandatory legal-counsel two-pass review** (v3.4 + v3.5.6) — full workflow + enforcement opt-in + hash-bound sentinel
+- New section: **CLI reference** — exhaustive command list (standard run / `--migrate-check` / `--override` with hybrid reason formats / `--enforce-phase-7-5` / `--phase-7-5-pass`) + exit codes
+- "Questions?" section: single-line reference expanded to full skill-directory table with per-file purpose (SKILL.md / ASSEMBLY_GUIDE / FEATURE_MATRIX / CHANGELOG / PRINCIPLES / jonathan-memo delivery map / entities register / Recital A library / framework / QA gate / junior + senior review callees / regression fixtures)
+
+### Verified
+- 139/139 pytest tests pass in both repos (no code change)
+- All 10 intakes regenerate with QA PASS (6 examples + 4 regression fixtures)
+- Sibling docs pass staleness scan: zero remaining `the Provider` / `purpose-built` in active prose; zero stale `v3.2` / `v3.3` active version references; Phase 7.5 / Signal Test / Parties Preamble / entities register all surfaced consistently across all three files
+
+### Not in scope (deferred by design)
+- **Tripwire implementations** for PRINCIPLES.md #1 (mirror-hash pre-commit), #4 (branch-specific tests), #5 (golden-file integration), #6 (visual-layout tests), #12 (structural-shape linter for intakes) — carry to v3.6.
+- **HoT stream documentation** (DE Site HoT §12 in ASSEMBLY_GUIDE) — v3.5.x did not touch HoT; left unchanged.
+
+---
+
 ## v3.5.6 scope G + G-bis — 2026-04-17
 
 Phase 7.5 fail-closed enforcement (Scope G) + senior-counsel refinement pass (Scope G-bis, added during execution per user request). Three design decisions from `~/.claude/plans/v3.5.6-design-decisions.md` plus the senior-pass addition.
