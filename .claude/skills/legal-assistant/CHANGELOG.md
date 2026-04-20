@@ -5,6 +5,36 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.6 scope D — 2026-04-17
+
+R-23 fabrication-gate upgrades per v3.5.6 design decisions (`~/.claude/plans/v3.5.6-design-decisions.md`). Three sub-decisions implemented:
+
+### D.1 — permissive any-pillar match with attribution diagnostic
+- Don't tighten the gate; tighten the signal. R-23 still passes if ANY pillar has URLs (v3.5.x behaviour preserved).
+- New: QA report emits `[INFO] R-23 attribution diagnostic` line on PASS naming which pillar matched each claim (or `TBC-covered` for sentence-scoped `[TBC]` claims). Reviewer gets visibility without the gate over-rejecting.
+- Module-level `_R23_PILLAR_DIAGNOSTIC` list carries (claim, pillar) tuples; `qa_lint()` renders them.
+
+### D.2 — sentence-boundary `[TBC]` proximity
+- Prior: `[TBC]` anywhere in Recital B suppressed R-23 for all claims (wildcard).
+- New: `[TBC]` only covers claims in the same sentence-boundary segment. Special case: trailing-`[TBC]` covers final-segment claims (common drafting pattern).
+- New helpers: `_split_recital_b_sentences()`, `_claim_is_tbc_covered()`, `_pillar_with_urls()`.
+
+### D.3 — hybrid override-reason validation
+- Prior: `--override-reason` accepted any string (even `"ok"`).
+- New: `_validate_override_reason()` enforces hybrid rule — free-text ≥15 chars OR structured audit short-code `<STATUS>-<YYYY-MM-DD> <INITIALS>` (STATUS in OK/FINE/APPROVED/PREAPPROVED). Thin patterns (`ok`, `fine`, `yes`, `done`, `sure`, `good`, `n/a`, `tbd`) rejected unconditionally.
+- `main()` validates before proceeding; prints both acceptable forms on rejection and exits 1.
+- QA report: `[INFO] R-override meta` line logs active overrides + reason + ISO timestamp.
+
+### Added
+- `colocation/tests/test_v3_5_6_scope_d.py` — 40 new unit tests. **Total: 160 tests all passing.**
+
+### Verified
+- 160/160 tests pass both repos
+- All 10 intakes regenerate QA PASS
+- CLI smoke verified: thin reason rejected; verbose + structured short-code both accepted
+
+---
+
 ## v3.5.3-cont — 2026-04-17
 
 Continuation of v3.5.3 — implements the scopes that v3.5.3 deferred because they needed v3.5.2-context to be landed first. Six of the nine originally-deferred scopes ship here (F / J12 / E / J8 / J9 / H); three (D / G / I) remain deferred pending explicit design decisions documented below.
