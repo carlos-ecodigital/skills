@@ -5,6 +5,39 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.5.6 scope G + G-bis — 2026-04-17
+
+Phase 7.5 fail-closed enforcement (Scope G) + senior-counsel refinement pass (Scope G-bis, added during execution per user request). Three design decisions from `~/.claude/plans/v3.5.6-design-decisions.md` plus the senior-pass addition.
+
+### G.1 — sentinel file with SHA-256 hash
+- `_write_phase_7_5_sentinel(docx_path)` writes `<docx>.phase_7_5_required` with SHA-256 of the .docx, ISO timestamp, and a HOW TO RESOLVE block naming both callee workflows (junior + senior).
+- `_consume_phase_7_5_sentinel(docx_path)` verifies hash matches current .docx, then consumes. Prevents replay (consumption) + post-approval tampering (hash check).
+- Helpers: `_docx_sha256()`, `_phase_7_5_sentinel_path()`.
+
+### G.2 — opt-in: CLI flag OR env var
+- `_phase_7_5_enforce_enabled()` checks `--enforce-phase-7-5` OR `DE_LOI_ENFORCE_PHASE_7_5=1/true/yes/on`. Either activates.
+- Default fail-open preserves v3.5.x behaviour.
+
+### G.3 — exit code 3
+- Distinct from 1 (validation) and 2 (QA FAIL). Self-documenting HOW TO RESOLVE prints on activation.
+
+### G-bis — senior-counsel refinement pass (new file)
+- `legal-counsel/specializations/contract-review/loi-senior-review-pass.md` created. Six-axis senior review (commercial posture, precedent consistency, counterparty-reading, Signal-Test deep check, identity/execution hygiene, deliverability/aftermath) reviewing the junior 4-point envelope. Verdict-reconciliation table governs how the senior upgrades/downgrades/consolidates the junior's output. The senior's envelope is the **final** envelope `legal-assistant` consumes.
+- Junior workflow (`loi-review-workflow.md`) updated with two-pass framing.
+- `legal-counsel/SKILL.md` router row names both files.
+- `legal-assistant/SKILL.md` Phase 7.5 section carries the two-pass callout and the v3.5.6 enforcement opt-in documentation.
+
+### Added
+- `colocation/tests/test_v3_5_6_scope_g.py` — 19 new tests
+- **Total: 139 pytest tests all passing**
+
+### Verified
+- 139/139 tests pass both repos
+- All 10 intakes regenerate QA PASS under default fail-open
+- Enforcement end-to-end: first-run exit 3 + sentinel write; --phase-7-5-pass exit 0 + sentinel consumed
+
+---
+
 ## v3.5.6 scope D — 2026-04-17
 
 R-23 fabrication-gate upgrades per v3.5.6 design decisions (`~/.claude/plans/v3.5.6-design-decisions.md`). Three sub-decisions implemented:
