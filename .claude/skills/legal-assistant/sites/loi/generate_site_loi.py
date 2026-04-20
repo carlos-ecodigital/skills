@@ -37,11 +37,17 @@ _FACTORY_PATH = (
 )
 if str(_FACTORY_PATH) not in sys.path:
     sys.path.insert(0, str(_FACTORY_PATH))
+# sites/_shared — for site_doc_base (role labels) + cross_doc_gate
+_SHARED_PATH = Path(__file__).resolve().parents[1] / "_shared"
+if str(_SHARED_PATH) not in sys.path:
+    sys.path.insert(0, str(_SHARED_PATH))
 
 from bilingual_body import render_bilingual_clause  # noqa: E402
 from format_validators import run_all as run_format_validators  # noqa: E402
 from generate import DE_ENTITIES  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
+import cross_doc_gate as cdg  # noqa: E402
+import site_doc_base as sdb  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -656,9 +662,11 @@ def parse_documents(deal: dict, documents_dir: Path) -> dict:
 
 
 def run_cross_doc_gate(deal: dict) -> list[dict]:
-    """TODO(Phase B8 / cross_doc_gate.py): run rules + return verdicts.
-    Currently returns empty list."""
-    return []
+    """Run the Phase B8 cross-doc gate against the deal. For LOI stage,
+    only LOI-applicable rules fire (Gap-4/Gap-5 and Con-* are HoT-stage).
+    Returns a list of serialisable verdict dicts."""
+    verdicts = cdg.run(deal, stage="loi")
+    return cdg.to_dict_list(verdicts)
 
 
 def build_document(deal: dict) -> Document:
