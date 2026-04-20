@@ -68,6 +68,31 @@ R-23 fabrication-gate upgrades per v3.5.6 design decisions (`~/.claude/plans/v3.
 
 ---
 
+## v3.5.6 scope I — 2026-04-17
+
+Framework worked-examples tier-1 / tier-2 URL re-verification. Documentation-only change; no code change; all 120 pytest tests remain passing.
+
+### Changed
+- `_shared/counterpart-description-framework.md` Worked Examples section: re-fetched every tier-1 / tier-2 URL across the four verified counterparties (Polarise, Civo, InfraPartners, SAG/Man of Solutions) on 2026-04-17.
+- Added a v3.5.6 verification-status table at the top of the Worked Examples section.
+- **Polarise Pillar 1**: companyhouse.de 403 → online-handelsregister.de HRB 17714 canonical; added polarise.eu/imprint.
+- **Polarise Pillar 3**: /newsroom deep-link 404 → newsroom index; swi.com → swi.com/announcements/.
+- **Polarise Pillar 5**: /sites/augsburg 404 → /newsroom.
+- **InfraPartners Pillar 2 + 3**: GlobeNewswire + Nscale shorthand paths → canonical full URLs.
+- **SAG Pillar 3**: /partners + /geography 404 → root (single-page site).
+- **Civo**: all URLs unchanged.
+
+### Material-fact surfaces
+- Polarise HRB 17714 Paderborn now framework-anchored; retires the `[Companyhouse.de placeholder]` pattern.
+- No claim text corrections required.
+
+### Verified
+- 120/120 pytest tests pass (no code change).
+- 19 URLs re-verified: 10 unchanged, 8 updated, 0 blocked, 0 pillar_4 (inferred).
+- No counterparty has all tier-1 sources gated.
+
+---
+
 ## v3.5.3-cont — 2026-04-17
 
 Continuation of v3.5.3 — implements the scopes that v3.5.3 deferred because they needed v3.5.2-context to be landed first. Six of the nine originally-deferred scopes ship here (F / J12 / E / J8 / J9 / H); three (D / G / I) remain deferred pending explicit design decisions documented below.
