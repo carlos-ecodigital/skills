@@ -40,9 +40,25 @@ DEFAULT_MAX_WIDTH_MM = 165.0
 TWIPS_PER_INCH = 1440
 MM_PER_INCH = 25.4
 
-#: Default allowed diacritic range. Covers Western European Latin 1 extended
-#: characters (é, ë, ï, ç, ñ, ö, ü, ß, etc.) plus currency (€).
-DEFAULT_ALLOWED_RANGE = r"À-ÿ€–—"
+#: Default allowed diacritic range. Covers:
+#:   - Latin-1 Supplement ``À-ÿ`` (é, ë, ï, ç, ñ, ö, ü, ß etc.)
+#:   - Currency & typography: ``€ – — ° § ¶ ¢ £ ¥``
+#:   - Superscripts used in legal (``m²``, ``m³``): ``² ³ ¹``
+#:   - Smart quotes used for defined terms and quotations:
+#:     left/right double ``" "`` and left/right single ``' '``, plus
+#:     prime ``′ ″`` and horizontal ellipsis ``…``.
+#:   - Bullet char used by bilingual_body list rendering: ``•``
+#:   - Various dashes: en/em ``– —``, figure dash ``‒``, horizontal bar ``―``.
+DEFAULT_ALLOWED_RANGE = (
+    r"À-ÿ"                              # Latin-1 Supplement
+    r"€°§¶¢£¥"                          # currency + common symbols
+    r"¹²³"                              # superscripts
+    r"\u2018\u2019\u201C\u201D"         # smart single/double quotes
+    r"\u2022"                           # bullet •
+    r"\u2013\u2014\u2012\u2015"         # dashes – — ‒ ―
+    r"\u2032\u2033"                     # prime ′ ″
+    r"\u2026"                           # ellipsis …
+)
 
 #: Default list-nesting ceiling.
 DEFAULT_MAX_LIST_DEPTH = 3
