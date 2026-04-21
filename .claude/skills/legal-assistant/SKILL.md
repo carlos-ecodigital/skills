@@ -107,6 +107,18 @@ Ask for all missing fields in one batched round, not iteratively. Use the **sour
 - **Distributor Mode A (DS-A):** Bespoke Cl. 3 text (write this — see Step 4), territory, target segments, estimated capacity
 - **Distributor Mode B (DS-B):** Territory, target segments, estimated capacity
 - **Strategic Supplier (SS):** Capability category, core capability, **1–2 strategic purposes** (from: capacity_lock_in, pricing_volume, supply_chain_de_risking, engineering_integration, pipeline_visibility), lead-time target (if capacity_lock_in), volume indicative (if pricing_volume), joint IP allocation (if engineering_integration), geographic coverage
+
+  **SS strategic-purpose → commercial-intent map (v3.6.0, InfraPartners §4.5):**
+
+  | Commercial intent observed with counterparty | Use purpose key |
+  |---|---|
+  | Preferred-supplier / RoFR at named sites | `pipeline_visibility` |
+  | Reserved factory/manufacturing slots | `capacity_lock_in` |
+  | Joint design, shared reference architecture, IP allocation | `engineering_integration` |
+  | Preferred pricing, volume tiers, unit economics | `pricing_volume` |
+  | Dual-source / supply continuity / second-source | `supply_chain_de_risking` |
+
+  Pick from observed intent, not abstract label. RoFR ≠ capacity_lock_in.
 - **Ecosystem Partnership (EP):** Relationship type (standards_body / university / research_consortium / co_marketing / industry_association / policy_partner), collaboration themes, joint-activity categories (publications / events / pilots / advocacy / working_groups), announcement protocol, logo use
 
 **Recital A variant (all types):** Select from `default` / `sovereignty` / `integration` / `bespoke`. See `_shared/loi-recital-a-library.md` for which variant fits which counterparty.
@@ -337,6 +349,13 @@ Respond with (a), (b) [notes], or (c) followed by the replacement text.
 
 Type: [Type]
 Provider: Digital Energy Netherlands B.V. (Carlos Reuven, Director)
+<!-- v3.6.0 item m — signatory-title memo: Carlos Reuven holds Chief
+Executive Officer (Group AG) AND Director (NL BV) titles. Both legally
+valid for NL BV signatures. Default in `config/entities.yaml::de_nl.
+signatory_default` is Director for NL BV pre-MSA. For external-facing
+CEO-signed variants, set provider.signatory_title: "Chief Executive
+Officer" on the intake YAML. -->
+
 Counterparty: [Name], [address], [reg_type]: [reg_number]
 Signatory: [Name], [Title]
 Contact: [Name], [Title]

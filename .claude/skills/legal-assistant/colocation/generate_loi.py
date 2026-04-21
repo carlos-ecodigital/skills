@@ -714,8 +714,16 @@ class LOI:
         party2_frag = f"(2) {cp_legal}, an entity incorporated under the laws of {cp_jur or '[TBC]'}"
         if cp_addr and not self._is_tbc(cp_addr):
             party2_frag += f", with registered office at {cp_addr}"
-        if cp_reg_type and cp_reg_number and not self._is_tbc(cp_reg_number):
-            party2_frag += f" and registered with the {cp_reg_type} under number {cp_reg_number}"
+        # v3.6.0 bug 7: Party 1 has a KvK fallback; Party 2 previously
+        # required BOTH cp_reg_type AND cp_reg_number, silently dropping
+        # the registration number when reg_type was absent. Now emit the
+        # number whenever it's present (using a generic label when
+        # reg_type is unset — operator can override via YAML).
+        if cp_reg_number and not self._is_tbc(cp_reg_number):
+            if cp_reg_type:
+                party2_frag += f" and registered with the {cp_reg_type} under number {cp_reg_number}"
+            else:
+                party2_frag += f" with company number {cp_reg_number}"
         party2_frag += f' (the "{self.party}").'
         self.p(party2_frag, space_after=6)
 
@@ -725,6 +733,11 @@ class LOI:
         self.h("Recitals")
         cp = self.g("counterparty", "short")
         desc = self.g("counterparty", "description")
+        # v3.6.0 bug 5: strip trailing period from description before the
+        # engine appends its own. Avoids double-period when operator ends
+        # the YAML value with '.'.
+        if isinstance(desc, str):
+            desc = desc.rstrip().rstrip(".")
 
         # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
         self.p(f"(A) {resolve_recital_a(self.d)}")
@@ -1172,9 +1185,13 @@ class LOI:
             "responsibility, and integration into Digital Energy's broader DEC "
             "platform for each Designated Site; and"
         )
+        # v3.6.0 bug 6: strip trailing period from core_capability to
+        # avoid double-period when operator ends YAML value with '.'.
+        _cc = supplier.get("core_capability", "[CAPABILITY DESCRIPTION TO BE CONFIRMED]")
+        if isinstance(_cc, str):
+            _cc = _cc.rstrip().rstrip(".")
         self.p(
-            f"(b) the {self.party} would contribute "
-            f"{supplier.get('core_capability', '[CAPABILITY DESCRIPTION TO BE CONFIRMED]')}."
+            f"(b) the {self.party} would contribute {_cc}."
         )
         self.p(
             "The precise scope boundaries, responsibility matrix, and commercial "
@@ -1308,10 +1325,8 @@ class LOI:
         self.p("(b) a Framework Agreement, setting out the definitive commercial and operational framework for the supply relationship;")
         self.p("(c) one or more Statements of Work for named Provider projects, each executed under the Framework Agreement; and")
         self.p("(d) site-specific deliverables, schedules, or operational annexes executed under each Statement of Work.")
-        self.p(
-            "Each stage is designed to provide increasing commercial certainty "
-            "and to support Digital Energy's project finance activities."
-        )
+        # v3.6.0 bug 4 (SS): meta-commentary trailer removed — explains
+        # the LOI rather than creating obligation; R-22 class.
 
         # 4.3 Joint-Development Governance — IF engineering_integration
         if "engineering_integration" in purposes:
@@ -1383,7 +1398,7 @@ class LOI:
             self.p("(b) a Sales Order Form or equivalent binding capacity commitment with indicative pricing;")
             self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
             self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
-            self.p("Each stage is designed to provide increasing commercial certainty and to support Digital Energy's project finance activities.")
+            # v3.6.0 bug 4 (WS): meta-commentary trailer removed.
             self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with Digital Energy's Financing Parties if requested under Clause 5.3. The {self.party}'s cooperation in this regard materially supports delivery of the committed capacity on the indicative timeline.")
             self.bp("4.4 Expansion and Priority. ", f"Digital Energy will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
@@ -1573,14 +1588,25 @@ class LOI:
 
         self.bp(f"{cl}.1 Non-Binding Status. ", "")
         if self.t != "EndUser":
+            # v3.6.0 bug 2: SS Cl. 5 is "Supply Chain and Delivery Commitment",
+            # not "Project Finance and Assignment". EP has no Cl. 5 finance
+            # either (IP and Deliverables). Branch on self.t.
+            if self.t == "StrategicSupplier":
+                cl5_label = "Supply Chain and Delivery Commitment"
+            elif self.t == "EcosystemPartnership":
+                cl5_label = "IP and Deliverables"
+            else:
+                cl5_label = "Project Finance and Assignment"
             self.p(f"(a) Non-binding provisions. Clauses 2 through 4 and Schedule 1 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the {downstream}.")
-            self.p(f"(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confidentiality), 7 (Non-Circumvention), and {cl} (General Provisions) are legally binding and enforceable obligations.")
+            self.p(f"(b) Binding provisions. Clauses 5 ({cl5_label}), 6 (Confidentiality), 7 (Non-Circumvention), and {cl} (General Provisions) are legally binding and enforceable obligations.")
         else:
             self.p("(a) Non-binding provisions. Clauses 2 through 4 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the MSA.")
             self.p(f"(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confidentiality), and {cl} (General Provisions) are legally binding and enforceable obligations.")
 
         scoping_phrase = "commercial scoping and negotiation" if self.t == "Distributor" else "technical scoping and commercial negotiation"
-        self.bp(f"{cl}.2 Good Faith. ", f"The Parties agree to engage in the {scoping_phrase} process in good faith (te goeder trouw) and in accordance with the principles of reasonableness and fairness (redelijkheid en billijkheid) as contemplated by Article 6:248 of the Dutch Civil Code (Burgerlijk Wetboek). " + ("" if self.t == "EndUser" else "For the avoidance of doubt, t") + ("T" if self.t == "EndUser" else "t") + f"he good faith obligation does not oblige either Party to enter into the {downstream}. Either Party may discontinue negotiations at any time, provided it does so in good faith. Any liability arising from a breach of this good faith obligation shall be limited to verifiable reliance damages (negatief contractsbelang)" + ("." if self.t == "EndUser" else " and shall not extend to loss of profit or expectation damages (positief contractsbelang)."))
+        # v3.6.0 bug 1: non-EndUser previously concatenated "..., t" + "t"
+        # producing "tthe good faith". Collapse to single 't' on non-EU.
+        self.bp(f"{cl}.2 Good Faith. ", f"The Parties agree to engage in the {scoping_phrase} process in good faith (te goeder trouw) and in accordance with the principles of reasonableness and fairness (redelijkheid en billijkheid) as contemplated by Article 6:248 of the Dutch Civil Code (Burgerlijk Wetboek). " + ("" if self.t == "EndUser" else "For the avoidance of doubt, ") + ("T" if self.t == "EndUser" else "t") + f"he good faith obligation does not oblige either Party to enter into the {downstream}. Either Party may discontinue negotiations at any time, provided it does so in good faith. Any liability arising from a breach of this good faith obligation shall be limited to verifiable reliance damages (negatief contractsbelang)" + ("." if self.t == "EndUser" else " and shall not extend to loss of profit or expectation damages (positief contractsbelang)."))
 
         survive = "Clauses 5.2, 5.3, 6, and 7" if self.t != "EndUser" else "Clauses 5.2, 5.3, and 6"
         self.bp(f"{cl}.3 Validity. ", f"This LOI shall remain valid until {val_date}, after which it shall lapse automatically unless extended by mutual written agreement. Upon lapse, {survive} shall survive for their respective stated periods.")
@@ -1597,7 +1623,14 @@ class LOI:
                 transaction_ref = "the proposed supply relationship"
             else:
                 transaction_ref = "the proposed transaction"
-            self.bp(f"{cl}.9 Entire Agreement. ", f"This LOI, together with any NDA referenced in Clause 6 (ALT-A), constitutes the entire agreement between the Parties in relation to its subject matter and supersedes all prior negotiations, representations, and agreements relating to {transaction_ref}. Nothing in this Clause limits liability for fraud.")
+            # v3.6.0 bug 3: "(ALT-A)" is a drafting-variant marker, never
+            # counterparty-facing. Gate phrase on existing_nda; when there
+            # is no prior NDA, drop the reference entirely.
+            if self.choice("existing_nda"):
+                ea_body = f"This LOI, together with the NDA referenced in Clause 6, constitutes the entire agreement between the Parties in relation to its subject matter and supersedes all prior negotiations, representations, and agreements relating to {transaction_ref}. Nothing in this Clause limits liability for fraud."
+            else:
+                ea_body = f"This LOI constitutes the entire agreement between the Parties in relation to its subject matter and supersedes all prior negotiations, representations, and agreements relating to {transaction_ref}. Nothing in this Clause limits liability for fraud."
+            self.bp(f"{cl}.9 Entire Agreement. ", ea_body)
             self.bp(f"{cl}.10 Partnership Disclaimer. ", "Nothing in this LOI shall be construed as creating a partnership, joint venture, agency, or employment relationship between the Parties. Neither Party has authority to bind the other or to incur any obligation on the other's behalf.")
         else:
             self.bp(f"{cl}.9 Entire Agreement. ", "This LOI constitutes the entire agreement between the Parties in relation to its subject matter and supersedes all prior negotiations, representations, and agreements. Nothing in this Clause limits liability for fraud.")
@@ -2838,6 +2871,18 @@ def main():
             date_str = datetime.now().strftime("%Y%m%d")
         cp = data.get("counterparty", {}).get("short", "Unknown")
         output = f"{date_str}_DEG_LOI-{data['type']}_{cp}_(DRAFT).docx"
+
+    # v3.6.0 item b: auto-version output filenames. If target exists,
+    # append _v{N} and increment until unique. Addresses file-confusion
+    # observed in Cerebro/Armada/InfraPartners retrospectives where
+    # operators regenerated iteratively and lost track of canonical draft.
+    if os.path.exists(output):
+        base, ext = os.path.splitext(output)
+        n = 2
+        while os.path.exists(f"{base}_v{n}{ext}"):
+            n += 1
+        output = f"{base}_v{n}{ext}"
+        print(f"[auto-version] Target exists; writing to {output}", file=sys.stderr)
 
     loi = LOI(data)
     doc = loi.build()

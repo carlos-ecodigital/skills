@@ -19,7 +19,7 @@
       "which": "footer"
     }
   ],
-  "n_paragraphs": 144,
+  "n_paragraphs": 143,
   "n_tables": 1,
   "paragraphs": [
     {
@@ -531,22 +531,13 @@
       "i": 56,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "e6fcfe9763e510e0",
-      "text_len": 125,
-      "text_prefix": "Each stage is designed to provide increasing commercial certainty and to support"
-    },
-    {
-      "alignment": null,
-      "i": 57,
-      "space_after_pt": null,
-      "space_before_pt": null,
       "text_hash": "fc1aa7e8903b1faa",
       "text_len": 285,
       "text_prefix": "4.3 Joint-Development Governance. The Parties intend to establish a joint design"
     },
     {
       "alignment": null,
-      "i": 58,
+      "i": 57,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "08ca6d612543b0b7",
@@ -555,7 +546,7 @@
     },
     {
       "alignment": null,
-      "i": 59,
+      "i": 58,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "37cbe19df7fcce78",
@@ -564,7 +555,7 @@
     },
     {
       "alignment": null,
-      "i": 60,
+      "i": 59,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "118c85f6d9923b52",
@@ -573,7 +564,7 @@
     },
     {
       "alignment": null,
-      "i": 61,
+      "i": 60,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "475bdf5a9dd1fa19",
@@ -582,7 +573,7 @@
     },
     {
       "alignment": null,
-      "i": 62,
+      "i": 61,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b568269c0c4b141d",
@@ -591,7 +582,7 @@
     },
     {
       "alignment": null,
-      "i": 63,
+      "i": 62,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "d26ce3e7ecfa2443",
@@ -600,7 +591,7 @@
     },
     {
       "alignment": null,
-      "i": 64,
+      "i": 63,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b7d372ee1b454bf5",
@@ -609,7 +600,7 @@
     },
     {
       "alignment": null,
-      "i": 65,
+      "i": 64,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "fea9e46f7f553a67",
@@ -618,7 +609,7 @@
     },
     {
       "alignment": null,
-      "i": 66,
+      "i": 65,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "62db0e41e8a0f4c2",
@@ -627,7 +618,7 @@
     },
     {
       "alignment": null,
-      "i": 67,
+      "i": 66,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "60c3c51bf5fdff18",
@@ -636,7 +627,7 @@
     },
     {
       "alignment": null,
-      "i": 68,
+      "i": 67,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "606f70809050b639",
@@ -645,7 +636,7 @@
     },
     {
       "alignment": null,
-      "i": 69,
+      "i": 68,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "aa1f26b9ca1eb730",
@@ -654,7 +645,7 @@
     },
     {
       "alignment": null,
-      "i": 70,
+      "i": 69,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "32cc6d11a73db2fe",
@@ -663,7 +654,7 @@
     },
     {
       "alignment": null,
-      "i": 71,
+      "i": 70,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "6dad84b4c98a8730",
@@ -672,7 +663,7 @@
     },
     {
       "alignment": null,
-      "i": 72,
+      "i": 71,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "7a2dcd78db0f65fb",
@@ -681,7 +672,7 @@
     },
     {
       "alignment": null,
-      "i": 73,
+      "i": 72,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b0050effb617fb8e",
@@ -690,7 +681,7 @@
     },
     {
       "alignment": null,
-      "i": 74,
+      "i": 73,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "e6e583077df6c558",
@@ -699,7 +690,7 @@
     },
     {
       "alignment": null,
-      "i": 75,
+      "i": 74,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "fde2f01443ecced0",
@@ -708,7 +699,7 @@
     },
     {
       "alignment": null,
-      "i": 76,
+      "i": 75,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "a13411261a832f69",
@@ -717,7 +708,7 @@
     },
     {
       "alignment": null,
-      "i": 77,
+      "i": 76,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "af62cbde0a8e7e86",
@@ -726,7 +717,7 @@
     },
     {
       "alignment": null,
-      "i": 78,
+      "i": 77,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "f9eb2a931bbf7f9e",
@@ -735,7 +726,7 @@
     },
     {
       "alignment": null,
-      "i": 79,
+      "i": 78,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "e143239639f28faa",
@@ -744,7 +735,7 @@
     },
     {
       "alignment": null,
-      "i": 80,
+      "i": 79,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "a826308ea6db47e4",
@@ -753,7 +744,7 @@
     },
     {
       "alignment": null,
-      "i": 81,
+      "i": 80,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b91a0e9f6e16f53c",
@@ -762,7 +753,7 @@
     },
     {
       "alignment": null,
-      "i": 82,
+      "i": 81,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "56624e3b590f7e9d",
@@ -771,7 +762,7 @@
     },
     {
       "alignment": null,
-      "i": 83,
+      "i": 82,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "cb337458bb6bbd2f",
@@ -780,7 +771,7 @@
     },
     {
       "alignment": null,
-      "i": 84,
+      "i": 83,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "bb02674c2f731955",
@@ -789,7 +780,7 @@
     },
     {
       "alignment": null,
-      "i": 85,
+      "i": 84,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "397a7550fe0c7065",
@@ -798,7 +789,7 @@
     },
     {
       "alignment": null,
-      "i": 86,
+      "i": 85,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "9e89c754eac294d8",
@@ -807,7 +798,7 @@
     },
     {
       "alignment": null,
-      "i": 87,
+      "i": 86,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "9695d0d5719f8964",
@@ -816,7 +807,7 @@
     },
     {
       "alignment": null,
-      "i": 88,
+      "i": 87,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b7bff091a0489f7e",
@@ -825,7 +816,7 @@
     },
     {
       "alignment": null,
-      "i": 89,
+      "i": 88,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "2fe8d452a772d36c",
@@ -834,7 +825,7 @@
     },
     {
       "alignment": null,
-      "i": 90,
+      "i": 89,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "dbd7075034cfe6e1",
@@ -843,7 +834,7 @@
     },
     {
       "alignment": null,
-      "i": 91,
+      "i": 90,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "605d84bf86a3a4a0",
@@ -852,7 +843,7 @@
     },
     {
       "alignment": null,
-      "i": 92,
+      "i": 91,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "efb04cb570db9ef9",
@@ -861,7 +852,7 @@
     },
     {
       "alignment": null,
-      "i": 93,
+      "i": 92,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "94c43f86e2660a00",
@@ -870,7 +861,7 @@
     },
     {
       "alignment": null,
-      "i": 94,
+      "i": 93,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "799f2d7322d58ffd",
@@ -879,7 +870,7 @@
     },
     {
       "alignment": null,
-      "i": 95,
+      "i": 94,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "7fe14367aded30ab",
@@ -888,7 +879,7 @@
     },
     {
       "alignment": null,
-      "i": 96,
+      "i": 95,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "bfa404afe945d47c",
@@ -897,7 +888,7 @@
     },
     {
       "alignment": null,
-      "i": 97,
+      "i": 96,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "701a6390086a62aa",
@@ -906,7 +897,7 @@
     },
     {
       "alignment": null,
-      "i": 98,
+      "i": 97,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "9bf7c870cedb57fb",
@@ -915,7 +906,7 @@
     },
     {
       "alignment": null,
-      "i": 99,
+      "i": 98,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "19fb05c0ee8d3e4a",
@@ -924,7 +915,7 @@
     },
     {
       "alignment": null,
-      "i": 100,
+      "i": 99,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "958d2039164ef7a0",
@@ -933,7 +924,7 @@
     },
     {
       "alignment": null,
-      "i": 101,
+      "i": 100,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "3489442ce223614f",
@@ -942,7 +933,7 @@
     },
     {
       "alignment": null,
-      "i": 102,
+      "i": 101,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "4f5ab906df193174",
@@ -951,7 +942,7 @@
     },
     {
       "alignment": null,
-      "i": 103,
+      "i": 102,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "1d178b48acf2290f",
@@ -960,7 +951,7 @@
     },
     {
       "alignment": null,
-      "i": 104,
+      "i": 103,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "b991a5aa96db20a2",
@@ -969,7 +960,7 @@
     },
     {
       "alignment": null,
-      "i": 105,
+      "i": 104,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "5a498433904b1408",
@@ -978,25 +969,25 @@
     },
     {
       "alignment": null,
-      "i": 106,
+      "i": 105,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "6bf5d5d2b3c5df16",
-      "text_len": 187,
-      "text_prefix": "(b) Binding provisions. Clauses 5 (Project Finance and Assignment), 6 (Confident"
+      "text_hash": "f7d0d253c567f052",
+      "text_len": 193,
+      "text_prefix": "(b) Binding provisions. Clauses 5 (Supply Chain and Delivery Commitment), 6 (Con"
     },
     {
       "alignment": null,
-      "i": 107,
+      "i": 106,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "ae43b10f482141e9",
-      "text_len": 757,
+      "text_hash": "b1b67d9eed2d6946",
+      "text_len": 756,
       "text_prefix": "8.2 Good Faith. The Parties agree to engage in the technical scoping and commerc"
     },
     {
       "alignment": null,
-      "i": 108,
+      "i": 107,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "c223067acf6413f8",
@@ -1005,7 +996,7 @@
     },
     {
       "alignment": null,
-      "i": 109,
+      "i": 108,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "bf296f193f2c63b1",
@@ -1014,7 +1005,7 @@
     },
     {
       "alignment": null,
-      "i": 110,
+      "i": 109,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "0e63db72d3a94b55",
@@ -1023,7 +1014,7 @@
     },
     {
       "alignment": null,
-      "i": 111,
+      "i": 110,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "78ac8b3879d84a15",
@@ -1032,7 +1023,7 @@
     },
     {
       "alignment": null,
-      "i": 112,
+      "i": 111,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "de380e0a20488b40",
@@ -1041,7 +1032,7 @@
     },
     {
       "alignment": null,
-      "i": 113,
+      "i": 112,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "297f648dd020e34f",
@@ -1050,16 +1041,16 @@
     },
     {
       "alignment": null,
-      "i": 114,
+      "i": 113,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "65b47096de84c46d",
-      "text_len": 340,
-      "text_prefix": "8.9 Entire Agreement. This LOI, together with any NDA referenced in Clause 6 (AL"
+      "text_hash": "f97ec31a34ae423b",
+      "text_len": 285,
+      "text_prefix": "8.9 Entire Agreement. This LOI constitutes the entire agreement between the Part"
     },
     {
       "alignment": null,
-      "i": 115,
+      "i": 114,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "8c2e05d1d106b58a",
@@ -1068,7 +1059,7 @@
     },
     {
       "alignment": null,
-      "i": 116,
+      "i": 115,
       "space_after_pt": 0.0,
       "space_before_pt": null,
       "text_hash": "fb69a709ae483c9d",
@@ -1077,7 +1068,7 @@
     },
     {
       "alignment": null,
-      "i": 117,
+      "i": 116,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "e016b5ff9042dc0f",
@@ -1086,7 +1077,7 @@
     },
     {
       "alignment": null,
-      "i": 118,
+      "i": 117,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1095,7 +1086,7 @@
     },
     {
       "alignment": null,
-      "i": 119,
+      "i": 118,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "6d12ed914c5cc1df",
@@ -1104,7 +1095,7 @@
     },
     {
       "alignment": null,
-      "i": 120,
+      "i": 119,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1113,7 +1104,7 @@
     },
     {
       "alignment": null,
-      "i": 121,
+      "i": 120,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "cdec56b0de46da45",
@@ -1122,7 +1113,7 @@
     },
     {
       "alignment": null,
-      "i": 122,
+      "i": 121,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1131,7 +1122,7 @@
     },
     {
       "alignment": null,
-      "i": 123,
+      "i": 122,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "bc3204ca0e5d9256",
@@ -1140,7 +1131,7 @@
     },
     {
       "alignment": null,
-      "i": 124,
+      "i": 123,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "fbcd35b74947c6c4",
@@ -1149,7 +1140,7 @@
     },
     {
       "alignment": null,
-      "i": 125,
+      "i": 124,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "24aa4235c62622bd",
@@ -1158,7 +1149,7 @@
     },
     {
       "alignment": null,
-      "i": 126,
+      "i": 125,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "8fcc7efbf553872c",
@@ -1167,7 +1158,7 @@
     },
     {
       "alignment": null,
-      "i": 127,
+      "i": 126,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "354a2396dffc0195",
@@ -1176,7 +1167,7 @@
     },
     {
       "alignment": null,
-      "i": 128,
+      "i": 127,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1185,7 +1176,7 @@
     },
     {
       "alignment": null,
-      "i": 129,
+      "i": 128,
       "space_after_pt": 0.0,
       "space_before_pt": null,
       "text_hash": "fb69a709ae483c9d",
@@ -1194,7 +1185,7 @@
     },
     {
       "alignment": null,
-      "i": 130,
+      "i": 129,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1203,7 +1194,7 @@
     },
     {
       "alignment": null,
-      "i": 131,
+      "i": 130,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "58a4cf104d6e5f12",
@@ -1212,7 +1203,7 @@
     },
     {
       "alignment": null,
-      "i": 132,
+      "i": 131,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1221,7 +1212,7 @@
     },
     {
       "alignment": null,
-      "i": 133,
+      "i": 132,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "bc3204ca0e5d9256",
@@ -1230,7 +1221,7 @@
     },
     {
       "alignment": null,
-      "i": 134,
+      "i": 133,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "ddbe3330ea17db6c",
@@ -1239,7 +1230,7 @@
     },
     {
       "alignment": null,
-      "i": 135,
+      "i": 134,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "d9339476ab48871a",
@@ -1248,7 +1239,7 @@
     },
     {
       "alignment": null,
-      "i": 136,
+      "i": 135,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "8fcc7efbf553872c",
@@ -1257,7 +1248,7 @@
     },
     {
       "alignment": null,
-      "i": 137,
+      "i": 136,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "354a2396dffc0195",
@@ -1266,7 +1257,7 @@
     },
     {
       "alignment": null,
-      "i": 138,
+      "i": 137,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1275,7 +1266,7 @@
     },
     {
       "alignment": null,
-      "i": 139,
+      "i": 138,
       "space_after_pt": 0.0,
       "space_before_pt": null,
       "text_hash": "fb69a709ae483c9d",
@@ -1284,7 +1275,7 @@
     },
     {
       "alignment": null,
-      "i": 140,
+      "i": 139,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "6b10564483557ddc",
@@ -1293,7 +1284,7 @@
     },
     {
       "alignment": null,
-      "i": 141,
+      "i": 140,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "35d24067309afce1",
@@ -1302,7 +1293,7 @@
     },
     {
       "alignment": null,
-      "i": 142,
+      "i": 141,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": null,
@@ -1311,7 +1302,7 @@
     },
     {
       "alignment": null,
-      "i": 143,
+      "i": 142,
       "space_after_pt": null,
       "space_before_pt": null,
       "text_hash": "d7da0e7d94c91290",
