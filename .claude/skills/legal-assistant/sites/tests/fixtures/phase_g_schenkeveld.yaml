@@ -1,0 +1,80 @@
+deal_yaml_schema_version: "1.0"
+slug: schenkeveld-schiphol
+project_name: DESCHEN-01
+version: "1.0"
+counterparty_folder_name: "Schenkeveld_Project_Benelux_Ops"
+
+# Phase G fixture — reconstructed from signed HoT PDF:
+# /Shared drives/NEW_Ops/Projects Benelux_Ops/Signed HoTs/20250214_DE_HoT_Schenkeveld.pdf
+# DocuSign Envelope ID: 3DC32075-0391-4A8D-980A-44A1C5D0028E
+# Signed date: 2025-02-14 (filename prefix)
+# NOTE: signed HoT PDF uses the 2024-era bilingual narrative template —
+# not the tabular v1.0 Annex A. Fields below were extracted manually
+# from recitals + clauses; many v1.0 Annex A specific fields
+# (EAN code, ATO reference, exact kadaster parcel, signatory title)
+# are not present in the signed document and are left UNKNOWN.
+
+commercial:
+  currency: "EUR"
+  heat_sales_split: "TBD"
+  payment_term_days: 30
+
+timeline:
+  hot_signed_date: "2025-02-14"
+  exclusivity_end_date: "2026-03-07"
+
+notices:
+  de_email: "contact@digitalenergy.ch"
+  grower_address: "Tijmweg 1, 1435 DE Rijsenhout"
+
+addons:
+  bess_co_development: false
+  btm_renewables: false
+  chp_present: false
+  co_investment: false
+
+site_partners:
+  - legal_name: "Schenkeveld Schiphol"
+    kvk: "67743366"
+    registered_address: "Tijmweg 1, 1435 DE Rijsenhout"
+    signatory:
+      signing_authority: "sole"
+    greenhouse:
+      address: "Tijmweg 1, 1435 DE Rijsenhout"
+      current_size_ha: 44
+      planned_size_ha: 44
+      expansion_timeline: "N/A"
+      cultivation_type: "Vegetables / Groenten"
+    contributions:
+      - asset: grid_interconnection
+        instrument: ato_sharing
+        details:
+          total_connection_mva: 20
+          total_import_mw: 20
+          total_export_mw: 20
+          base_connection_mva: 6
+          base_import_mw: 6
+          base_export_mw: 0
+          future_connection_mva: 6
+          future_import_mw: 6
+          future_export_mw: 6
+          sap_configuration: "Cable pooling / MLOEA"
+        stage_tag: "hot"
+      - asset: land
+        instrument: opstalrecht
+        details:
+          title_type: "Full ownership"
+          zoning_designation: "Glastuinbouw"
+        stage_tag: "hot"
+    returns:
+      - value: energy_heat
+        instrument: heat_offtake_agreement
+        details:
+          target_outlet_temp_c: 70
+          delta_t_requirement_c: 15
+          heat_price_eur_mwh: 0
+          delivery_basis: "DAP"
+
+locations:
+  - address: "Tijmweg 1, 1435 DE Rijsenhout"
+    municipality: "Haarlemmermeer"

@@ -69,6 +69,17 @@ TOKEN_MAP: Dict[str, Dict[Hashable, str]] = {
         "Erfpacht / Leasehold": "Erfpacht / Leasehold",
         "Other / Anders": "Other / Anders",
     },
+    # B13_sap_configuration — human-friendly bare tokens from SAL runbook +
+    # deal.yaml authors; canonical NL-bilingual option preferred by registry.
+    "B13_sap_configuration": {
+        "Cable pooling": "Cable pooling / Kabel delen",
+        "Kabel delen": "Cable pooling / Kabel delen",
+        "MLOEA": "MLOEA",
+        "Other": "Other / Anders",
+        "Anders": "Other / Anders",
+        "Cable pooling / Kabel delen": "Cable pooling / Kabel delen",
+        "Other / Anders": "Other / Anders",
+    },
     "D3_encumbrances": {
         # Kadaster parser boolean — v1 simplification: True → Mortgage.
         # (The Kadaster parser currently treats any hypotheek/beslag/
