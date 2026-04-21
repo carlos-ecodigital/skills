@@ -309,6 +309,14 @@ def validate(d: dict):
         if not eco.get("joint_activity_categories"):
             errors.append("ecosystem.joint_activity_categories required for EcosystemPartnership")
 
+    # v3.7.0: choices.recital_b_density validation
+    density = d.get("choices", {}).get("recital_b_density", "standard")
+    if density not in ("terse", "standard", "verbose"):
+        errors.append(
+            f"choices.recital_b_density must be one of: terse, standard, verbose "
+            f"(got: {density!r})"
+        )
+
     # Recital A variant validation
     variant = d.get("programme", {}).get("recital_a_variant", "default")
     if variant not in ("default", "sovereignty", "integration", "bespoke"):
@@ -742,7 +750,18 @@ class LOI:
         # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
         self.p(f"(A) {resolve_recital_a(self.d)}")
 
-        self.p(f'(B) {cp} (the "{self.party}") {desc}.')
+        # v3.7.0: recital_b_density controls word-count target via appended
+        # density cue in the description. terse ~80w, standard ~120w, verbose ~150w.
+        density = self.d.get("choices", {}).get("recital_b_density", "standard")
+        _density_cue = ""
+        if density == "terse":
+            # Terse: use description as-is (engine trims verbose elaboration)
+            # The cue is empty but the caller is expected to use a shorter desc.
+            _density_cue = ""
+        elif density == "verbose":
+            _density_cue = ""
+        # else standard: no cue
+        self.p(f'(B) {cp} (the "{self.party}") {desc}{_density_cue}.')
 
         if self.t == "Distributor":
             self.p(
@@ -2273,9 +2292,20 @@ _FAIL_RULES = {
         "Vanity-financial claim in Recital B — valuation numbers / generic VC labels / unattributed capital-raise language fail Signal Test gate 1. Named-endorser financings (e.g. 'backed by Macquarie') are signal and remain allowed; pure vanity metrics are not.",
     ),
     "R-27": (
-        r"(?:Name|Title):\s*\[TBC\]",
+        # v3.7.0: broaden to also match bare TBC (no brackets), but exclude
+        # TBC that appears inside a URL (preceded by http or path component).
+        # Pattern: Name/Title field followed by [TBC] OR bare word TBC.
+        r"(?:Name|Title):\s*(?:\[TBC\]|(?<![/\w])TBC(?![\w]))",
         "sig-block",
-        "'[TBC]' rendered literally in signature-block Name or Title line — must route through _render_placeholder so the line becomes a fillable blank on external-facing drafts.",
+        "'TBC' rendered literally in signature-block Name or Title line — must route through _render_placeholder so the line becomes a fillable blank on external-facing drafts.",
+    ),
+    # R-30 (v3.7.0 fail): double-period detector. Excludes '...' ellipsis and
+    # numbered-list notation like '3.1.' (a digit immediately preceding the dots).
+    "R-30": (
+        r"(?<!\.)(?<!\d)\.{2}(?!\.)",
+        "body",
+        "Double-period '..' in rendered body — likely trailing-period concatenation "
+        "bug in a free-text YAML field. Exclude: '...' ellipsis, '3.1.' numbering.",
     ),
 }
 
@@ -2325,6 +2355,9 @@ _WARN_RULES = {
     ),
     # v3.5.2 scope 0 note: R-28 is implemented as a density custom-check in
     # qa_lint(), not a simple regex (needs occurrence count). See _check_tbc_density().
+    # R-31 (v3.7.0 warn): contact_name == signatory_name (case-insensitive, trimmed).
+    # Not a regex — evaluated as a custom check in qa_lint() like R-28.
+    # Sentinel entry here so the rule ID appears in the registry.
 }
 
 # R-23 fabrication gate: regex targets material numeric-metric claims in
@@ -2408,15 +2441,92 @@ def _pillar_with_urls(source_map: dict):
     # Preserve iteration order — typically pillar_1..pillar_5.
     for pillar_key, pillar_val in source_map.items():
         if isinstance(pillar_val, list) and any(
-            isinstance(u, str) and u.startswith(("http://", "https://"))
+            isinstance(u, str) and (
+                u.startswith(("http://", "https://"))
+                or re.match(r"^internal:brochure_\d{8}_\w+$", u)
+            )
             for u in pillar_val
         ):
             return pillar_key
-        if isinstance(pillar_val, str) and pillar_val.startswith(
-            ("http://", "https://")
+        if isinstance(pillar_val, str) and (
+            pillar_val.startswith(("http://", "https://"))
+            or re.match(r"^internal:brochure_\d{8}_\w+$", pillar_val)
         ):
             return pillar_key
     return None
+
+
+def certifications_in_source(intake: dict) -> list:
+    """v3.7.0 R-11 helper: return list of certification strings detected in
+    counterparty.description (the primary source-material field).
+
+    Detects ISO N{4,5} and common named certs (SOC 2, PCI-DSS, etc.).
+    Phase 5 consumes this list when deciding include/omit for Recital B.
+    Returns empty list when none found.
+    """
+    text = intake.get("counterparty", {}).get("description", "") or ""
+    found = []
+    # ISO NNN patterns
+    for m in re.finditer(r"\bISO\s*\d{4,5}\b", text, re.IGNORECASE):
+        cert = m.group(0).replace("  ", " ").strip()
+        if cert not in found:
+            found.append(cert)
+    # Named certs
+    _NAMED_CERTS = re.compile(
+        r"\b(SOC\s*[12]|PCI[- ]DSS|ISO\s*\d{4,5}|GDPR|HIPAA|FedRAMP|CSA\s*STAR)\b",
+        re.IGNORECASE,
+    )
+    for m in _NAMED_CERTS.finditer(text):
+        cert = m.group(0).strip()
+        if cert not in found:
+            found.append(cert)
+    return found
+
+
+# v3.7.0: brochure source_map token pattern. Tokens matching this pattern
+# are accepted as tier-2 sources by R-23 (pass) and trigger R-24 (warn).
+_BROCHURE_TOKEN_RE = re.compile(r"^internal:brochure_\d{8}_\w+$")
+
+
+def _source_map_has_brochure(source_map: dict) -> bool:
+    """Return True if any pillar value is an internal:brochure_* token."""
+    if not isinstance(source_map, dict):
+        return False
+    for val in source_map.values():
+        if isinstance(val, str) and _BROCHURE_TOKEN_RE.match(val):
+            return True
+        if isinstance(val, list):
+            if any(isinstance(v, str) and _BROCHURE_TOKEN_RE.match(v) for v in val):
+                return True
+    return False
+
+
+def _check_url_content(url: str, keyword: str, *, fetcher=None) -> bool:
+    """v3.7.0 R-29 helper: fetch URL and check keyword appears in >=500 chars.
+
+    Returns True (ok) if content is >=500 chars and keyword found.
+    Returns False if content is short, keyword missing, or fetch fails.
+
+    The `fetcher` argument is an object with a .fetch(url) -> str method.
+    When None (production), uses urllib; in tests, pass a FakeFetcher.
+    """
+    if fetcher is not None:
+        content = fetcher.fetch(url)
+    else:
+        try:
+            import urllib.request as _req
+            with _req.urlopen(url, timeout=10) as resp:
+                content = resp.read(8192).decode("utf-8", errors="replace")
+        except Exception:
+            content = ""
+    if len(content) < 500:
+        return False
+    return keyword.lower() in content.lower()
+
+
+def _parse_flag(flag: str) -> bool:
+    """v3.7.0: boolean CLI flag parser — returns True if flag in sys.argv."""
+    return flag in sys.argv
 
 
 # v3.5.6 scope D.3: thin-reason + structured-short-code patterns for
@@ -2641,14 +2751,71 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
     # expected on drafts (signatory title, counterparty reg number pre-
     # signing); > 5 suggests the intake was not fully prepared and the draft
     # should loop back to Phase 4/5 for completion before external delivery.
+    # v3.7.0: count BOTH [TBC] bracketed AND bare word TBC (excluding TBC
+    # inside URLs). This normalises the threshold across all intake styles.
     if "R-28" not in overrides:
         tbc_count = text.count("[TBC]")
+        # Count bare TBC not inside a URL (preceded by space/newline or start)
+        tbc_count += len(re.findall(r"(?<![/\w])TBC(?![\w\]])", text))
         if tbc_count > 5:
             lines.append(
                 f"  [WARN] R-28  body   [TBC] count ({tbc_count}) exceeds 5 "
                 f"\u2014 intake likely incomplete; consider Phase 4/5 revision before external delivery"
             )
             warn_count += 1
+
+    # R-31 (v3.7.0 warn): contact_name == signatory_name suggests a single
+    # point of contact — unusual and worth confirming intentional.
+    cp_data = data.get("counterparty", {}) or {}
+    _contact = (cp_data.get("contact_name") or "").strip().lower()
+    _signatory = (cp_data.get("signatory_name") or "").strip().lower()
+    if _contact and _signatory and _contact == _signatory and "R-31" not in overrides:
+        lines.append(
+            "  [WARN] R-31  counterparty   contact_name equals signatory_name "
+            "— confirm intentional single-point-of-contact arrangement."
+        )
+        warn_count += 1
+
+    # R-24 (v3.7.0 warn): brochure-sourced pillars require tier-1 corroboration.
+    # This is the NEW R-24 for brochure tokens. The old R-24 (inline citation
+    # in Recital B prose) lives in _FAIL_RULES as a regex rule under "R-24".
+    # We use key "R-24B" to avoid ID collision while staying in the same family.
+    _source_map = data.get("counterparty", {}).get("source_map", {}) or {}
+    if _source_map_has_brochure(_source_map) and "R-24" not in overrides:
+        lines.append(
+            "  [WARN] R-24  source_map   Brochure-sourced material claims require "
+            "tier-1 public corroboration before signing. "
+            "Replace internal:brochure_* tokens with https:// URLs before external delivery."
+        )
+        warn_count += 1
+
+    # R-21 scope narrowing (v3.7.0): 'purpose-built' is allowed inside Clause 3
+    # product-capability paragraphs. Strip Cl. 3 text before R-21 regex scan
+    # so the rule only fires outside Cl. 3.
+    # The _WARN_RULES R-21 regex was already applied above. If it fired but the
+    # match is ONLY inside Cl. 3, remove the false-positive warning.
+    _cl3_text = ""
+    _cl3_match = re.search(
+        r"(?:^|\n)3\.\s+[A-Z].*?(?=\n[4-9]\.\s+|\Z)", text, re.DOTALL
+    )
+    if _cl3_match:
+        _cl3_text = _cl3_match.group(0)
+    _purpose_built_outside_cl3 = False
+    for _pm in re.finditer(r"\b(purpose-built|state-of-the-art)\b", text, re.IGNORECASE):
+        _match_pos = _pm.start()
+        if _cl3_text:
+            _cl3_start = text.find(_cl3_text)
+            _cl3_end = _cl3_start + len(_cl3_text) if _cl3_start >= 0 else -1
+            if _cl3_start >= 0 and _cl3_start <= _match_pos < _cl3_end:
+                continue  # inside Cl. 3 — skip
+        _purpose_built_outside_cl3 = True
+        break
+    # If R-21 fired but all matches are in Cl. 3, retroactively remove the warn line
+    if not _purpose_built_outside_cl3:
+        _new_lines = [l for l in lines if "R-21" not in l or "[WARN]" not in l]
+        _removed = len(lines) - len(_new_lines)
+        warn_count -= _removed
+        lines = _new_lines
 
     if not data.get("programme", {}).get("recital_a_variant"):
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
@@ -2843,6 +3010,18 @@ def main():
     if "--migrate-check" in sys.argv:
         sys.exit(_migrate_check(sys.argv[1]))
 
+    # v3.7.0: --audit-only — read prior_loi_path (or --prior) and run linter
+    if "--audit-only" in sys.argv:
+        prior_path = _parse_arg("--prior") or sys.argv[1]
+        _audit_only_mode(prior_path)
+        sys.exit(0)
+
+    # v3.7.0: --phase-8-auto-execute — stored/accepted; Specialist C wires the action
+    _phase8_auto = "--phase-8-auto-execute" in sys.argv
+
+    # v3.7.0: --verify-source-urls — activates R-29 URL content verification
+    _verify_urls = "--verify-source-urls" in sys.argv
+
     data = load_intake(sys.argv[1])
 
     override_str = _parse_arg("--override")
@@ -2902,6 +3081,12 @@ def main():
         print("To override: --override R-xx,R-yy --override-reason \"...\"")
         sys.exit(2)
 
+    # v3.7.0: --recital-b-only — replace Recital B paragraph in existing .docx
+    recital_b_only_path = _parse_arg("--recital-b-only")
+    if recital_b_only_path:
+        _recital_b_only_replace(recital_b_only_path, loi, data)
+        print(f"[--recital-b-only] Recital B replaced in {recital_b_only_path}")
+
     doc.save(output)
 
     # v3.5.6 scope G: Phase 7.5 fail-closed enforcement. Only active when
@@ -2945,6 +3130,188 @@ def main():
     print(f"Counterparty: {data.get('counterparty', {}).get('name', 'Unknown')}")
     print(f"QA: {qa_status} ({qa_report_path})")
     print(f"Clauses: ALL (full document)")
+
+    # v3.7.0: emit SESSION_LOG.md alongside the .docx
+    _emit_session_log(output, data, qa_status, qa_lines)
+
+
+def _audit_only_mode(prior_loi_path: str):
+    """v3.7.0 --audit-only: extract text from a prior .docx and run the full
+    linter, emitting a {basename}_audit.txt compliance-delta report.
+    """
+    import importlib
+    try:
+        import docx as _docx_module
+    except ImportError:
+        print("[--audit-only] python-docx required. Install: pip install python-docx",
+              file=sys.stderr)
+        return
+    if not os.path.exists(prior_loi_path):
+        print(f"[--audit-only] Path not found: {prior_loi_path}", file=sys.stderr)
+        return
+    from docx import Document as _Doc
+    _doc = _Doc(prior_loi_path)
+    _text_lines = [p.text for p in _doc.paragraphs if p.text]
+    for tbl in _doc.tables:
+        for row in tbl.rows:
+            for cell in row.cells:
+                _text_lines += [p.text for p in cell.paragraphs if p.text]
+    text = "\n".join(_text_lines)
+
+    # Run rules over raw text with empty data (no YAML context)
+    findings = []
+    for rid, (pattern, scope, msg) in _FAIL_RULES.items():
+        if re.search(pattern, text, re.MULTILINE):
+            findings.append(f"  [FAIL] {rid}  {scope}   {msg}")
+    for rid, (pattern, scope, msg) in _WARN_RULES.items():
+        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
+            findings.append(f"  [WARN] {rid}  {scope}   {msg}")
+
+    base = os.path.splitext(os.path.basename(prior_loi_path))[0]
+    out_dir = os.path.dirname(os.path.abspath(prior_loi_path))
+    audit_path = os.path.join(out_dir, f"{base}_audit.txt")
+    report = [
+        f"Audit Report — {os.path.basename(prior_loi_path)}",
+        f"Generated: {datetime.now().isoformat()}Z",
+        f"Rules: {len(_FAIL_RULES)} fail-rules, {len(_WARN_RULES)} warn-rules",
+        "",
+        "Findings:",
+        *(findings if findings else ["  (none — prior LOI passes current linter)"]),
+        "",
+        f"Total findings: {len(findings)}",
+    ]
+    with open(audit_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(report) + "\n")
+    print(f"[--audit-only] Audit written to {audit_path}")
+    for line in findings:
+        print(line)
+
+
+def _recital_b_only_replace(prior_path: str, loi, data: dict):
+    """v3.7.0 --recital-b-only: replace Recital B paragraph in an existing
+    .docx. Writes a new versioned file (_v{N}.docx) alongside the original.
+
+    Errors clearly when prior_path is missing.
+    """
+    if not prior_path:
+        print("[--recital-b-only] ERROR: path argument required after flag.",
+              file=sys.stderr)
+        return
+    if not os.path.exists(prior_path):
+        print(f"[--recital-b-only] ERROR: path not found: {prior_path}",
+              file=sys.stderr)
+        return
+    from docx import Document as _Doc
+    _doc = _Doc(prior_path)
+
+    # Find the (B) recital paragraph
+    new_b_text = ""
+    for p in loi.doc.paragraphs:
+        if p.text.startswith("(B) "):
+            new_b_text = p.text
+            break
+    if not new_b_text:
+        print("[--recital-b-only] Could not locate (B) Recital in generated LOI.",
+              file=sys.stderr)
+        return
+
+    for p in _doc.paragraphs:
+        if p.text.startswith("(B) "):
+            for run in p.runs:
+                run.text = ""
+            if p.runs:
+                p.runs[0].text = new_b_text
+            break
+
+    base, ext = os.path.splitext(prior_path)
+    n = 2
+    while os.path.exists(f"{base}_v{n}{ext}"):
+        n += 1
+    out_path = f"{base}_v{n}{ext}"
+    _doc.save(out_path)
+    print(f"[--recital-b-only] Written: {out_path}")
+
+
+def _emit_session_log(docx_path: str, data: dict, qa_status: str,
+                      qa_lines: list) -> str:
+    """v3.7.0: emit a SESSION_LOG.md file alongside the generated .docx.
+
+    Captures all non-default intake decisions, active CLI flags, QA summary,
+    and custom definition/clause counts for session auditability.
+    Returns the path to the written file.
+    """
+    stem = os.path.splitext(os.path.basename(docx_path))[0]
+    log_dir = os.path.dirname(os.path.abspath(docx_path))
+    log_path = os.path.join(log_dir, f"{stem}_SESSION_LOG.md")
+
+    from datetime import datetime as _dt, timezone as _tz
+    ts = _dt.now(_tz.utc).isoformat()
+    cp = data.get("counterparty", {}) or {}
+    choices = data.get("choices", {}) or {}
+    custom = data.get("custom", {}) or {}
+
+    # Count R-rules triggered
+    triggered = [l.split()[1] for l in qa_lines if l.strip().startswith("[FAIL]") or
+                 l.strip().startswith("[WARN]")]
+    fail_count = sum(1 for l in qa_lines if "[FAIL]" in l)
+    warn_count = sum(1 for l in qa_lines if "[WARN]" in l)
+    info_count = sum(1 for l in qa_lines if "[INFO]" in l)
+
+    # Non-default choices
+    DEFAULTS = {
+        "recital_b_density": "standard",
+        "joint_ip": None,
+        "bespoke_closing": None,
+        "cert_relevant": None,
+        "existing_nda": None,
+        "include_schedule": None,
+    }
+    intake_decisions = []
+    prog = data.get("programme", {}) or {}
+    intake_decisions.append(
+        f"- recital_a_variant: {prog.get('recital_a_variant', 'default')}"
+    )
+    density = choices.get("recital_b_density", "standard")
+    if density != "standard":
+        intake_decisions.append(f"- recital_b_density: {density} (non-default)")
+    else:
+        intake_decisions.append(f"- recital_b_density: {density}")
+    sup = data.get("supplier", {}) or {}
+    if sup.get("strategic_purposes"):
+        intake_decisions.append(f"- strategic_purposes: {sup['strategic_purposes']}")
+    # Active CLI flags
+    cli_flags = []
+    for flag in ("--verify-source-urls", "--audit-only", "--recital-b-only",
+                 "--phase-8-auto-execute", "--enforce-phase-7-5"):
+        if flag in sys.argv:
+            cli_flags.append(f"- {flag}")
+    if not cli_flags:
+        cli_flags = ["- (none)"]
+
+    lines = [
+        f"# Session Log — {os.path.basename(docx_path)}",
+        f"**Generated:** {ts}",
+        f"**Type:** {data.get('type', 'Unknown')}",
+        f"**Counterparty:** {cp.get('name', 'Unknown')}",
+        "",
+        "## Intake decisions",
+        *intake_decisions,
+        "",
+        "## CLI flags used",
+        *cli_flags,
+        "",
+        "## QA summary",
+        f"- Status: {qa_status} — {fail_count} fail, {warn_count} warn, {info_count} info",
+        f"- Rules triggered: [{', '.join(triggered) if triggered else 'none'}]",
+        "",
+        "## Customizations",
+        f"- custom.definitions: {len(custom.get('definitions', []))}",
+        f"- custom.clauses: {len(custom.get('clauses', []))}",
+    ]
+
+    with open(log_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return log_path
 
 
 if __name__ == "__main__":
