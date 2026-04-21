@@ -47,7 +47,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 # original loi-generator/ layout, so resolve document-factory via parent.parent.
 SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR.parent.parent / "document-factory"))
-from generate import (  # noqa: E402
+from common import (  # noqa: E402
     add_cover, Party,
     COBALT, SLATE, SLATE_800, SLATE_900, WHITE,
     setup_first_page_header, setup_cont_header,
@@ -226,10 +226,11 @@ def validate(d: dict):
     errors = []
     t = d.get("type", "")
     if t not in ("EndUser", "Distributor", "Wholesale",
-                  "StrategicSupplier", "EcosystemPartnership"):
+                  "StrategicSupplier", "EcosystemPartnership", "Bespoke"):
         errors.append(
             "type must be one of: EndUser, Distributor, Wholesale, "
-            f"StrategicSupplier, EcosystemPartnership (got: {d.get('type')})"
+            "StrategicSupplier, EcosystemPartnership, Bespoke "
+            f"(got: {d.get('type')})"
         )
     for s in ("provider", "counterparty", "programme", "dates"):
         if s not in d:
@@ -293,6 +294,57 @@ def validate(d: dict):
                 "choices.joint_ip required when strategic_purposes "
                 "includes engineering_integration (none | background | foreground)"
             )
+    if t == "Bespoke":
+        # Bespoke type — structural validation only, content is free text
+        # but still passes through the full QA catalog (banned phrases etc).
+        clauses = d.get("clauses")
+        if not clauses or not isinstance(clauses, list) or len(clauses) < 1:
+            errors.append(
+                "clauses required for Bespoke (list of at least one clause "
+                "with number, heading, paragraphs)"
+            )
+        else:
+            for idx, c in enumerate(clauses):
+                if not isinstance(c, dict):
+                    errors.append(f"clauses[{idx}] must be a mapping")
+                    continue
+                if not c.get("number"):
+                    errors.append(f"clauses[{idx}].number required")
+                if not c.get("heading"):
+                    errors.append(f"clauses[{idx}].heading required")
+                paras = c.get("paragraphs")
+                if not paras or not isinstance(paras, list) or len(paras) < 1:
+                    errors.append(
+                        f"clauses[{idx}].paragraphs required "
+                        "(list of at least one string)"
+                    )
+                subs = c.get("subclauses", [])
+                if subs and isinstance(subs, list):
+                    for si, s in enumerate(subs):
+                        if not isinstance(s, dict):
+                            errors.append(
+                                f"clauses[{idx}].subclauses[{si}] must be a mapping"
+                            )
+                            continue
+                        if not s.get("letter"):
+                            errors.append(
+                                f"clauses[{idx}].subclauses[{si}].letter required"
+                            )
+                        if not s.get("text"):
+                            errors.append(
+                                f"clauses[{idx}].subclauses[{si}].text required"
+                            )
+        # Optional supplementary recitals
+        recs = d.get("recitals", [])
+        if recs and isinstance(recs, list):
+            for ri, r in enumerate(recs):
+                if not isinstance(r, dict):
+                    errors.append(f"recitals[{ri}] must be a mapping")
+                    continue
+                if not r.get("letter"):
+                    errors.append(f"recitals[{ri}].letter required")
+                if not r.get("text"):
+                    errors.append(f"recitals[{ri}].text required")
     if t == "EcosystemPartnership":
         eco = d.get("ecosystem", {})
         if not eco.get("relationship_type"):
@@ -566,6 +618,9 @@ RECITAL_A_TAIL_BY_TYPE = {
         "infrastructure, sustainable datacentre design, and European "
         "industrial policy alignment."
     ),
+    # Bespoke: no standard fit-line. The YAML author supplies recitals
+    # tailored to the specific deal. Falls through to the base body only.
+    "Bespoke": "",
 }
 
 
@@ -603,6 +658,8 @@ _AGREEMENT_TYPE_BY_LOI = {
     "EndUser": "Letter of Intent",
     "StrategicSupplier": "Letter of Intent and NCNDA",
     "EcosystemPartnership": "Letter of Intent",
+    # M4 Bespoke default — can be overridden via top-level `agreement_type:` in YAML
+    "Bespoke": "Letter of Intent",
 }
 
 # v3.4: Wholesale subject dropped "Purpose-Built" marketing modifier.
@@ -612,6 +669,8 @@ _SUBJECT_BY_LOI = {
     "EndUser": "AI Compute Infrastructure Services",
     "StrategicSupplier": "Strategic Supply and Infrastructure Partnership",
     "EcosystemPartnership": "Strategic Ecosystem Collaboration",
+    # M4 Bespoke default — override via top-level `subject:` in YAML
+    "Bespoke": "Bespoke Engagement",
 }
 
 
@@ -739,8 +798,12 @@ class LOI:
     def __init__(self, data: dict):
         self.d = data
         self.t = data["type"]
-        self.agreement_type = _AGREEMENT_TYPE_BY_LOI[self.t]
-        self.subject = _SUBJECT_BY_LOI[self.t]
+        # M4: Bespoke deals can override the default agreement_type /
+        # subject from top-level YAML keys; templated types ignore them.
+        self.agreement_type = (
+            data.get("agreement_type") or _AGREEMENT_TYPE_BY_LOI[self.t]
+        )
+        self.subject = data.get("subject") or _SUBJECT_BY_LOI[self.t]
         self.doc = Document()
         self._setup()
         party_by_type = {
@@ -749,8 +812,10 @@ class LOI:
             "EcosystemPartnership": "Partner",
             "Wholesale": "Customer",
             "EndUser": "Customer",
+            # M4 Bespoke: default "Counterparty"; YAML can override via `party_label:`
+            "Bespoke": "Counterparty",
         }
-        self.party = party_by_type.get(self.t, "Customer")
+        self.party = data.get("party_label") or party_by_type.get(self.t, "Customer")
         # v3.5.2 (brand-name defined term): provider is defined by its
         # short name throughout the body. The v3.5.2 brand rename replaced
         # every prior "the Provider" reference with "Digital Energy".
@@ -2405,6 +2470,10 @@ class LOI:
             "Wholesale": "v3.2",
             "StrategicSupplier": "v1.0",
             "EcosystemPartnership": "v1.0",
+            # M4: Bespoke type — new in v1.0. Escape hatch for deals that
+            # don't fit the 5 templated types, still gated through the
+            # full QA catalog.
+            "Bespoke": "v1.0",
         }
         vsn = version_by_type.get(self.t, "v3.2")
         self.p(
@@ -2752,6 +2821,11 @@ class LOI:
         if self.t == "EcosystemPartnership":
             return self._build_ep()
 
+        # M4: Bespoke — free-text clauses with structural validation,
+        # full QA catalog still applies.
+        if self.t == "Bespoke":
+            return self._build_bespoke()
+
         self.letterhead()
         # add_cover() already ends with page break
         # v3.5.2 scope A''': Parties Preamble renders legal identification
@@ -3078,6 +3152,92 @@ class LOI:
         # Schedule 1 is optional for EP — only rendered if the intake provides one.
         if self.d.get("ecosystem", {}).get("joint_activity_plan"):
             self.schedule_ep()
+        self.footer()
+        return self.doc
+
+    # ----- Bespoke build (M4) -----
+    # Escape hatch for deals that don't fit the 5 templated types
+    # (EU/DS/WS/SS/EP). Clauses come from the YAML as a structured list:
+    # each clause has a number, heading, paragraphs (ordered), and
+    # optional lettered subclauses. Recital A is always library-sourced;
+    # supplementary recitals (B+) come from the optional `recitals` list.
+    #
+    # IMPORTANT: Bespoke ≠ unvalidated. The full QA catalogue
+    # (R-1 banned phrases, R-7 Unicode arrows, R-20 programme-span
+    # regressions, R-24 party-duplication, etc.) still applies to
+    # bespoke clause text — qa_lint() walks the entire rendered
+    # document and doesn't care how it was built. If a bespoke
+    # paragraph contains "→" or "minimum commitment term of 5 years",
+    # the gate fires as it would for any templated type.
+
+    def _bespoke_recitals(self):
+        """Recital A from library + optional supplementary recitals from YAML."""
+        self.h("Recitals")
+        cp = self.g("counterparty", "short")
+        desc = self.g("counterparty", "description")
+        # v3.6.0 bug 5 parity: strip trailing period from description
+        # before the engine appends its own.
+        if isinstance(desc, str):
+            desc = desc.rstrip().rstrip(".")
+
+        recital_a_body = resolve_recital_a(self.d)
+        self.p(f"(A) {recital_a_body}")
+        self.p(f'(B) {cp} (the "{self.party}") {desc}.')
+
+        # Optional C, D, E... from YAML. Author supplies letter + text;
+        # validate() already enforces presence of both fields on each.
+        for r in self.d.get("recitals", []) or []:
+            letter = str(r.get("letter", "")).strip()
+            text = str(r.get("text", "")).strip()
+            if not letter or not text:
+                continue
+            self.p(f"({letter}) {text}")
+
+    def _bespoke_clauses(self):
+        """Render the YAML `clauses` list as Heading 1 + body paragraphs
+        + (a)/(b) lettered subclauses."""
+        for c in self.d.get("clauses", []) or []:
+            number = str(c.get("number", "")).strip()
+            heading = str(c.get("heading", "")).strip()
+            if not number or not heading:
+                continue
+            self.h(f"{number}. {heading}", level=1)
+
+            for para in c.get("paragraphs", []) or []:
+                text = str(para).strip()
+                if text:
+                    self.p(text)
+
+            for sub in c.get("subclauses", []) or []:
+                letter = str(sub.get("letter", "")).strip()
+                text = str(sub.get("text", "")).strip()
+                if letter and text:
+                    self.p(f"({letter}) {text}")
+
+    def _build_bespoke(self) -> Document:
+        """M4: Bespoke build pipeline.
+
+        Structure:
+          1. Cover (letterhead) — via add_cover, brand-consistent.
+          2. Parties Preamble — v3.5.2 scope A''' (same as templated types).
+          3. Recitals — (A) library-sourced, (B) counterparty descriptor,
+             (C)... from YAML `recitals:` list.
+          4. Clauses — from YAML `clauses:` list, each with number,
+             heading, paragraphs, optional subclauses.
+          5. Signature block — shared across all types.
+          6. Footer — DE-LOI-Bespoke-v1.0 version stamp.
+
+        No definitions(), no clause5/7_nc/general — bespoke deals
+        include those directly inside the free-text clauses list when
+        relevant. Keeps the engine honest: structure validated, content
+        authored.
+        """
+        self.letterhead()
+        # v3.5.2 scope A''': Parties Preamble applies here too.
+        self.parties()
+        self._bespoke_recitals()
+        self._bespoke_clauses()
+        self.signature()
         self.footer()
         return self.doc
 

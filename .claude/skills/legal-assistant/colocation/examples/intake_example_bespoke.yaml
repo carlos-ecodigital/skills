@@ -1,0 +1,82 @@
+# Bespoke LOI intake example
+#
+# Use this type when a deal doesn't fit the 5 templated types
+# (EndUser / Distributor / Wholesale / StrategicSupplier / EcosystemPartnership)
+# but still needs to go through Pipeline A for QA-validated branded output.
+#
+# All clause text is free-form, but the full QA catalog still applies —
+# banned phrases (R-1), Unicode arrows (R-7), etc. are rejected by the
+# linter, same as for templated types.
+
+type: Bespoke
+
+# Optional overrides — default agreement_type is "Letter of Intent";
+# default subject is "Bespoke Engagement"; default party_label is "Counterparty".
+agreement_type: "Letter of Intent"
+subject: "Joint AI Infrastructure Delivery Partnership"
+party_label: "Partner"
+
+provider:
+  short_name: "Digital Energy"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Founder & CEO"
+
+counterparty:
+  name: "Example Bespoke Partner B.V."
+  short: "Example Partner"
+  description: >-
+    a Netherlands-based AI infrastructure solutions company specialising
+    in custom GPU deployment programmes for enterprise customers
+  signatory_name: "Example Signatory"
+  signatory_title: "Director"
+
+programme:
+  recital_a_variant: default
+
+dates:
+  loi_date: "2026-04-17"
+
+# Optional supplementary recitals. Recital A (Provider) and Recital B
+# (Counterparty) are auto-generated from the library and the counterparty
+# descriptor above. Add C, D, E... here if needed.
+recitals:
+  - letter: "C"
+    text: >-
+      The Parties recognise that the Provider's infrastructure and
+      the Partner's managed-services capabilities are complementary, and
+      wish to explore a joint offering to serve enterprise customers.
+
+# Free-text clauses. Structure is enforced; content is authored.
+clauses:
+  - number: "1"
+    heading: "Partnership Model and Joint Offering"
+    paragraphs:
+      - >-
+        1.1 The Parties intend to develop and market an integrated offering
+        combining the Provider's colocation infrastructure with the Partner's
+        managed-services layer.
+    subclauses:
+      - letter: "a"
+        text: >-
+          the Provider delivers energy, cooling, and facility
+          infrastructure at its DEC sites;
+      - letter: "b"
+        text: >-
+          the Partner delivers compute hardware procurement, deployment,
+          lifecycle management, and managed services.
+
+  - number: "2"
+    heading: "Commercial Workshop"
+    paragraphs:
+      - >-
+        2.1 The Parties intend to conduct a joint commercial workshop within
+        thirty (30) calendar days of LOI execution to define the integrated
+        offering and target accounts.
+
+  - number: "3"
+    heading: "Non-Binding Status"
+    paragraphs:
+      - >-
+        3.1 This LOI is non-binding. No Party is obliged to enter into any
+        definitive agreement. Nothing in this LOI creates a partnership,
+        joint venture, or agency relationship.

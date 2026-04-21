@@ -22,7 +22,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 # Import shared cover page and branding from document-factory
 SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR.parent.parent / "document-factory"))
-from generate import (  # noqa: E402
+from common import (  # noqa: E402
     add_cover, Party,
     COBALT, SLATE, SLATE_800, SLATE_900, WHITE,
     setup_first_page_header, setup_cont_header,

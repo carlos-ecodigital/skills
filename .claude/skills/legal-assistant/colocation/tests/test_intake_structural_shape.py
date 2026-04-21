@@ -86,6 +86,19 @@ EXPECTED_TYPE_FOR_FILE: dict[str, str] = {
     "intake_example_ecosystem_partnership.yaml": "EcosystemPartnership",
 }
 
+# M4 Bespoke type — architecturally distinct from the 6 templated types.
+# Intentionally excluded from EXPECTED_TYPE_FOR_FILE because the Bespoke
+# schema is less prescriptive (no required `dates.validity_date`, no
+# required `programme.platform_mw` / `programme.site_count`) — those
+# fields are template-specific, not universal. Bespoke examples are
+# covered by a dedicated test suite (tests/test_bespoke.py,
+# tests/test_mdcs_bespoke.py). They are listed here so
+# test_all_intakes_discovered reconciles the full on-disk set.
+BESPOKE_FILES: dict[str, str] = {
+    "intake_example_bespoke.yaml": "Bespoke",
+    "intake_example_bespoke_mdcs.yaml": "Bespoke",
+}
+
 
 def _discover_intakes() -> list[tuple[str, Path]]:
     return [
@@ -114,9 +127,15 @@ class TestTopLevelShape:
 
     def test_all_intakes_discovered(self, intakes):
         """The fixture set is the contract — if a file is renamed or
-        deleted, the test surface has to be updated explicitly."""
-        assert set(intakes.keys()) == set(EXPECTED_TYPE_FOR_FILE.keys()), (
-            f"Intake file set drifted. Expected {sorted(EXPECTED_TYPE_FOR_FILE)}, "
+        deleted, the test surface has to be updated explicitly.
+
+        Set = templated types (EXPECTED_TYPE_FOR_FILE) ∪ Bespoke
+        examples (BESPOKE_FILES). Adding a new example YAML requires
+        registering it in one of the two dicts; the mismatch here
+        forces that discipline."""
+        expected = set(EXPECTED_TYPE_FOR_FILE) | set(BESPOKE_FILES)
+        assert set(intakes.keys()) == expected, (
+            f"Intake file set drifted. Expected {sorted(expected)}, "
             f"got {sorted(intakes)}."
         )
 

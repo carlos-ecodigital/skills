@@ -29,6 +29,56 @@ content skill → structured content (markdown / sections / clauses)
         → branded .docx with logo, headers, footers, cover page, entity details
 ```
 
+## Pipelines
+
+The factory has three pipelines. `document_factory.build()` dispatches to the right one automatically based on the shape of your input. Full decision table in `references/pipeline-decision.md`.
+
+| Pipeline | Input | Use for | Entry point |
+|---|---|---|---|
+| **A** — Structured intake | `dict` / YAML-loaded deal data | New agreement drafts (LOI, NDA, MSA, bespoke) — deterministic, build-time QA | Today: `legal-assistant/colocation/generate_loi.py`. `build()` raises `NotImplementedError` with this pointer until M4 merges builders into document-factory. |
+| **B** — Preserving rebrand | `.docx` on disk + `RebrandSpec` | Existing Word drafts, outside counsel, counterparty docs, documents with tracked changes | `build(path, rebrand_spec=...)` or `rebrand.rebrand(path, spec)` |
+| **C** — Markdown | markdown string / `.md` file | Non-agreement documents: board memos, exec summaries, reports, proposals | `build(md, md_opts={...})` or `md_to_docx(md, ...)` |
+
+### Deprecation: markdown for agreements
+
+As of M5, passing an agreement profile (anything in `AGREEMENT_PROFILES`, currently `{"agreement"}`) to Pipeline C emits a `DeprecationWarning`. The markdown path loses native numbering, loses recital lettering `(A) / (B) / (C)`, and bypasses the build-time QA catalog (R-11 banned phrases, R-21 no-undersigned-when-cover-has-parties, party-duplication checks).
+
+- **M5 (now):** warning — the path still works.
+- **Next minor version:** error — `build(md, profile="agreement")` raises.
+
+**Migrate agreements to Pipeline A (new drafts) or Pipeline B (existing Word drafts).**
+
+### Using `build()`
+
+```python
+from pathlib import Path
+from common import build, RebrandSpec
+
+# Pipeline B — rebrand an existing .docx
+spec = RebrandSpec(
+    agreement_type="Letter of Intent",
+    client="Acme B.V.",
+    client_address="123 Main St, 1000 AA Amsterdam",
+    entity="nl",
+)
+out_bytes = build(
+    Path("~/Downloads/counsel_draft.docx").expanduser(),
+    rebrand_spec=spec,
+)
+
+# Pipeline C — render a non-agreement markdown doc
+doc = build(
+    Path("~/Downloads/board_memo.md").expanduser().read_text(),
+    md_opts={"title": "Q2 Board Memo", "client": "DE Board",
+             "entity": "nl", "cover": True},
+)
+
+# Pipeline A (dict / AgreementSpec) — not yet wired through build();
+# use legal-assistant/colocation/generate_loi.py for YAML intake.
+```
+
+See `references/pipeline-decision.md` for the full decision table, examples, and migration guidance.
+
 ## Upstream Skills (content producers)
 
 | Skill | Produces | Factory Profile |
@@ -70,6 +120,8 @@ Agreement cover pages follow an IB-standard hierarchy:
 - `--entity nl` → Digital Energy Netherlands B.V.
 
 ## Quick Start
+
+> **For agreements, prefer Pipeline B (`rebrand.py`) or Pipeline A (`legal-assistant`).** The markdown-based examples below still work for non-agreement documents; for agreements they emit a `DeprecationWarning` as of M5 and will error in the next minor version. See the Pipelines section above.
 
 ```bash
 cd /path/to/skills/.claude/skills/document-factory
