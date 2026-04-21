@@ -78,7 +78,7 @@ EP has no purpose selector — the shape is fixed. Configuration via YAML:
 | `ecosystem.joint_activity_categories` | publications / events / pilots / advocacy / working_groups (subset) | — (required) |
 | `choices.announcement_protocol` | mutual_approval / notify_only | mutual_approval |
 | `choices.logo_use` | reciprocal / one_way / none | reciprocal |
-| `programme.recital_a_variant` | default / sovereignty / integration / bespoke | `sovereignty` for EU-mission; else `default` |
+| `programme.recital_a_variant` | default (canonical, v3.4) | `default` — sovereignty/integration keys accepted but map to canonical body. Bespoke by exception only. |
 
 Full template: `colocation/templates/DE-LOI-EcosystemPartnership-v1.0_TEMPLATE.md`.
 
@@ -86,18 +86,16 @@ Full template: `colocation/templates/DE-LOI-EcosystemPartnership-v1.0_TEMPLATE.m
 
 ## Recital A Variant Selection
 
-Per `_shared/loi-recital-a-library.md` — same library across all five types. Suggested variant by counterparty profile:
+Per `_shared/loi-recital-a-library.md` — same canonical body + per-type tail across all five types (v3.4).
 
-| Counterparty profile | Recommended variant |
+**v3.7.0 note:** The three-variant model (default / sovereignty / integration) is deprecated. Use the single canonical body for all types. The `sovereignty` and `integration` legacy keys still resolve to the canonical body for backward compatibility — but do not prompt the operator to choose them.
+
+| Recital A path | When to use |
 |---|---|
-| Neocloud / GPU cloud / wholesale buyer | `default` |
-| European enterprise, AI lab, government / institution | `sovereignty` |
-| Grower, district-heating, energy-led partner | `integration` |
-| Distributor / channel partner | `default` (`sovereignty` if end-users are sovereignty-sensitive) |
-| Strategic supplier / EPC | `default` |
-| Ecosystem partner (EU-mission) | `sovereignty` |
+| **Canonical body + per-type tail** (default) | All counterparties. Covers both sovereignty and integration framing — do not override to bespoke to blend them. |
+| **Bespoke** (exception) | Only when (a) counterparty profile is genuinely non-commercial (sovereign regulator, academic institution), OR (b) per-type canonical tail is materially incorrect for the relationship. Requires justification in intake YAML — see Phase 5 bespoke gate. |
 
-`bespoke` is the escape hatch — linter-checked against R-2, R-3, R-14, R-15.
+`bespoke` is the exception, not a blending convenience — linter-checked against R-2, R-3, R-14, R-15.
 
 ---
 

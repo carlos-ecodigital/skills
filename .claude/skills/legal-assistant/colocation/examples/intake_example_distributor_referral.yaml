@@ -56,7 +56,7 @@ choices:
   existing_nda: false
 
 # --- Programme ---
-# v3.2: recital_a_variant: default | sovereignty | integration | bespoke
+# v3.7.0: recital_a_variant: "default" (canonical body + DS tail, v3.4). Legacy variant keys resolve to canonical body. Bespoke by exception only — see SKILL.md Phase 5 gate.
 programme:
   platform_mw: "100+"
   site_count: "14"

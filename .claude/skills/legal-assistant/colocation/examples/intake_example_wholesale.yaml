@@ -98,12 +98,10 @@ choices:
   ramp_schedule: "50% at RFS, 100% within 90 days"
 
 # --- Programme ---
-# v3.2: Recital A is library-sourced. Set recital_a_variant to:
-#   default      — institutional platform framing (use for neoclouds)
-#   sovereignty  — EU sovereignty emphasis (use for EU enterprises / gov)
-#   integration  — energy-recycling framing (use for grower-adjacent)
-#   bespoke      — provide recital_a_bespoke string (linter-checked)
-# See _shared/loi-recital-a-library.md.
+# v3.7.0: Recital A is library-sourced (single canonical body + WS tail, v3.4).
+#   recital_a_variant: "default"  is the only production value.
+#   Legacy keys (sovereignty, integration) resolve to canonical body.
+#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
 programme:
   platform_mw: "100+"
   site_count: "14"
