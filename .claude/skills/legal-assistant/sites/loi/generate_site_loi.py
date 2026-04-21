@@ -48,55 +48,12 @@ from generate import DE_ENTITIES  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
 import cross_doc_gate as cdg  # noqa: E402
 import site_doc_base as sdb  # noqa: E402
+from site_doc_base import derive_role_labels as sdb_derive_role_labels  # noqa: E402
 
-
-# ---------------------------------------------------------------------------
-# Role-label derivation — a stub of the eventual site_doc_base.derive_labels.
-# Kept here for v0.1 so the engine is self-contained.
-# ---------------------------------------------------------------------------
-
-_ROLE_LABEL_EN = {
-    "grid_interconnection": "Grid Contributor",
-    "gas_connection": "Gas Contributor",  # reserved; not in Van Gog
-    "land": "Landowner",
-    "property": "Landowner",
-    "energy_heat": "Heat Offtaker",  # derived from returns[]
-}
-
-_ROLE_LABEL_NL = {
-    "grid_interconnection": "Netbijdrager",
-    "gas_connection": "Gasbijdrager",
-    "land": "Grondeigenaar",
-    "property": "Grondeigenaar",
-    "energy_heat": "Warmteafnemer",
-}
-
-
-def _derive_role_labels(site_partner: dict) -> tuple[list[str], list[str]]:
-    """TODO(Phase B6 / site_doc_base.py): this will move into the shared
-    chassis once Wave 2 lands."""
-    en_labels: list[str] = []
-    nl_labels: list[str] = []
-
-    for contrib in site_partner.get("contributions") or []:
-        asset = contrib.get("asset", "")
-        if asset in _ROLE_LABEL_EN:
-            en = _ROLE_LABEL_EN[asset]
-            nl = _ROLE_LABEL_NL[asset]
-            if en not in en_labels:
-                en_labels.append(en)
-                nl_labels.append(nl)
-
-    for ret in site_partner.get("returns") or []:
-        value = ret.get("value", "")
-        if value in _ROLE_LABEL_EN:
-            en = _ROLE_LABEL_EN[value]
-            nl = _ROLE_LABEL_NL[value]
-            if en not in en_labels:
-                en_labels.append(en)
-                nl_labels.append(nl)
-
-    return en_labels, nl_labels
+# Phase B6 integration complete — imports from site_doc_base.
+# Back-compat alias so existing tests that reference ``engine._derive_role_labels``
+# keep working; new code should use ``sdb_derive_role_labels`` directly.
+_derive_role_labels = sdb_derive_role_labels
 
 
 # ---------------------------------------------------------------------------
@@ -788,7 +745,7 @@ def build_document(deal: dict) -> Document:
     r = p.add_run("Section R — Roles and Parties / Rollen en Partijen")
     r.bold = True
     for sp in site_partners:
-        en_lbls, nl_lbls = _derive_role_labels(sp)
+        en_lbls, nl_lbls = sdb_derive_role_labels(sp)
         sp["_role_labels_en"] = en_lbls
         sp["_role_labels_nl"] = nl_lbls
         role_line = ", ".join(en_lbls) + " / " + ", ".join(nl_lbls) if en_lbls else ""
