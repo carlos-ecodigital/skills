@@ -17,9 +17,13 @@ Terms (HoT) package for a single-partner (grower) deal:
 - **Gate report** — JSON dump of ``cross_doc_gate.run(deal, stage='hot',
   prior_loi_deal=None)`` verdicts.
 
-v0.1 scope: single Site Partner (grower-shaped). Multi-partner HoT
-(e.g. separate Landowner or BESS JV party) ships in Wave 2; the engine
-emits a warning for multi-partner inputs rather than silently merging.
+v0.2 scope (Wave 2): multi-partner HoT supported via a section-to-partner
+disambiguation layer (see ``_select_partners_by_section``). Each Annex A
+section resolves its fields from the partner holding the relevant role:
+A.*/C.*/G.Grower_* → Heat Offtaker (``returns[].value == energy_heat``);
+B.* → Grid Contributor (largest MVA on ties); D.*/G.Landowner_* →
+Landowner (``contributions[].asset in {land, property}``);
+E.* → deal-level. Ambiguity emits a warning rather than hard-failing.
 
 Usage::
 
@@ -59,7 +63,71 @@ if str(_SHARED_PATH) not in sys.path:
     sys.path.insert(0, str(_SHARED_PATH))
 
 import cross_doc_gate as cdg  # noqa: E402
+import enum_normaliser as en  # noqa: E402
+import hubspot_sync as _hs  # noqa: E402
 import site_doc_base as sdb  # noqa: E402
+
+# Document parsers (Phase B5 wiring). Heavy imports are lazy-attempted —
+# every parser except GenericPDFParser requires PyMuPDF. If unavailable,
+# parse_documents() emits a structured warning and passes through.
+try:
+    from document_parsers.ato import ATOParser  # noqa: E402
+    from document_parsers.bestemmingsplan import BestemmingsplanParser  # noqa: E402
+    from document_parsers.equipment_oem import EquipmentOEMParser  # noqa: E402
+    from document_parsers.financier_consent import FinancierConsentParser  # noqa: E402
+    from document_parsers.generic_pdf import GenericPDFParser  # noqa: E402
+    from document_parsers.kadaster import KadasterParser  # noqa: E402
+    from document_parsers.kvk import KvKParser  # noqa: E402
+    from document_parsers.landowner_consent import LandownerConsentParser  # noqa: E402
+    from document_parsers.sde_plus import SDEPlusParser  # noqa: E402
+    _PARSERS_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    _PARSERS_AVAILABLE = False
+
+
+# Map between registry field_id (e.g. "A6_signing_authority") and the
+# display ID used in the section mapper + XML form-fill ("A.6").  Built
+# lazily to avoid repeated iteration.
+_DISPLAY_TO_FIELD_ID: Dict[str, str] = {}
+
+
+def _display_to_field_id(registry: dict) -> Dict[str, str]:
+    global _DISPLAY_TO_FIELD_ID
+    if _DISPLAY_TO_FIELD_ID:
+        return _DISPLAY_TO_FIELD_ID
+    out: Dict[str, str] = {}
+    for _sec, fid, spec in sdb.iter_fields(registry):
+        display = spec.get("id") or fid
+        out[display] = fid
+    _DISPLAY_TO_FIELD_ID = out
+    return out
+
+
+def normalise_if_registry_enum(
+    display_id: str,
+    value: Any,
+    registry: dict,
+) -> Any:
+    """Section-mapper helper — if ``display_id`` corresponds to a registry
+    enum field, run the parser-token value through
+    :func:`enum_normaliser.normalise_field`.  For non-enum fields, return
+    the value unchanged.  Unknown enum tokens propagate the raised
+    :class:`enum_normaliser.EnumNormaliserError` so the caller surfaces
+    parser/registry drift instead of writing garbage into the .docx.
+
+    TODO(registry-maintainer): as new enum fields land in
+    ``field-registry.json``, ensure ``TOKEN_MAP`` in ``enum_normaliser``
+    covers any new parser tokens; passthrough (already-canonical) values
+    are a no-op here.
+    """
+    if value in (None, ""):
+        return value
+    mapping = _display_to_field_id(registry)
+    field_id = mapping.get(display_id)
+    if not field_id:
+        return value
+    normalised = en.normalise_field(field_id, value, registry)
+    return normalised if normalised is not None else value
 
 # ---------------------------------------------------------------------------
 # Constants — template paths + shading codes
@@ -135,96 +203,269 @@ def _find_return(partner: dict, value: str) -> Optional[dict]:
     return None
 
 
-def build_field_values(deal: dict) -> Dict[str, Any]:
+def _has_contribution(partner: dict, asset: str) -> bool:
+    return _find_contribution(partner, asset) is not None
+
+
+def _has_return(partner: dict, value: str) -> bool:
+    return _find_return(partner, value) is not None
+
+
+def _grid_mva(partner: dict) -> float:
+    """Return the MVA rating of a partner's grid_interconnection (0.0 if
+    missing). Tolerates str/int/float and either ``total_connection_mva``
+    or legacy ``mva`` keys."""
+    c = _find_contribution(partner, "grid_interconnection") or {}
+    d = c.get("details") or {}
+    raw = d.get("total_connection_mva") or d.get("mva") or 0
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _select_partner_for_section(
+    section: str,
+    partners: List[dict],
+    warnings: Optional[List[str]] = None,
+) -> Optional[dict]:
+    """Pick the single partner that owns a given Annex A section.
+
+    Rules (Wave 2):
+      - ``A`` / ``C`` / ``G.Grower`` → Heat Offtaker (``returns[].value ==
+        energy_heat``). If none, falls back to the first partner; emits a
+        warning.
+      - ``B`` → partner with ``grid_interconnection`` contribution. Ties
+        broken by largest MVA; ambiguity warned when two partners tie.
+      - ``D`` / ``G.Landowner`` → partner with ``land`` or ``property``
+        contribution. Multiple land partners warned.
+      - ``G.Financier`` → partner with a ``land_financier_name`` present
+        on any ``land`` contribution; None if absent.
+      - any other → None (deal-level, no partner lookup).
+
+    ``warnings`` is mutated in place when provided.
+    """
+    if warnings is None:
+        warnings = []
+
+    if not partners:
+        return None
+
+    sec = section.upper()
+
+    # --- A / C / G.Grower → Heat Offtaker -------------------------------
+    if sec in ("A", "C", "G.GROWER"):
+        heat = [p for p in partners if _has_return(p, "energy_heat")]
+        if len(heat) == 1:
+            return heat[0]
+        if len(heat) > 1:
+            warnings.append(
+                f"Section {section}: multiple Heat Offtakers "
+                f"({', '.join(p.get('legal_name', '?') for p in heat)}); "
+                f"using {heat[0].get('legal_name', '?')}"
+            )
+            return heat[0]
+        # No heat offtaker → fall back to first partner (single-partner
+        # grower v0.1 shape where returns may be elided).
+        warnings.append(
+            f"Section {section}: no partner with returns[].value==energy_heat; "
+            f"falling back to partners[0]"
+        )
+        return partners[0]
+
+    # --- B → Grid Contributor -------------------------------------------
+    if sec == "B":
+        grid = [p for p in partners if _has_contribution(p, "grid_interconnection")]
+        if not grid:
+            warnings.append("Section B: no Grid Contributor; fields emitted as [TBC]")
+            return None
+        if len(grid) == 1:
+            return grid[0]
+        # Largest MVA wins; warn if ambiguous (tie or all-zero).
+        grid_sorted = sorted(grid, key=_grid_mva, reverse=True)
+        top_mva = _grid_mva(grid_sorted[0])
+        tied = [p for p in grid_sorted if _grid_mva(p) == top_mva]
+        if len(tied) > 1 or top_mva == 0.0:
+            warnings.append(
+                f"Section B: {len(grid)} Grid Contributors "
+                f"({', '.join(p.get('legal_name', '?') for p in grid)}); "
+                f"using {grid_sorted[0].get('legal_name', '?')} "
+                f"(mva={top_mva})"
+            )
+        return grid_sorted[0]
+
+    # --- D / G.Landowner → Landowner ------------------------------------
+    if sec in ("D", "G.LANDOWNER"):
+        land = [
+            p for p in partners
+            if _has_contribution(p, "land") or _has_contribution(p, "property")
+        ]
+        if not land:
+            if sec == "D":
+                warnings.append("Section D: no Landowner; fields emitted as [TBC]")
+            return None
+        if len(land) > 1:
+            warnings.append(
+                f"Section {section}: multiple Landowners "
+                f"({', '.join(p.get('legal_name', '?') for p in land)}); "
+                f"using {land[0].get('legal_name', '?')}"
+            )
+        return land[0]
+
+    # --- G.Financier → Land Financier -----------------------------------
+    if sec == "G.FINANCIER":
+        for p in partners:
+            land = (
+                _find_contribution(p, "land")
+                or _find_contribution(p, "property")
+                or {}
+            )
+            d = land.get("details") or {}
+            if d.get("land_financier_name"):
+                return p
+        return None
+
+    return None
+
+
+def build_field_values(
+    deal: dict,
+    warnings: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """Produce a flat ``display_id → value`` map covering every Annex A
     form-fill field we can resolve from the deal.yaml.
 
-    Section-to-path mapper:
-      A.* → site_partners[0] identity + greenhouse
-      B.* → contributions[asset=grid_interconnection].details
-      C.* → returns[value=energy_heat].details
-      D.* → contributions[asset=land].details
-      E.* → commercial
-      F.* → addons-derived
-      G.* → notices
+    Section-to-partner mapper (Wave 2 multi-partner):
+      A.*          → Heat Offtaker partner (identity + greenhouse)
+      B.*          → Grid Contributor partner
+      C.*          → Heat Offtaker partner (returns[energy_heat].details)
+      D.*          → Landowner partner (contributions[land|property])
+      E.*          → deal-level commercial (partner-agnostic)
+      F.*          → deal-level addons
+      G.Grower_*   → Heat Offtaker partner
+      G.Landowner_*→ Landowner partner (only when distinct from grower)
+      G.Financier_*→ partner with land_financier details (rare)
 
     Unresolved fields are omitted; the form-fill engine leaves the
-    template placeholder in place for them.
+    template placeholder in place for them. Ambiguity (multiple
+    qualifying partners) is recorded in ``warnings``.
     """
     values: Dict[str, Any] = {}
-    partner = _partner(deal) or {}
+    if warnings is None:
+        warnings = []
 
-    # Header
+    partners = deal.get("site_partners") or []
+
+    # --- Header (deal-level) -------------------------------------------
     values["project_name"] = deal.get("project_name") or deal.get("slug", "[TBC]")
     values["version"] = deal.get("version", "1.0")
     values["date"] = date.today().strftime("%d-%m-%Y")
 
-    # --- Section A: Grower + Greenhouse --------------------------------
-    sig = partner.get("signatory") or {}
-    greenhouse = partner.get("greenhouse") or {}
-    values["A.1"] = partner.get("legal_name")
-    values["A.2"] = partner.get("kvk")
-    values["A.3"] = partner.get("registered_address")
+    # --- Section A: Grower + Greenhouse → Heat Offtaker partner --------
+    a_partner = _select_partner_for_section("A", partners, warnings) or {}
+    sig = a_partner.get("signatory") or {}
+    greenhouse = a_partner.get("greenhouse") or {}
+    values["A.1"] = a_partner.get("legal_name")
+    values["A.2"] = a_partner.get("kvk")
+    values["A.3"] = a_partner.get("registered_address")
     values["A.4"] = sig.get("name")
     values["A.5"] = sig.get("title")
     auth = sig.get("signing_authority")
     if auth:
-        values["A.6"] = (
-            "Sole / Zelfstandig bevoegd"
-            if str(auth).lower().startswith("sole")
-            else "Joint / Gezamenlijk bevoegd"
-        )
-    values["A.7"] = greenhouse.get("address") or partner.get("registered_address")
+        # Delegated to enum_normaliser so the slash-combined bilingual
+        # strings live in exactly one place (the registry).
+        values["A.6"] = auth
+    values["A.7"] = greenhouse.get("address") or a_partner.get("registered_address")
     values["A.8"] = greenhouse.get("current_size_ha")
     values["A.9"] = greenhouse.get("planned_size_ha") or greenhouse.get("current_size_ha")
-    values["A.10"] = greenhouse.get("expansion_timeline") or "N/A"
+    values["A.10"] = greenhouse.get("expansion_timeline") or (
+        "N/A" if greenhouse else None
+    )
     values["A.11"] = greenhouse.get("cultivation_type")
 
-    # --- Section B: Grid Connection ------------------------------------
-    grid = _find_contribution(partner, "grid_interconnection") or {}
-    gd = grid.get("details") or {}
-    values["B.1"] = gd.get("dso")
-    values["B.2"] = gd.get("ean_code")
-    values["B.3"] = gd.get("ato_reference")
-    values["B.4"] = gd.get("total_connection_mva") or gd.get("mva")
-    values["B.5"] = gd.get("total_import_mw") or gd.get("import_mw")
-    values["B.6"] = gd.get("total_export_mw") or gd.get("export_mw")
-    values["B.7"] = gd.get("base_connection_mva")
-    values["B.8"] = gd.get("base_import_mw")
-    values["B.9"] = gd.get("base_export_mw")
-    values["B.10"] = gd.get("future_connection_mva")
-    values["B.11"] = gd.get("future_import_mw")
-    values["B.12"] = gd.get("future_export_mw")
-    values["B.13"] = gd.get("sap_configuration")
+    # --- Section B: Grid Connection → Grid Contributor partner ---------
+    b_partner = _select_partner_for_section("B", partners, warnings)
+    if b_partner is not None:
+        grid = _find_contribution(b_partner, "grid_interconnection") or {}
+        gd = grid.get("details") or {}
+        values["B.1"] = gd.get("dso")
+        values["B.2"] = gd.get("ean_code")
+        values["B.3"] = gd.get("ato_reference")
+        values["B.4"] = gd.get("total_connection_mva") or gd.get("mva")
+        values["B.5"] = gd.get("total_import_mw") or gd.get("import_mw")
+        values["B.6"] = gd.get("total_export_mw") or gd.get("export_mw")
+        values["B.7"] = gd.get("base_connection_mva")
+        values["B.8"] = gd.get("base_import_mw")
+        values["B.9"] = gd.get("base_export_mw")
+        values["B.10"] = gd.get("future_connection_mva")
+        values["B.11"] = gd.get("future_import_mw")
+        values["B.12"] = gd.get("future_export_mw")
+        values["B.13"] = gd.get("sap_configuration")
+    else:
+        # No grid partner → explicit [TBC] placeholders for the required
+        # B.* fields. The form-fill engine will render these.
+        for fid in ("B.1", "B.2", "B.3", "B.4", "B.5", "B.6"):
+            values[fid] = "[TBC]"
 
-    # --- Section C: Heat Supply ----------------------------------------
-    heat = _find_return(partner, "energy_heat") or {}
+    # --- Section C: Heat Supply → Heat Offtaker partner ----------------
+    c_partner = _select_partner_for_section("C", partners, warnings) or {}
+    heat = _find_return(c_partner, "energy_heat") or {}
     hd = heat.get("details") or {}
     values["C.1"] = hd.get("target_outlet_temp_c")
     values["C.2"] = hd.get("expected_return_temp_c")
     values["C.4"] = hd.get("heat_price_eur_mwh")
     values["C.5"] = hd.get("combined_eb")
 
-    # --- Section D: Land & Property ------------------------------------
-    land = _find_contribution(partner, "land") or _find_contribution(partner, "property") or {}
-    ld = land.get("details") or {}
-    values["D.1"] = ld.get("kadaster_parcels")
-    values["D.2"] = ld.get("title_type")
-    values["D.3"] = ld.get("encumbrances")
-    values["D.4"] = ld.get("zoning_designation")
-    values["D.5"] = ld.get("land_area_per_mw_m2")
-    values["D.6"] = ld.get("opstalrecht_term_years")
-    values["D.7"] = ld.get("mv_cable_length_m")
+    # --- Section D: Land & Property → Landowner partner ----------------
+    d_partner = _select_partner_for_section("D", partners, warnings)
+    grower_legal_name = a_partner.get("legal_name")
+    if d_partner is not None:
+        land = (
+            _find_contribution(d_partner, "land")
+            or _find_contribution(d_partner, "property")
+            or {}
+        )
+        ld = land.get("details") or {}
+        values["D.1"] = ld.get("kadaster_parcels") or ld.get("parcel_id")
+        values["D.2"] = ld.get("title_type")
+        values["D.3"] = ld.get("encumbrances")
+        values["D.4"] = ld.get("zoning_designation")
+        values["D.5"] = (
+            ld.get("land_area_per_mw_m2") or ld.get("area_m2_per_mw")
+        )
+        values["D.6"] = ld.get("opstalrecht_term_years")
+        values["D.7"] = ld.get("mv_cable_length_m")
 
-    # Conditional D.8–D.11 only when distinct landowner / land financier
-    if ld.get("landowner_name") and ld.get("landowner_name") != partner.get("legal_name"):
-        values["D.8"] = ld.get("landowner_name")
-        values["D.9"] = ld.get("landowner_signatory")
-    if ld.get("land_financier_name"):
-        values["D.10"] = ld.get("land_financier_name")
-        values["D.11"] = ld.get("land_financier_signatory")
+        # D.8/D.9 fire when the Landowner is a DISTINCT legal entity
+        # from the Grower (Heat Offtaker). Two sources accepted:
+        # (a) explicit ``landowner_name`` field in the details block
+        # (back-compat with v0.1 single-partner land inlining);
+        # (b) a separate Site Partner whose legal_name differs — this
+        # is the Wave 2 multi-partner path.
+        if (
+            ld.get("landowner_name")
+            and ld.get("landowner_name") != grower_legal_name
+        ):
+            values["D.8"] = ld.get("landowner_name")
+            values["D.9"] = ld.get("landowner_signatory")
+        elif (
+            d_partner is not a_partner
+            and d_partner.get("legal_name")
+            and d_partner.get("legal_name") != grower_legal_name
+        ):
+            values["D.8"] = d_partner.get("legal_name")
+            lo_sig = d_partner.get("signatory") or {}
+            values["D.9"] = lo_sig.get("name")
 
-    # --- Section E: Commercial Terms -----------------------------------
+        if ld.get("land_financier_name"):
+            values["D.10"] = ld.get("land_financier_name")
+            values["D.11"] = ld.get("land_financier_signatory")
+    else:
+        # No land partner → explicit [TBC] placeholders for D.1 (the
+        # only strictly required D.* field; D.5-D.7 are conditional).
+        values["D.1"] = "[TBC]"
+
+    # --- Section E: Commercial Terms (deal-level) ----------------------
     commercial = deal.get("commercial") or {}
     values["E.1"] = commercial.get("heat_sales_split") or "50 : 50"
     values["E.2"] = commercial.get("payment_term_days")
@@ -232,7 +473,7 @@ def build_field_values(deal: dict) -> Dict[str, Any]:
         (deal.get("timeline") or {}).get("hot_drafted_date")
     )
 
-    # --- Section F: Optional provisions (addon-gated) ------------------
+    # --- Section F: Optional provisions (deal-level, addon-gated) ------
     addons = deal.get("addons") or {}
     values["F.1"] = "Include / Opnemen" if addons.get("chp_present") else "Delete / Verwijderen"
     values["F.2"] = "Include / Opnemen" if addons.get("co_investment") else "Delete / Verwijderen"
@@ -240,17 +481,58 @@ def build_field_values(deal: dict) -> Dict[str, Any]:
     # --- Section G: Notices --------------------------------------------
     notices = deal.get("notices") or {}
     values["G.DE_email"] = notices.get("de_email") or "contact@digitalenergy.ch"
-    values["G.Grower_address"] = notices.get("grower_address") or partner.get("registered_address")
+
+    # G.Grower_* → Heat Offtaker partner
+    values["G.Grower_address"] = (
+        notices.get("grower_address") or a_partner.get("registered_address")
+    )
     values["G.Grower_email"] = notices.get("grower_email") or sig.get("email")
-    if values.get("D.8"):
-        values["G.Landowner_address"] = notices.get("landowner_address")
-        values["G.Landowner_email"] = notices.get("landowner_email")
+
+    # G.Landowner_* → only when landowner distinct from grower
+    landowner_distinct = bool(values.get("D.8"))
+    if landowner_distinct:
+        lo_sig = (d_partner or {}).get("signatory") or {}
+        values["G.Landowner_address"] = (
+            notices.get("landowner_address")
+            or (d_partner or {}).get("registered_address")
+        )
+        values["G.Landowner_email"] = (
+            notices.get("landowner_email") or lo_sig.get("email")
+        )
+
+    # G.Financier_* → only when D.10 present (rare)
     if values.get("D.10"):
-        values["G.Financier_address"] = notices.get("financier_address")
-        values["G.Financier_email"] = notices.get("financier_email")
+        f_partner = _select_partner_for_section("G.Financier", partners, warnings)
+        fin_sig = (f_partner or {}).get("signatory") or {}
+        values["G.Financier_address"] = (
+            notices.get("financier_address")
+            or (f_partner or {}).get("registered_address")
+        )
+        values["G.Financier_email"] = (
+            notices.get("financier_email") or fin_sig.get("email")
+        )
 
     # Strip None / "" so the form-fill engine leaves placeholders in place.
-    return {k: v for k, v in values.items() if v not in (None, "")}
+    pruned = {k: v for k, v in values.items() if v not in (None, "")}
+
+    # Enum normalisation pass — converts parser bare tokens
+    # (e.g. "Sole", "Eigendom", True) into the registry's slash-combined
+    # bilingual canonical strings before XML form-fill.  Runs on the
+    # display_id-keyed map; silently no-ops for non-enum fields.
+    # See sites/_shared/enum_normaliser.py for the token table.
+    try:
+        registry = sdb.load_registry()
+    except Exception:
+        registry = None
+    if registry is not None:
+        for did, val in list(pruned.items()):
+            try:
+                pruned[did] = normalise_if_registry_enum(did, val, registry)
+            except en.EnumNormaliserError as exc:
+                warnings.append(
+                    f"enum_normaliser: {did}={val!r} — {exc}; leaving raw"
+                )
+    return pruned
 
 
 # ---------------------------------------------------------------------------
@@ -522,15 +804,296 @@ def load_deal(deal_yaml_path: Path) -> dict:
     return deal
 
 
-def hydrate_from_hubspot(deal: dict) -> dict:
-    """TODO(Phase B7 / hubspot_sync.py): round-trip read/write Deal + Companies
-    + Contacts, resolve conflicts. Passthrough for v0.1."""
+# ---------------------------------------------------------------------------
+# Phase B7 — HubSpot hydration (real or fake client)
+# ---------------------------------------------------------------------------
+
+
+def hydrate_from_hubspot(
+    deal: dict,
+    client: Optional["_hs.HubSpotClient"] = None,
+) -> dict:
+    """Round-trip HubSpot Deal + Companies + Contacts into ``deal``.
+
+    If ``client`` is None and ``deal['hubspot_deal_id']`` is absent the
+    call is a safe passthrough (useful for fixtures that don't carry a
+    HubSpot ID yet).  Tests inject a FakeHubSpotClient via ``client=``;
+    production wiring supplies the real MCP-backed client.
+
+    Populates:
+      * ``hubspot.*`` identity/pipeline block
+      * ``owner.hubspot_owner_id``
+      * ``commercial.*`` envelope
+      * ``site_partners[]`` (one per associated Company, with signatories)
+      * ``hubspot.raw_extra`` (unmapped properties)
+      * ``hubspot.conflict_log`` (after validate+resolve)
+
+    Returns the mutated deal dict (same object).
+    """
+    if client is None or deal.get("hubspot_deal_id") is None:
+        return deal
+
+    # 1. Hydrate from HubSpot
+    _hs.read_deal(client, deal)
+
+    # 2. Validate against HubSpot snapshot + resolve conflicts
+    view = {
+        "deal": client.read_deal(deal["hubspot_deal_id"]),
+        "companies": client.read_associated_companies(deal["hubspot_deal_id"]),
+        "contacts": client.read_associated_contacts(deal["hubspot_deal_id"]),
+    }
+    conflicts = _hs.validate(deal, view)
+    if conflicts:
+        _hs.resolve(deal, conflicts)
     return deal
 
 
+# ---------------------------------------------------------------------------
+# Phase B5 — Document parser enrichment
+# ---------------------------------------------------------------------------
+
+
+# doc_type -> parser class. equipment_* entries all route to the single
+# EquipmentOEMParser which auto-detects CHP/BESS/PV from the text.
+_PARSER_MAP: Dict[str, Any] = {}
+if _PARSERS_AVAILABLE:
+    _PARSER_MAP = {
+        "ato_document": ATOParser,
+        "kadaster_uittreksel": KadasterParser,
+        "kvk_uittreksel": KvKParser,
+        "bestemmingsplan_excerpt": BestemmingsplanParser,
+        "sde_plus_plus": SDEPlusParser,
+        "landowner_consent": LandownerConsentParser,
+        "financier_consent": FinancierConsentParser,
+        "chp_commissioning_cert": EquipmentOEMParser,
+        "bess_grid_sharing_agreement": EquipmentOEMParser,
+        "solar_pv_yield_report": EquipmentOEMParser,
+        "generic_pdf": GenericPDFParser,
+    }
+
+
+def _partner_grid_details(partner: dict) -> dict:
+    for c in partner.get("contributions") or []:
+        if c.get("asset") == "grid_interconnection":
+            c.setdefault("details", {})
+            return c["details"]
+    # Create one if absent so parsers never fail silently.
+    c = {"asset": "grid_interconnection", "details": {}}
+    partner.setdefault("contributions", []).append(c)
+    return c["details"]
+
+
+def _partner_land_details(partner: dict) -> dict:
+    for c in partner.get("contributions") or []:
+        if c.get("asset") in ("land", "property"):
+            c.setdefault("details", {})
+            return c["details"]
+    c = {"asset": "land", "details": {}}
+    partner.setdefault("contributions", []).append(c)
+    return c["details"]
+
+
+# Section-to-path: parser field_id -> (partner-scoped) dotted accessor.
+# Each entry is (target_kind, write_fn) where write_fn takes (partner, value).
+def _merge_parser_field(partner: dict, field_id: str, value: Any) -> bool:
+    """Write a parser field into the correct slot on `partner`.
+    Returns True if the field was recognised and written."""
+    # A. Identity
+    if field_id == "A1_legal_name":
+        partner["legal_name"] = value
+        return True
+    if field_id == "A2_kvk_number":
+        partner["kvk"] = str(value) if value is not None else value
+        return True
+    if field_id == "A3_registered_address":
+        partner["registered_address"] = value
+        return True
+    if field_id == "A4_signatory_name":
+        partner.setdefault("signatory", {})["name"] = value
+        return True
+    if field_id == "A5_signatory_title":
+        partner.setdefault("signatory", {})["title"] = value
+        return True
+    if field_id == "A6_signing_authority":
+        partner.setdefault("signatory", {})["signing_authority"] = value
+        return True
+
+    # B. Grid connection → contributions[asset=grid_interconnection].details
+    if field_id.startswith("B") and field_id[1].isdigit():
+        gd = _partner_grid_details(partner)
+        mapping = {
+            "B1_dso": "dso",
+            "B2_ean_code": "ean_code",
+            "B3_ato_reference": "ato_reference",
+            "B4_total_connection_mva": "total_connection_mva",
+            "B5_total_import_mw": "total_import_mw",
+            "B6_total_export_mw": "total_export_mw",
+        }
+        key = mapping.get(field_id)
+        if key is not None:
+            gd[key] = value
+            return True
+
+    # D. Land → contributions[asset=land].details
+    if field_id in ("D1_kadaster_parcels", "D2_title_type",
+                    "D3_encumbrances", "D4_zoning_designation"):
+        ld = _partner_land_details(partner)
+        mapping = {
+            "D1_kadaster_parcels": "kadaster_parcels",
+            "D2_title_type": "title_type",
+            "D3_encumbrances": "encumbrances",
+            "D4_zoning_designation": "zoning_designation",
+        }
+        ld[mapping[field_id]] = value
+        return True
+
+    # Meta-fields (start with "_") → preserved under partner.enrichment_meta.
+    if field_id.startswith("_"):
+        meta = partner.setdefault("_enrichment_meta", {})
+        meta[field_id] = value
+        return True
+
+    return False
+
+
+def _resolve_target_partner(deal: dict, doc_entry: dict) -> Optional[int]:
+    """Identify which Site Partner a parsed doc belongs to.
+
+    Precedence:
+      1. ``partner_entity_idx`` on doc entry (explicit).
+      2. ``partner_idx`` (legacy alias).
+      3. fallback: partner[0] (single-partner deals).
+    """
+    idx = doc_entry.get("partner_entity_idx")
+    if idx is None:
+        idx = doc_entry.get("partner_idx")
+    if idx is None and len(deal.get("site_partners") or []) == 1:
+        idx = 0
+    if idx is not None:
+        try:
+            idx = int(idx)
+        except (TypeError, ValueError):
+            return None
+        partners = deal.get("site_partners") or []
+        if 0 <= idx < len(partners):
+            return idx
+    return None
+
+
 def parse_documents(deal: dict, documents_dir: Path) -> dict:
-    """TODO(Phase B5 / document_parsers): iterate deal['documents'][],
-    invoke parsers, populate enrichment. Passthrough for v0.1."""
+    """Phase B5 — iterate deal['documents'][], dispatch each to the
+    matching parser, merge fields_populated into the deal.
+
+    Per-document entry shape (from deal.yaml or hydrate stage)::
+
+        { "type": "kvk_uittreksel",
+          "path": "kvk_vangog.pdf",              # relative to documents_dir
+          "partner_entity_idx": 0,                # which Site Partner it proves
+          "uploaded_at": "2026-04-18",            # for staleness checks
+          ... }
+
+    Parser outputs are normalised through ``enum_normaliser`` so registry
+    enum fields receive canonical values (not parser bare tokens). Parser
+    warnings + per-doc audit entries are appended to
+    ``deal['enrichment']['parser_log']`` for traceability.
+    """
+    # Always normalise any enums already present in deal.yaml (manual
+    # authoring may produce bare tokens).
+    try:
+        registry = sdb.load_registry()
+    except Exception:
+        registry = None
+
+    enrichment = deal.setdefault("enrichment", {})
+    parser_log: List[dict] = enrichment.setdefault("parser_log", [])
+
+    if not _PARSERS_AVAILABLE:
+        parser_log.append({
+            "status": "skipped",
+            "reason": "PyMuPDF unavailable; parser chassis not importable",
+        })
+        if registry is not None:
+            en.normalise_deal_yaml(deal, registry)
+        return deal
+
+    for doc_entry in (deal.get("documents") or []):
+        doc_type = doc_entry.get("type")
+        rel_path = doc_entry.get("path")
+        if not doc_type or not rel_path:
+            parser_log.append({
+                "status": "skipped",
+                "doc": doc_entry,
+                "reason": "doc entry missing type or path",
+            })
+            continue
+        doc_path = Path(rel_path)
+        if not doc_path.is_absolute():
+            doc_path = documents_dir / doc_path
+        if not doc_path.exists():
+            parser_log.append({
+                "status": "missing",
+                "doc_type": doc_type,
+                "path": str(doc_path),
+            })
+            continue
+
+        parser_cls = _PARSER_MAP.get(doc_type, GenericPDFParser)
+        try:
+            result = parser_cls(doc_path).parse()
+        except Exception as exc:
+            parser_log.append({
+                "status": "error",
+                "doc_type": doc_type,
+                "path": str(doc_path),
+                "error_class": exc.__class__.__name__,
+                "message": str(exc),
+            })
+            continue
+
+        # Normalise parser output (enum canonicalisation)
+        if registry is not None:
+            fields_populated = en.normalise_parse_result(
+                result.fields_populated, registry
+            )
+        else:
+            fields_populated = result.fields_populated
+
+        partner_idx = _resolve_target_partner(deal, doc_entry)
+        merged: List[str] = []
+        unmerged: List[str] = []
+        if partner_idx is not None:
+            partner = deal["site_partners"][partner_idx]
+            for fid, value in fields_populated.items():
+                if _merge_parser_field(partner, fid, value):
+                    merged.append(fid)
+                else:
+                    unmerged.append(fid)
+        else:
+            # Global / deal-level meta (e.g. SDE++ parser)
+            deal_meta = deal.setdefault("_enrichment_meta", {})
+            for fid, value in fields_populated.items():
+                if fid.startswith("_"):
+                    deal_meta[fid] = value
+                    merged.append(fid)
+                else:
+                    unmerged.append(fid)
+
+        parser_log.append({
+            "status": "ok",
+            "doc_type": doc_type,
+            "path": str(doc_path),
+            "partner_entity_idx": partner_idx,
+            "doc_hash": result.doc_hash,
+            "parser_version": result.parser_version,
+            "confidence": result.confidence,
+            "fields_merged": merged,
+            "fields_unmerged": unmerged,
+            "warnings": result.warnings,
+        })
+
+    # Second normalisation pass after all parser writes land.
+    if registry is not None:
+        en.normalise_deal_yaml(deal, registry)
     return deal
 
 
@@ -620,16 +1183,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     deal = hydrate_from_hubspot(deal)
     deal = parse_documents(deal, args.deal_yaml.parent / "documents")
 
-    # Multi-partner warning (v0.1 is single-partner only).
-    if len(deal.get("site_partners") or []) > 1:
-        print(
-            "WARN: multi-partner HoT requested; v0.1 engine uses partner[0] "
-            "as the grower and ignores the rest — TODO(Wave 2).",
-            file=sys.stderr,
-        )
-
     registry = sdb.load_registry()
-    values = build_field_values(deal)
+    selection_warnings: List[str] = []
+    values = build_field_values(deal, warnings=selection_warnings)
     gate_verdicts = run_cross_doc_gate(deal, prior_loi_deal=None)
 
     slug = deal.get("slug", "unknown")
@@ -653,6 +1209,9 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     # Annex A — XML form-fill
     stats = populate_annex_a(ANNEX_A_TEMPLATE, annex_path, values, registry)
+    # Prepend partner-selection warnings ahead of form-fill warnings so
+    # the QA report surfaces them.
+    stats.warnings = list(selection_warnings) + list(stats.warnings)
 
     # QA + gate-report
     write_qa_report(deal, values, stats, gate_verdicts, body_sha, qa_path)
