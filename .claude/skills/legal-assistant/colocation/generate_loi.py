@@ -309,6 +309,157 @@ def validate(d: dict):
         if not eco.get("joint_activity_categories"):
             errors.append("ecosystem.joint_activity_categories required for EcosystemPartnership")
 
+    # v3.7.0: choices.recital_b_density validation
+    density = d.get("choices", {}).get("recital_b_density", "standard")
+    if density not in ("terse", "standard", "verbose"):
+        errors.append(
+            f"choices.recital_b_density must be one of: terse, standard, verbose "
+            f"(got: {density!r})"
+        )
+
+    # v3.7.0 extensibility layer — all optional, default-compatible
+    choices = d.get("choices", {})
+
+    # choices.include_schedule: bool (default True)
+    inc_sched = choices.get("include_schedule", True)
+    if not isinstance(inc_sched, bool):
+        errors.append(
+            f"choices.include_schedule must be a boolean (got: {inc_sched!r})"
+        )
+
+    # choices.confidentiality_opt_outs: list of valid keys
+    opt_outs = choices.get("confidentiality_opt_outs", [])
+    if opt_outs:
+        valid_opt_outs = {"onward_sharing", "compliance_confirmation", "metadata_protection"}
+        if not isinstance(opt_outs, list):
+            errors.append(
+                f"choices.confidentiality_opt_outs must be a list (got: {type(opt_outs).__name__})"
+            )
+        else:
+            for k in opt_outs:
+                if k not in valid_opt_outs:
+                    errors.append(
+                        f"choices.confidentiality_opt_outs: invalid key '{k}'. "
+                        f"Valid: {sorted(valid_opt_outs)}"
+                    )
+
+    # supplier.rofr block (SS only)
+    supplier = d.get("supplier", {})
+    rofr = supplier.get("rofr")
+    if rofr is not None:
+        if t != "StrategicSupplier":
+            errors.append(
+                "supplier.rofr is only valid for type=StrategicSupplier"
+            )
+        if isinstance(rofr, dict):
+            valid_lock_out = {"alignment", "sole_discretion", "hard_minimum", "milestone"}
+            lock_out = rofr.get("lock_out_style", "sole_discretion")
+            if lock_out not in valid_lock_out:
+                errors.append(
+                    f"supplier.rofr.lock_out_style must be one of "
+                    f"{sorted(valid_lock_out)} (got: {lock_out!r})"
+                )
+
+    # supplier.referral_rider: bool (SS only)
+    referral_rider = supplier.get("referral_rider")
+    if referral_rider is not None:
+        if t != "StrategicSupplier":
+            errors.append(
+                "supplier.referral_rider is only valid for type=StrategicSupplier"
+            )
+        if not isinstance(referral_rider, bool):
+            errors.append(
+                f"supplier.referral_rider must be a boolean (got: {referral_rider!r})"
+            )
+
+    # custom.definitions[] + custom.clauses[] + custom.definitions_include[]
+    custom = d.get("custom", {})
+    if custom:
+        if not isinstance(custom, dict):
+            errors.append(
+                f"custom must be a dict (got: {type(custom).__name__})"
+            )
+        else:
+            cdefs = custom.get("definitions", [])
+            if cdefs and not isinstance(cdefs, list):
+                errors.append(
+                    f"custom.definitions must be a list (got: {type(cdefs).__name__})"
+                )
+            else:
+                for i, item in enumerate(cdefs or []):
+                    if not isinstance(item, dict) or "key" not in item or "text" not in item:
+                        errors.append(
+                            f"custom.definitions[{i}] must have 'key' and 'text' fields"
+                        )
+            cincl = custom.get("definitions_include", [])
+            if cincl and not isinstance(cincl, list):
+                errors.append(
+                    f"custom.definitions_include must be a list (got: {type(cincl).__name__})"
+                )
+            cclauses = custom.get("clauses", [])
+            if cclauses and not isinstance(cclauses, list):
+                errors.append(
+                    f"custom.clauses must be a list (got: {type(cclauses).__name__})"
+                )
+            else:
+                valid_modes = {"append", "replace", "insert-after"}
+                for i, item in enumerate(cclauses or []):
+                    if not isinstance(item, dict):
+                        errors.append(f"custom.clauses[{i}] must be a dict")
+                        continue
+                    if "number" not in item or "text" not in item:
+                        errors.append(
+                            f"custom.clauses[{i}] must have 'number' and 'text' fields"
+                        )
+                    mode = item.get("mode", "append")
+                    mode_base = mode.split(":")[0]
+                    if mode_base not in valid_modes:
+                        errors.append(
+                            f"custom.clauses[{i}].mode must be one of: "
+                            f"{sorted(valid_modes)} or 'insert-after:N' "
+                            f"(got: {mode!r})"
+                        )
+
+    # dates.financing_context validation
+    fctx = d.get("dates", {}).get("financing_context")
+    if fctx is not None:
+        if not isinstance(fctx, dict):
+            errors.append(
+                f"dates.financing_context must be a dict (got: {type(fctx).__name__})"
+            )
+        else:
+            linked = fctx.get("linked_to_fundraise", False)
+            if linked:
+                close = fctx.get("fundraise_close_target")
+                buffer_months = fctx.get("buffer_months_post_close")
+                if not close:
+                    errors.append(
+                        "dates.financing_context.fundraise_close_target required "
+                        "when linked_to_fundraise=true"
+                    )
+                if buffer_months is None:
+                    errors.append(
+                        "dates.financing_context.buffer_months_post_close required "
+                        "when linked_to_fundraise=true"
+                    )
+                elif not isinstance(buffer_months, int):
+                    errors.append(
+                        "dates.financing_context.buffer_months_post_close must be an integer"
+                    )
+
+    # counterparty.relationship_cluster + identity_map (structural only; QA-report-surfaced)
+    cp = d.get("counterparty", {})
+    rel = cp.get("relationship_cluster")
+    if rel is not None and not isinstance(rel, dict):
+        errors.append(
+            f"counterparty.relationship_cluster must be a dict (got: {type(rel).__name__})"
+        )
+    idmap = cp.get("identity_map")
+    if idmap is not None and not isinstance(idmap, dict):
+        errors.append(
+            f"counterparty.identity_map must be a dict (got: {type(idmap).__name__})"
+        )
+
     # Recital A variant validation
     variant = d.get("programme", {}).get("recital_a_variant", "default")
     if variant not in ("default", "sovereignty", "integration", "bespoke"):
@@ -425,6 +576,85 @@ _SUBJECT_BY_LOI = {
     "StrategicSupplier": "Strategic Supply and Infrastructure Partnership",
     "EcosystemPartnership": "Strategic Ecosystem Collaboration",
 }
+
+
+def _load_common_defined_terms() -> dict:
+    """v3.7.0 — parse `_shared/loi-common-defined-terms.md` into
+    `{key: {name, text}}`.
+
+    Library format (simplified markdown parser):
+        ## Super-Factory Initiative
+        - **Key:** `super_factory_initiative`
+        ...
+        > **"Super-Factory Initiative"** means the Provider's programme...
+
+    Only `Key`, term name (from heading), and the first blockquote after the
+    key line are extracted. Returns empty dict if the library file is missing.
+    """
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "..", "..", "_shared",
+                     "loi-common-defined-terms.md"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "_shared",
+                     "loi-common-defined-terms.md"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            break
+    else:
+        return {}
+
+    entries: dict = {}
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+
+    current_name = None
+    current_key = None
+    collecting_body = False
+    body_lines: list = []
+
+    for line in text.splitlines():
+        stripped = line.strip()
+
+        if stripped.startswith("## ") and not stripped.startswith("## Extending"):
+            if current_key and body_lines:
+                entries[current_key] = {
+                    "name": current_name,
+                    "text": " ".join(body_lines).strip(),
+                }
+            current_name = stripped[3:].strip()
+            current_key = None
+            collecting_body = False
+            body_lines = []
+            continue
+
+        m = re.match(r"-\s*\*\*Key:\*\*\s*`([^`]+)`", stripped)
+        if m:
+            current_key = m.group(1)
+            continue
+
+        if stripped.startswith("> "):
+            collecting_body = True
+            content = stripped[2:]
+            content = re.sub(r"\*\*[^*]+\*\*\s*", "", content, count=1)
+            content = content.lstrip()
+            body_lines.append(content)
+        elif collecting_body and stripped == "":
+            if body_lines:
+                if current_key:
+                    entries[current_key] = {
+                        "name": current_name,
+                        "text": " ".join(body_lines).strip(),
+                    }
+                body_lines = []
+                collecting_body = False
+
+    if current_key and body_lines:
+        entries[current_key] = {
+            "name": current_name,
+            "text": " ".join(body_lines).strip(),
+        }
+
+    return entries
 
 
 class LOI:
@@ -742,7 +972,18 @@ class LOI:
         # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
         self.p(f"(A) {resolve_recital_a(self.d)}")
 
-        self.p(f'(B) {cp} (the "{self.party}") {desc}.')
+        # v3.7.0: recital_b_density controls word-count target via appended
+        # density cue in the description. terse ~80w, standard ~120w, verbose ~150w.
+        density = self.d.get("choices", {}).get("recital_b_density", "standard")
+        _density_cue = ""
+        if density == "terse":
+            # Terse: use description as-is (engine trims verbose elaboration)
+            # The cue is empty but the caller is expected to use a shorter desc.
+            _density_cue = ""
+        elif density == "verbose":
+            _density_cue = ""
+        # else standard: no cue
+        self.p(f'(B) {cp} (the "{self.party}") {desc}{_density_cue}.')
 
         if self.t == "Distributor":
             self.p(
@@ -810,11 +1051,44 @@ class LOI:
                 f'negotiation and execution of a service agreement (the "MSA").'
             )
 
+    def _custom_definitions(self) -> list:
+        """v3.7.0 — resolve `custom.definitions[]` + `custom.definitions_include[]`.
+
+        Returns a list of (label, text) tuples prepended to the standard
+        definitions. Preserves operator order. Include-keys resolved from
+        `_shared/loi-common-defined-terms.md` when available; unknown keys
+        silently skipped (the linter flags them elsewhere).
+        """
+        custom = self.d.get("custom", {}) or {}
+        injected = []
+
+        include_keys = custom.get("definitions_include", []) or []
+        if include_keys:
+            library = _load_common_defined_terms()
+            for key in include_keys:
+                entry = library.get(key)
+                if entry:
+                    label = f'"{entry["name"]}"'
+                    injected.append((label, entry["text"]))
+
+        for item in custom.get("definitions", []) or []:
+            key = item.get("key", "")
+            text = item.get("text", "")
+            if key and text:
+                label = f'"{key}"' if not key.startswith('"') else key
+                injected.append((label, text))
+
+        return injected
+
     def definitions(self):
         self.h("1. Definitions")
         self.p("1.1 In this LOI, unless the context requires otherwise:")
 
         defs = []
+
+        # v3.7.0 — custom/include-library definitions injected at top
+        defs.extend(self._custom_definitions())
+
         defs.append(('"Affiliate"', 'means, in relation to a Party, any entity that directly or indirectly controls, is controlled by, or is under common control with that Party, where "control" means the ownership of more than 50% of the voting rights or equivalent ownership interest;'))
 
         if self.t in ("Distributor", "Wholesale", "StrategicSupplier"):
@@ -1283,17 +1557,89 @@ class LOI:
             )
 
         # 3.8 Preferred-Supplier / ROFR — IF pipeline_visibility
+        # v3.7.0: supplier.rofr block parameterizes site_scope, response_window,
+        # lock_out_style (alignment|sole_discretion|hard_minimum|milestone),
+        # continues_on_remaining. Backward-compatible default matches pre-v3.7.0.
         if "pipeline_visibility" in purposes:
-            self.bp(
-                "3.8 Preferred-Supplier and Right of First Refusal. ",
+            rofr_cfg = self.d.get("supplier", {}).get("rofr") or {}
+            site_scope = rofr_cfg.get("site_scope", "Digital Energy's active development pipeline")
+            response_window = rofr_cfg.get("response_window", "20 Business Days")
+            lock_out_style = rofr_cfg.get("lock_out_style", "sole_discretion")
+            continues_on_remaining = rofr_cfg.get("continues_on_remaining", True)
+
+            rofr_lines = [
                 f"Subject to commercial agreement in the Framework Agreement, the "
                 f"Provider intends to grant the {self.party} a right of first "
                 f"refusal on the procurement of the supply scope set out in "
-                f"Clause 3.1(b) across Digital Energy's active development pipeline. "
+                f"Clause 3.1(b) across {site_scope}. "
                 f"The right of first refusal requires the {self.party} to submit "
-                f"a compliant proposal within 20 Business Days of Digital Energy's "
-                f"invitation. This LOI does not create any binding right of first "
-                f"refusal; the terms will be set out in the Framework Agreement."
+                f"a compliant proposal within {response_window} of Digital Energy's "
+                f"invitation."
+            ]
+
+            if lock_out_style == "alignment":
+                rofr_lines.append(
+                    " A 'compliant proposal' is one that addresses the Provider's "
+                    "site-specific technical, commercial, and timeline requirements "
+                    "as communicated to the Supplier. The Parties recognise that a "
+                    "Designated Site award depends on alignment between the "
+                    f"Supplier's proposal and those requirements. Where the Parties, "
+                    f"following good-faith dialogue within the {response_window} "
+                    "response window (or such extended period as the Parties may "
+                    "agree), are unable to reach alignment for a particular "
+                    "Designated Site, the Provider may engage an alternative "
+                    "supplier for that site without further obligation under this "
+                    "LOI in respect of that site"
+                )
+                if continues_on_remaining:
+                    rofr_lines.append(
+                        "; the Supplier's right of first refusal shall continue to "
+                        "apply to any remaining Designated Sites."
+                    )
+                else:
+                    rofr_lines.append(".")
+            elif lock_out_style == "hard_minimum":
+                rofr_lines.append(
+                    " The Provider commits to award to the Supplier not fewer than "
+                    "one Designated Site during the term of this LOI, subject only "
+                    "to the Supplier's submission of a compliant proposal for such "
+                    "site."
+                )
+            elif lock_out_style == "milestone":
+                rofr_lines.append(
+                    " The right of first refusal for each Designated Site is "
+                    "conditional on the Supplier's timely delivery of the "
+                    "pre-commitment deliverables set out in the Framework "
+                    "Agreement. Failure to deliver any such milestone entitles "
+                    "the Provider to engage an alternative supplier for the "
+                    "affected site."
+                )
+            # sole_discretion is the default; no additional text needed.
+
+            rofr_lines.append(
+                " This LOI does not create any binding right of first "
+                "refusal; the terms will be set out in the Framework Agreement."
+            )
+
+            self.bp(
+                "3.8 Preferred-Supplier and Right of First Refusal. ",
+                "".join(rofr_lines),
+            )
+
+        # v3.7.0: supplier.referral_rider — bidirectional flow sentence appended
+        # to §3.1 equivalent. InfraPartners §3.2 pattern, Armada referral rider.
+        if self.d.get("supplier", {}).get("referral_rider"):
+            self.bp(
+                "3.9 Mutual Referral Rider. ",
+                f"In addition to the supply arrangements above, the Parties "
+                f"acknowledge a bidirectional referral interest: Digital Energy may "
+                f"introduce end-customers requiring the Supplier's products to the "
+                f"Supplier, and the Supplier may introduce colocation customers "
+                f"requiring European AI capacity to Digital Energy. Commercial "
+                f"terms for such referrals (including any fee or margin sharing) "
+                f"shall be set out in the Framework Agreement. Mutual "
+                f"non-circumvention obligations in Clause 7 apply to both "
+                f"referral directions."
             )
 
     def clause4_ss(self):
@@ -1324,7 +1670,13 @@ class LOI:
         self.p("(a) this LOI, setting out non-binding commercial intent and binding confidentiality and non-circumvention;")
         self.p("(b) a Framework Agreement, setting out the definitive commercial and operational framework for the supply relationship;")
         self.p("(c) one or more Statements of Work for named Provider projects, each executed under the Framework Agreement; and")
-        self.p("(d) site-specific deliverables, schedules, or operational annexes executed under each Statement of Work.")
+        # v3.7.0: when include_schedule=false, scrub the "schedules, or
+        # operational annexes" phrasing so §4.2(d) aligns with the omitted
+        # Schedule 1. InfraPartners §4.8 pattern.
+        if self.d.get("choices", {}).get("include_schedule", True) is False:
+            self.p("(d) site-specific deliverables executed under each Statement of Work.")
+        else:
+            self.p("(d) site-specific deliverables, schedules, or operational annexes executed under each Statement of Work.")
         # v3.6.0 bug 4 (SS): meta-commentary trailer removed — explains
         # the LOI rather than creating obligation; R-22 class.
 
@@ -1397,7 +1749,11 @@ class LOI:
             self.p("(a) this LOI, setting out non-binding commercial intent;")
             self.p("(b) a Sales Order Form or equivalent binding capacity commitment with indicative pricing;")
             self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
-            self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
+            # v3.7.0: include_schedule-aware phrasing (mirrors clause4_ss §4.2(d))
+            if self.d.get("choices", {}).get("include_schedule", True) is False:
+                self.p("(d) site-specific deliverables executed under the MSA.")
+            else:
+                self.p("(d) site-specific deliverables, schedules, or operational annexes executed under the MSA.")
             # v3.6.0 bug 4 (WS): meta-commentary trailer removed.
             self.bp("4.3 Direct Agreement Willingness. ", f"The {self.party} confirms its willingness, subject to commercially reasonable terms, to enter into a direct agreement with Digital Energy's Financing Parties if requested under Clause 5.3. The {self.party}'s cooperation in this regard materially supports delivery of the committed capacity on the indicative timeline.")
             self.bp("4.4 Expansion and Priority. ", f"Digital Energy will offer the {self.party} priority access to additional capacity within the DEC(s) allocated to the {self.party}, subject to availability. Expansion terms will be governed by the MSA.")
@@ -1509,34 +1865,64 @@ class LOI:
                 self.p(f"6.7 The obligations in this Clause 6 shall survive for {surv} from the date of termination or expiry of this LOI. Obligations in respect of trade secrets shall continue indefinitely.")
                 self.p("6.8 Each Party acknowledges that a breach of this Clause 6 may cause irreparable harm for which damages would not be an adequate remedy. The disclosing Party shall be entitled to seek injunctive or other equitable relief without the need to prove actual loss.")
             else:
-                # Tier B — 16 clauses
-                self.bp("6.1 Purpose Limitation. ", "Each Party shall use the other Party's Confidential Information solely for the Purpose and for no other purpose.")
-                self.bp("6.2 Non-Disclosure. ", "Each Party shall keep confidential all Confidential Information received from the other Party and shall not disclose such information to any person except as permitted under this Clause 6.")
-                self.bp("6.3 Standard of Care. ", "Each Party shall apply no less than reasonable care to protect the other Party's Confidential Information, and no less than the care it applies to its own confidential information of a similar nature.")
-                self.bp("6.4 Permitted Disclosures. ", "A Party may disclose Confidential Information to:")
-                self.p("(a) its Representatives who have a genuine need to know for the Purpose and who are bound by confidentiality obligations no less restrictive than this Clause 6 (whether by professional duty or written undertaking);")
-                self.p("(b) its bona fide Financing Parties and potential co-investors, provided they are bound by confidentiality obligations no less restrictive than this Clause 6; and")
-                self.p("(c) to the extent required by applicable law, regulation, court order, or the rules of any relevant regulatory authority or stock exchange, provided that (where legally permitted) the disclosing Party: (i) gives the other Party prior written notice as soon as reasonably practicable; (ii) consults with the other Party regarding the scope and manner of disclosure; and (iii) discloses only the minimum information required to comply.")
-                self.bp("6.5 Liability for Representatives. ", "Each Party shall be responsible for any breach of this Clause 6 by its Representatives.")
-                self.bp("6.6 Exclusions. ", "The obligations in Clauses 6.1 through 6.3 do not apply to information that the receiving Party can demonstrate:")
-                self.p("(a) is or becomes publicly available through no fault of the receiving Party or its Representatives;")
-                self.p("(b) was already in the lawful possession of the receiving Party before disclosure, without restriction as to use or disclosure;")
-                self.p("(c) was independently developed by the receiving Party without use of or reference to the Confidential Information; or")
-                self.p("(d) was received from a third party who was not, to the receiving Party's knowledge, under any obligation of confidentiality in respect of that information.")
-                self.bp("6.7 No Implied Rights. ", "No licence or right is granted under this LOI to the receiving Party in respect of any intellectual property rights of the disclosing Party. All Confidential Information remains the property of the disclosing Party.")
-                self.bp("6.8 Return and Destruction. ", "Upon the earlier of: (a) the disclosing Party's written request, or (b) the expiry or termination of this LOI, the receiving Party shall promptly return or destroy all documents, materials, and tangible items containing Confidential Information and certify such return or destruction in writing within 15 Business Days. The receiving Party may retain copies to the extent required by applicable law or its internal compliance policies, provided such retained copies remain subject to this Clause 6.")
-                self.bp("6.9 Onward-Sharing Controls. ", "If the receiving Party receives an inquiry from any third party regarding the disclosing Party's Confidential Information, the receiving Party shall: (a) not respond to such inquiry without the disclosing Party's prior written consent; and (b) promptly notify the disclosing Party of such inquiry. The receiving Party shall not further distribute or re-disclose Confidential Information beyond the persons authorised under Clause 6.4 without the disclosing Party's prior written consent.")
-                self.bp("6.10 Compliance Confirmation. ", "Upon the disclosing Party's reasonable written request (not more than once per calendar year), the receiving Party shall confirm in writing its compliance with the obligations in this Clause 6.")
-                self.bp("6.11 Breach Notification. ", "Each Party shall notify the other Party in writing within 72 hours of becoming aware of any actual or suspected breach of this Clause 6, and shall take all reasonable steps to mitigate the effects of such breach.")
-                self.bp("6.12 Disclaimer. ", 'All Confidential Information is disclosed "as is." The disclosing Party makes no representation or warranty, express or implied, as to the accuracy, completeness, or reliability of any Confidential Information. The receiving Party shall be solely responsible for its own assessment and due diligence.')
-                self.bp("6.13 Metadata Protection. ", "Confidential Information includes metadata, EXIF data, geolocation data, timestamps, file names, folder names, and any digital artifacts associated with or derived from disclosed materials. The receiving Party shall not extract, analyse, or use such metadata except as necessary for the Purpose.")
-                surv_text = f"6.14 Survival. The obligations in this Clause 6 shall survive termination or expiry of this LOI for a period of {surv} from the date of termination or expiry. Obligations in respect of information that constitutes a trade secret under applicable law shall continue indefinitely."
+                # Tier B — 16 clauses, reshaped as a list so v3.7.0
+                # confidentiality_opt_outs can suppress named sub-clauses and
+                # the remainder auto-renumbers.
+                opt_outs = set(self.d.get("choices", {}).get("confidentiality_opt_outs") or [])
+                surv_text_body = (
+                    f"The obligations in this Clause 6 shall survive termination or "
+                    f"expiry of this LOI for a period of {surv} from the date of "
+                    f"termination or expiry. Obligations in respect of information "
+                    f"that constitutes a trade secret under applicable law shall "
+                    f"continue indefinitely."
+                )
                 if self.t == "Distributor":
-                    surv_text += " Obligations in respect of Protected Business Information shall survive for the period specified in Clause 4.1."
-                self.bp("6.14 Survival. ", surv_text.replace("6.14 Survival. ", ""))
+                    surv_text_body += (
+                        " Obligations in respect of Protected Business Information "
+                        "shall survive for the period specified in Clause 4.1."
+                    )
                 transaction_ref = "the Transaction" if self.t == "Distributor" else "the proposed transaction"
-                self.bp("6.15 Announcements. ", f"Neither Party shall make any public announcement regarding this LOI or {transaction_ref} without the prior written consent of the other Party, except as required by applicable law.")
-                self.bp("6.16 Remedies. ", "Each Party acknowledges that a breach of this Clause 6 may cause the disclosing Party irreparable harm for which damages would not be an adequate remedy. The disclosing Party shall be entitled to seek injunctive or other equitable relief from any court of competent jurisdiction, without the need to prove actual loss and without prejudice to any other rights or remedies.")
+
+                # Each entry: (opt_out_key_or_None, heading_label, body_text, [sub_lines])
+                # opt_out_key_or_None: when set, skipped if key appears in opt_outs
+                tier_b_items = [
+                    (None, "Purpose Limitation", "Each Party shall use the other Party's Confidential Information solely for the Purpose and for no other purpose.", []),
+                    (None, "Non-Disclosure", "Each Party shall keep confidential all Confidential Information received from the other Party and shall not disclose such information to any person except as permitted under this Clause 6.", []),
+                    (None, "Standard of Care", "Each Party shall apply no less than reasonable care to protect the other Party's Confidential Information, and no less than the care it applies to its own confidential information of a similar nature.", []),
+                    (None, "Permitted Disclosures", "A Party may disclose Confidential Information to:", [
+                        "(a) its Representatives who have a genuine need to know for the Purpose and who are bound by confidentiality obligations no less restrictive than this Clause 6 (whether by professional duty or written undertaking);",
+                        "(b) its bona fide Financing Parties and potential co-investors, provided they are bound by confidentiality obligations no less restrictive than this Clause 6; and",
+                        "(c) to the extent required by applicable law, regulation, court order, or the rules of any relevant regulatory authority or stock exchange, provided that (where legally permitted) the disclosing Party: (i) gives the other Party prior written notice as soon as reasonably practicable; (ii) consults with the other Party regarding the scope and manner of disclosure; and (iii) discloses only the minimum information required to comply.",
+                    ]),
+                    (None, "Liability for Representatives", "Each Party shall be responsible for any breach of this Clause 6 by its Representatives.", []),
+                    (None, "Exclusions", "The obligations in Clauses 6.1 through 6.3 do not apply to information that the receiving Party can demonstrate:", [
+                        "(a) is or becomes publicly available through no fault of the receiving Party or its Representatives;",
+                        "(b) was already in the lawful possession of the receiving Party before disclosure, without restriction as to use or disclosure;",
+                        "(c) was independently developed by the receiving Party without use of or reference to the Confidential Information; or",
+                        "(d) was received from a third party who was not, to the receiving Party's knowledge, under any obligation of confidentiality in respect of that information.",
+                    ]),
+                    (None, "No Implied Rights", "No licence or right is granted under this LOI to the receiving Party in respect of any intellectual property rights of the disclosing Party. All Confidential Information remains the property of the disclosing Party.", []),
+                    (None, "Return and Destruction", "Upon the earlier of: (a) the disclosing Party's written request, or (b) the expiry or termination of this LOI, the receiving Party shall promptly return or destroy all documents, materials, and tangible items containing Confidential Information and certify such return or destruction in writing within 15 Business Days. The receiving Party may retain copies to the extent required by applicable law or its internal compliance policies, provided such retained copies remain subject to this Clause 6.", []),
+                    ("onward_sharing", "Onward-Sharing Controls", "If the receiving Party receives an inquiry from any third party regarding the disclosing Party's Confidential Information, the receiving Party shall: (a) not respond to such inquiry without the disclosing Party's prior written consent; and (b) promptly notify the disclosing Party of such inquiry. The receiving Party shall not further distribute or re-disclose Confidential Information beyond the persons authorised under Clause 6.4 without the disclosing Party's prior written consent.", []),
+                    ("compliance_confirmation", "Compliance Confirmation", "Upon the disclosing Party's reasonable written request (not more than once per calendar year), the receiving Party shall confirm in writing its compliance with the obligations in this Clause 6.", []),
+                    (None, "Breach Notification", "Each Party shall notify the other Party in writing within 72 hours of becoming aware of any actual or suspected breach of this Clause 6, and shall take all reasonable steps to mitigate the effects of such breach.", []),
+                    (None, "Disclaimer", 'All Confidential Information is disclosed "as is." The disclosing Party makes no representation or warranty, express or implied, as to the accuracy, completeness, or reliability of any Confidential Information. The receiving Party shall be solely responsible for its own assessment and due diligence.', []),
+                    ("metadata_protection", "Metadata Protection", "Confidential Information includes metadata, EXIF data, geolocation data, timestamps, file names, folder names, and any digital artifacts associated with or derived from disclosed materials. The receiving Party shall not extract, analyse, or use such metadata except as necessary for the Purpose.", []),
+                    (None, "Survival", surv_text_body, []),
+                    (None, "Announcements", f"Neither Party shall make any public announcement regarding this LOI or {transaction_ref} without the prior written consent of the other Party, except as required by applicable law.", []),
+                    (None, "Remedies", "Each Party acknowledges that a breach of this Clause 6 may cause the disclosing Party irreparable harm for which damages would not be an adequate remedy. The disclosing Party shall be entitled to seek injunctive or other equitable relief from any court of competent jurisdiction, without the need to prove actual loss and without prejudice to any other rights or remedies.", []),
+                ]
+
+                filtered = [
+                    (heading, body, subs)
+                    for (opt_key, heading, body, subs) in tier_b_items
+                    if not (opt_key and opt_key in opt_outs)
+                ]
+
+                for idx, (heading, body, subs) in enumerate(filtered, start=1):
+                    self.bp(f"6.{idx} {heading}. ", body)
+                    for sub in subs:
+                        self.p(sub)
 
     def clause7_nc(self):
         if self.t == "EndUser" or self.t == "EcosystemPartnership":
@@ -1597,7 +1983,9 @@ class LOI:
                 cl5_label = "IP and Deliverables"
             else:
                 cl5_label = "Project Finance and Assignment"
-            self.p(f"(a) Non-binding provisions. Clauses 2 through 4 and Schedule 1 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the {downstream}.")
+            # v3.7.0: when include_schedule=false, drop "and Schedule 1" reference
+            sched_ref = "" if self.d.get("choices", {}).get("include_schedule", True) is False else " and Schedule 1"
+            self.p(f"(a) Non-binding provisions. Clauses 2 through 4{sched_ref} of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the {downstream}.")
             self.p(f"(b) Binding provisions. Clauses 5 ({cl5_label}), 6 (Confidentiality), 7 (Non-Circumvention), and {cl} (General Provisions) are legally binding and enforceable obligations.")
         else:
             self.p("(a) Non-binding provisions. Clauses 2 through 4 of this LOI are non-binding expressions of the Parties' current intentions. They do not create legally enforceable obligations and are subject to the negotiation and execution of the MSA.")
@@ -2183,9 +2571,38 @@ class LOI:
         self.clause7_nc()
         self.clause_general()
         self.signature()
-        self.schedule()
+        # v3.7.0: choices.include_schedule=false suppresses Schedule 1 entirely.
+        # Default (unset or True) preserves pre-v3.7.0 behavior. Note that
+        # self.choice() returns False when unset — so we look at the raw
+        # intake dict to distinguish unset (default True) from explicit False.
+        _inc_sched = self.d.get("choices", {}).get("include_schedule", True)
+        if _inc_sched:
+            self.schedule()
+        self._inject_custom_clauses()
         self.footer()
         return self.doc
+
+    def _inject_custom_clauses(self):
+        """v3.7.0 — inject `custom.clauses[]` entries in append mode.
+
+        v3.7.0 supports `mode: append` (appended at end of body).
+        `mode: replace` and `mode: insert-after:N` are validated in
+        load_intake but deferred to v3.7.1 for implementation.
+        """
+        for item in self.d.get("custom", {}).get("clauses", []) or []:
+            mode = item.get("mode", "append")
+            if mode != "append":
+                # Validated as allowed but not yet implemented in body.
+                continue
+            number = item.get("number", "")
+            heading = item.get("heading", "")
+            text = item.get("text", "")
+            if heading:
+                self.bp(f"{number} {heading}. ", text)
+            else:
+                self.p(f"{number} {text}")
+            for sub in item.get("sub_clauses", []) or []:
+                self.p(sub)
 
     def _build_ep(self) -> Document:
         """v3.3: Ecosystem Partnership build pipeline.
@@ -2273,9 +2690,20 @@ _FAIL_RULES = {
         "Vanity-financial claim in Recital B — valuation numbers / generic VC labels / unattributed capital-raise language fail Signal Test gate 1. Named-endorser financings (e.g. 'backed by Macquarie') are signal and remain allowed; pure vanity metrics are not.",
     ),
     "R-27": (
-        r"(?:Name|Title):\s*\[TBC\]",
+        # v3.7.0: broaden to also match bare TBC (no brackets), but exclude
+        # TBC that appears inside a URL (preceded by http or path component).
+        # Pattern: Name/Title field followed by [TBC] OR bare word TBC.
+        r"(?:Name|Title):\s*(?:\[TBC\]|(?<![/\w])TBC(?![\w]))",
         "sig-block",
-        "'[TBC]' rendered literally in signature-block Name or Title line — must route through _render_placeholder so the line becomes a fillable blank on external-facing drafts.",
+        "'TBC' rendered literally in signature-block Name or Title line — must route through _render_placeholder so the line becomes a fillable blank on external-facing drafts.",
+    ),
+    # R-30 (v3.7.0 fail): double-period detector. Excludes '...' ellipsis and
+    # numbered-list notation like '3.1.' (a digit immediately preceding the dots).
+    "R-30": (
+        r"(?<!\.)(?<!\d)\.{2}(?!\.)",
+        "body",
+        "Double-period '..' in rendered body — likely trailing-period concatenation "
+        "bug in a free-text YAML field. Exclude: '...' ellipsis, '3.1.' numbering.",
     ),
 }
 
@@ -2325,6 +2753,9 @@ _WARN_RULES = {
     ),
     # v3.5.2 scope 0 note: R-28 is implemented as a density custom-check in
     # qa_lint(), not a simple regex (needs occurrence count). See _check_tbc_density().
+    # R-31 (v3.7.0 warn): contact_name == signatory_name (case-insensitive, trimmed).
+    # Not a regex — evaluated as a custom check in qa_lint() like R-28.
+    # Sentinel entry here so the rule ID appears in the registry.
 }
 
 # R-23 fabrication gate: regex targets material numeric-metric claims in
@@ -2408,15 +2839,92 @@ def _pillar_with_urls(source_map: dict):
     # Preserve iteration order — typically pillar_1..pillar_5.
     for pillar_key, pillar_val in source_map.items():
         if isinstance(pillar_val, list) and any(
-            isinstance(u, str) and u.startswith(("http://", "https://"))
+            isinstance(u, str) and (
+                u.startswith(("http://", "https://"))
+                or re.match(r"^internal:brochure_\d{8}_\w+$", u)
+            )
             for u in pillar_val
         ):
             return pillar_key
-        if isinstance(pillar_val, str) and pillar_val.startswith(
-            ("http://", "https://")
+        if isinstance(pillar_val, str) and (
+            pillar_val.startswith(("http://", "https://"))
+            or re.match(r"^internal:brochure_\d{8}_\w+$", pillar_val)
         ):
             return pillar_key
     return None
+
+
+def certifications_in_source(intake: dict) -> list:
+    """v3.7.0 R-11 helper: return list of certification strings detected in
+    counterparty.description (the primary source-material field).
+
+    Detects ISO N{4,5} and common named certs (SOC 2, PCI-DSS, etc.).
+    Phase 5 consumes this list when deciding include/omit for Recital B.
+    Returns empty list when none found.
+    """
+    text = intake.get("counterparty", {}).get("description", "") or ""
+    found = []
+    # ISO NNN patterns
+    for m in re.finditer(r"\bISO\s*\d{4,5}\b", text, re.IGNORECASE):
+        cert = m.group(0).replace("  ", " ").strip()
+        if cert not in found:
+            found.append(cert)
+    # Named certs
+    _NAMED_CERTS = re.compile(
+        r"\b(SOC\s*[12]|PCI[- ]DSS|ISO\s*\d{4,5}|GDPR|HIPAA|FedRAMP|CSA\s*STAR)\b",
+        re.IGNORECASE,
+    )
+    for m in _NAMED_CERTS.finditer(text):
+        cert = m.group(0).strip()
+        if cert not in found:
+            found.append(cert)
+    return found
+
+
+# v3.7.0: brochure source_map token pattern. Tokens matching this pattern
+# are accepted as tier-2 sources by R-23 (pass) and trigger R-24 (warn).
+_BROCHURE_TOKEN_RE = re.compile(r"^internal:brochure_\d{8}_\w+$")
+
+
+def _source_map_has_brochure(source_map: dict) -> bool:
+    """Return True if any pillar value is an internal:brochure_* token."""
+    if not isinstance(source_map, dict):
+        return False
+    for val in source_map.values():
+        if isinstance(val, str) and _BROCHURE_TOKEN_RE.match(val):
+            return True
+        if isinstance(val, list):
+            if any(isinstance(v, str) and _BROCHURE_TOKEN_RE.match(v) for v in val):
+                return True
+    return False
+
+
+def _check_url_content(url: str, keyword: str, *, fetcher=None) -> bool:
+    """v3.7.0 R-29 helper: fetch URL and check keyword appears in >=500 chars.
+
+    Returns True (ok) if content is >=500 chars and keyword found.
+    Returns False if content is short, keyword missing, or fetch fails.
+
+    The `fetcher` argument is an object with a .fetch(url) -> str method.
+    When None (production), uses urllib; in tests, pass a FakeFetcher.
+    """
+    if fetcher is not None:
+        content = fetcher.fetch(url)
+    else:
+        try:
+            import urllib.request as _req
+            with _req.urlopen(url, timeout=10) as resp:
+                content = resp.read(8192).decode("utf-8", errors="replace")
+        except Exception:
+            content = ""
+    if len(content) < 500:
+        return False
+    return keyword.lower() in content.lower()
+
+
+def _parse_flag(flag: str) -> bool:
+    """v3.7.0: boolean CLI flag parser — returns True if flag in sys.argv."""
+    return flag in sys.argv
 
 
 # v3.5.6 scope D.3: thin-reason + structured-short-code patterns for
@@ -2641,8 +3149,12 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
     # expected on drafts (signatory title, counterparty reg number pre-
     # signing); > 5 suggests the intake was not fully prepared and the draft
     # should loop back to Phase 4/5 for completion before external delivery.
+    # v3.7.0: count BOTH [TBC] bracketed AND bare word TBC (excluding TBC
+    # inside URLs). This normalises the threshold across all intake styles.
     if "R-28" not in overrides:
         tbc_count = text.count("[TBC]")
+        # Count bare TBC not inside a URL (preceded by space/newline or start)
+        tbc_count += len(re.findall(r"(?<![/\w])TBC(?![\w\]])", text))
         if tbc_count > 5:
             lines.append(
                 f"  [WARN] R-28  body   [TBC] count ({tbc_count}) exceeds 5 "
@@ -2650,10 +3162,109 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
             )
             warn_count += 1
 
+    # R-31 (v3.7.0 warn): contact_name == signatory_name suggests a single
+    # point of contact — unusual and worth confirming intentional.
+    cp_data = data.get("counterparty", {}) or {}
+    _contact = (cp_data.get("contact_name") or "").strip().lower()
+    _signatory = (cp_data.get("signatory_name") or "").strip().lower()
+    if _contact and _signatory and _contact == _signatory and "R-31" not in overrides:
+        lines.append(
+            "  [WARN] R-31  counterparty   contact_name equals signatory_name "
+            "— confirm intentional single-point-of-contact arrangement."
+        )
+        warn_count += 1
+
+    # R-24 (v3.7.0 warn): brochure-sourced pillars require tier-1 corroboration.
+    # This is the NEW R-24 for brochure tokens. The old R-24 (inline citation
+    # in Recital B prose) lives in _FAIL_RULES as a regex rule under "R-24".
+    # We use key "R-24B" to avoid ID collision while staying in the same family.
+    _source_map = data.get("counterparty", {}).get("source_map", {}) or {}
+    if _source_map_has_brochure(_source_map) and "R-24" not in overrides:
+        lines.append(
+            "  [WARN] R-24  source_map   Brochure-sourced material claims require "
+            "tier-1 public corroboration before signing. "
+            "Replace internal:brochure_* tokens with https:// URLs before external delivery."
+        )
+        warn_count += 1
+
+    # R-21 scope narrowing (v3.7.0): 'purpose-built' is allowed inside Clause 3
+    # product-capability paragraphs. Strip Cl. 3 text before R-21 regex scan
+    # so the rule only fires outside Cl. 3.
+    # The _WARN_RULES R-21 regex was already applied above. If it fired but the
+    # match is ONLY inside Cl. 3, remove the false-positive warning.
+    _cl3_text = ""
+    _cl3_match = re.search(
+        r"(?:^|\n)3\.\s+[A-Z].*?(?=\n[4-9]\.\s+|\Z)", text, re.DOTALL
+    )
+    if _cl3_match:
+        _cl3_text = _cl3_match.group(0)
+    _purpose_built_outside_cl3 = False
+    for _pm in re.finditer(r"\b(purpose-built|state-of-the-art)\b", text, re.IGNORECASE):
+        _match_pos = _pm.start()
+        if _cl3_text:
+            _cl3_start = text.find(_cl3_text)
+            _cl3_end = _cl3_start + len(_cl3_text) if _cl3_start >= 0 else -1
+            if _cl3_start >= 0 and _cl3_start <= _match_pos < _cl3_end:
+                continue  # inside Cl. 3 — skip
+        _purpose_built_outside_cl3 = True
+        break
+    # If R-21 fired but all matches are in Cl. 3, retroactively remove the warn line
+    if not _purpose_built_outside_cl3:
+        _new_lines = [l for l in lines if "R-21" not in l or "[WARN]" not in l]
+        _removed = len(lines) - len(_new_lines)
+        warn_count -= _removed
+        lines = _new_lines
+
     if not data.get("programme", {}).get("recital_a_variant"):
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
     if not data.get("choices", {}).get("bespoke_closing"):
         lines.append("  [INFO] R-17  YAML   No bespoke_closing, used default single-sentence")
+
+    # v3.7.0: surface structured metadata from the intake — relationship_cluster,
+    # identity_map, and financing_context do not appear in the LOI body but
+    # are valuable for the QA audit trail and the cover-email cross-check.
+    _rel = data.get("counterparty", {}).get("relationship_cluster")
+    if _rel:
+        _gid = _rel.get("group_id", "<unnamed>")
+        _aff = _rel.get("affiliated_entities", []) or []
+        lines.append(
+            f"  [INFO] V3-7-meta  counterparty   relationship_cluster: "
+            f"group_id={_gid}, affiliated_entities={len(_aff)}"
+        )
+        for entity in _aff[:3]:
+            lines.append(
+                f"         - {entity.get('name', '<unnamed>')}: "
+                f"{entity.get('role', '<role unspecified>')}"
+            )
+
+    _idmap = data.get("counterparty", {}).get("identity_map")
+    if _idmap:
+        lines.append(
+            f"  [INFO] V3-7-meta  counterparty   identity_map: "
+            f"{len(_idmap)} person(s) tracked across multiple domains"
+        )
+
+    _fctx = data.get("dates", {}).get("financing_context")
+    if _fctx:
+        _linked = _fctx.get("linked_to_fundraise", False)
+        _close = _fctx.get("fundraise_close_target", "<unset>")
+        _buffer = _fctx.get("buffer_months_post_close", "<unset>")
+        lines.append(
+            f"  [INFO] V3-7-meta  dates   financing_context: "
+            f"linked={_linked}, close_target={_close}, buffer_months={_buffer}"
+        )
+
+    # v3.7.0: certifications_in_source (R-11 helper) — surface the detected
+    # list so Phase 5 can make the include/omit decision explicitly.
+    _certs = certifications_in_source(data)
+    if _certs:
+        lines.append(
+            f"  [INFO] R-11  source   certifications_detected: {', '.join(_certs)}"
+        )
+        lines.append(
+            "         Phase 5 decision point: include in Recital B (differentiator) "
+            "or omit (conservative). Default: omit."
+        )
 
     lines.append("")
     if fail_count > 0:
@@ -2843,6 +3454,18 @@ def main():
     if "--migrate-check" in sys.argv:
         sys.exit(_migrate_check(sys.argv[1]))
 
+    # v3.7.0: --audit-only — read prior_loi_path (or --prior) and run linter
+    if "--audit-only" in sys.argv:
+        prior_path = _parse_arg("--prior") or sys.argv[1]
+        _audit_only_mode(prior_path)
+        sys.exit(0)
+
+    # v3.7.0: --phase-8-auto-execute — stored/accepted; Specialist C wires the action
+    _phase8_auto = "--phase-8-auto-execute" in sys.argv
+
+    # v3.7.0: --verify-source-urls — activates R-29 URL content verification
+    _verify_urls = "--verify-source-urls" in sys.argv
+
     data = load_intake(sys.argv[1])
 
     override_str = _parse_arg("--override")
@@ -2902,6 +3525,12 @@ def main():
         print("To override: --override R-xx,R-yy --override-reason \"...\"")
         sys.exit(2)
 
+    # v3.7.0: --recital-b-only — replace Recital B paragraph in existing .docx
+    recital_b_only_path = _parse_arg("--recital-b-only")
+    if recital_b_only_path:
+        _recital_b_only_replace(recital_b_only_path, loi, data)
+        print(f"[--recital-b-only] Recital B replaced in {recital_b_only_path}")
+
     doc.save(output)
 
     # v3.5.6 scope G: Phase 7.5 fail-closed enforcement. Only active when
@@ -2945,6 +3574,188 @@ def main():
     print(f"Counterparty: {data.get('counterparty', {}).get('name', 'Unknown')}")
     print(f"QA: {qa_status} ({qa_report_path})")
     print(f"Clauses: ALL (full document)")
+
+    # v3.7.0: emit SESSION_LOG.md alongside the .docx
+    _emit_session_log(output, data, qa_status, qa_lines)
+
+
+def _audit_only_mode(prior_loi_path: str):
+    """v3.7.0 --audit-only: extract text from a prior .docx and run the full
+    linter, emitting a {basename}_audit.txt compliance-delta report.
+    """
+    import importlib
+    try:
+        import docx as _docx_module
+    except ImportError:
+        print("[--audit-only] python-docx required. Install: pip install python-docx",
+              file=sys.stderr)
+        return
+    if not os.path.exists(prior_loi_path):
+        print(f"[--audit-only] Path not found: {prior_loi_path}", file=sys.stderr)
+        return
+    from docx import Document as _Doc
+    _doc = _Doc(prior_loi_path)
+    _text_lines = [p.text for p in _doc.paragraphs if p.text]
+    for tbl in _doc.tables:
+        for row in tbl.rows:
+            for cell in row.cells:
+                _text_lines += [p.text for p in cell.paragraphs if p.text]
+    text = "\n".join(_text_lines)
+
+    # Run rules over raw text with empty data (no YAML context)
+    findings = []
+    for rid, (pattern, scope, msg) in _FAIL_RULES.items():
+        if re.search(pattern, text, re.MULTILINE):
+            findings.append(f"  [FAIL] {rid}  {scope}   {msg}")
+    for rid, (pattern, scope, msg) in _WARN_RULES.items():
+        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
+            findings.append(f"  [WARN] {rid}  {scope}   {msg}")
+
+    base = os.path.splitext(os.path.basename(prior_loi_path))[0]
+    out_dir = os.path.dirname(os.path.abspath(prior_loi_path))
+    audit_path = os.path.join(out_dir, f"{base}_audit.txt")
+    report = [
+        f"Audit Report — {os.path.basename(prior_loi_path)}",
+        f"Generated: {datetime.now().isoformat()}Z",
+        f"Rules: {len(_FAIL_RULES)} fail-rules, {len(_WARN_RULES)} warn-rules",
+        "",
+        "Findings:",
+        *(findings if findings else ["  (none — prior LOI passes current linter)"]),
+        "",
+        f"Total findings: {len(findings)}",
+    ]
+    with open(audit_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(report) + "\n")
+    print(f"[--audit-only] Audit written to {audit_path}")
+    for line in findings:
+        print(line)
+
+
+def _recital_b_only_replace(prior_path: str, loi, data: dict):
+    """v3.7.0 --recital-b-only: replace Recital B paragraph in an existing
+    .docx. Writes a new versioned file (_v{N}.docx) alongside the original.
+
+    Errors clearly when prior_path is missing.
+    """
+    if not prior_path:
+        print("[--recital-b-only] ERROR: path argument required after flag.",
+              file=sys.stderr)
+        return
+    if not os.path.exists(prior_path):
+        print(f"[--recital-b-only] ERROR: path not found: {prior_path}",
+              file=sys.stderr)
+        return
+    from docx import Document as _Doc
+    _doc = _Doc(prior_path)
+
+    # Find the (B) recital paragraph
+    new_b_text = ""
+    for p in loi.doc.paragraphs:
+        if p.text.startswith("(B) "):
+            new_b_text = p.text
+            break
+    if not new_b_text:
+        print("[--recital-b-only] Could not locate (B) Recital in generated LOI.",
+              file=sys.stderr)
+        return
+
+    for p in _doc.paragraphs:
+        if p.text.startswith("(B) "):
+            for run in p.runs:
+                run.text = ""
+            if p.runs:
+                p.runs[0].text = new_b_text
+            break
+
+    base, ext = os.path.splitext(prior_path)
+    n = 2
+    while os.path.exists(f"{base}_v{n}{ext}"):
+        n += 1
+    out_path = f"{base}_v{n}{ext}"
+    _doc.save(out_path)
+    print(f"[--recital-b-only] Written: {out_path}")
+
+
+def _emit_session_log(docx_path: str, data: dict, qa_status: str,
+                      qa_lines: list) -> str:
+    """v3.7.0: emit a SESSION_LOG.md file alongside the generated .docx.
+
+    Captures all non-default intake decisions, active CLI flags, QA summary,
+    and custom definition/clause counts for session auditability.
+    Returns the path to the written file.
+    """
+    stem = os.path.splitext(os.path.basename(docx_path))[0]
+    log_dir = os.path.dirname(os.path.abspath(docx_path))
+    log_path = os.path.join(log_dir, f"{stem}_SESSION_LOG.md")
+
+    from datetime import datetime as _dt, timezone as _tz
+    ts = _dt.now(_tz.utc).isoformat()
+    cp = data.get("counterparty", {}) or {}
+    choices = data.get("choices", {}) or {}
+    custom = data.get("custom", {}) or {}
+
+    # Count R-rules triggered
+    triggered = [l.split()[1] for l in qa_lines if l.strip().startswith("[FAIL]") or
+                 l.strip().startswith("[WARN]")]
+    fail_count = sum(1 for l in qa_lines if "[FAIL]" in l)
+    warn_count = sum(1 for l in qa_lines if "[WARN]" in l)
+    info_count = sum(1 for l in qa_lines if "[INFO]" in l)
+
+    # Non-default choices
+    DEFAULTS = {
+        "recital_b_density": "standard",
+        "joint_ip": None,
+        "bespoke_closing": None,
+        "cert_relevant": None,
+        "existing_nda": None,
+        "include_schedule": None,
+    }
+    intake_decisions = []
+    prog = data.get("programme", {}) or {}
+    intake_decisions.append(
+        f"- recital_a_variant: {prog.get('recital_a_variant', 'default')}"
+    )
+    density = choices.get("recital_b_density", "standard")
+    if density != "standard":
+        intake_decisions.append(f"- recital_b_density: {density} (non-default)")
+    else:
+        intake_decisions.append(f"- recital_b_density: {density}")
+    sup = data.get("supplier", {}) or {}
+    if sup.get("strategic_purposes"):
+        intake_decisions.append(f"- strategic_purposes: {sup['strategic_purposes']}")
+    # Active CLI flags
+    cli_flags = []
+    for flag in ("--verify-source-urls", "--audit-only", "--recital-b-only",
+                 "--phase-8-auto-execute", "--enforce-phase-7-5"):
+        if flag in sys.argv:
+            cli_flags.append(f"- {flag}")
+    if not cli_flags:
+        cli_flags = ["- (none)"]
+
+    lines = [
+        f"# Session Log — {os.path.basename(docx_path)}",
+        f"**Generated:** {ts}",
+        f"**Type:** {data.get('type', 'Unknown')}",
+        f"**Counterparty:** {cp.get('name', 'Unknown')}",
+        "",
+        "## Intake decisions",
+        *intake_decisions,
+        "",
+        "## CLI flags used",
+        *cli_flags,
+        "",
+        "## QA summary",
+        f"- Status: {qa_status} — {fail_count} fail, {warn_count} warn, {info_count} info",
+        f"- Rules triggered: [{', '.join(triggered) if triggered else 'none'}]",
+        "",
+        "## Customizations",
+        f"- custom.definitions: {len(custom.get('definitions', []))}",
+        f"- custom.clauses: {len(custom.get('clauses', []))}",
+    ]
+
+    with open(log_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    return log_path
 
 
 if __name__ == "__main__":

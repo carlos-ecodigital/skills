@@ -49,12 +49,14 @@ choices:
   existing_nda: false
 
 # --- Programme ---
-# v3.2: Recital A is library-sourced. recital_a_variant: default | sovereignty |
-# integration | bespoke. See _shared/loi-recital-a-library.md.
+# v3.7.0: Recital A is library-sourced (single canonical body + EU tail, v3.4).
+#   recital_a_variant: "default"  is the only production value.
+#   Legacy keys (sovereignty, integration) resolve to canonical body.
+#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
 programme:
   platform_mw: "100+"
   site_count: "14"
-  recital_a_variant: "sovereignty"
+  recital_a_variant: "default"   # v3.4: canonical body. Legacy sovereignty/integration keys also resolve here.
 
 # --- Protection ---
 protection:

@@ -83,11 +83,13 @@ choices:
   # bespoke_closing: ""   # optional — linter-checked (R-5/R-6/R-9)
 
 # --- Programme ---
-# v3.2: library-sourced Recital A. Variants: default | sovereignty | integration | bespoke.
+# v3.7.0: Recital A is library-sourced (single canonical body + SS tail, v3.4).
+#   recital_a_variant: "default"  is the only production value.
+#   Legacy variant keys resolve to canonical body. Bespoke by exception only.
 programme:
   platform_mw: "100+"
   site_count: "14"
-  recital_a_variant: "default"
+  recital_a_variant: "default"   # v3.4: canonical body. Bespoke requires justification — see SKILL.md Phase 5 gate.
 
 # --- Protection ---
 protection:

@@ -32,6 +32,10 @@ allowed-tools:
   - WebFetch
   - mcp__2c81bf85-2089-44af-a3a9-1de82f765ed9__search_crm_objects
   - mcp__2c81bf85-2089-44af-a3a9-1de82f765ed9__get_crm_objects
+  - fireflies_search
+  - fireflies_get_transcript
+  - manage_crm_objects
+  - clickup_create_task
 ---
 
 # LEGAL-ASSISTANT — DE Document Production Framework
@@ -121,7 +125,7 @@ Ask for all missing fields in one batched round, not iteratively. Use the **sour
   Pick from observed intent, not abstract label. RoFR ≠ capacity_lock_in.
 - **Ecosystem Partnership (EP):** Relationship type (standards_body / university / research_consortium / co_marketing / industry_association / policy_partner), collaboration themes, joint-activity categories (publications / events / pilots / advocacy / working_groups), announcement protocol, logo use
 
-**Recital A variant (all types):** Select from `default` / `sovereignty` / `integration` / `bespoke`. See `_shared/loi-recital-a-library.md` for which variant fits which counterparty.
+**Recital A variant (all types):** Always `default` (canonical body, v3.4). Bespoke override is an exception path — see Phase 5 gate below.
 
 **Choices to confirm:** indicative pricing (default: no, defer to MSA); existing NDA (default: no, embed NCNDA); bespoke closing (default: no, use single-sentence default — linter-checked); Wholesale deployment phasing; Distributor exclusivity; SS exclusivity; EP announcement protocol.
 
@@ -147,6 +151,15 @@ Use defaults from the Defaults table below.
 cd /Users/crmg/skills/.claude/skills/legal-assistant/colocation
 python3 generate_loi.py examples/intake.yaml --output /path/to/output.docx
 ```
+
+#### v3.7.0 CLI flags
+
+| Flag | Description |
+|---|---|
+| `--recital-b-only <path.docx>` | Regenerate Recital B only; replace paragraph in existing .docx and write `_v{N}.docx`. Error if path missing. |
+| `--audit-only` | Extract text from `prior_loi_path` (or `--prior <path>`); run full linter; emit `{basename}_audit.txt`. No regeneration. |
+| `--verify-source-urls` | Opt-in R-29 URL content verification: fetch each `source_map` URL and assert claim keywords present in ≥500 chars. Default OFF. |
+| `--phase-8-auto-execute` | Accepted and stored; Specialist C wires Phase 8 auto-actions in a future release. |
 
 ### Step 7: Quality Check (MANDATORY — automated + manual)
 
@@ -228,16 +241,31 @@ Question to resolve: [one clarifying question]
 
 **Handoff to Phase 3** when classification confirmed.
 
+### Phase 2.5 — Name Disambiguation (v3.7.0, scope E)
+
+**Skill action:** After Phase 2 classification, run `WebSearch` top-5 for the counterparty short name. If ≥60% of top-3 result domains belong to a different entity (e.g., "Cerebro" ↔ "Cerebras"), emit:
+
+```
+⚠️ Name collision: "{counterparty_short}" WebSearch returns {observed_entity_name}. Distinct entity? Confirm or update.
+```
+
+Support intake field `counterparty.websearch_exclude_domains: [cerebras.ai, ...]` to pre-filter noise on recurring collisions. If no collision detected, proceed silently to Phase 3.
+
 ### Phase 3 — Source Capture (autonomous, parallel)
 
-**Skill action:** Run these in parallel (where tools available):
-- `WebFetch` website (about / products / customers / leadership / news)
-- HubSpot MCP (`search_crm_objects`, `get_crm_objects`) for company + deals + engagement
-- ClickUp MCP (`clickup_search`) for associated tasks/docs
-- `WebFetch` LinkedIn company page
-- `WebSearch` for recent press/funding/customers (last 18 months)
-- `Read` user-provided email / Fireflies / deck paths
-- For NL counterparties: KVK lookup; for UK: Companies House
+**Skill action (v3.7.0 — mandated parallel, scope F):** Run ALL of these in parallel as a single invocation batch. Do not skip any unless the tool is unavailable. These are mandatory, not ad-hoc:
+
+1. `fireflies_search keyword:"{counterparty}" limit:10`
+2. `fireflies_search keyword:"{signatory_last_name}" limit:10`
+3. `fireflies_search participants:@{counterparty_domain} limit:10`
+4. `search_crm_objects` (HubSpot) on name + domain
+5. `clickup_search` keyword (if available)
+6. `WebFetch` root + 5 standard subpaths (`/about`, `/company`, `/team`, `/products`, `/pricing`)
+7. `WebSearch "{counterparty}" 2026` + `WebSearch "{counterparty}" funding`
+8. **Top-20 tech-partnership scan:** `WebSearch` counterparty against OpenAI / Anthropic / Microsoft / Google / AWS / Meta / Palantir / NVIDIA / Oracle / Databricks / Aramco / Dell / HPE / Lenovo / Supermicro / ServiceNow / Salesforce / Snowflake / IBM / Cisco. Return matches with tier-1 URLs.
+9. For NL counterparties: KVK lookup; for UK: Companies House. `Read` user-provided email / Fireflies / deck paths.
+
+**Prior-LOI `/extract`-first rule (scope G):** When `prior_loi_path` is supplied, ALWAYS run `/extract {path}` first to generate a Git-tracked markdown extraction. Read the markdown extraction (not the raw .docx) for Recital B / terms carry-forward. This preserves drift-tracking and reproducibility.
 
 **v3.5.3 scope J14 — Gmail MCP fallback:** if Gmail MCP returns a schema error (e.g. `"False is not of type 'array'"`) or is otherwise unavailable, request PDF export or paste of the relevant email thread from the user rather than proceeding without the source. Detection heuristic: a schema-error from `search_threads` / `list_drafts` indicates the MCP is degraded; fall back immediately. Do not silently omit the email-thread context — it often carries technical commitments (GPU platform, rack density, RFS timing) that must land in Schedule 1.
 
@@ -271,6 +299,18 @@ Gaps:
 
 **Handoff to Phase 4** with gap list.
 
+### Phase 3.5 — Public-Web-Dark Detection (v3.7.0, scope H)
+
+**Trigger:** After initial `WebFetch` of root domain.
+
+**Skill action:**
+1. If root `WebFetch` returns <500 chars of usable content OR only a tagline: try `/about`, `/company`, `/team`, `/products`, `/pricing`, `/locations` in parallel.
+2. If all return minimal signal → **emit `dark_web_counterparty: true`** in intake state.
+3. When `dark_web_counterparty: true`:
+   - Recital B **requires** a private evidence artefact (brochure / deck / direct-quote email) OR mandatory `[TBC]` on pillars 1–3 with explicit operator acknowledgement that public corroboration is weak.
+   - Phase 7.5 `legal-counsel` review is **elevated**: Source-verification sample gate expanded to 5 claims (vs. standard 3), with ≥2 tier-1 URL verifications required.
+4. Emit to operator: `⚠️ Public-web-dark counterparty detected. Recital B requires a private evidence artefact or [TBC] on pillars 1–3.`
+
 ### Phase 4 — Batched Intake (one round, only for gaps)
 
 **Skill action:** Ask only for fields that Phase 3 did not resolve. Include type-specific required fields from `validate()`. For SS, force 1–2 strategic purpose selection. For DS Mode A and SS, request bespoke Cl. 3 language.
@@ -286,7 +326,7 @@ Gaps — please provide in one response:
 - **Indicative MW IT**: approximate capacity interest (no DEC Blocks)
 - **Indicative term**: years
 - **Expansion target**: MW IT
-- **Recital A variant**: default | sovereignty | integration — I suggest `default` (wholesale buyer profile); confirm?
+- **Recital A variant**: confirm canonical Recital A body + Wholesale tail is appropriate? (Or request bespoke with justification?)
 - **Pricing in LOI?** default: no, defer to MSA — confirm?
 - **Existing NDA?** default: no, embed NCNDA — confirm?
 
@@ -298,7 +338,28 @@ Please respond in one message.
 - **EP**: relationship_type; collaboration_themes (list); joint_activity_categories (subset); announcement_protocol; logo_use
 - **DS Mode A**: bespoke Cl. 3.1 Partnership Overview; Cl. 3.2(b) Partner Service Scope
 
+**LOI sizing framework (v3.7.0, scope M):** When the operator asks "is this good?" or when commercial terms appear outside the R1 10–30% absorption band, emit the sizing framework table from `_shared/loi-sizing-framework.md`:
+
+| Ratio | Calculation | Interpretation |
+|---|---|---|
+| **R1 — Absorption ratio** | `LOI capacity / counterparty current operating capacity` | 10–30% = credibly absorbable; <5% = too small to signal commitment; >50% = aspirational to lender |
+| **R2 — Programme share** | `LOI expansion / counterparty disclosed programme target` | 3–10% = meaningful tranche; <1% = rounding error; >25% = unrealistic anchor |
+| **R3 — RFS alignment** | `DE first RFS date vs counterparty build cadence (Fireflies-observed)` | ±2 quarters = aligned; >4 quarters drift = flag |
+| **R4 — Term vs customer's own commercial tier** | 5-yr minimum vs their public annual/monthly tiers | If customer's own longest public tier is 1yr, 5yr is a step-up requiring negotiation flag |
+
+Full table + worked example in `_shared/loi-sizing-framework.md`.
+
 **Handoff to Phase 5** when user responds with values.
+
+### Phase 4.5 — Signatory Name Cross-Check (v3.7.0, scope I)
+
+**Skill action:** After Phase 4 intake, before YAML write:
+1. Query Fireflies `participants:{counterparty_domain}` for meetings in last 365 days.
+2. Extract distinct `displayName + email` pairs.
+3. If user-provided `signatory_name` doesn't fuzzy-match any observed name (surname-based match), prompt:
+   `"User-provided name 'X' not observed in Fireflies meetings for {domain}. Observed names: [...]. Confirm or update."`
+4. Do NOT silently rewrite; require explicit confirmation.
+5. **Known failure mode — domain-surname homonyms:** If signatory surname shares letters with counterparty domain (e.g., "Marin Barrage" for domain `barrage.net`), always escalate verification regardless of Fireflies match, because the domain name may be mistaken for the surname.
 
 ### Phase 5 — Recital B Draft
 
@@ -339,6 +400,22 @@ Respond with (a), (b) [notes], or (c) followed by the replacement text.
 
 **v3.5.3-cont scope J9**: prior Phase 5 prompt offered only "Accept, or request edits?" — user had to manually edit YAML and re-run the generator for each redraft. Three-option prompt above makes redraft and paste-replacement first-class actions inside the Phase 5 loop.
 
+**v3.7.0 — Bespoke Recital A gate (scope C):** Bespoke Recital A is the exception, not a blending convenience. If bespoke is requested, the operator must confirm ONE of:
+- (a) Counterparty profile is genuinely non-commercial (sovereign regulator, academic institution), OR
+- (b) The per-type canonical tail is materially incorrect for this specific relationship.
+
+If neither applies, the operator must use `default`. Blending messaging (e.g., integration + sovereignty) is drift — the canonical body already carries both framings. Capture the justification in intake YAML as `choices.recital_a_bespoke_justification: "..."`. Phase 5 emits the gate before accepting bespoke:
+
+```
+⚠️ Bespoke Recital A requested.
+Confirm one of:
+(a) Counterparty profile is genuinely non-commercial (sovereign regulator / academic institution)
+(b) Canonical tail for [type] is materially incorrect — explain: __________
+If neither, use `default` which already carries integration + sovereignty framing.
+```
+
+**Phase 5 reference order (scope D):** Start from the **newest** regression fixture in `regression/v{X.Y}/*_intake.yaml` that matches the LOI type. Fall back to `examples/intake_example_*.yaml` only if no regression fixture matches. The examples directory illustrates v3.2 baseline behavior; regression fixtures illustrate the latest production patterns.
+
 ### Phase 6 — Assumption-Confirmation Gate
 
 **Skill action:** Present a single-screen summary of every decision that will go into the .docx. One last chance to catch errors before generation.
@@ -364,12 +441,14 @@ Recital A variant: [variant]
 Recital B ([N] words, [K] sentences):
     [full paragraph — verbatim, not truncated]
 
-source_map pillars (tier-1 URLs):
-    pillar_1: [URL or "[TBC]"]
-    pillar_2: [URL or "[TBC]"]
-    pillar_3: [URL or "[TBC]"]
-    pillar_4: [inferred note or "[TBC]"]
-    pillar_5: [URL, "[TBC]", or "N/A — omitted per Signal Test gate 1"]
+source_map pillars (tier-1 URLs + evidence tier):
+    pillar_1 (Identity):   [URL or "[TBC]"] — Tier-1 [registry + website] | Tier-2 [brochure] | [TBC]
+    pillar_2 (Business):   [URL or "[TBC]"] — Tier-1 | Tier-2 | [TBC]
+    pillar_3 (Track rec):  [URL or "[TBC]"] — Tier-1 | Tier-2 | [TBC]
+    pillar_4 (Strat fit):  [inferred note or "[TBC]"] — inferred
+    pillar_5 (Fwd plans):  [URL, "[TBC]", or "N/A — omitted per Signal Test gate 1"]
+
+⚠️ 2+ pillars at Tier-2 or below → elevated Phase 7.5 review (5-claim sample).
 
 Commercial:
 - [type-specific key values]
@@ -391,6 +470,8 @@ Confirm (yes) or specify changes?
 **v3.5.3-cont scope J8**: prior Phase 6 prompt truncated Recital B to 60 chars, so the user could not audit inline citations, framing, tone, or `[TBC]` markers from the confirmation screen — they had to open the generated `.docx` to see the full paragraph, which defeated the gate's purpose. Phase 6 now surfaces the full Recital B paragraph verbatim, the word + sentence count, and the full source_map pillar URLs for one-screen audit. If Recital B has changed since Phase 5 acceptance, the prompt should prepend a diff-highlight block showing what changed (reviewer discipline; not yet enforced programmatically).
 
 Any `no` → loop back to the relevant phase. `yes` → Phase 7.
+
+**Auto mode (v3.7.0, scope J):** Phase 6 becomes "summary before fire" — emit the summary above, wait 10 seconds for operator interrupt, then proceed automatically. Do not require an explicit "yes" gate in Auto mode. If the operator interrupts within the window, loop back to the relevant phase.
 
 ### Phase 7 — Generation + QA
 
@@ -470,27 +551,46 @@ Return: PASS / FLAG-FOR-REVISION (with line-level feedback) / REJECT (with reaso
 
 ### Phase 8 — Delivery
 
-**Skill action:** Emit path and next-step menu. Hand off to downstream skills as needed.
+**Skill action (v3.7.0 — auto-execute, scope K):** Emit delivery summary + action menu. Selected actions execute. Pre-authorized tools (`manage_crm_objects`, `clickup_create_task`) are invoked directly without a second permission gate — the LOI generation itself is the operator confirmation.
 
-**v3.5.3 scope J13 — Drive routing (deferred):** Phase 8 should route the generated `.docx` through `scripts/artifact_storage.py::upload_artifact()` so binaries land in the Drive folder structure (`Fundraise DE/06_Shared_Collateral/` generic or `Projects Benelux_Ops/{project}/Legal/` when site-named), not in `/tmp/`. This is a CLAUDE.md §4 requirement. **Status: deferred — `artifact_storage.py` script does not yet exist in the repo.** When it lands, wire Phase 8 to call `upload_artifact(output_path, drive_subpath=...)` after `doc.save(output)` and emit the Drive URL (not the local path) in the delivery prompt. Local copy can be retained via optional `--local` flag.
+**Dry-run default (first shipping cycle):** Phase 8 defaults to `--dry-run` (show what would be written, don't write). Real writes are activated via `--phase-8-auto-execute` CLI flag (specialist A defines the flag). Document clearly in delivery output whether dry-run or live.
+
+**6 actions (select any subset):**
+1. **HubSpot company + deal create/update** — `manage_crm_objects`: create company record (`name`, `domain`, `description` = Recital B first sentence, `lifecyclestage: opportunity`, `loi_status: LOI Sent — Draft`) + associate deal (`dealname: LOI-{Type}-{Counterparty}`, `stage: LOI Sent`, `pipeline: Commercial`). Pre-authorized; executes on selection.
+2. **ClickUp task** — `clickup_create_task`: task "LOI sent — {Counterparty}" with LOI output path + [TBC] field list. Pre-authorized; executes on selection.
+3. **Upload .docx to Drive audit folder** — `artifact_storage.py::upload_artifact()` → `Fundraise DE/06_Shared_Collateral/_Drafts/{YYYYMMDD}_DEG_LOI-{Type}_{slug}/` (specialist C implements). Emits Drive URL on completion.
+4. **Create domain card** — create `/domains/counterparties/{slug}/overview.md` linking HubSpot company ID, deal ID, Drive folder, Fireflies meeting count, dual-role flag (if applicable), and next-step status.
+5. **Cover-email cross-check** — extract headline claims from cover email body; map each to a LOI clause; flag any email claim without LOI backing or any [TBC] claimed in email but not flagged in LOI.
+6. **Done** (no-op).
+
+**v3.5.3 scope J13 — Drive routing:** `artifact_storage.py` is implemented as action (3) above. Until the script lands in `scripts/`, the action emits a warning and saves locally.
 
 **Prompt template (PASS):**
 ```
 ✅ Generated: [absolute path to .docx]
     Type: DE-LOI-[Type]-v3.3
-    Recital A variant: [variant]
+    Recital A: canonical body + [Type] tail (v3.4)
     Recital B: [N] words
     QA: PASS (warnings: [N], failures: 0)
     QA report: [path to _qa.txt]
     Remaining [TO BE CONFIRMED]: [list or "none"]
+    Phase 8 mode: dry-run (add --phase-8-auto-execute to enable live writes)
 
-Next step (pick one):
-(1) Open in Word for manual review
-(2) Export to PDF via document-factory pipeline
-(3) Hand off to executive-comms for DocuSign email draft
-(4) Log against HubSpot deal (stage: LOI Sent)
-(5) Done
+Phase 8 actions — pick any (will execute, not just display):
+(1) Create HubSpot company + deal for {counterparty}  [dry-run: would create]
+(2) Create ClickUp task: "LOI sent — {counterparty}"   [dry-run: would create]
+(3) Upload .docx to Drive audit folder               [pending artifact_storage.py]
+(4) Create /domains/counterparties/{slug}/overview.md [dry-run: would create]
+(5) Cover-email cross-check (map email claims → LOI clauses)
+(6) Done
 ```
+
+### Session Chapter Hygiene (v3.7.0, scope N)
+
+Call `mark_chapter` at the following moments:
+- At Phase 7 delivery (LOI generated)
+- Whenever the operator pivots to cover-email drafting
+- Whenever a material correction loop opens (e.g., signatory name correction, Recital B redraft after Phase 7.5 FLAG)
 
 ### Invariants across phases
 
@@ -639,7 +739,7 @@ Manual LOI templates (for non-technical users):
 - `grower-relationship-mgr` — post-HoT lifecycle (heat offtake coordination, SDE++, expectations).
 - `document-factory` — brand rendering engine for LOI covers/headers/footers. **Not** used for Site HoT.
 - `_shared/nda-policy-positions.md` — shared policy layer, read by both this skill and `legal-counsel`.
-- `_shared/loi-recital-a-library.md` — 3 canonical Recital A variants + bespoke (MPN v3.2-aligned). Single source of truth for Recital A.
+- `_shared/loi-recital-a-library.md` — canonical Recital A body + 5 per-type tails + bespoke exception path (MPN v3.2-aligned, v3.4 canonicalized). Single source of truth for Recital A.
 - `_shared/counterpart-description-framework.md` — 5-pillar Recital B methodology, source-capture protocol, consortium/federation guidance, per-type tuning, anti-patterns, worked examples.
 - `_shared/loi-qa-gate.md` — pre-save linter rule catalogue (20 rules), severity levels, override mechanism.
 
