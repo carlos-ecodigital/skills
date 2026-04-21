@@ -79,7 +79,7 @@ To verify v3.5.x end-to-end against your Polarise use case:
 ```bash
 # After v3.5 PR merges to main
 git checkout main && git pull
-cd .claude/skills/legal-assistant/colocation
+cd .claude/skills/legal-assistant/sales
 python3 generate_loi.py regression/v3.5/polarise_wholesale_intake.yaml
 open "20260417_DEG_LOI-Wholesale_Polarise_(DRAFT).docx"
 ```

@@ -413,7 +413,7 @@ All three templates share identical binding clauses (Cl. 5, 6 ALT-B, 8). If a bi
 | DE-LOI-EndUser | 3.5 | 2026-04-17 |
 | DE-LOI-StrategicSupplier | 1.0 | 2026-04-17 |
 | DE-LOI-EcosystemPartnership | 1.0 | 2026-04-17 |
-| DE-Site-HoT (grower body + Annex A) | 1.0 | 2026-03-13 (see `de-site-hot/templates/template-version.md`) |
+| DE-Site-HoT (grower body + Annex A) | 1.0 | 2026-03-13 (see `sites/hot/templates/template-version.md`) |
 
 ### Changelog summary (v3.2 → v3.5.6)
 
@@ -443,8 +443,8 @@ This section covers assembly rules specific to the DE Site HoT (grower Heads of 
 
 | Artefact | Source | Modification allowed? |
 |---|---|---|
-| **Body** (`hot-grower-body-v1.docx`) | `de-site-hot/templates/` | **NEVER**. Legally reviewed bilingual (EN/NL) body. Variable references point to Annex A items. If a request implies body modification, REFUSE and escalate to `legal-counsel`. |
-| **Annex A** (`hot-grower-annex-a-v1.docx`) | `de-site-hot/templates/` | Only via form-fill of yellow (FFFF99, required) and green (CCFFCC, conditional) shaded cells per `field-registry.json`. No structural edits. |
+| **Body** (`hot-grower-body-v1.docx`) | `sites/hot/templates/` | **NEVER**. Legally reviewed bilingual (EN/NL) body. Variable references point to Annex A items. If a request implies body modification, REFUSE and escalate to `legal-counsel`. |
+| **Annex A** (`hot-grower-annex-a-v1.docx`) | `sites/hot/templates/` | Only via form-fill of yellow (FFFF99, required) and green (CCFFCC, conditional) shaded cells per `field-registry.json`. No structural edits. |
 
 ### 12.2 Intake discipline
 
@@ -479,4 +479,4 @@ The NDA/confidentiality policy in `_shared/nda-policy-positions.md` applies to t
 
 ### 12.7 Generation caveat (2026-04-13)
 
-The form-fill engine `generate_site_hot.py` is **not yet built**. The versioned .docx templates in `de-site-hot/templates/` are Git LFS pointer stubs (130 B each); the real binaries must be fetched before the engine can be written. See `de-site-hot/templates/README.md` for fetch instructions. Until resolved: the intake runs to completion, `annex-a-data.json` is written, the Annex A docx step writes a `PENDING_ENGINE.md` placeholder, and the body is copied (also a stub until fetch).
+The form-fill engine `generate_site_hot.py` is **not yet built**. The versioned .docx templates in `sites/hot/templates/` are Git LFS pointer stubs (130 B each); the real binaries must be fetched before the engine can be written. See `sites/hot/templates/README.md` for fetch instructions. Until resolved: the intake runs to completion, `annex-a-data.json` is written, the Annex A docx step writes a `PENDING_ENGINE.md` placeholder, and the body is copied (also a stub until fetch).

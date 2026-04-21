@@ -202,9 +202,9 @@ All 5 types run the same linter; rule applicability varies by clause scope. Ever
 | **Counterparty** | Dutch greenhouse grower (B.V., V.O.F., C.V., N.V., Coöperatie U.A.) |
 | **Structure** | Two-part: locked bilingual Body (EN/NL, never modified) + populated Annex A (form-filled) |
 | **Intake method** | 7-phase conversational (Identification → Signatory/Greenhouse → Electrical → Heat → Land → Commercial → Optional + Notices) |
-| **Field count** | 48 (35 required yellow-shaded + 13 conditional green-shaded) |
-| **Template version** | 1.0 (2026-03-13); bilingual; locked body |
-| **Engine** | `generate_site_hot.py` (NOT YET BUILT — blocked on LFS template fetch) |
+| **Field count** | 58 (44 required + 12 conditional) per registry v1.1, tagged with `stage` ∈ {loi, hot, both} and `asset` ∈ enum |
+| **Template version** | Body 1.0 (2026-03-13, locked bilingual); Annex A 1.0; DE-HoT-Site-v1.0 master template (1,360 lines) derived from body for LOI→HoT composition |
+| **Engine** | `generate_site_hot.py` v0.1 — **LIVE** (3-pass XML form-fill; byte-exact body copy with SHA-256 verification) |
 | **Validators** | KVK 8-digit, EAN `^871\d{15}$`, capacity base≤total, heat ΔT ≥15°C, co-investment ≤50%, entity suffix whitelist |
 | **Conditional blocks** | Grower ≠ landowner (D.8–11, G.Landowner); mortgaged land (D.10–11, G.Financier); CHP lease (F.1a); co-investment (F.2a) |
 | **Escalations** | Non-50:50 heat split → Carlos; co-investment → Jelmer; missing consent → Carlos + legal-counsel; body modification → REFUSE |
@@ -219,7 +219,7 @@ All 5 types run the same linter; rule applicability varies by clause scope. Ever
 | | Colocation LOI | Site HoT |
 |---|---|---|
 | Intake format | YAML file | Conversational (7 phases) |
-| Engine status | Deterministic Python (`generate_loi.py`), shipping | NOT BUILT — blocked on LFS fetch |
+| Engine status | Deterministic Python (`sales/generate_loi.py`), shipping | Deterministic Python (`sites/hot/generate_site_hot.py` v0.1), shipping |
 | Template storage | Markdown reference (not consumed by script) + Python-built .docx from scratch | Locked binary .docx, form-filled in place via zipfile + xml.etree |
 | Brand layer | Via `document-factory` (cover page, headers, footers) | Self-contained (pre-formatted bilingual template) |
 | Body mutability | Full (script builds from scratch) | Locked; REFUSE body modification |

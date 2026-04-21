@@ -56,7 +56,7 @@ If a request falls outside the templated documents below, or requires legal judg
 | Stream | Document | Sub-types | Engine | Intake | Output |
 |---|---|---|---|---|---|
 | Colocation | LOI/NCNDA v3.2 | End User (EU), Distributor Mode A/B (DS), Wholesale (WS), Strategic Supplier (SS, v1.0), Ecosystem Partnership (EP, v1.0) | `colocation/generate_loi.py` (Python, stdlib + python-docx) | YAML | Branded .docx + QA report |
-| Site Sourcing | DE Site HoT v1.0 | Grower (single variant) | Pending — see `de-site-hot/templates/README.md` | 7-phase conversational | Populated Annex A .docx + locked body copy |
+| Site Sourcing | DE Site HoT v1.0 | Grower (single variant) | Pending — see `sites/hot/templates/README.md` | 7-phase conversational | Populated Annex A .docx + locked body copy |
 
 **v3.2 engine coverage:**
 - Full engine: EU, DS (Mode A / Mode B), WS (Clauses 1–8 + Schedule 1 auto-generated).
@@ -65,7 +65,7 @@ If a request falls outside the templated documents below, or requires legal judg
 ### Engine asymmetry (current state)
 
 - **Colocation:** `generate_loi.py` is a complete, deterministic Python engine. Runs end-to-end from YAML to a fully branded .docx.
-- **Site Sourcing:** the Annex A form-fill engine (`generate_site_hot.py`) is **not yet built**. Reason: the versioned .docx templates live on Git LFS and the local Obsidian SSOT checkout holds only 130-byte pointer stubs. Until the real binaries are fetched, the Site HoT workflow runs the intake to completion, writes `annex-a-data.json` to the SSOT, and flags document generation as a blocked step. See `de-site-hot/templates/README.md` for fetch instructions.
+- **Site Sourcing:** the Site LOI engine (`sites/loi/generate_site_loi.py`) and Site HoT engine (`sites/hot/generate_site_hot.py`) are **LIVE** as of v4.0-rc1. Both produce bilingual EN/NL `.docx` artefacts via `document-factory/bilingual_body.py` + `signature_block.py`. LFS template binaries resolved (real Word files in `sites/hot/templates/`). End-to-end Van Gog LOI smoke produces a 46 KB bilingual `.docx` with zero format-validator issues; cross-doc gate surfaces expected `DataAcc-1` + `Esc-2` verdicts per registry `escalation_rules`. See `sites/_shared/sal_runbook.md` for operator workflow.
 
 ## Colocation Stream Workflow
 
@@ -148,7 +148,7 @@ Use defaults from the Defaults table below.
 ### Step 6: Generate the Document
 
 ```bash
-cd /Users/crmg/skills/.claude/skills/legal-assistant/colocation
+cd /Users/crmg/skills/.claude/skills/legal-assistant/sales
 python3 generate_loi.py examples/intake.yaml --output /path/to/output.docx
 ```
 
@@ -607,8 +607,8 @@ This stream uses the 7-phase conversational intake pattern. The intake is the va
 ### Pre-Flight
 
 Silently verify (do not ask the user):
-- `de-site-hot/templates/template-version.md` — current active version
-- `de-site-hot/field-registry.json` — 48 fields, validators, conditionals, phase assignments
+- `sites/hot/templates/template-version.md` — current active version
+- `sites/hot/field-registry.json` — 48 fields, validators, conditionals, phase assignments
 - SSOT `contracts/hots/active/{grower-slug}/` — if it exists, offer to RESUME from `annex-a-data.json`
 - Operator identity (for audit trail)
 
@@ -645,9 +645,9 @@ Once confirmed:
 
 2. **Save `annex-a-data.json`** with version, template_version, created timestamp, operator, grower_slug, grower_name, status, all field key-value pairs, documents map, escalations list, missing_fields list.
 
-3. **Populate Annex A .docx** — **currently blocked**. Real templates are Git LFS stubs. Write a TODO marker file `HoT_Annex_A_{Name}_PENDING_ENGINE.md` in the grower folder alongside the JSON, noting the engine is not yet available. When `generate_site_hot.py` ships, re-run against this JSON to produce `DE-Site-HoT_Annex_A_{Name}.docx`. The engine pseudocode lives in `de-site-hot/templates/README.md`.
+3. **Populate Annex A .docx** — `sites/hot/generate_site_hot.py` consumes `annex-a-data.json` + the v1.1 registry and form-fills the real Annex A template via a 3-pass XML walk (shaded cells, header table, notice addresses). Output: `DE-Site-HoT_Annex_A_{Name}.docx`. Single-partner v0.1; multi-partner fan-out queued for Wave 2.
 
-4. **Copy body template** to `contracts/hots/active/{grower-slug}/DE-Site-HoT_Body_{Name}.docx`. **Do NOT open or modify the body file.** (Today: the copy will itself be an LFS stub until binaries fetched; document that in the PENDING file.)
+4. **Copy body template** to `contracts/hots/active/{grower-slug}/DE-Site-HoT_Body_{Name}.docx`. Engine performs a byte-exact `shutil.copy2` with SHA-256 before/after verification. **Do NOT open or modify the body file.**
 
 5. **Save `intake-log.md`** with timestamped Q&A transcript of the full intake conversation. Include the automated-tool disclaimer at the bottom.
 
@@ -712,7 +712,7 @@ Escalate to the user — tell them to invoke `legal-counsel` — when:
 | Recital A variant | `default` (override per counterparty profile) | `_shared/loi-recital-a-library.md` |
 | Closing line | `We look forward to working with you.` (single sentence) | Linter-checked R-5/R-6/R-9; bespoke replaces default entirely |
 | Schedule title suffix | No `(NON-BINDING)` (v3.2) | Italic prefatory note instead |
-| Template versions | LOI v3.2 (EU/DS/WS) · SS v1.0 · EP v1.0 · Site HoT v1.0 | See `ASSEMBLY_GUIDE.md` + `CHANGELOG.md` + `de-site-hot/templates/template-version.md` |
+| Template versions | LOI v3.2 (EU/DS/WS) · SS v1.0 · EP v1.0 · Site HoT v1.0 | See `ASSEMBLY_GUIDE.md` + `CHANGELOG.md` + `sites/hot/templates/template-version.md` |
 
 **Policy SSOT:** `_shared/nda-policy-positions.md` — single source of truth for NDA/NCNDA commercial positions (duration, scope, carve-outs, penalty). Referenced by `ASSEMBLY_GUIDE.md` Red-Line Protocol and by `legal-counsel`'s contract-review workflow.
 
@@ -766,7 +766,7 @@ legal-assistant/
 │   ├── generate_loi.py                 (LOI engine — YAML → branded .docx)
 │   ├── templates/                      (three v3.0 reference .md templates, not consumed by script)
 │   └── examples/                       (YAML intake examples for each LOI type)
-├── de-site-hot/
+├── sites/hot/
 │   ├── field-registry.json             (48 fields, validators, conditionals, phase assignments)
 │   ├── templates/
 │   │   ├── hot-grower-annex-a-v1.docx  (LFS pointer — fetch required before engine build)

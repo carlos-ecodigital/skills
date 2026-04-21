@@ -478,6 +478,15 @@ def audit_document(doc):
     for t_idx, table in enumerate(doc.tables):
         tblPr = table._tbl.find(qn('w:tblPr'))
 
+        # T0: exempt bilingual-body tables from data-table rules.
+        # Two-column EN/NL clause bodies are intentional layout tables, not
+        # data tables — the Cobalt-header / CENTER-align / WHITE-bold
+        # conventions don't apply. Rendered by bilingual_body.py.
+        if tblPr is not None:
+            _desc = tblPr.find(qn('w:tblDescription'))
+            if _desc is not None and _desc.get(qn('w:val')) == '__bilingual_body__':
+                continue
+
         # T1: width
         if tblPr is not None:
             tblW = tblPr.find(qn('w:tblW'))

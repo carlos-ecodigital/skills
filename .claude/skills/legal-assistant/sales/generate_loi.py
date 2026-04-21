@@ -43,7 +43,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
 # Import shared cover page and branding from document-factory
-# Script now lives under legal-assistant/colocation/, one level deeper than the
+# Script now lives under legal-assistant/sales/, one level deeper than the
 # original loi-generator/ layout, so resolve document-factory via parent.parent.
 SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR.parent.parent / "document-factory"))

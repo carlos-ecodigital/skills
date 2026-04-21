@@ -1,0 +1,206 @@
+# Reference intake fixture for Van Gog Grubbenvorst — multi-party grower+BESS deal.
+# Sourced from:
+#   (a) DEC_LOI_Lodewijk_VanGog_DRAFT_v1.pdf (DocuSigned 2026-04-14; envelope CF30318B-72FC-42D5-AF94-2EDAB78CBB86)
+#   (b) HubSpot Deal 365739346165 ("van Gog kwekerijen Grubbenvorst")
+#   (c) HubSpot Contacts 578654116067, 530825526469, 579068405992, 45051 (4 associated)
+#
+# Purpose: exercise the full Asset × Contribution × Value-Exchange model in one fixture:
+#   - 3 Site Partners, 3 distinct role-label combinations
+#   - BESS co-development add-on (§3.2 activates)
+#   - Multi-location Section L
+#   - Heat supply + equity-in-BESS returns (mixed value taxonomy)
+#   - Known HubSpot data-hygiene gap: 0 associated Companies → DataAcc-1 gate will fire (expected)
+
+deal_yaml_schema_version: "1.0"
+
+# ─── Identity ─────────────────────────────────────────────────────────────────
+slug: van-gog-grubbenvorst
+hubspot_deal_id: 365739346165
+counterparty_folder_name: "Van Gog Grubbenvorst_Project_Benelux_Ops"
+
+# ─── HubSpot sync state (hydrated from MCP query) ─────────────────────────────
+hubspot:
+  pipeline: "492649440"
+  dealstage: "1163932892"
+  dealname: "van Gog kwekerijen Grubbenvorst"
+  hs_lastmodifieddate: "2026-04-13T07:23:54.058Z"
+  last_sync_at: "2026-04-20T00:00:00Z"
+  conflict_log: []
+
+# ─── Ownership ────────────────────────────────────────────────────────────────
+owner:
+  hubspot_owner_id: "521949924"
+  name: "TODO(lookup_via_search_owners)"
+  email: "TODO(lookup_via_search_owners)"
+
+# ─── Deal archetype & commercial envelope ─────────────────────────────────────
+deal_archetype: "Heat Recovery"
+dealtype: "newbusiness"
+commercial:
+  deal_value_eur: 300000
+  currency: "EUR"
+  contract_mw_available: 3
+  contract_mw_potential: 10
+  pricing:
+    preliminary: "cpi_indexed"          # LOI §3.3 — "pricing indexed to inflation (CPI)"
+    indicative: null                    # populated in HoT after docs arrive
+
+# ─── Site Partners (3) — Section R of the LOI ────────────────────────────────
+site_partners:
+  - entity_id: null                      # GAP: HubSpot Company not associated — DataAcc-1 will fire
+    legal_name: "Van Gog Grubbenvorst B.V."
+    kvk: null                            # enrichment target via kvk_uittreksel doc
+    registered_address: null
+    signatory:
+      contact_id: null                   # Marion van Gog not in current HubSpot contact set on this deal
+      name: "Marion van Gog"
+      title: "Directeur"
+      email: null
+      signing_authority: "sole"
+    contributions:
+      - asset: grid_interconnection
+        instrument: ato_sharing          # Van Gog holds the ATO; Project shares the connection
+        details:
+          mva: null                      # enrichment target from ATO doc (contract_capacity_mw_potential suggests 10 MW = ~16 MVA equivalent)
+          dso: "Enexis"                  # Grubbenvorst is in Limburg (Horst aan de Maas) — Enexis territory
+          ean_code: null
+          import_mw: null
+          export_mw: null
+          ato_doc_ref: null              # documents/ato_vangog.pdf once uploaded
+        stage_tag: "loi"
+        source_doc_ref: null
+      - asset: equipment_bess
+        instrument: bess_jv_50_50        # LOI §3.2
+        details:
+          mw: 25.5                       # LOI §3.2 "approximately 25.5 MW / 51 MWh"
+          mwh: 51
+          chemistry: "LFP"               # LOI §3.2 "lithium iron phosphate"
+          co_invest_pct: 50
+          operational_phase: "pre_dec"   # "BESS is intended to be operational prior to the DEC"
+          revenue_sources: ["energy_arbitrage", "fcr", "ancillary_services"]
+        stage_tag: "loi"
+    returns:
+      - value: equity
+        instrument: bess_spv_equity
+        details:
+          percent: 50
+          convert_at_fid_to: "projectbv_equity"   # LOI §3.2 "conversion terms to be agreed in the HoT"
+          vesting: null
+        stage_tag: "loi"
+
+  - entity_id: null                      # GAP: not associated
+    legal_name: "Van Gog Grubbenvorst Vastgoed B.V."
+    kvk: null
+    registered_address: null
+    signatory:
+      contact_id: null
+      name: "Marion van Gog"             # same signatory per LOI signature page (via Van Gog Grubbenvorst B.V. as Bestuurder)
+      title: "Directeur"
+      email: null
+      signing_authority: "sole"          # through bestuurder chain
+    contributions:
+      - asset: land
+        instrument: recht_van_opstal
+        details:
+          parcel_id: null                # enrichment target from Kadaster extract
+          area_m2: null
+          area_m2_per_mw: 300            # LOI §3.5 "approximately 300 m² per MW"
+        stage_tag: "loi"
+        source_doc_ref: null             # documents/kadaster_vangog.pdf once uploaded
+    returns:
+      - value: money
+        instrument: opstal_fee_or_revenue_share
+        details:
+          tbd: true                      # LOI §3.5 "terms ... are to be determined in the HoT"
+        stage_tag: "hot"
+
+  - entity_id: null                      # GAP: not associated
+    legal_name: "Van Gog kwekerijen Grubbenvorst B.V."
+    kvk: null
+    registered_address: null
+    signatory:
+      contact_id: "578654116067"         # Koen Saris — Operationeel Directeur @ vangogkwekerijen.nl
+      name: "Koen Saris"
+      title: "Operationeel Directeur"
+      email: "koen.saris@vangogkwekerijen.nl"
+      signing_authority: "sole"
+    contributions: []                    # pure offtaker
+    returns:
+      - value: energy_heat
+        instrument: heat_supply_agreement          # LOI §3.3 "long-term heat offtake agreement"
+        details:
+          mwh_per_year: null                       # TBD in HoT
+          price_eur_mwh: "cpi_indexed"             # LOI §3.3 "pricing indexed to inflation (CPI)"
+          price_mechanism: "cpi_indexed"
+          term_years: 30                           # LOI §3.8
+          delivery_mode: "direct_pipeline"         # LOI §3.3 "direct pipeline connection"
+          delta_t_requirement_c: null
+          min_offtake_obligation_mwh: null         # LOI §3.3 "minimum offtake obligations" - TBD
+          credit_support: null                     # LOI §3.3 - TBD
+        stage_tag: "loi"
+        source_doc_ref: null
+      # Revenue-sharing note from LOI §3.3:
+      # "economic benefit of the heat revenue will be shared between Digital Energy
+      # and the Grid Contributor" — this is a cross-partner mechanic documented in
+      # the LOI but whose commercial specifics land in HoT §6. Not modeled as a
+      # return on the Heat Offtaker record (it's a revenue-share between DE and
+      # Van Gog Grubbenvorst B.V., the Grid Contributor).
+
+# ─── Locations — Section L ───────────────────────────────────────────────────
+locations:
+  - parcel_id: null                      # TODO: enrich from Kadaster
+    address: "TODO(kadaster_enrichment)"
+    postcode: null
+    dso: "Enexis"
+    municipality: "Horst aan de Maas"
+    bestemmingsplan_designation: null
+
+# ─── Add-ons ──────────────────────────────────────────────────────────────────
+addons:
+  bess_co_development: true              # derived: Van Gog Grubbenvorst B.V. contributes equipment_bess
+  btm_renewables: false
+
+# ─── Documents (empty at LOI stage; Site Partner uploads post-LOI) ───────────
+documents: []
+
+# ─── Enrichment audit (populated by engine during run) ───────────────────────
+enrichment:
+  kvk_active: null
+  pdok_parcel_confirmed: null
+  dso_matches_postcode: null
+  sde_eligibility: null
+  last_enrichment_at: null
+
+# ─── Gate overrides ───────────────────────────────────────────────────────────
+gate_overrides: []
+
+# ─── Generated artifacts ──────────────────────────────────────────────────────
+generated:
+  loi_v1_path: "drafts/20260414_DE_LOI_Site_van-gog-grubbenvorst_v1_(DRAFT).docx"
+  loi_v1_qa_path: "drafts/20260414_DE_LOI_Site_van-gog-grubbenvorst_v1_qa.txt"
+  loi_v1_hash: "sha256:TODO(compute_on_generation)"
+  hot_v1_path: null
+  hot_v1_qa_path: null
+  hot_v1_hash: null
+  cross_doc_gate_report_path: null
+
+# ─── Timeline ────────────────────────────────────────────────────────────────
+timeline:
+  loi_drafted_date: "2026-04-14"
+  loi_signed_date: "2026-04-14"         # DocuSign envelope CF30318B-72FC-42D5-AF94-2EDAB78CBB86
+  hot_target_date: "2026-07-13"         # loi_signed + 90 days (LOI §4.3)
+  hot_drafted_date: null
+  hot_signed_date: null
+  pre_feasibility_status: "in_progress"  # LOI §4.1 assessment active
+
+# ─── Known gaps / test-expectation markers ───────────────────────────────────
+# Intentionally documented so test assertions can key off them:
+_expected_gate_findings:
+  DataAcc-1:
+    - "site_partners[0].entity_id is null (Van Gog Grubbenvorst B.V. Company not associated with HubSpot Deal 365739346165)"
+    - "site_partners[1].entity_id is null (Van Gog Grubbenvorst Vastgoed B.V.)"
+    - "site_partners[2].entity_id is null (Van Gog kwekerijen Grubbenvorst B.V.)"
+  Gap-1:
+    - "Multiple enrichment targets remain null pending document uploads (kvk, parcel_id, mva, mwh_per_year, etc.)"
+  Con-?:
+    - "No LOI↔HoT contradictions yet (HoT not yet generated)"

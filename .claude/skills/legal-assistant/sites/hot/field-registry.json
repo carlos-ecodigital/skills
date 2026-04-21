@@ -1,0 +1,1100 @@
+{
+  "version": "1.1",
+  "template": "hot-grower-annex-a-v1.docx",
+  "total_fields": 58,
+  "required_fields": 44,
+  "conditional_fields": 12,
+  "sections": {
+    "header": {
+      "label": "Header",
+      "label_nl": "Koptekst",
+      "fields": {
+        "project_name": {
+          "id": "header.project_name",
+          "label": "Project Name",
+          "label_nl": "Projectnaam",
+          "type": "text",
+          "required": true,
+          "format": "free_text",
+          "example": "DEKWAKEL-01",
+          "phase": 1,
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "version": {
+          "id": "header.version",
+          "label": "Version",
+          "label_nl": "Versie",
+          "type": "text",
+          "required": true,
+          "format": "semantic_version",
+          "default": "1.0",
+          "phase": 1,
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "none"
+        },
+        "date": {
+          "id": "header.date",
+          "label": "Date",
+          "label_nl": "Datum",
+          "type": "date",
+          "required": true,
+          "format": "DD-MM-YYYY",
+          "phase": 1,
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "none"
+        }
+      }
+    },
+    "A": {
+      "label": "Grower & Greenhouse",
+      "label_nl": "Teler & Kas",
+      "fields": {
+        "A1_legal_name": {
+          "id": "A.1",
+          "label": "Legal company name",
+          "label_nl": "Statutaire naam",
+          "type": "text",
+          "required": true,
+          "validation": "must_end_with_entity_suffix",
+          "entity_suffixes": [
+            "B.V.",
+            "V.O.F.",
+            "C.V.",
+            "N.V.",
+            "Coöperatie U.A."
+          ],
+          "phase": 1,
+          "question": "What is the grower's legal company name (as registered at KVK)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "A2_kvk_number": {
+          "id": "A.2",
+          "label": "KVK number",
+          "label_nl": "KVK-nummer",
+          "type": "text",
+          "required": true,
+          "validation": "regex",
+          "pattern": "^\\d{8}$",
+          "error": "KVK must be exactly 8 digits",
+          "phase": 1,
+          "question": "KVK number (8 digits)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "A3_registered_address": {
+          "id": "A.3",
+          "label": "Registered address",
+          "label_nl": "Statutair adres",
+          "type": "text",
+          "required": true,
+          "format": "street_postcode_city",
+          "phase": 1,
+          "question": "Registered address (street, postcode, city)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "A4_signatory_name": {
+          "id": "A.4",
+          "label": "Signatory name",
+          "label_nl": "Naam ondertekenaar",
+          "type": "text",
+          "required": true,
+          "phase": 2,
+          "question": "Who will sign on behalf of the grower (full name)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "A5_signatory_title": {
+          "id": "A.5",
+          "label": "Signatory title",
+          "label_nl": "Functie ondertekenaar",
+          "type": "text",
+          "required": true,
+          "example": "Directeur",
+          "phase": 2,
+          "question": "What is their title/function?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "A6_signing_authority": {
+          "id": "A.6",
+          "label": "Signing authority",
+          "label_nl": "Tekenbevoegdheid",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Sole / Zelfstandig bevoegd",
+            "Joint / Gezamenlijk bevoegd"
+          ],
+          "phase": 2,
+          "question": "Signing authority: sole (zelfstandig bevoegd) or joint (gezamenlijk bevoegd)?",
+          "warning_if": "Joint — flag that two signatures will be required",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "A7_greenhouse_location": {
+          "id": "A.7",
+          "label": "Greenhouse location",
+          "label_nl": "Kaslocatie",
+          "type": "text",
+          "required": true,
+          "phase": 2,
+          "question": "Where is the greenhouse located (address)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "land"
+        },
+        "A8_current_size_ha": {
+          "id": "A.8",
+          "label": "Current greenhouse size",
+          "label_nl": "Huidige kasgrootte",
+          "type": "number",
+          "required": true,
+          "unit": "hectares",
+          "phase": 2,
+          "question": "Current greenhouse size in hectares?",
+          "xml_marker": "FFFF99",
+          "stage": "loi",
+          "asset": "land"
+        },
+        "A9_planned_size_ha": {
+          "id": "A.9",
+          "label": "Planned greenhouse size",
+          "label_nl": "Geplande kasgrootte",
+          "type": "number",
+          "required": true,
+          "unit": "hectares",
+          "phase": 2,
+          "question": "Planned/target greenhouse size in hectares?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "A10_expansion_timeline": {
+          "id": "A.10",
+          "label": "Expansion timeline",
+          "label_nl": "Uitbreidingsplanning",
+          "type": "text",
+          "required": true,
+          "phase": 2,
+          "question": "Expansion timeline (or 'N/A' if no expansion planned)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "A11_cultivation_type": {
+          "id": "A.11",
+          "label": "Cultivation type",
+          "label_nl": "Teelttype",
+          "type": "multi_select",
+          "required": true,
+          "options": [
+            "Flowers / Bloemen",
+            "Vegetables / Groenten",
+            "Plants / Planten"
+          ],
+          "phase": 2,
+          "question": "What type of cultivation? (flowers, vegetables, plants — can be multiple)",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "heat_supply"
+        }
+      }
+    },
+    "B": {
+      "label": "Electrical Connection",
+      "label_nl": "Elektrische Aansluiting",
+      "fields": {
+        "B1_dso": {
+          "id": "B.1",
+          "label": "Distribution System Operator",
+          "label_nl": "Netbeheerder",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Liander",
+            "Stedin",
+            "Enexis",
+            "Westland Infra",
+            "Other"
+          ],
+          "phase": 3,
+          "question": "Which DSO (netbeheerder) manages the grid connection?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "grid_interconnection"
+        },
+        "B2_ean_code": {
+          "id": "B.2",
+          "label": "EAN code",
+          "label_nl": "EAN-code",
+          "type": "text",
+          "required": true,
+          "validation": "regex",
+          "pattern": "^871\\d{15}$",
+          "error": "EAN must be 18 digits starting with 871",
+          "phase": 3,
+          "question": "EAN code of the connection (18 digits, starts with 871)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B3_ato_reference": {
+          "id": "B.3",
+          "label": "ATO reference",
+          "label_nl": "ATO-referentie",
+          "type": "text",
+          "required": true,
+          "phase": 3,
+          "question": "ATO (Aansluit- en Transportovereenkomst) reference number?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B4_total_connection_mva": {
+          "id": "B.4",
+          "label": "Total contracted connection capacity",
+          "label_nl": "Totale gecontracteerde aansluitcapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MVA",
+          "phase": 3,
+          "question": "Total contracted connection capacity (MVA)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B5_total_import_mw": {
+          "id": "B.5",
+          "label": "Total import capacity",
+          "label_nl": "Totale invoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "question": "Total import capacity (MW)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B6_total_export_mw": {
+          "id": "B.6",
+          "label": "Total export capacity",
+          "label_nl": "Totale uitvoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "question": "Total export capacity (MW)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B7_base_connection_mva": {
+          "id": "B.7",
+          "label": "Base connection capacity",
+          "label_nl": "Basiscapaciteit aansluiting",
+          "type": "number",
+          "required": true,
+          "unit": "MVA",
+          "validation": "lte_field",
+          "lte_field": "B4_total_connection_mva",
+          "error": "Base connection cannot exceed total connection",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B8_base_import_mw": {
+          "id": "B.8",
+          "label": "Base import capacity",
+          "label_nl": "Basis invoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B9_base_export_mw": {
+          "id": "B.9",
+          "label": "Base export capacity",
+          "label_nl": "Basis uitvoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B10_future_connection_mva": {
+          "id": "B.10",
+          "label": "Future connection capacity",
+          "label_nl": "Toekomstige aansluitcapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MVA",
+          "note": "Subject to DSO approval",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B11_future_import_mw": {
+          "id": "B.11",
+          "label": "Future import capacity",
+          "label_nl": "Toekomstige invoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B12_future_export_mw": {
+          "id": "B.12",
+          "label": "Future export capacity",
+          "label_nl": "Toekomstige uitvoercapaciteit",
+          "type": "number",
+          "required": true,
+          "unit": "MW",
+          "phase": 3,
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "B13_sap_configuration": {
+          "id": "B.13",
+          "label": "SAP configuration",
+          "label_nl": "SAP-configuratie",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Cable pooling / Kabel delen",
+            "MLOEA",
+            "Other / Anders"
+          ],
+          "phase": 3,
+          "question": "Preferred SAP configuration?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        }
+      }
+    },
+    "C": {
+      "label": "Heat Supply",
+      "label_nl": "Warmtelevering",
+      "fields": {
+        "C1_target_outlet_temp": {
+          "id": "C.1",
+          "label": "Target outlet temperature",
+          "label_nl": "Doel uitlaattemperatuur",
+          "type": "number",
+          "required": true,
+          "unit": "°C",
+          "phase": 4,
+          "question": "Target heat outlet temperature (°C)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "heat_supply"
+        },
+        "C2_expected_return_temp": {
+          "id": "C.2",
+          "label": "Expected return temperature",
+          "label_nl": "Verwachte retourtemperatuur",
+          "type": "number",
+          "required": true,
+          "unit": "°C",
+          "validation": "delta_t_check",
+          "delta_t_min": 15,
+          "delta_t_reference": "C1_target_outlet_temp",
+          "error": "Temperature delta (C.1 - C.2) must be at least 15°C",
+          "phase": 4,
+          "question": "Expected return temperature (°C)? Note: must be at least 15°C below outlet.",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "heat_supply"
+        },
+        "C3_minimum_delta_t": {
+          "id": "C.3",
+          "label": "Minimum ΔT",
+          "label_nl": "Minimale ΔT",
+          "type": "number",
+          "required": false,
+          "fixed": true,
+          "fixed_value": 15,
+          "unit": "°C",
+          "phase": null,
+          "xml_marker": "fixed",
+          "stage": "hot",
+          "asset": "heat_supply"
+        },
+        "C4_heat_price": {
+          "id": "C.4",
+          "label": "Heat price",
+          "label_nl": "Warmteprijs",
+          "type": "number",
+          "required": true,
+          "unit": "EUR/MWh",
+          "phase": 4,
+          "question": "Heat price (EUR per MWh)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "heat_supply"
+        },
+        "C5_combined_eb": {
+          "id": "C.5",
+          "label": "Combined EB calculation",
+          "label_nl": "Gecombineerde EB-berekening",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Yes / Ja",
+            "No / Nee",
+            "TBD / Nog te bepalen"
+          ],
+          "phase": 4,
+          "question": "Combined EB (energiebelasting) calculation: yes, no, or TBD?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "heat_supply"
+        }
+      }
+    },
+    "D": {
+      "label": "Land & Property",
+      "label_nl": "Grond & Eigendom",
+      "fields": {
+        "D1_kadaster_parcels": {
+          "id": "D.1",
+          "label": "Kadaster parcel(s)",
+          "label_nl": "Kadastrale percelen",
+          "type": "text",
+          "required": true,
+          "format": "gemeente_sectie_nr",
+          "phase": 5,
+          "question": "Kadaster parcel reference(s) — gemeente, sectie, nummer?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "land"
+        },
+        "D2_title_type": {
+          "id": "D.2",
+          "label": "Title type",
+          "label_nl": "Eigendomstype",
+          "type": "select",
+          "required": true,
+          "options": [
+            "Full ownership / Vol eigendom",
+            "Erfpacht / Leasehold",
+            "Other / Anders"
+          ],
+          "phase": 5,
+          "question": "What is the property title type?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D3_encumbrances": {
+          "id": "D.3",
+          "label": "Encumbrances",
+          "label_nl": "Bezwaringen",
+          "type": "select",
+          "required": true,
+          "options": [
+            "None / Geen",
+            "Mortgage / Hypotheek",
+            "Other / Anders"
+          ],
+          "phase": 5,
+          "question": "Any encumbrances on the property (mortgage, liens)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D4_zoning_designation": {
+          "id": "D.4",
+          "label": "Zoning designation",
+          "label_nl": "Bestemmingsplanbestemming",
+          "type": "text",
+          "required": true,
+          "example": "Glastuinbouw",
+          "phase": 5,
+          "question": "Current zoning designation in the bestemmingsplan?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D5_land_area_per_mw": {
+          "id": "D.5",
+          "label": "Land area per MW",
+          "label_nl": "Grondoppervlak per MW",
+          "type": "number",
+          "required": true,
+          "unit": "m²",
+          "phase": 5,
+          "question": "Available land area per MW for DEC placement (m²)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D6_opstalrecht_term": {
+          "id": "D.6",
+          "label": "Right of superficies term",
+          "label_nl": "Opstalrecht termijn",
+          "type": "number",
+          "required": true,
+          "unit": "years",
+          "phase": 5,
+          "question": "Proposed opstalrecht (right of superficies) term in years?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D7_mv_cable_length": {
+          "id": "D.7",
+          "label": "MV cable length (max)",
+          "label_nl": "MS-kabellengte (max)",
+          "type": "number",
+          "required": true,
+          "unit": "meters",
+          "phase": 5,
+          "question": "Maximum MV cable length from connection point to DEC (meters)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "grid_interconnection"
+        },
+        "D8_landowner_name": {
+          "id": "D.8",
+          "label": "Landowner name",
+          "label_nl": "Naam grondeigenaar",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "grower_is_not_landowner",
+          "phase": 5,
+          "question": "Who is the landowner (if different from grower)?",
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D9_landowner_signatory": {
+          "id": "D.9",
+          "label": "Landowner signatory",
+          "label_nl": "Ondertekenaar grondeigenaar",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "grower_is_not_landowner",
+          "phase": 5,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D10_land_financier_name": {
+          "id": "D.10",
+          "label": "Land Financier name",
+          "label_nl": "Naam grondfinancier",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "has_land_financier",
+          "phase": 5,
+          "question": "Name of the land financier / mortgage holder (if applicable)?",
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "land"
+        },
+        "D11_land_financier_signatory": {
+          "id": "D.11",
+          "label": "Land Financier signatory",
+          "label_nl": "Ondertekenaar grondfinancier",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "has_land_financier",
+          "phase": 5,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "land"
+        }
+      }
+    },
+    "E": {
+      "label": "Commercial Terms",
+      "label_nl": "Commerciële Voorwaarden",
+      "fields": {
+        "E1_heat_sales_split": {
+          "id": "E.1",
+          "label": "Heat sales revenue split (DE:Grower)",
+          "label_nl": "Warmteopbrengstverdeling (DE:Teler)",
+          "type": "text",
+          "required": true,
+          "format": "XX : YY %",
+          "example": "50 : 50 %",
+          "phase": 6,
+          "question": "Heat sales revenue split between Digital Energy and the grower (e.g., 50:50)?",
+          "xml_marker": "FFFF99",
+          "escalation": "non_standard_split_escalate_to_carlos",
+          "stage": "both",
+          "asset": "none"
+        },
+        "E2_payment_term_days": {
+          "id": "E.2",
+          "label": "Payment/pass-through term",
+          "label_nl": "Betalings-/doorgiftetermijn",
+          "type": "number",
+          "required": true,
+          "unit": "days",
+          "phase": 6,
+          "question": "Payment/pass-through term in days?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "none"
+        },
+        "E3_effective_date": {
+          "id": "E.3",
+          "label": "Effective Date",
+          "label_nl": "Ingangsdatum",
+          "type": "date",
+          "required": true,
+          "format": "DD-MM-YYYY",
+          "phase": 6,
+          "question": "Proposed effective date of the HoT (DD-MM-YYYY)?",
+          "xml_marker": "FFFF99",
+          "stage": "hot",
+          "asset": "none"
+        },
+        "E4_E12_fixed_terms": {
+          "id": "E.4-E.12",
+          "label": "Fixed terms and periods",
+          "label_nl": "Vaste termijnen en periodes",
+          "type": "fixed_block",
+          "required": false,
+          "fixed": true,
+          "note": "All E.4-E.12 are fixed values (30yr cooperation, 5yr initial term, etc.)",
+          "phase": null,
+          "xml_marker": "fixed",
+          "stage": "hot",
+          "asset": "none"
+        }
+      }
+    },
+    "F": {
+      "label": "Optional Provisions",
+      "label_nl": "Optionele Bepalingen",
+      "fields": {
+        "F1_chp_lease": {
+          "id": "F.1",
+          "label": "CHP lease provision",
+          "label_nl": "WKK-leasebepaling",
+          "type": "select",
+          "required": false,
+          "conditional": true,
+          "options": [
+            "Include / Opnemen",
+            "Delete / Verwijderen"
+          ],
+          "phase": 7,
+          "question": "Include CHP (WKK) lease provision?",
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "equipment_chp"
+        },
+        "F1a_chp_lease_fee": {
+          "id": "F.1a",
+          "label": "CHP lease fee",
+          "label_nl": "WKK-leasekosten",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "F1_chp_lease == Include",
+          "format": "EUR [amount] per [period]",
+          "phase": 7,
+          "question": "CHP lease fee amount and period (e.g., EUR 5,000 per month)?",
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "equipment_chp"
+        },
+        "F2_grower_co_investment": {
+          "id": "F.2",
+          "label": "Grower co-investment",
+          "label_nl": "Mede-investering teler",
+          "type": "select",
+          "required": false,
+          "conditional": true,
+          "options": [
+            "Include / Opnemen",
+            "Delete / Verwijderen"
+          ],
+          "phase": 7,
+          "question": "Include grower co-investment provision?",
+          "xml_marker": "CCFFCC",
+          "escalation": "co_investment_escalate_to_jelmer",
+          "stage": "hot",
+          "asset": "none"
+        },
+        "F2a_co_investment_pct": {
+          "id": "F.2a",
+          "label": "Co-investment percentage",
+          "label_nl": "Mede-investering percentage",
+          "type": "number",
+          "required": false,
+          "conditional": true,
+          "condition": "F2_grower_co_investment == Include",
+          "unit": "%",
+          "validation": "max_value",
+          "max_value": 50,
+          "error": "Co-investment cannot exceed 50%",
+          "phase": 7,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "none"
+        }
+      }
+    },
+    "G": {
+      "label": "Notice Addresses",
+      "label_nl": "Kennisgevingen",
+      "fields": {
+        "G_de_email": {
+          "id": "G.DE_email",
+          "label": "Digital Energy notice email",
+          "label_nl": "E-mail Digital Energy",
+          "type": "email",
+          "required": true,
+          "default": "contact@digitalenergy.ch",
+          "phase": 7,
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "G_grower_address": {
+          "id": "G.Grower_address",
+          "label": "Grower notice address",
+          "label_nl": "Adres kennisgeving teler",
+          "type": "text",
+          "required": true,
+          "note": "Usually same as A.3",
+          "phase": 7,
+          "question": "Grower notice address (same as registered address, or different)?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "G_grower_email": {
+          "id": "G.Grower_email",
+          "label": "Grower notice email",
+          "label_nl": "E-mail kennisgeving teler",
+          "type": "email",
+          "required": true,
+          "phase": 7,
+          "question": "Grower contact email for notices?",
+          "xml_marker": "FFFF99",
+          "stage": "both",
+          "asset": "identity"
+        },
+        "G_landowner_address": {
+          "id": "G.Landowner_address",
+          "label": "Landowner notice address",
+          "label_nl": "Adres kennisgeving grondeigenaar",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "grower_is_not_landowner",
+          "phase": 7,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "G_landowner_email": {
+          "id": "G.Landowner_email",
+          "label": "Landowner notice email",
+          "label_nl": "E-mail kennisgeving grondeigenaar",
+          "type": "email",
+          "required": false,
+          "conditional": true,
+          "condition": "grower_is_not_landowner",
+          "phase": 7,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "G_financier_address": {
+          "id": "G.Financier_address",
+          "label": "Land Financier notice address",
+          "label_nl": "Adres kennisgeving grondfinancier",
+          "type": "text",
+          "required": false,
+          "conditional": true,
+          "condition": "has_land_financier",
+          "phase": 7,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "identity"
+        },
+        "G_financier_email": {
+          "id": "G.Financier_email",
+          "label": "Land Financier notice email",
+          "label_nl": "E-mail kennisgeving grondfinancier",
+          "type": "email",
+          "required": false,
+          "conditional": true,
+          "condition": "has_land_financier",
+          "phase": 7,
+          "xml_marker": "CCFFCC",
+          "stage": "hot",
+          "asset": "identity"
+        }
+      }
+    }
+  },
+  "supporting_documents": {
+    "kvk_uittreksel": {
+      "label": "KVK extract",
+      "label_nl": "KVK-uittreksel",
+      "required": true,
+      "request_at_phase": 1,
+      "verifies": [
+        "A1_legal_name",
+        "A2_kvk_number",
+        "A3_registered_address",
+        "A6_signing_authority"
+      ],
+      "validity_days": 30,
+      "review_tier": "sal",
+      "typical_days_to_receive": 1
+    },
+    "ato_document": {
+      "label": "ATO document (DSO contract)",
+      "label_nl": "ATO-document",
+      "required": true,
+      "request_at_phase": 3,
+      "verifies": [
+        "B2_ean_code",
+        "B4_total_connection_mva",
+        "B5_total_import_mw",
+        "B6_total_export_mw"
+      ],
+      "validity_days": 365,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 10
+    },
+    "kadaster_uittreksel": {
+      "label": "Kadaster extract",
+      "label_nl": "Kadaster-uittreksel",
+      "required": true,
+      "request_at_phase": 5,
+      "verifies": [
+        "D1_kadaster_parcels",
+        "D2_title_type",
+        "D3_encumbrances"
+      ],
+      "validity_days": 90,
+      "review_tier": "sal",
+      "typical_days_to_receive": 3
+    },
+    "bestemmingsplan_excerpt": {
+      "label": "Zoning plan excerpt",
+      "label_nl": "Bestemmingsplan-uittreksel",
+      "required": true,
+      "request_at_phase": 5,
+      "verifies": [
+        "D4_zoning_designation"
+      ],
+      "validity_days": 180,
+      "review_tier": "sal",
+      "typical_days_to_receive": 5
+    },
+    "landowner_consent": {
+      "label": "Landowner consent letter",
+      "label_nl": "Instemmingsbrief grondeigenaar",
+      "required": false,
+      "conditional": true,
+      "condition": "grower_is_not_landowner",
+      "request_at_phase": 5,
+      "validity_days": 180,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 21
+    },
+    "financier_consent": {
+      "label": "Land Financier consent letter",
+      "label_nl": "Instemmingsbrief grondfinancier",
+      "required": false,
+      "conditional": true,
+      "condition": "has_land_financier",
+      "request_at_phase": 5,
+      "validity_days": 180,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 21
+    },
+    "site_plan": {
+      "label": "Greenhouse layout / site plan",
+      "label_nl": "Kasplattegrond / situatietekening",
+      "required": false,
+      "request_at_phase": 5,
+      "validity_days": null,
+      "review_tier": "sal",
+      "typical_days_to_receive": 5
+    },
+    "bess_grid_sharing_agreement": {
+      "label": "BESS grid-sharing agreement",
+      "label_nl": "BESS-netdelingsovereenkomst",
+      "required": false,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_bess",
+      "request_at_phase": 4,
+      "verifies": [
+        "B4_total_connection_mva",
+        "B11_ato_transfer_mode"
+      ],
+      "validity_days": 365,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 21
+    },
+    "bess_balancing_market_enrollment": {
+      "label": "BESS balancing-market participation enrollment",
+      "label_nl": "BESS-inschrijving balanceringsmarkt",
+      "required": false,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_bess",
+      "request_at_phase": 4,
+      "verifies": [],
+      "validity_days": 365,
+      "review_tier": "sal",
+      "typical_days_to_receive": 14
+    },
+    "chp_commissioning_cert": {
+      "label": "CHP commissioning certificate",
+      "label_nl": "WKK-inbedrijfstellingscertificaat",
+      "required": true,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_chp",
+      "request_at_phase": 3,
+      "verifies": [
+        "F1_chp_lease",
+        "F1a_chp_lease_fee"
+      ],
+      "validity_days": 365,
+      "review_tier": "sal",
+      "typical_days_to_receive": 14
+    },
+    "chp_maintenance_contract": {
+      "label": "CHP maintenance contract",
+      "label_nl": "WKK-onderhoudscontract",
+      "required": false,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_chp",
+      "request_at_phase": 3,
+      "verifies": [],
+      "validity_days": 365,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 14
+    },
+    "chp_gasketel_cert": {
+      "label": "Gas-boiler certificate (gasketel)",
+      "label_nl": "Gasketelcertificaat",
+      "required": true,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_chp AND chp is gas-fired",
+      "request_at_phase": 3,
+      "verifies": [
+        "F1_chp_lease"
+      ],
+      "validity_days": 365,
+      "review_tier": "sal",
+      "typical_days_to_receive": 14
+    },
+    "solar_pv_yield_report": {
+      "label": "Solar PV yield report",
+      "label_nl": "Opbrengstrapport zonnepanelen",
+      "required": true,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_solar_pv",
+      "request_at_phase": 4,
+      "verifies": [],
+      "validity_days": 365,
+      "review_tier": "sal",
+      "typical_days_to_receive": 14
+    },
+    "solar_pv_connection_agreement": {
+      "label": "Solar PV connection agreement",
+      "label_nl": "Zonnepanelen-aansluitovereenkomst",
+      "required": true,
+      "conditional": true,
+      "condition": "any contribution.asset == equipment_solar_pv",
+      "request_at_phase": 3,
+      "verifies": [
+        "B1_dso",
+        "B4_total_connection_mva"
+      ],
+      "validity_days": 365,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 21
+    },
+    "co2_supply_contract": {
+      "label": "CO₂ supply contract (grower)",
+      "label_nl": "CO₂-leveringscontract (teler)",
+      "required": false,
+      "conditional": true,
+      "condition": "crop_uses_co2_enrichment",
+      "request_at_phase": 4,
+      "verifies": [],
+      "validity_days": 365,
+      "review_tier": "legal_counsel",
+      "typical_days_to_receive": 21
+    },
+    "_partner_subset_logic": "A supporting_documents entry is required for a site_partner ONLY if that partner's contributions[] includes an asset matching the entry's verify-scope. Examples: ATO required only for Grid Contributors (contributions.asset == grid_interconnection); Kadaster required only for Landowners (contributions.asset == land); Equipment OEM specs only for partners contributing that equipment class. For identity docs (KVK), required for every Site Partner regardless of contribution mix."
+  },
+  "escalation_rules": {
+    "non_standard_heat_split": {
+      "trigger": "E1 value != '50 : 50 %'",
+      "escalate_to": "Carlos Reuven",
+      "reason": "Non-standard commercial terms require commercial director approval"
+    },
+    "co_investment_included": {
+      "trigger": "F2 == Include",
+      "escalate_to": "Jelmer",
+      "reason": "Co-investment affects SPV structure and financing"
+    },
+    "missing_landowner_consent": {
+      "trigger": "grower_is_not_landowner AND landowner_consent not uploaded",
+      "escalate_to": "Carlos Reuven + legal-counsel",
+      "reason": "Land rights unenforceable without third-party consent (Art. 5.5(g))"
+    },
+    "joint_signing_authority": {
+      "trigger": "A6 == Joint",
+      "escalate_to": null,
+      "action": "Flag warning: two signatures required on execution page"
+    }
+  },
+  "tagging_notes": "Stage-tag rationale: stage='both' for identity + location fields (captured at LOI Section L/R and carried into HoT); stage='loi' for top-of-funnel intent values (current size, preliminary heat price envelope, heat split); stage='hot' for binding operational parameters that require authoritative documents (ATO MVA numbers, Kadaster instruments, signatory authority, term years, equipment-class provisions). Asset-tag rationale: 'identity' for legal-person fields; 'none' for pure commercial/capital-stack fields not tied to a specific asset class; otherwise the canonical asset taxonomy from deal_yaml_schema.md (land, property, grid_interconnection, gas_connection, equipment_chp, equipment_bess, equipment_solar_pv, heat_supply).",
+  "schema_changelog": [
+    {
+      "version": "1.1",
+      "date": "2026-04-20",
+      "changes": [
+        "Tagged all 58 fields with stage ∈ {loi|hot|both} + asset ∈ enum (see tagging_notes).",
+        "Added 8 equipment-class supporting_documents: bess_grid_sharing_agreement, bess_balancing_market_enrollment, chp_commissioning_cert, chp_maintenance_contract, chp_gasketel_cert, solar_pv_yield_report, solar_pv_connection_agreement, co2_supply_contract.",
+        "Added validity_days, review_tier, typical_days_to_receive metadata to all supporting_documents entries (existing 7 + new 8).",
+        "Added _partner_subset_logic rule describing when a supporting_document is required for a given Site Partner based on their contributions[].",
+        "Fixed stale total_fields count: was 48, corrected to 58."
+      ]
+    }
+  ]
+}

@@ -53,8 +53,8 @@ jobs:
           echo "--- Changed files ---"
           echo "$CHANGED"
           echo "---------------------"
-          GEN_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/colocation/generate_loi\.py$' || true)
-          TEST_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/colocation/tests/' || true)
+          GEN_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/generate_loi\.py$' || true)
+          TEST_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/tests/' || true)
           if [ -n "$GEN_TOUCHED" ] && [ -z "$TEST_TOUCHED" ]; then
             # Check for the escape-hatch marker across the PR commits.
             if git log --format=%B "$BASE"...HEAD | grep -q '\[skip-test-check\]'; then
@@ -71,12 +71,12 @@ jobs:
           echo "OK: generator/test change balance satisfied."
 
       - name: Run legal-assistant tests
-        working-directory: .claude/skills/legal-assistant/colocation
+        working-directory: .claude/skills/legal-assistant/sales
         run: |
           python -m pytest tests/ -v
 
       - name: Smoke-regen all intake examples
-        working-directory: .claude/skills/legal-assistant/colocation
+        working-directory: .claude/skills/legal-assistant/sales
         run: |
           set -e
           for f in examples/intake_example_*.yaml; do
@@ -87,7 +87,7 @@ jobs:
           rm -f *.docx *_qa.txt
 
       - name: Smoke-regen v3.5 regression fixtures
-        working-directory: .claude/skills/legal-assistant/colocation
+        working-directory: .claude/skills/legal-assistant/sales
         run: |
           set -e
           for f in regression/v3.5/*_intake.yaml; do
