@@ -414,9 +414,7 @@
   <w:p>
     <w:pPr>
       <w:pStyle w:val="Footer"/>
-      <w:tabs>
-        <w:tab w:pos="9354" w:val="right"/>
-      </w:tabs>
+      <w:jc w:val="center"/>
     </w:pPr>
     <w:r>
       <w:rPr>
@@ -434,9 +432,7 @@
   <w:p>
     <w:pPr>
       <w:pStyle w:val="Footer"/>
-      <w:tabs>
-        <w:tab w:pos="9354" w:val="right"/>
-      </w:tabs>
+      <w:jc w:val="center"/>
     </w:pPr>
     <w:r>
       <w:rPr>
