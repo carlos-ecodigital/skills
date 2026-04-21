@@ -233,7 +233,17 @@ Title: Advisor
         return audit_document(doc)
 
     def test_profile_agreement(self):
-        doc = profile_agreement("Advisory Agreement", entity="nl")
+        # M2: placeholders are rejected at build time, so tests must
+        # supply real client + address. Advisory Agreement auto-detects
+        # as binding, which additionally requires registration fields.
+        doc = profile_agreement(
+            "Advisory Agreement",
+            client="Test Counterparty B.V.",
+            client_address="1 Test Straat, 1000 AA Amsterdam",
+            client_reg_type="KvK",
+            client_reg_number="12345678",
+            entity="nl",
+        )
         violations = self._audit_profile(doc)
         assert violations == [], violations
 

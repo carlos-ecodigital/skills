@@ -44,6 +44,13 @@ from generate import _detect_formality
 # Zoom element fix — semi-private, retained for tools/visual_qa.py
 from generate import _fix_zoom
 
+# M2: build-time validators + per-profile structural audits
+from validators import (
+    AgreementValidationError,
+    validate_agreement_inputs,
+)
+from audit_profiles import audit_agreement
+
 __all__ = [
     # Stable surface
     "Party",
@@ -63,7 +70,11 @@ __all__ = [
     "audit_document",
     "save_doc",
     "docx_to_pdf",
-    # Semi-private (retained for compatibility, likely to stabilise in M2+)
+    # M2 (build-time enforcement + per-profile audit)
+    "AgreementValidationError",
+    "validate_agreement_inputs",
+    "audit_agreement",
+    # Semi-private (retained for compatibility, likely to stabilise later)
     "_SP",
     "_detect_formality",
     "_fix_zoom",
