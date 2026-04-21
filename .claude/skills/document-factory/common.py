@@ -51,6 +51,9 @@ from validators import (
 )
 from audit_profiles import audit_agreement
 
+# M3: Pipeline B preserving rebrand
+from rebrand import RebrandSpec, rebrand
+
 __all__ = [
     # Stable surface
     "Party",
@@ -74,6 +77,9 @@ __all__ = [
     "AgreementValidationError",
     "validate_agreement_inputs",
     "audit_agreement",
+    # M3 (Pipeline B — preserving rebrand)
+    "RebrandSpec",
+    "rebrand",
     # Semi-private (retained for compatibility, likely to stabilise later)
     "_SP",
     "_detect_formality",
