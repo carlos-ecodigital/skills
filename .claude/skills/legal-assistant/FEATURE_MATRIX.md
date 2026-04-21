@@ -214,6 +214,68 @@ All 5 types run the same linter; rule applicability varies by clause scope. Ever
 | **Post-gen action** | Git commit + push to SSOT (when working dir is a git checkout) |
 | **Companion agreements** | None at HoT stage — future MSA/SOF are post-HoT lifecycle (see `grower-relationship-mgr`) |
 
+## v3.7.x Extensibility Layer — Colocation LOI
+
+Additions in v3.7.0 + v3.7.1 + v3.7.2 that extend the engine without
+changing clause defaults. All fields are optional; absence preserves
+v3.6.0 rendering.
+
+| Feature | Field | Applies to | Release |
+|---|---|---|---|
+| **Recital B density advisory** | `choices.recital_b_density: terse\|standard\|verbose` | All types | v3.7.0 (advisory v3.7.2) |
+| **Brochure source_map token** | `source_map[pillar_N]: ["internal:brochure_{YYYYMMDD}_{slug}"]` | All types | v3.7.0 |
+| **Schedule 1 suppression** | `choices.include_schedule: bool` | All types (except EP) | v3.7.0 |
+| **Confidentiality opt-outs** | `choices.confidentiality_opt_outs: [...]` — suppresses §6.9 / §6.10 / §6.13 with auto-renumber | Tier B types (DS / WS / SS) | v3.7.0 |
+| **Structured RoFR** | `supplier.rofr: {site_scope, response_window, lock_out_style, continues_on_remaining}` — 4 lock-out styles | SS | v3.7.0 |
+| **Mutual Referral Rider** | `supplier.referral_rider: bool` — §3.9 bidirectional | SS | v3.7.0 |
+| **Joint Stocking Programme** | auto-fires when `supplier.lead_time_target < 6 months` — §3.10 | SS | v3.7.1 |
+| **Co-Marketing parameterized** | `supplier.co_marketing: {framing, logo_use, site_naming_approval_sla, press_at_loi}` — §3.11 with 6 sub-clauses | SS | v3.7.1 |
+| **Relationship cluster metadata** | `counterparty.relationship_cluster`, `counterparty.identity_map` — QA-report only, not body | All types | v3.7.0 |
+| **Financing context** | `dates.financing_context: {linked_to_fundraise, fundraise_close_target, buffer_months_post_close}` | All types | v3.7.0 |
+| **Inline custom definitions** | `custom.definitions: [{key, text}, ...]` — injected at top of Cl. 2 | All types | v3.7.0 |
+| **Library-sourced definitions** | `custom.definitions_include: [...]` — pulls from `_shared/loi-common-defined-terms.md` | All types | v3.7.0 |
+| **Custom clauses** | `custom.clauses: [{number, mode, heading, text, sub_clauses}]` — modes: `append` / `replace` / `insert-after:N` | All types | v3.7.0 (append) / v3.7.1 (replace + insert-after) |
+| **Opt-in renumbering** | `choices.auto_renumber: bool` — closes N.M gaps post-build | All types | v3.7.1 |
+
+### v3.7.x Linter additions
+
+| Rule | Severity | Condition | Release |
+|---|---|---|---|
+| **R-24** (second definition) | warn | `source_map` uses brochure tokens; tier-1 corroboration still needed before signing | v3.7.0 |
+| **R-29** | warn | URL content verification — fetch fails to confirm Recital B keyword; pillar downgraded to `[TBC]` + R-23 re-asserted | v3.7.0 (wired default-on v3.7.2) |
+| **R-30** | fail | Double-period in rendered body (excluding ellipsis + numbered lists) | v3.7.0 |
+| **R-31** | warn | `contact_name == signatory_name` — confirm intentional single-POC | v3.7.0 |
+| **R-21 (narrowed)** | warn | "purpose-built" permitted in Cl. 3 product-capability; still banned in Recital A / B / closing | v3.7.0 |
+| **R-density** | info | Recital B word count out of band for chosen `recital_b_density` | v3.7.2 |
+| **R-lead-time** | warn | `supplier.lead_time_target` non-empty but unparseable as days/weeks/months | v3.7.2 |
+| **R-custom-mut** | warn | `custom.clauses` replace/insert-after target number not found in rendered body | v3.7.2 |
+
+### v3.7.x CLI additions
+
+| Flag | Purpose | Release |
+|---|---|---|
+| `--recital-b-only <path>` | Regenerate Recital B + QA only; replace paragraph in existing .docx | v3.7.0 |
+| `--audit-only` | Read `prior_loi_path`; run full linter; emit `{basename}_audit.txt` without regenerating | v3.7.0 |
+| `--verify-source-urls` | Force R-29 on (redundant when default-on) | v3.7.0 |
+| `--no-network` | Disable R-29 fetching (CI escape) | v3.7.2 |
+| `--phase-8-auto-execute` | Flip Phase 8 dispatch from dry-run to real writes | v3.7.0 (wired v3.7.2) |
+| `--phase-8-actions=a,b,c` | Select specific Phase 8 actions to run | v3.7.2 |
+| `LOI_NO_NETWORK=1` (env) | Same as `--no-network` (for CI environments) | v3.7.2 |
+
+### v3.7.x Artifacts emitted alongside .docx
+
+| File | Content | Release |
+|---|---|---|
+| `{stem}_SESSION_LOG.md` | Intake decisions, CLI flags, QA summary, customization counts | v3.7.0 |
+| `{stem}_AUDIT.txt` | 20+ core assertions + per-customization probes (PASS/FAIL) | v3.7.1 |
+| `{stem}_PHASE8_DISPATCH.json` | Action payloads for orchestrator to invoke (MCP tools) | v3.7.2 |
+| `/domains/counterparties/{slug}/overview.md` | Domain card (HubSpot/ClickUp/Drive links, relationship cluster, identity map) | v3.7.2 |
+
+### v3.7.x Canonical examples
+
+- `examples/intake_example_strategic_supplier_v37_full.yaml` — **kitchen sink** demonstrating every v3.7.x field in one fixture. Recommended starting point for operators adopting the extensibility layer.
+- `regression/v3.7/*.yaml` — 8 retrospective-derived fixtures (Cerebro, Armada, InfraPartners, name-homonym, dual-role, dark-web, brochure, prior-LOI regen) serving as both canonical audit records and regression tests.
+
 ### Engine asymmetry (vs. Colocation LOI)
 
 | | Colocation LOI | Site HoT |

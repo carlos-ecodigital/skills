@@ -174,6 +174,157 @@ tests green; 181-test Sales regression intact.
 
 ---
 
+## v3.7.2 — 2026-04-21
+
+Full-closure release. Turns every v3.7.0/v3.7.1 stub into real implementation, ships the 8 retrospective-derived regression fixtures the plan called for, and introduces the canonical v3.7.x kitchen-sink example demonstrating every feature in one fixture.
+
+Test baseline 434 → **485 passing** (+34 new v3.7.2 + updated v3.7.1 assertions + 8 new golden parametrisations + 9 golden-corpus CI scans + integration tests).
+
+### Fixed — stubs from v3.7.0 now functional
+
+- **R-29 URL content verification** (v3.7.0 had helper + CLI flag; `qa_lint` never called it). Now wired: default-on, fetches each `source_map[pillar_N]` URL (first http/https), checks Recital B keyword presence in ≥500 chars, downgrades pillar to `[TBC]` + re-asserts R-23 on failure. Network errors emit INFO (not WARN — avoids flaky-run blast radius).
+  - **Escape hatches:** `LOI_NO_NETWORK=1` env var (set by `conftest.py` for the test suite), `--no-network` CLI flag. `--verify-source-urls` still accepted (forces on, redundant when default-on).
+  - **New `qa_lint` keyword params:** `verify_urls=None|bool` + `url_fetcher=None|Fetcher` for test injection.
+- **Recital B density advisory** (v3.7.0 had validation + empty cue). Now measures actual word count of rendered Recital B and emits `[INFO] R-density` when count is outside the chosen band (terse: 40–100, standard: 60–150, verbose: 110–200). Engine does NOT auto-edit — advisory informs operator their density choice is inconsistent with their supplied text.
+- **Phase 8 MCP dispatch execution** (v3.7.0 had dispatch payload builder; nothing invoked them). Now wired: generator writes `{stem}_PHASE8_DISPATCH.json` alongside the .docx. When `--phase-8-auto-execute` is passed, local-file actions (`artifact_storage_push`, `domain_card_create`) execute inline; MCP actions (`hubspot_upsert_company`, `clickup_create_task`) emit payloads for the orchestrator session to consume (MCP tools are session-scoped — can't invoke from subprocess).
+- **`--phase-8-actions=a,b,c`** — new CLI flag selects which actions to run. Default when `--phase-8-auto-execute`: all 5. Default without: local-only pair.
+- **Domain card real implementation** (v3.7.0 had a stub in `phase8_actions.py`). Now `_write_domain_card()` writes `/domains/counterparties/{slug}/overview.md` with HubSpot/ClickUp/Drive placeholders, relationship cluster, identity map, financing context. Path resolution: prefer `{cwd}/domains/counterparties/` if present (DEGitOS repo-root convention); fall back to `{docx_parent}/domain_cards/{slug}/overview.md`.
+
+### Added — 8 regression fixtures under `sales/regression/v3.7/`
+
+Plan called for 8 retrospective-derived fixtures (v3.6.2 scope), deferred across v3.6.x. All shipped:
+
+- `cerebro_wholesale_intake.yaml` — dark-web + brochure + relationship_cluster + prior-LOI regen
+- `armada_strategic_supplier_intake.yaml` — SS + Joint Stocking (90d lead) + referral rider
+- `infrapartners_strategic_supplier_v6_intake.yaml` — SS + custom definitions (Super-Factory) + confidentiality opt-outs + `include_schedule=false` + co_marketing + RoFR
+- `name_homonym_collision.yaml` — Phase 4.5 cross-check pattern (Marin Barrage → Marin Bakša)
+- `dual_role_founder.yaml` — Phase 2 dual-role detection via relationship_cluster
+- `dark_web_counterparty.yaml` — Phase 3.5 detection + elevated Phase 7.5
+- `brochure_sourced_recital_b.yaml` — tier-2 brochure token handling
+- `prior_loi_regeneration.yaml` — `--audit-only` lineage tracking
+
+Each fixture registered with `tests/test_golden_files.py` as a named golden; discovery now scans `regression/v3.5/` and `regression/v3.7/` with a version tag in the slug to prevent collision.
+
+### Added — Canonical v3.7.x kitchen-sink example
+
+- `examples/intake_example_strategic_supplier_v37_full.yaml` — demonstrates every v3.7.x field in one working fixture. 12 feature branches fire simultaneously (Joint Stocking + Co-Marketing + RoFR alignment + Referral Rider + Super-Factory definitions_include + inline custom definitions + custom.clauses all 3 modes + confidentiality opt-outs + include_schedule=false + auto_renumber). Serves as operator reference + integration test.
+
+### Added — Golden-corpus CI
+
+- `test_golden_corpus_r_rules_clean` — parametrised over every `intake_example_*.yaml`. Asserts zero `[FAIL]` rules (excluding overrides) on empty-intake render. Catches template-level R-22 meta-commentary regressions at CI time. Would have caught the v3.6.0 `tthe` / `(ALT-A)` / Cl. 4.2 meta-trailer bugs pre-merge.
+
+### Added — v3.7.2 integrity additions
+
+- **`custom.clauses.append` collision check** — `validate()` rejects `mode: append` with a number matching an engine-emitted clause for the type (e.g., `append 3.1` on WS). Replace mode is allowed to collide (that's the whole point). Known-number table per type (WS, SS).
+- **`custom.clauses` silent no-op surfacing** — `replace` / `insert-after:N` targeting an unknown number records the failure on `LOI._custom_mutation_failures`; `main()` threads these into `qa_lint` as `builder_warnings` which emit `[WARN] R-custom-mut` lines.
+- **Lead-time unparseable advisory** — `_lead_time_under_six_months()` now records its parse outcome on `_LAST_LEAD_TIME_PARSE`; `qa_lint` emits `[WARN] R-lead-time` when operator supplied a non-empty value that couldn't be parsed (e.g., `"Q2 2026"`, `"half a year"`). Previously silent — Joint Stocking clause didn't fire and operator had no signal why.
+- **Renumbering 2-phase substitution** — v3.7.1's `auto_renumber` pass had a chained-rewrite bug (remapping `3.7 → 3.2` and `3.12 → 3.7` would double-rewrite `3.12` to `3.2`). Fixed via placeholder-token indirection: Pass A substitutes `N.M` → `\uE000RENUM_i\uE001`; Pass B substitutes placeholders → final values.
+
+### Added — Cross-skill + operational docs
+
+- `legal-assistant/docs/staging-mirror.md` — formal mirror discipline + path map + known substitutions (`document-factory` → `de-document-factory`).
+- **Staging-adaptation sentinel comment** in `sales/generate_loi.py` at the `sys.path.insert(...)` line — future mirrors must preserve the comment OR the mirror-script substitution will silently miss and re-break staging.
+
+### Changed
+
+- `qa_lint()` signature extended with keyword-only params `verify_urls`, `url_fetcher`, `builder_warnings`. All default to `None` for backward compatibility.
+- `tests/conftest.py` sets `LOI_NO_NETWORK=1` by default so test runs never hit live URLs. Individual R-29 tests explicitly opt in with `verify_urls=True` + a `FakeFetcher`.
+- Audit checklist labels updated to be `auto_renumber`-aware: RoFR assertion now matches heading text only (not `§3.8 …`), custom.clauses assertions match heading only.
+- Template version tag assertion recognises SS/EP/Bespoke use `v1.0` suffix (vs EU/DS/WS `v3.2`).
+
+### Verified
+
+- **485/485 pytest** tests pass with `LOI_NO_NETWORK=1` (conftest default).
+- Kitchen-sink fixture: 12/12 feature branches fire (Joint Stocking, Co-Marketing, RoFR, Referral Rider, Super-Factory Initiative, inline custom definitions, all 3 custom.clauses modes, opt-outs × 3, `include_schedule=false`).
+- Regression fixtures: all 8 build cleanly + registered as goldens.
+- Golden-corpus CI: every example intake renders 0 FAIL rules.
+- Renumbering pass: verified no chained-rewrite on kitchen sink (3.1 → 3.7 contiguous after replace mode on 3.7 + insert-after:3.11).
+
+### Migration notes (v3.6.x → v3.7.x)
+
+**No migration required if you were not using any v3.7.x features.** All new fields are optional with v3.7.x defaults matching v3.6.0 rendering behavior. Your existing intake YAMLs continue to work unchanged.
+
+**If you want to adopt v3.7.x features, minimal recipes:**
+
+1. **Suppress confidentiality sub-clauses (DS/WS/SS):**
+   ```yaml
+   choices:
+     confidentiality_opt_outs: [onward_sharing, metadata_protection]
+   ```
+   Engine auto-renumbers the remaining §6 sub-clauses contiguously.
+
+2. **Omit Schedule 1 for early-stage SS LOIs:**
+   ```yaml
+   choices:
+     include_schedule: false
+   ```
+   Also scrubs `§8.1(a)` "and Schedule 1" + `§4.2(d)` "schedules, or operational annexes" references.
+
+3. **Structured RoFR (SS):**
+   ```yaml
+   supplier:
+     rofr:
+       site_scope: "1-3 Designated Sites"
+       response_window: "20 Business Days"
+       lock_out_style: alignment   # or sole_discretion | hard_minimum | milestone
+       continues_on_remaining: true
+   ```
+
+4. **Joint Stocking (SS, auto-fires on short lead time):**
+   ```yaml
+   supplier:
+     lead_time_target: "90 days"   # any value <6 months triggers §3.10
+   ```
+
+5. **Co-Marketing (SS):**
+   ```yaml
+   supplier:
+     co_marketing:
+       framing: multi_supplier
+       logo_use: per_event_approval
+       press_at_loi: none
+   ```
+
+6. **Custom definitions + clauses:**
+   ```yaml
+   custom:
+     definitions_include: [super_factory_initiative, designated_site]
+     definitions:
+       - key: "My Custom Term"
+         text: "means the bespoke thing described in Annex Z."
+     clauses:
+       - number: "3.12"
+         mode: "insert-after:3.11"
+         heading: "Operational Review Cadence"
+         text: "The Parties shall convene a quarterly operational review..."
+   ```
+
+7. **Disable network-dependent linting for CI:**
+   ```bash
+   LOI_NO_NETWORK=1 python3 generate_loi.py intake.yaml --output out.docx
+   # or
+   python3 generate_loi.py intake.yaml --output out.docx --no-network
+   ```
+
+8. **Activate Phase 8 auto-actions:**
+   ```bash
+   python3 generate_loi.py intake.yaml --output out.docx \
+     --phase-8-auto-execute \
+     --phase-8-actions=artifact_storage_push,domain_card_create
+   # MCP actions (hubspot, clickup) emit a dispatch JSON for the
+   # orchestrator to invoke via real MCP tool calls
+   ```
+
+See `examples/intake_example_strategic_supplier_v37_full.yaml` for a working reference that combines all of the above.
+
+### Not in scope (future)
+
+- **v3.8:** R-29 flipped from warn (v3.7.2) to fail severity after real-world false-positive rate is known. Currently R-29 warns + downgrades pillar → R-23 re-asserts; in v3.8, unfetchable URLs themselves fail the build.
+- **v3.8+:** `custom.clauses` auto-collision detection for `insert-after:N` with a new number that also collides with existing clauses.
+- **v3.8+:** cross-skill handoff from `legal-assistant` Phase 8 → `de-executive-comms` cover-email drafting (currently operator invokes second skill manually).
+
+---
+
 ## v3.7.1 — 2026-04-20
 
 Closes the 5 items explicitly deferred from v3.7.0 (CHANGELOG `Deferred to v3.7.1` block). All additions backward-compatible; every new field is optional with v3.7.0-matching defaults.

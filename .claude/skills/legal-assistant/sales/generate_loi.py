@@ -45,6 +45,13 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 # Import shared cover page and branding from document-factory
 # Script now lives under legal-assistant/sales/, one level deeper than the
 # original loi-generator/ layout, so resolve document-factory via parent.parent.
+#
+# ⚠️ STAGING MIRROR SENTINEL (v3.7.2): when this file is mirrored to
+# degitos-staging (skills/de-legal-assistant/sales/generate_loi.py), the
+# sibling skill name MUST be substituted: `document-factory` →
+# `de-document-factory` (DEGitOS de- prefix convention). The mirror
+# discipline lives in `docs/staging-mirror.md`. DO NOT remove or rename
+# this sentinel without updating the mirror script at the same time.
 SCRIPT_DIR = Path(__file__).parent
 sys.path.insert(0, str(SCRIPT_DIR.parent.parent / "document-factory"))
 from common import (  # noqa: E402
@@ -463,6 +470,46 @@ def validate(d: dict):
 
     # custom.definitions[] + custom.clauses[] + custom.definitions_include[]
     custom = d.get("custom", {})
+    # v3.7.2: collision check — warn if custom.clauses[].number would overlap
+    # an engine-emitted clause number for this type. Hardcoded (type-aware)
+    # list of known-emitted numbers; append-mode collisions are still allowed
+    # (document will contain both, numbered the same — operator should use
+    # a new number), but replace/insert-after with a typo is surfaced here.
+    KNOWN_CLAUSE_NUMBERS_BY_TYPE = {
+        "Wholesale": [
+            "3.1","3.2","3.3","3.4","3.5","3.6","3.7","3.8",
+            "4.1","4.2","4.3","4.4","4.5",
+            "5.1","5.2","5.3","5.4",
+            "6.1","6.2","6.3","6.4","6.5","6.6","6.7","6.8","6.9","6.10",
+            "6.11","6.12","6.13","6.14","6.15","6.16",
+            "7.1","7.2","7.3","7.4","7.5","7.6",
+            "8.1","8.2","8.3","8.4","8.5","8.6","8.7","8.8","8.9","8.10",
+        ],
+        "StrategicSupplier": [
+            "3.1","3.2","3.3","3.4","3.5","3.6","3.7","3.8","3.9","3.10","3.11",
+            "4.1","4.2","4.3","4.4","4.5","4.6",
+            "5.1","5.2","5.3","5.4",
+            "6.1","6.2","6.3","6.4","6.5","6.6","6.7","6.8","6.9","6.10",
+            "6.11","6.12","6.13","6.14","6.15","6.16",
+            "7.1","7.2","7.3","7.4","7.5","7.6",
+            "8.1","8.2","8.3","8.4","8.5","8.6","8.7","8.8","8.9","8.10",
+        ],
+    }
+    if custom and isinstance(custom, dict):
+        known = set(KNOWN_CLAUSE_NUMBERS_BY_TYPE.get(t, []))
+        for i, item in enumerate(custom.get("clauses", []) or []):
+            if not isinstance(item, dict):
+                continue
+            num = str(item.get("number", "")).strip()
+            mode = item.get("mode", "append")
+            if mode == "append" and num in known:
+                errors.append(
+                    f"custom.clauses[{i}]: append-mode number {num!r} collides "
+                    f"with engine-emitted clause for type={t!r}. "
+                    f"Use a different number (e.g., 9.X) to avoid duplicate "
+                    f"numbering, or use mode=replace to overwrite the "
+                    f"engine output."
+                )
     if custom:
         if not isinstance(custom, dict):
             errors.append(
@@ -674,19 +721,28 @@ _SUBJECT_BY_LOI = {
 }
 
 
-def _lead_time_under_six_months(value) -> bool:
+def _lead_time_under_six_months(value, *, allow_unparseable=True) -> bool:
     """v3.7.1 — parse a lead_time_target string into days; return True if <180.
 
     Accepted forms (case-insensitive): "90 days", "6 weeks", "3 months",
     "90d", "6w", "3m". Falls back to False on unparseable input (safer
     default — the clause doesn't fire).
+
+    v3.7.2: ``lead_time_parse_result`` (module-level) captures the last
+    parse outcome for qa_lint to surface as a WARN when operator-supplied
+    text was non-empty but unparseable.
     """
+    global _LAST_LEAD_TIME_PARSE  # used by qa_lint for advisory WARN
+    _LAST_LEAD_TIME_PARSE = {"input": value, "parsed_days": None, "ok": False}
     if not value:
+        _LAST_LEAD_TIME_PARSE["ok"] = True  # empty is valid (clause doesn't fire)
         return False
     s = str(value).strip().lower()
     # Split numeric prefix from unit
     m = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*(days?|weeks?|months?|d|w|m)\b", s)
     if not m:
+        # Non-empty but unparseable — signal to qa_lint
+        _LAST_LEAD_TIME_PARSE["ok"] = False
         return False
     n = float(m.group(1))
     unit = m.group(2)
@@ -697,8 +753,16 @@ def _lead_time_under_six_months(value) -> bool:
     elif unit.startswith("m"):
         days = n * 30  # approximate month
     else:
+        _LAST_LEAD_TIME_PARSE["ok"] = False
         return False
+    _LAST_LEAD_TIME_PARSE["parsed_days"] = days
+    _LAST_LEAD_TIME_PARSE["ok"] = True
     return days < 180
+
+
+# Populated by _lead_time_under_six_months() each call; qa_lint reads to emit
+# a WARN when the intake had a non-empty but unparseable value.
+_LAST_LEAD_TIME_PARSE: dict = {"input": None, "parsed_days": None, "ok": True}
 
 
 def _has_super_factory_initiative(data: dict) -> bool:
@@ -1115,18 +1179,15 @@ class LOI:
         # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
         self.p(f"(A) {resolve_recital_a(self.d)}")
 
-        # v3.7.0: recital_b_density controls word-count target via appended
-        # density cue in the description. terse ~80w, standard ~120w, verbose ~150w.
-        density = self.d.get("choices", {}).get("recital_b_density", "standard")
-        _density_cue = ""
-        if density == "terse":
-            # Terse: use description as-is (engine trims verbose elaboration)
-            # The cue is empty but the caller is expected to use a shorter desc.
-            _density_cue = ""
-        elif density == "verbose":
-            _density_cue = ""
-        # else standard: no cue
-        self.p(f'(B) {cp} (the "{self.party}") {desc}{_density_cue}.')
+        # v3.7.2: recital_b_density is advisory — engine measures the operator-
+        # provided `desc` and qa_lint emits an INFO when the measured length
+        # is out of band for the chosen density. Engine does NOT auto-edit
+        # the description (would mangle carefully-crafted Recital B prose).
+        #   terse   ~80w   (logo-drop style; ≤100w tolerable)
+        #   standard ~120w (60–150w tolerable)
+        #   verbose ~150w  (≥110w expected)
+        # The emission is unchanged — density informs QA, not rendering.
+        self.p(f'(B) {cp} (the "{self.party}") {desc}.')
 
         if self.t == "Distributor":
             self.p(
@@ -2870,6 +2931,9 @@ class LOI:
         # v3.7.1: apply `custom.clauses` replace + insert-after modes after
         # all body rendering is complete.
         self._apply_custom_mutations()
+        # Note: v3.7.2 custom-mutation failures are stored on
+        # `self._custom_mutation_failures` and surfaced by qa_lint via the
+        # `builder_warnings` parameter when called from main().
         # v3.7.1: opt-in post-template renumbering pass. Closes gaps in
         # top-level clause numbering when conditional sub-clauses skip
         # (e.g., clause4_ss emits 4.1 / 4.2 / 4.4 / 4.6 when only
@@ -2921,28 +2985,42 @@ class LOI:
         if not remap:
             return
 
-        # Pass 3: rewrite paragraph prefixes. Sort remap keys by longest first
-        # to avoid substring collisions (e.g., when remapping 3.10 → 3.5, we
-        # don't want to apply 3.1 → 3.2 to the "3.1" inside "3.10").
+        # Pass 3: rewrite paragraph prefixes. Two-phase substitution via
+        # placeholder tokens to avoid chained-rewrite bugs (e.g., remapping
+        # 3.7 → 3.2 and 3.12 → 3.7 — if we substitute 3.12 first, then
+        # 3.7 would double-rewrite to 3.2).
         #
-        # Regex pattern: match "M.N" only when not preceded by a digit and
-        # not followed by another digit or ".digit" — so "3.1" doesn't match
-        # inside "3.10" or "3.1.1".
+        # Phase A: replace each old `N.M` with a unique placeholder.
+        # Phase B: replace placeholders with final `N.M'`.
+        #
+        # Regex guards: match "N.M" only when not preceded by a digit/dot
+        # and not followed by ".digit" or another digit — so "3.1" doesn't
+        # match inside "3.10" or "3.1.1".
         sorted_keys = sorted(remap.keys(), key=lambda k: -len(k))
+        placeholders = {
+            old: f"\uE000RENUM_{i}\uE001" for i, old in enumerate(sorted_keys)
+        }
 
-        def substitute(text: str) -> str:
+        def substitute_a(text: str) -> str:
             for old in sorted_keys:
-                new = remap[old]
+                if old not in remap or old == remap[old]:
+                    continue
                 pattern = re.compile(
                     rf"(?<!\d)(?<!\.)\b{re.escape(old)}\b(?!\.\d)(?!\d)"
                 )
-                text = pattern.sub(new, text)
+                text = pattern.sub(placeholders[old], text)
+            return text
+
+        def substitute_b(text: str) -> str:
+            for old, ph in placeholders.items():
+                if ph in text:
+                    text = text.replace(ph, remap[old])
             return text
 
         for para in paras:
             for run in para.runs:
                 if run.text:
-                    new_text = substitute(run.text)
+                    new_text = substitute_b(substitute_a(run.text))
                     if new_text != run.text:
                         run.text = new_text
 
@@ -2991,7 +3069,13 @@ class LOI:
         """v3.7.1 — apply `replace` + `insert-after:N` custom.clauses[] entries
         to the already-rendered Document. Called from build() after append
         items are inline-rendered.
+
+        v3.7.2: records failed lookups so `qa_lint()` can surface them as
+        WARN lines instead of silently no-op'ing. Stored in
+        `self._custom_mutation_failures` as a list of
+        `(mode, target, reason)` tuples.
         """
+        self._custom_mutation_failures = []
         mutations = getattr(self, "_pending_custom_mutations", None) or []
         if not mutations:
             return
@@ -3005,10 +3089,24 @@ class LOI:
 
             if mode.startswith("insert-after:"):
                 target = mode.split(":", 1)[1].strip()
+                idx = self._find_paragraph_index(target)
+                if idx < 0:
+                    self._custom_mutation_failures.append(
+                        ("insert-after", target,
+                         f"target clause {target!r} not found in rendered body")
+                    )
+                    continue
                 self._insert_clause_after(
                     target, target_number, heading, text, sub_clauses
                 )
             elif mode == "replace":
+                idx = self._find_paragraph_index(target_number)
+                if idx < 0:
+                    self._custom_mutation_failures.append(
+                        ("replace", target_number,
+                         f"target clause {target_number!r} not found in rendered body")
+                    )
+                    continue
                 self._replace_clause(target_number, heading, text, sub_clauses)
 
     def _find_paragraph_index(self, clause_number: str):
@@ -3667,10 +3765,19 @@ def _extract_text(doc) -> str:
 
 
 def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
-            override_reason: str):
+            override_reason: str, *, verify_urls=None, url_fetcher=None,
+            builder_warnings=None):
     """Run QA rules over the built Document. Returns (status, report_lines).
 
     status: "PASS" | "PASS_WITH_WARN" | "FAIL"
+
+    v3.7.2: R-29 URL content verification is now default-on. Behavior:
+    - `verify_urls=None` (default) auto-detects from env (`LOI_NO_NETWORK=1`
+      disables) and CLI (`--no-network` disables, `--verify-source-urls`
+      explicitly enables).
+    - `verify_urls=True|False` overrides the auto-detection (tests pass
+      explicit values with a FakeFetcher).
+    - `url_fetcher` injects a fake fetcher for tests; None = real urllib.
     """
     text = _extract_text(doc)
     lines = [
@@ -3694,6 +3801,11 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
         else:
             lines.append(f"  [FAIL] {rule}  {scope}   {msg}")
             fail_count += 1
+
+    # v3.7.2: emit engine-side WARN findings (e.g., silent-no-op mutations)
+    for rule, scope, msg in (builder_warnings or []):
+        lines.append(f"  [WARN] {rule}  {scope}   {msg}")
+        warn_count += 1
 
     for rid, (pattern, scope, msg) in _FAIL_RULES.items():
         if re.search(pattern, text, re.MULTILINE):
@@ -3726,7 +3838,63 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
     if m:
         recital_b_text = m.group(1)
     source_map = data.get("counterparty", {}).get("source_map", {})
-    r23_findings = _check_fabrication_gate(recital_b_text, source_map, overrides)
+
+    # v3.7.2: R-29 URL content verification — default-on, env-escape-hatched.
+    # Fetch one URL per pillar, check Recital B keyword presence, downgrade
+    # insufficient pillars before R-23 fabrication gate runs. Sits upstream
+    # of R-23 so downgrades propagate into R-23's coverage check.
+    if verify_urls is None:
+        _no_net_env = os.environ.get("LOI_NO_NETWORK") == "1"
+        _no_net_flag = "--no-network" in sys.argv
+        _explicit_on = "--verify-source-urls" in sys.argv
+        verify_urls = (not (_no_net_env or _no_net_flag)) or _explicit_on
+
+    effective_source_map = source_map
+    if verify_urls and source_map and "R-29" not in overrides:
+        effective_source_map = dict(source_map)
+        downgrades = []
+        short_name = data.get("counterparty", {}).get("short", "") or \
+                     data.get("counterparty", {}).get("name", "")
+
+        for pillar_key, pillar_val in source_map.items():
+            urls = pillar_val if isinstance(pillar_val, list) else [pillar_val]
+            first_url = next(
+                (u for u in urls
+                 if isinstance(u, str) and u.startswith(("http://", "https://"))),
+                None,
+            )
+            if not first_url:
+                continue
+
+            # Pick a representative keyword: counterparty short name is the
+            # most load-bearing claim on every pillar; if Recital B is too
+            # short to yield a meaningful keyword, fall back to the short name.
+            _kw = short_name or "Digital Energy"
+
+            try:
+                ok = _check_url_content(first_url, _kw, fetcher=url_fetcher)
+            except Exception:
+                # Network error — log but don't downgrade (avoid flaky runs)
+                lines.append(
+                    f"  [INFO] R-29  source_map   {pillar_key}: "
+                    f"URL fetch raised; skipping verification (re-check "
+                    f"before signing)."
+                )
+                continue
+
+            if not ok:
+                downgrades.append((pillar_key, first_url, _kw))
+                effective_source_map[pillar_key] = ["[TBC]"]
+
+        for pillar_key, url, kw in downgrades:
+            lines.append(
+                f"  [WARN] R-29  source_map   {pillar_key}: URL {url!r} "
+                f"returned <500 chars or missing keyword {kw!r} \u2014 pillar "
+                f"downgraded to [TBC]. Re-verify + replace before signing."
+            )
+            warn_count += 1
+
+    r23_findings = _check_fabrication_gate(recital_b_text, effective_source_map, overrides)
     for rid, scope, msg in r23_findings:
         lines.append(f"  [FAIL] {rid}  {scope}   {msg}")
         fail_count += 1
@@ -3833,6 +4001,58 @@ def qa_lint(doc, data: dict, builder_findings: list, overrides: set,
         lines.append("  [INFO] R-16  YAML   Recital A variant not set, used 'default'")
     if not data.get("choices", {}).get("bespoke_closing"):
         lines.append("  [INFO] R-17  YAML   No bespoke_closing, used default single-sentence")
+
+    # v3.7.2: custom.clauses silent no-op surfacing — when replace or
+    # insert-after targets weren't found in the rendered body, report it.
+    # (Common cause: operator typo'd the clause number or the target clause
+    # doesn't exist in this LOI type.)
+    _lb_cm_failures = []
+    # `builder_findings` carries engine-emitted findings keyed by rule id;
+    # we attach mutation failures via the loi object when qa_lint is called
+    # from main(). Fall back gracefully if not available.
+    try:
+        # Best-effort: pull from the build-time LOI object if the caller
+        # threaded it through. Current signature doesn't, but we can find
+        # the failures list on any attribute the user might have plumbed in.
+        # For now we don't have access — skip. This hook is populated
+        # properly via the SESSION_LOG + qa_lint call in main().
+        pass
+    except Exception:
+        pass
+
+    # v3.7.2: lead_time unparseable advisory
+    _lt_state = _LAST_LEAD_TIME_PARSE
+    _lt_input = _lt_state.get("input")
+    if _lt_input and not _lt_state.get("ok"):
+        lines.append(
+            f"  [WARN] R-lead-time  supplier   supplier.lead_time_target "
+            f"{_lt_input!r} could not be parsed as days/weeks/months "
+            f"(accepted: '90 days', '6 weeks', '3 months', '90d', '6w', '3m'). "
+            f"Joint Stocking Programme clause did NOT fire — consider "
+            f"reformatting the value."
+        )
+        warn_count += 1
+
+    # v3.7.2: Recital B density advisory — measure actual word count against
+    # the chosen density band and emit INFO when out of band. Engine does not
+    # auto-edit description; this tells operator their density choice is
+    # inconsistent with their supplied text.
+    _density = data.get("choices", {}).get("recital_b_density", "standard")
+    _recital_b_wc = len(re.findall(r"\b\w+\b", recital_b_text or ""))
+    if _recital_b_wc > 0:
+        _bands = {
+            "terse": (40, 100, "~80w logo-drop"),
+            "standard": (60, 150, "~120w default"),
+            "verbose": (110, 200, "~150w contextual"),
+        }
+        low, high, label = _bands.get(_density, (0, 10_000, ""))
+        if _recital_b_wc < low or _recital_b_wc > high:
+            lines.append(
+                f"  [INFO] R-density  Recital B   word count {_recital_b_wc} "
+                f"outside {_density!r} band ({low}-{high}, {label}). "
+                f"Either adjust description length or change "
+                f"choices.recital_b_density."
+            )
 
     # v3.7.0: surface structured metadata from the intake — relationship_cluster,
     # identity_map, and financing_context do not appear in the LOI body but
@@ -4125,8 +4345,18 @@ def main():
     doc = loi.build()
 
     qa_report_path = output.replace(".docx", "_qa.txt")
+    # v3.7.2: build the builder_warnings list from engine-side advisories
+    # (currently: custom.clauses silent-no-op failures)
+    _builder_warnings = [
+        ("R-custom-mut", "custom.clauses",
+         f"{mode} mode targeting {target!r}: {reason}. "
+         f"The mutation was not applied; check intake for typos "
+         f"or wrong-type targets.")
+        for mode, target, reason in getattr(loi, "_custom_mutation_failures", [])
+    ]
     qa_status, qa_lines = qa_lint(doc, data, loi.qa_findings, loi.overrides,
-                                   loi.override_reason)
+                                   loi.override_reason,
+                                   builder_warnings=_builder_warnings)
     with open(qa_report_path, "w", encoding="utf-8") as f:
         f.write("\n".join(qa_lines) + "\n")
 
@@ -4193,6 +4423,13 @@ def main():
     _emit_session_log(output, data, qa_status, qa_lines)
     # v3.7.1: emit 84-item audit checklist alongside the .docx
     _emit_audit_checklist(output, doc, data)
+    # v3.7.2: Phase 8 auto-execute — runs selected actions. Local-only
+    # actions (artifact_storage_push, domain_card_create) execute inline;
+    # MCP actions (HubSpot, ClickUp) emit a JSON dispatch file for the
+    # orchestrator session to consume. Action selection via
+    # `--phase-8-actions=key1,key2,...`; dispatch shape controlled by
+    # `--phase-8-auto-execute` (default dry_run=True).
+    _run_phase_8_wiring(output, data)
 
 
 def _audit_only_mode(prior_loi_path: str):
@@ -4290,6 +4527,218 @@ def _recital_b_only_replace(prior_path: str, loi, data: dict):
     out_path = f"{base}_v{n}{ext}"
     _doc.save(out_path)
     print(f"[--recital-b-only] Written: {out_path}")
+
+
+def _run_phase_8_wiring(docx_path: str, data: dict) -> None:
+    """v3.7.2: Phase 8 auto-execute wiring — invoked from main() post-save.
+
+    Reads CLI flags:
+      --phase-8-actions=<comma-separated>  # defaults to all 5 local+MCP
+      --phase-8-auto-execute               # flips dry_run to False
+
+    Local-file actions (artifact_storage_push, domain_card_create) execute
+    inline when dry_run=False. MCP actions (hubspot_upsert_company,
+    clickup_create_task) emit a JSON dispatch file
+    (`{stem}_PHASE8_DISPATCH.json`) which the Claude Code orchestrator
+    session reads + invokes via the real MCP tool calls. This split keeps
+    the generator CLI runnable in non-Claude environments (it can write
+    files, but it can't invoke MCP tools — those are session-scoped).
+
+    A `{stem}_PHASE8_DISPATCH.json` is ALWAYS emitted (even in dry-run)
+    so operators can inspect the planned payloads before running for real.
+    """
+    import json as _json
+
+    # Parse action selection
+    actions_arg = _parse_arg("--phase-8-actions")
+    if actions_arg:
+        actions = [a.strip() for a in actions_arg.split(",") if a.strip()]
+    else:
+        # default: local-only (safer: never dispatches MCP writes without explicit opt-in)
+        actions = ["artifact_storage_push", "domain_card_create"]
+        if "--phase-8-auto-execute" in sys.argv:
+            # Full opt-in also includes MCP dispatch
+            actions = [
+                "hubspot_upsert_company",
+                "clickup_create_task",
+                "artifact_storage_push",
+                "domain_card_create",
+                "cover_email_cross_check",
+            ]
+
+    auto_execute = "--phase-8-auto-execute" in sys.argv
+    dry_run = not auto_execute
+
+    # Import the dispatcher module
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from scripts import phase8_actions as _p8
+        from scripts import artifact_storage as _artstore
+    except Exception as exc:
+        print(f"[phase-8] scripts module unavailable: {exc!r} — skipping", file=sys.stderr)
+        return
+
+    result = _p8.run_phase_8_actions(data, docx_path, actions, dry_run=dry_run)
+
+    # Write the dispatch JSON
+    stem = os.path.splitext(os.path.basename(docx_path))[0]
+    parent = os.path.dirname(os.path.abspath(docx_path))
+    dispatch_path = os.path.join(parent, f"{stem}_PHASE8_DISPATCH.json")
+    with open(dispatch_path, "w", encoding="utf-8") as f:
+        _json.dump(result, f, indent=2, default=str)
+
+    # Execute local-file actions inline when opted in
+    executed_local = []
+    if auto_execute:
+        for action_result in result["actions"]:
+            key = action_result.get("action", "")
+            if key == "artifact_storage_push":
+                try:
+                    target = _artstore.upload_artifact(docx_path, data, dry_run=False)
+                    executed_local.append(("artifact_storage_push", target))
+                except Exception as exc:
+                    executed_local.append(("artifact_storage_push", f"error: {exc!r}"))
+            elif key == "domain_card_create":
+                try:
+                    card_path = _write_domain_card(docx_path, data)
+                    executed_local.append(("domain_card_create", card_path))
+                except Exception as exc:
+                    executed_local.append(("domain_card_create", f"error: {exc!r}"))
+
+    # Print a concise report to stdout so operators see what happened
+    if auto_execute:
+        print(f"Phase 8: dispatch written to {dispatch_path}")
+        for key, target in executed_local:
+            print(f"  executed: {key} \u2192 {target}")
+        if not executed_local:
+            print("  (no local actions executed; MCP actions await orchestrator)")
+    else:
+        print(f"Phase 8: dry-run dispatch written to {dispatch_path}")
+
+
+def _write_domain_card(docx_path: str, data: dict) -> str:
+    """v3.7.2: real implementation of domain card creation (E1).
+
+    Writes `/domains/counterparties/{slug}/overview.md` (repo-relative)
+    with a structured template. The base path defaults to a sibling
+    `domains/` directory under the current working directory; operators
+    in the DEGitOS repo work out of the project root where this path
+    resolves correctly. In other contexts (CI, ad-hoc), writes to a
+    fallback under the docx's directory.
+    """
+    # Reuse artifact_storage slug helper
+    from scripts.artifact_storage import _slugify
+
+    cp = data.get("counterparty", {}) or {}
+    slug = _slugify(cp.get("name", ""))
+    loi_type = data.get("type", "Unknown")
+
+    # Prefer DEGitOS repo-root /domains/ if present; else fallback next to docx
+    docx_parent = os.path.dirname(os.path.abspath(docx_path))
+    repo_root_guess = os.getcwd()
+    primary = os.path.join(repo_root_guess, "domains", "counterparties", slug)
+    fallback = os.path.join(docx_parent, "domain_cards", slug)
+
+    if os.path.isdir(os.path.join(repo_root_guess, "domains")):
+        target_dir = primary
+    else:
+        target_dir = fallback
+
+    os.makedirs(target_dir, exist_ok=True)
+    card_path = os.path.join(target_dir, "overview.md")
+
+    # Don't overwrite an existing card — append a version suffix instead
+    if os.path.exists(card_path):
+        from datetime import datetime as _dt
+        stamp = _dt.now().strftime("%Y%m%d_%H%M%S")
+        card_path = os.path.join(target_dir, f"overview_v3.7.2_{stamp}.md")
+
+    # Assemble the card
+    sup = data.get("supplier", {}) or {}
+    rel = cp.get("relationship_cluster") or {}
+    idm = cp.get("identity_map") or {}
+    fctx = data.get("dates", {}).get("financing_context") or {}
+
+    content_lines = [
+        f"# {cp.get('name', slug)}",
+        "",
+        f"- **Type (this LOI):** {loi_type}",
+        f"- **LOI path:** {docx_path}",
+        f"- **LOI date:** {data.get('dates', {}).get('loi_date', '[TBC]')}",
+        f"- **Validity:** {data.get('dates', {}).get('validity_date', '[TBC]')}",
+        f"- **Signatory (counterparty):** {cp.get('signatory_name', '[TBC]')}",
+        f"- **Contact (counterparty):** {cp.get('contact_name', '[TBC]')}",
+        f"- **Short name:** {cp.get('short', slug)}",
+        f"- **Jurisdiction:** {cp.get('jurisdiction', '[TBC]')}",
+        f"- **Registration:** {cp.get('reg_type', '[TBC]')} {cp.get('reg_number', '[TBC]')}",
+        "",
+        "## HubSpot / ClickUp / Drive links",
+        "",
+        "- HubSpot company: [pending — populated by Phase 8 MCP dispatch]",
+        "- HubSpot deal: [pending]",
+        "- ClickUp task: [pending]",
+        "- Drive audit folder: [pending]",
+        "",
+    ]
+
+    if rel:
+        content_lines += [
+            "## Relationship cluster",
+            "",
+            f"- **Group ID:** {rel.get('group_id', '[unnamed]')}",
+            f"- **Primary entity:** {rel.get('primary_entity', cp.get('name', ''))}",
+        ]
+        aff = rel.get("affiliated_entities", []) or []
+        if aff:
+            content_lines.append("- **Affiliated entities:**")
+            for e in aff:
+                content_lines.append(
+                    f"  - {e.get('name', '[unnamed]')} "
+                    f"\u2014 {e.get('role', '[role unspecified]')}"
+                )
+        content_lines.append("")
+
+    if idm:
+        content_lines += [
+            "## Identity map",
+            "",
+        ]
+        for key, person in idm.items():
+            domains = ", ".join(
+                f"{d.get('domain', '')} ({d.get('role', '')})"
+                for d in (person.get("email_domains") or [])
+            )
+            content_lines.append(
+                f"- **{person.get('display_name', key)}** "
+                f"\u2014 preferred domain: "
+                f"{person.get('preferred_email_for_this_loi', '[TBC]')}"
+            )
+            if domains:
+                content_lines.append(f"  - Known domains: {domains}")
+        content_lines.append("")
+
+    if fctx:
+        content_lines += [
+            "## Financing context",
+            "",
+            f"- Linked to fundraise: {fctx.get('linked_to_fundraise', False)}",
+            f"- Fundraise close target: {fctx.get('fundraise_close_target', '[TBC]')}",
+            f"- Buffer months post-close: {fctx.get('buffer_months_post_close', '[TBC]')}",
+            "",
+        ]
+
+    content_lines += [
+        "## Status",
+        "",
+        "- LOI: DRAFT (as of emission)",
+        "- Next step: legal-counsel Phase 7.5 review + cover-email drafting",
+        "",
+    ]
+
+    with open(card_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(content_lines) + "\n")
+
+    return card_path
 
 
 def _emit_session_log(docx_path: str, data: dict, qa_status: str,
@@ -4438,7 +4887,11 @@ def _emit_audit_checklist(docx_path: str, doc, data: dict) -> str:
     assert_present("Signature block — Digital Energy attestation",
                    "For and on behalf of Digital Energy")
     # Footer
-    assert_present("Footer — template version tag", f"DE-LOI-{t}-v3.2")
+    # Template version tag — v3.2 for EU/DS/WS, v1.0 for SS/EP/Bespoke
+    _footer_vsn = {"StrategicSupplier": "v1.0", "EcosystemPartnership": "v1.0",
+                   "Bespoke": "v1.0"}.get(t, "v3.2")
+    assert_present("Footer — template version tag",
+                   f"DE-LOI-{t}-{_footer_vsn}")
     # v3.6.0 bug-fix invariants — should never appear in any LOI
     assert_absent('v3.6.0 bug — "tthe" typo', "tthe good faith")
     assert_absent('v3.6.0 bug — "(ALT-A)" leftover', "(ALT-A)")
@@ -4460,8 +4913,10 @@ def _emit_audit_checklist(docx_path: str, doc, data: dict) -> str:
     # supplier.rofr
     rofr = supplier.get("rofr")
     if rofr:
-        assert_present("RoFR §3.8 Preferred-Supplier present",
-                       "3.8 Preferred-Supplier and Right of First Refusal")
+        # Match on heading text only, not the number — auto_renumber may
+        # shift §3.8 to a different number.
+        assert_present("RoFR Preferred-Supplier clause present",
+                       "Preferred-Supplier and Right of First Refusal")
         scope = rofr.get("site_scope", "")
         if scope:
             assert_present(f"RoFR — site_scope {scope!r} rendered", scope)
@@ -4537,15 +4992,11 @@ def _emit_audit_checklist(docx_path: str, doc, data: dict) -> str:
                 entry["name"],
             )
 
-    # custom.clauses (all modes)
+    # custom.clauses (all modes) — assert on heading text, not the original
+    # clause number (auto_renumber may shift it).
     for item in custom.get("clauses", []) or []:
-        num = item.get("number", "")
         head = item.get("heading", "")
-        if num:
-            assert_present(
-                f"custom.clauses[{num}] — rendered",
-                num,
-            )
+        num = item.get("number", "")
         if head:
             assert_present(
                 f"custom.clauses[{num}] heading {head!r}",

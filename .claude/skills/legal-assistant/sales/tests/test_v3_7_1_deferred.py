@@ -305,7 +305,8 @@ def test_audit_checklist_expands_on_customizations(base_ss_intake, tmp_path):
         content = f.read()
 
     # Customization-specific assertions
-    assert "RoFR §3.8 Preferred-Supplier present" in content
+    # v3.7.2: audit label updated to be auto_renumber-aware (no hardcoded §3.8)
+    assert "RoFR Preferred-Supplier clause present" in content
     assert "RoFR — alignment framing present" in content
     assert "Mutual Referral Rider heading present" in content
     assert "Joint Stocking Programme heading present" in content

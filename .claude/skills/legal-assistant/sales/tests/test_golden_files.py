@@ -44,24 +44,34 @@ _TESTS_DIR = Path(__file__).resolve().parent
 _COLOCATION_DIR = _TESTS_DIR.parent
 _GOLDENS_DIR = _TESTS_DIR / "goldens"
 _EXAMPLES_DIR = _COLOCATION_DIR / "examples"
-_REGRESSION_DIR = _COLOCATION_DIR / "regression" / "v3.5"
+_REGRESSION_DIRS = [
+    _COLOCATION_DIR / "regression" / "v3.5",
+    _COLOCATION_DIR / "regression" / "v3.7",  # v3.7.2: 8 new fixtures
+]
 
 
 def _discover_intakes() -> list[tuple[str, Path]]:
     """Return list of (golden_name, intake_path) for parametrised tests.
 
     Example intakes → `example_<type>.json`
-    Regression intakes → `regression_<slug>.json`
+    Regression intakes → `regression_<slug>.json` (v3.5) or
+                         `regression_v3_7_<slug>.json` (v3.7)
     """
     out: list[tuple[str, Path]] = []
     for p in sorted(_EXAMPLES_DIR.glob("intake_example_*.yaml")):
         # "intake_example_wholesale.yaml" → "example_wholesale"
         slug = p.stem.replace("intake_", "")
         out.append((slug, p))
-    if _REGRESSION_DIR.exists():
-        for p in sorted(_REGRESSION_DIR.glob("*_intake.yaml")):
-            # "polarise_wholesale_intake.yaml" → "regression_polarise_wholesale"
-            slug = "regression_" + p.stem.replace("_intake", "")
+    for reg_dir in _REGRESSION_DIRS:
+        if not reg_dir.exists():
+            continue
+        # Include the version in the slug for the newer dirs so v3.5 + v3.7
+        # fixtures don't collide (e.g., infrapartners_supplier in v3.5 vs
+        # infrapartners_strategic_supplier_v6 in v3.7).
+        ver_tag = "" if reg_dir.name == "v3.5" else f"_{reg_dir.name.replace('.', '_')}"
+        for p in sorted(reg_dir.glob("*_intake.yaml")):
+            # "cerebro_wholesale_intake.yaml" → "regression_v3_7_cerebro_wholesale"
+            slug = f"regression{ver_tag}_" + p.stem.replace("_intake", "")
             out.append((slug, p))
     return out
 
