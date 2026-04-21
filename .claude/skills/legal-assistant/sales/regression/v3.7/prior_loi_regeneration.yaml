@@ -1,0 +1,68 @@
+# Prior-LOI Regeneration — v3.7 regression intake
+#
+# Exercises v3.7.0 `--audit-only` mode + prior-LOI carry-forward pattern.
+# Represents the state after regenerating a v3.0 → v3.2 LOI for linter
+# compliance. The `notes.prior_loi_path` field documents the lineage;
+# when operators regenerate with `--audit-only`, the linter emits a
+# compliance-delta report against the prior document.
+
+type: Wholesale
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  reg_number: "98580086"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
+
+counterparty:
+  name: "RegenCo AI Ltd"
+  short: "RegenCo"
+  address: "[TBC]"
+  jurisdiction: "[TBC]"
+  reg_number: "[TBC]"
+  contact_name: "[TBC]"
+  signatory_name: "[TBC]"
+  signatory_title: "[TBC]"
+  description: >-
+    is an AI compute operator whose prior v3.0-era LOI has been regenerated
+    under the v3.2 template + v3.7.x engine for linter compliance. The
+    regeneration preserves commercial terms (capacity, expansion, term)
+    from the original instrument; the only changes are linter-driven
+    (e.g., banned adjectives scrubbed, closing collapsed to single sentence,
+    "DEC Block" removed from customer-facing clauses). Named engagements:
+    [TBC — lineage preserved from prior LOI pending independent verification]
+  source_map:
+    pillar_1: ["https://example.com/about"]
+    pillar_2: ["https://example.com/products"]
+    pillar_3: ["[TBC]"]
+    pillar_4: ["https://example.com/strategy"]
+    pillar_5: ["[TBC]"]
+
+programme:
+  recital_a_variant: "default"
+
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
+
+commercial:
+  # Carry-forward from v3.0 prior LOI
+  indicative_mw: "4.8 MW IT"
+  expansion_mw: "12.0 MW"
+  min_term: "5 years"
+  target_rfs_date: "H2 2026"
+
+choices:
+  existing_nda: false
+  recital_b_density: "standard"
+
+notes:
+  # v3.7.0 prior_loi_path field — consumed by --audit-only CLI mode
+  prior_loi_path: "~/Downloads/20260215_DEG_LOI-Wholesale_RegenCo_v3.0_prior.docx"
+  regeneration_reason: "v3.0 → v3.2 linter compliance; commercial terms preserved"

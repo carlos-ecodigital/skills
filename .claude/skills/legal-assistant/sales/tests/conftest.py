@@ -1,10 +1,18 @@
-"""Pytest configuration for legal-assistant colocation tests.
+"""Pytest configuration for legal-assistant sales tests.
 
-Sets up sys.path so tests can import generate_loi from the colocation
+Sets up sys.path so tests can import generate_loi from the sales
 package without requiring an installed package layout.
+
+v3.7.2: sets LOI_NO_NETWORK=1 by default so R-29 URL content
+verification doesn't hit live URLs during test runs. Individual tests
+that exercise R-29 explicitly pass verify_urls=True + url_fetcher=<fake>
+to qa_lint().
 """
 import os
 import sys
+
+# v3.7.2: mandatory for all test runs — disable live network fetches.
+os.environ.setdefault("LOI_NO_NETWORK", "1")
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _COLOCATION = os.path.dirname(_HERE)

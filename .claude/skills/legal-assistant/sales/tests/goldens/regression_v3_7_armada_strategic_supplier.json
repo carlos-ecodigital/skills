@@ -1,0 +1,1387 @@
+{
+  "footer": [
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "first_page_footer"
+    },
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Netherlands B.V.  \u00b7  Mijnsherenweg 33 A, 1433 AP Kudelstaart, The Netherlands  \u00b7  KvK 98580086  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "footer"
+    }
+  ],
+  "n_paragraphs": 145,
+  "n_tables": 1,
+  "paragraphs": [
+    {
+      "alignment": null,
+      "i": 0,
+      "space_after_pt": 0.0,
+      "space_before_pt": 200.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 1,
+      "space_after_pt": 4.0,
+      "space_before_pt": 8.0,
+      "text_hash": "ce9098b1971e2d42",
+      "text_len": 16,
+      "text_prefix": "Letter of Intent"
+    },
+    {
+      "alignment": null,
+      "i": 2,
+      "space_after_pt": 0.0,
+      "space_before_pt": 2.0,
+      "text_hash": "79f2a06260f13e9c",
+      "text_len": 47,
+      "text_prefix": "Strategic Supply and Infrastructure Partnership"
+    },
+    {
+      "alignment": null,
+      "i": 3,
+      "space_after_pt": 0.0,
+      "space_before_pt": 16.0,
+      "text_hash": "48e8ddbfc98921ec",
+      "text_len": 13,
+      "text_prefix": "17 April 2026"
+    },
+    {
+      "alignment": null,
+      "i": 4,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 5,
+      "space_after_pt": 2.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d05e9343a6dcb14b",
+      "text_len": 8,
+      "text_prefix": "Between:"
+    },
+    {
+      "alignment": null,
+      "i": 6,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "c9349500950c3890",
+      "text_len": 31,
+      "text_prefix": "Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 7,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "332b48e1b663deee",
+      "text_len": 56,
+      "text_prefix": "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+    },
+    {
+      "alignment": null,
+      "i": 8,
+      "space_after_pt": 2.0,
+      "space_before_pt": 12.0,
+      "text_hash": "ab131b737d68ecb9",
+      "text_len": 4,
+      "text_prefix": "And:"
+    },
+    {
+      "alignment": null,
+      "i": 9,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d4d91f6e7c11d97a",
+      "text_len": 20,
+      "text_prefix": "Armada Systems, Inc."
+    },
+    {
+      "alignment": null,
+      "i": 10,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "5a3dd5287873780d",
+      "text_len": 5,
+      "text_prefix": "[TBC]"
+    },
+    {
+      "alignment": null,
+      "i": 11,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 12,
+      "space_after_pt": 2.0,
+      "space_before_pt": 2.0,
+      "text_hash": "90e0afd8c5a8cc05",
+      "text_len": 29,
+      "text_prefix": "Classification:  Confidential"
+    },
+    {
+      "alignment": null,
+      "i": 13,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 14,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "22f190f1e064ee0a",
+      "text_len": 82,
+      "text_prefix": "THIS LETTER OF INTENT (the \"LOI\") is dated 17 April 2026 and entered into betwee"
+    },
+    {
+      "alignment": null,
+      "i": 15,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "076a2a4d789ca26e",
+      "text_len": 272,
+      "text_prefix": "(1) Digital Energy Netherlands B.V., a Besloten Vennootschap (B.V.) incorporated"
+    },
+    {
+      "alignment": null,
+      "i": 16,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "019029211e7e1b03",
+      "text_len": 98,
+      "text_prefix": "(2) Armada Systems, Inc., an entity incorporated under the laws of Delaware, USA"
+    },
+    {
+      "alignment": null,
+      "i": 17,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94139f6e4095abc6",
+      "text_len": 43,
+      "text_prefix": "(each a \"Party\" and together the \"Parties\")"
+    },
+    {
+      "alignment": null,
+      "i": 18,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2cbe40dde0c1847e",
+      "text_len": 8,
+      "text_prefix": "Recitals"
+    },
+    {
+      "alignment": null,
+      "i": 19,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0e11cdb4c30f1154",
+      "text_len": 614,
+      "text_prefix": "(A) Digital Energy develops and operates Digital Energy Centers (\"DECs\"), distri"
+    },
+    {
+      "alignment": null,
+      "i": 20,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bb85ee38cb17de0d",
+      "text_len": 315,
+      "text_prefix": "(B) Armada (the \"Supplier\") emerged from stealth in December 2023 and delivers m"
+    },
+    {
+      "alignment": null,
+      "i": 21,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "558aaec0503065b5",
+      "text_len": 432,
+      "text_prefix": "(C) The Parties wish to record their mutual interest in establishing a strategic"
+    },
+    {
+      "alignment": null,
+      "i": 22,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4b87e5d9ecd66b7d",
+      "text_len": 333,
+      "text_prefix": "(D) The Parties will exchange commercially sensitive and competitively valuable "
+    },
+    {
+      "alignment": null,
+      "i": 23,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "54376bf016bcf4f0",
+      "text_len": 14,
+      "text_prefix": "1. Definitions"
+    },
+    {
+      "alignment": null,
+      "i": 24,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ef6020d34bb104a9",
+      "text_len": 55,
+      "text_prefix": "1.1 In this LOI, unless the context requires otherwise:"
+    },
+    {
+      "alignment": null,
+      "i": 25,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9a5a99700f487610",
+      "text_len": 261,
+      "text_prefix": "\"Affiliate\" means, in relation to a Party, any entity that directly or indirectl"
+    },
+    {
+      "alignment": null,
+      "i": 26,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6aae6168a6568f02",
+      "text_len": 704,
+      "text_prefix": "\"Associated Counterparty\" means, in relation to a Site Identifier, any of the fo"
+    },
+    {
+      "alignment": null,
+      "i": 27,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8ca3eb97c417f2aa",
+      "text_len": 95,
+      "text_prefix": "\"Business Day\" means a day other than a Saturday, Sunday, or public holiday in t"
+    },
+    {
+      "alignment": null,
+      "i": 28,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "266cbd1fab4993b2",
+      "text_len": 545,
+      "text_prefix": "\"Confidential Information\" means all information (whether technical, commercial,"
+    },
+    {
+      "alignment": null,
+      "i": 29,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2af5e4d8eef007f2",
+      "text_len": 117,
+      "text_prefix": "\"DEC\" means a Digital Energy Center: a liquid-cooled AI colocation facility deve"
+    },
+    {
+      "alignment": null,
+      "i": 30,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d8c53ade07a2f984",
+      "text_len": 143,
+      "text_prefix": "\"Designated Site\" means any DEC or DEC site designated by Digital Energy for the"
+    },
+    {
+      "alignment": null,
+      "i": 31,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d12b5f6b652325b5",
+      "text_len": 261,
+      "text_prefix": "\"Financing Party\" means any bank, financial institution, fund, security trustee,"
+    },
+    {
+      "alignment": null,
+      "i": 32,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0d173078e6f88063",
+      "text_len": 218,
+      "text_prefix": "\"Framework Agreement\" means the definitive Framework Agreement and accompanying "
+    },
+    {
+      "alignment": null,
+      "i": 33,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "adddd3757860cc80",
+      "text_len": 291,
+      "text_prefix": "\"Protected Business Information\" or \"PBI\" means Digital Energy's proprietary des"
+    },
+    {
+      "alignment": null,
+      "i": 34,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6b324509f1d54255",
+      "text_len": 167,
+      "text_prefix": "\"Purpose\" means evaluating, negotiating, and progressing toward the execution of"
+    },
+    {
+      "alignment": null,
+      "i": 35,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0b2e927074764c32",
+      "text_len": 188,
+      "text_prefix": "\"Ready-for-Service\" or \"RFS\" means the date on which a DEC (or a discrete capaci"
+    },
+    {
+      "alignment": null,
+      "i": 36,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "404eb1c0a753ee87",
+      "text_len": 160,
+      "text_prefix": "\"Representatives\" means, in relation to a Party, its Affiliates, and its and the"
+    },
+    {
+      "alignment": null,
+      "i": 37,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9c536efb18ce24e8",
+      "text_len": 309,
+      "text_prefix": "\"Site Identifier\" means any information that identifies or could reasonably be u"
+    },
+    {
+      "alignment": null,
+      "i": 38,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "161d3d1e8b66c72d",
+      "text_len": 20,
+      "text_prefix": "2. Purpose and Scope"
+    },
+    {
+      "alignment": null,
+      "i": 39,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "84de8e2c6f9a5c76",
+      "text_len": 240,
+      "text_prefix": "2.1 This LOI records the Parties' mutual interest in establishing a strategic su"
+    },
+    {
+      "alignment": null,
+      "i": 40,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8b89bcf3f974c086",
+      "text_len": 222,
+      "text_prefix": "2.2 The Parties intend this LOI to provide a framework for further technical and"
+    },
+    {
+      "alignment": null,
+      "i": 41,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d0e7d9624df4d20e",
+      "text_len": 153,
+      "text_prefix": "2.3 The confidentiality, non-circumvention, and general provisions in Clauses 5 "
+    },
+    {
+      "alignment": null,
+      "i": 42,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "428bfc05db9ce7c9",
+      "text_len": 20,
+      "text_prefix": "3. Partnership Scope"
+    },
+    {
+      "alignment": null,
+      "i": 43,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2e71248ea1baceb2",
+      "text_len": 61,
+      "text_prefix": "3.1 Capability Contribution. Under the envisaged partnership:"
+    },
+    {
+      "alignment": null,
+      "i": 44,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "205eace17381a5ef",
+      "text_len": 241,
+      "text_prefix": "(a) Digital Energy would contribute the site, energy procurement, grid connectio"
+    },
+    {
+      "alignment": null,
+      "i": 45,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "41dfe03a78504549",
+      "text_len": 88,
+      "text_prefix": "(b) the Supplier would contribute Factory-built modular data-centre platforms (G"
+    },
+    {
+      "alignment": null,
+      "i": 46,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1cfcd35532ac1c85",
+      "text_len": 153,
+      "text_prefix": "The precise scope boundaries, responsibility matrix, and commercial terms will b"
+    },
+    {
+      "alignment": null,
+      "i": 47,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "58e6c9c66e966c00",
+      "text_len": 557,
+      "text_prefix": "3.7 Design Integration and IP Allocation. The Parties will collaborate on design"
+    },
+    {
+      "alignment": null,
+      "i": 48,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1644bf3233a1cad3",
+      "text_len": 546,
+      "text_prefix": "3.8 Preferred-Supplier and Right of First Refusal. Subject to commercial agreeme"
+    },
+    {
+      "alignment": null,
+      "i": 49,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7ff87c91f0e22eac",
+      "text_len": 530,
+      "text_prefix": "3.9 Mutual Referral Rider. In addition to the supply arrangements above, the Par"
+    },
+    {
+      "alignment": null,
+      "i": 50,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "52b71bb2404705f0",
+      "text_len": 476,
+      "text_prefix": "3.10 Joint Stocking Programme. The Parties acknowledge that a 90-day Ready-for-S"
+    },
+    {
+      "alignment": null,
+      "i": 51,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "27918bf79f34ea82",
+      "text_len": 22,
+      "text_prefix": "4. Pipeline Engagement"
+    },
+    {
+      "alignment": null,
+      "i": 52,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "72d21d45af57d79a",
+      "text_len": 281,
+      "text_prefix": "4.1 Project Introduction Process. Following execution of this LOI, Digital Energ"
+    },
+    {
+      "alignment": null,
+      "i": 53,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ccf3bc7779f9f86f",
+      "text_len": 101,
+      "text_prefix": "4.2 Contractual Sequence. The Parties acknowledge the intended progression of co"
+    },
+    {
+      "alignment": null,
+      "i": 54,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d9795f6dd3a8436c",
+      "text_len": 106,
+      "text_prefix": "(a) this LOI, setting out non-binding commercial intent and binding confidential"
+    },
+    {
+      "alignment": null,
+      "i": 55,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "95b87909ec4fdb74",
+      "text_len": 119,
+      "text_prefix": "(b) a Framework Agreement, setting out the definitive commercial and operational"
+    },
+    {
+      "alignment": null,
+      "i": 56,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2a3c2e61e1407087",
+      "text_len": 112,
+      "text_prefix": "(c) one or more Statements of Work for named Provider projects, each executed un"
+    },
+    {
+      "alignment": null,
+      "i": 57,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9e9965a11f60ec5d",
+      "text_len": 104,
+      "text_prefix": "(d) site-specific deliverables, schedules, or operational annexes executed under"
+    },
+    {
+      "alignment": null,
+      "i": 58,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fc1aa7e8903b1faa",
+      "text_len": 285,
+      "text_prefix": "4.3 Joint-Development Governance. The Parties intend to establish a joint design"
+    },
+    {
+      "alignment": null,
+      "i": 59,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "08ca6d612543b0b7",
+      "text_len": 510,
+      "text_prefix": "4.4 Change of Control. If, during the term of this LOI, a direct competitor of t"
+    },
+    {
+      "alignment": null,
+      "i": 60,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "37cbe19df7fcce78",
+      "text_len": 102,
+      "text_prefix": "4.6 Implementation Roadmap. Following execution of this LOI, the Parties intend "
+    },
+    {
+      "alignment": null,
+      "i": 61,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "118c85f6d9923b52",
+      "text_len": 156,
+      "text_prefix": "(a) Technical and commercial scoping (target: 30 days post-LOI) \u2014 detailed disco"
+    },
+    {
+      "alignment": null,
+      "i": 62,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "475bdf5a9dd1fa19",
+      "text_len": 144,
+      "text_prefix": "(b) Draft Framework Agreement (target: 60 days post-LOI) \u2014 Digital Energy will i"
+    },
+    {
+      "alignment": null,
+      "i": 63,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b568269c0c4b141d",
+      "text_len": 142,
+      "text_prefix": "(c) Framework Agreement negotiation and execution (target: 90 days post-LOI) \u2014 t"
+    },
+    {
+      "alignment": null,
+      "i": 64,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d26ce3e7ecfa2443",
+      "text_len": 47,
+      "text_prefix": "These timelines are indicative and non-binding."
+    },
+    {
+      "alignment": null,
+      "i": 65,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b7d372ee1b454bf5",
+      "text_len": 49,
+      "text_prefix": "5. Supply Chain and Delivery Commitment (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 66,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fea9e46f7f553a67",
+      "text_len": 338,
+      "text_prefix": "5.1 Delivery Intent. The Supplier confirms its intent to reserve manufacturing a"
+    },
+    {
+      "alignment": null,
+      "i": 67,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "62db0e41e8a0f4c2",
+      "text_len": 195,
+      "text_prefix": "5.2 Assignment. Neither Party may assign its rights or obligations under this LO"
+    },
+    {
+      "alignment": null,
+      "i": 68,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "60c3c51bf5fdff18",
+      "text_len": 155,
+      "text_prefix": "(a) Digital Energy may assign this LOI, or any rights under it, to any Financing"
+    },
+    {
+      "alignment": null,
+      "i": 69,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "606f70809050b639",
+      "text_len": 231,
+      "text_prefix": "(b) Digital Energy may assign this LOI to any Affiliate or special-purpose vehic"
+    },
+    {
+      "alignment": null,
+      "i": 70,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "aa1f26b9ca1eb730",
+      "text_len": 738,
+      "text_prefix": "5.3 Financing Continuity Acknowledgment. The Supplier acknowledges that Digital "
+    },
+    {
+      "alignment": null,
+      "i": 71,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "32cc6d11a73db2fe",
+      "text_len": 47,
+      "text_prefix": "6. Confidentiality and Non-Disclosure (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 72,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6dad84b4c98a8730",
+      "text_len": 136,
+      "text_prefix": "6.1 Purpose Limitation. Each Party shall use the other Party's Confidential Info"
+    },
+    {
+      "alignment": null,
+      "i": 73,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7a2dcd78db0f65fb",
+      "text_len": 208,
+      "text_prefix": "6.2 Non-Disclosure. Each Party shall keep confidential all Confidential Informat"
+    },
+    {
+      "alignment": null,
+      "i": 74,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b0050effb617fb8e",
+      "text_len": 222,
+      "text_prefix": "6.3 Standard of Care. Each Party shall apply no less than reasonable care to pro"
+    },
+    {
+      "alignment": null,
+      "i": 75,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e6e583077df6c558",
+      "text_len": 76,
+      "text_prefix": "6.4 Permitted Disclosures. A Party may disclose Confidential Information to:"
+    },
+    {
+      "alignment": null,
+      "i": 76,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fde2f01443ecced0",
+      "text_len": 214,
+      "text_prefix": "(a) its Representatives who have a genuine need to know for the Purpose and who "
+    },
+    {
+      "alignment": null,
+      "i": 77,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a13411261a832f69",
+      "text_len": 162,
+      "text_prefix": "(b) its bona fide Financing Parties and potential co-investors, provided they ar"
+    },
+    {
+      "alignment": null,
+      "i": 78,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "af62cbde0a8e7e86",
+      "text_len": 433,
+      "text_prefix": "(c) to the extent required by applicable law, regulation, court order, or the ru"
+    },
+    {
+      "alignment": null,
+      "i": 79,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f9eb2a931bbf7f9e",
+      "text_len": 122,
+      "text_prefix": "6.5 Liability for Representatives. Each Party shall be responsible for any breac"
+    },
+    {
+      "alignment": null,
+      "i": 80,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e143239639f28faa",
+      "text_len": 128,
+      "text_prefix": "6.6 Exclusions. The obligations in Clauses 6.1 through 6.3 do not apply to infor"
+    },
+    {
+      "alignment": null,
+      "i": 81,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a826308ea6db47e4",
+      "text_len": 100,
+      "text_prefix": "(a) is or becomes publicly available through no fault of the receiving Party or "
+    },
+    {
+      "alignment": null,
+      "i": 82,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b91a0e9f6e16f53c",
+      "text_len": 127,
+      "text_prefix": "(b) was already in the lawful possession of the receiving Party before disclosur"
+    },
+    {
+      "alignment": null,
+      "i": 83,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "56624e3b590f7e9d",
+      "text_len": 118,
+      "text_prefix": "(c) was independently developed by the receiving Party without use of or referen"
+    },
+    {
+      "alignment": null,
+      "i": 84,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cb337458bb6bbd2f",
+      "text_len": 156,
+      "text_prefix": "(d) was received from a third party who was not, to the receiving Party's knowle"
+    },
+    {
+      "alignment": null,
+      "i": 85,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bb02674c2f731955",
+      "text_len": 238,
+      "text_prefix": "6.7 No Implied Rights. No licence or right is granted under this LOI to the rece"
+    },
+    {
+      "alignment": null,
+      "i": 86,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "397a7550fe0c7065",
+      "text_len": 526,
+      "text_prefix": "6.8 Return and Destruction. Upon the earlier of: (a) the disclosing Party's writ"
+    },
+    {
+      "alignment": null,
+      "i": 87,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9e89c754eac294d8",
+      "text_len": 516,
+      "text_prefix": "6.9 Onward-Sharing Controls. If the receiving Party receives an inquiry from any"
+    },
+    {
+      "alignment": null,
+      "i": 88,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9695d0d5719f8964",
+      "text_len": 223,
+      "text_prefix": "6.10 Compliance Confirmation. Upon the disclosing Party's reasonable written req"
+    },
+    {
+      "alignment": null,
+      "i": 89,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b7bff091a0489f7e",
+      "text_len": 238,
+      "text_prefix": "6.11 Breach Notification. Each Party shall notify the other Party in writing wit"
+    },
+    {
+      "alignment": null,
+      "i": 90,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2fe8d452a772d36c",
+      "text_len": 317,
+      "text_prefix": "6.12 Disclaimer. All Confidential Information is disclosed \"as is.\" The disclosi"
+    },
+    {
+      "alignment": null,
+      "i": 91,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "dbd7075034cfe6e1",
+      "text_len": 321,
+      "text_prefix": "6.13 Metadata Protection. Confidential Information includes metadata, EXIF data,"
+    },
+    {
+      "alignment": null,
+      "i": 92,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "605d84bf86a3a4a0",
+      "text_len": 279,
+      "text_prefix": "6.14 Survival. The obligations in this Clause 6 shall survive termination or exp"
+    },
+    {
+      "alignment": null,
+      "i": 93,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "efb04cb570db9ef9",
+      "text_len": 207,
+      "text_prefix": "6.15 Announcements. Neither Party shall make any public announcement regarding t"
+    },
+    {
+      "alignment": null,
+      "i": 94,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94c43f86e2660a00",
+      "text_len": 387,
+      "text_prefix": "6.16 Remedies. Each Party acknowledges that a breach of this Clause 6 may cause "
+    },
+    {
+      "alignment": null,
+      "i": 95,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "799f2d7322d58ffd",
+      "text_len": 30,
+      "text_prefix": "7. Non-Circumvention (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 96,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7fe14367aded30ab",
+      "text_len": 104,
+      "text_prefix": "7.1 The Supplier shall not, directly or indirectly, without the prior written co"
+    },
+    {
+      "alignment": null,
+      "i": 97,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bfa404afe945d47c",
+      "text_len": 190,
+      "text_prefix": "(a) contact, solicit, deal with, or enter into any business relationship with an"
+    },
+    {
+      "alignment": null,
+      "i": 98,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "701a6390086a62aa",
+      "text_len": 274,
+      "text_prefix": "(b) circumvent, avoid, or bypass Digital Energy in order to deal directly or ind"
+    },
+    {
+      "alignment": null,
+      "i": 99,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9bf7c870cedb57fb",
+      "text_len": 221,
+      "text_prefix": "7.2 Duration. The obligations in this Clause 7 shall continue for 24 months afte"
+    },
+    {
+      "alignment": null,
+      "i": 100,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "19fb05c0ee8d3e4a",
+      "text_len": 257,
+      "text_prefix": "7.3 Deemed Introduction. Digital Energy's sharing of any Site Identifier with th"
+    },
+    {
+      "alignment": null,
+      "i": 101,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "958d2039164ef7a0",
+      "text_len": 411,
+      "text_prefix": "7.4 Scope Limitation. The non-circumvention obligations in this Clause 7 are lim"
+    },
+    {
+      "alignment": null,
+      "i": 102,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "3489442ce223614f",
+      "text_len": 334,
+      "text_prefix": "7.5 Independent Knowledge Exception. The obligations in Clause 7.1 do not apply "
+    },
+    {
+      "alignment": null,
+      "i": 103,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "4f5ab906df193174",
+      "text_len": 402,
+      "text_prefix": "7.6 Framework Agreement Supersession. If the Parties execute a Framework Agreeme"
+    },
+    {
+      "alignment": null,
+      "i": 104,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1d178b48acf2290f",
+      "text_len": 31,
+      "text_prefix": "8. General Provisions (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 105,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b991a5aa96db20a2",
+      "text_len": 24,
+      "text_prefix": "8.1 Non-Binding Status. "
+    },
+    {
+      "alignment": null,
+      "i": 106,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "5a498433904b1408",
+      "text_len": 266,
+      "text_prefix": "(a) Non-binding provisions. Clauses 2 through 4 and Schedule 1 of this LOI are n"
+    },
+    {
+      "alignment": null,
+      "i": 107,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f7d0d253c567f052",
+      "text_len": 193,
+      "text_prefix": "(b) Binding provisions. Clauses 5 (Supply Chain and Delivery Commitment), 6 (Con"
+    },
+    {
+      "alignment": null,
+      "i": 108,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b1b67d9eed2d6946",
+      "text_len": 756,
+      "text_prefix": "8.2 Good Faith. The Parties agree to engage in the technical scoping and commerc"
+    },
+    {
+      "alignment": null,
+      "i": 109,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0577aee325652491",
+      "text_len": 238,
+      "text_prefix": "8.3 Validity. This LOI shall remain valid until 17 April 2027, after which it sh"
+    },
+    {
+      "alignment": null,
+      "i": 110,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bf296f193f2c63b1",
+      "text_len": 122,
+      "text_prefix": "8.4 Costs. Each Party shall bear its own costs in connection with this LOI and t"
+    },
+    {
+      "alignment": null,
+      "i": 111,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "0e63db72d3a94b55",
+      "text_len": 196,
+      "text_prefix": "8.5 Counterparts. This LOI may be executed in counterparts, including by electro"
+    },
+    {
+      "alignment": null,
+      "i": 112,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "78ac8b3879d84a15",
+      "text_len": 248,
+      "text_prefix": "8.6 Notices. All notices under this LOI shall be in writing (including email) an"
+    },
+    {
+      "alignment": null,
+      "i": 113,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "de380e0a20488b40",
+      "text_len": 219,
+      "text_prefix": "8.7 Governing Law. This LOI shall be governed by and construed in accordance wit"
+    },
+    {
+      "alignment": null,
+      "i": 114,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "297f648dd020e34f",
+      "text_len": 187,
+      "text_prefix": "8.8 Jurisdiction. The courts of Amsterdam (Rechtbank Amsterdam) shall have exclu"
+    },
+    {
+      "alignment": null,
+      "i": 115,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f97ec31a34ae423b",
+      "text_len": 285,
+      "text_prefix": "8.9 Entire Agreement. This LOI constitutes the entire agreement between the Part"
+    },
+    {
+      "alignment": null,
+      "i": 116,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8c2e05d1d106b58a",
+      "text_len": 261,
+      "text_prefix": "8.10 Partnership Disclaimer. Nothing in this LOI shall be construed as creating "
+    },
+    {
+      "alignment": null,
+      "i": 117,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 118,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e016b5ff9042dc0f",
+      "text_len": 36,
+      "text_prefix": "We look forward to working with you."
+    },
+    {
+      "alignment": null,
+      "i": 119,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 120,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6d12ed914c5cc1df",
+      "text_len": 17,
+      "text_prefix": "Yours faithfully,"
+    },
+    {
+      "alignment": null,
+      "i": 121,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 122,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cdec56b0de46da45",
+      "text_len": 52,
+      "text_prefix": "For and on behalf of Digital Energy Netherlands B.V."
+    },
+    {
+      "alignment": null,
+      "i": 123,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 124,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 125,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fbcd35b74947c6c4",
+      "text_len": 19,
+      "text_prefix": "Name: Carlos Reuven"
+    },
+    {
+      "alignment": null,
+      "i": 126,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d9339476ab48871a",
+      "text_len": 30,
+      "text_prefix": "Title: Chief Executive Officer"
+    },
+    {
+      "alignment": null,
+      "i": 127,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 128,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 129,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 130,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 131,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 132,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "26675bb2cb52d821",
+      "text_len": 41,
+      "text_prefix": "For and on behalf of Armada Systems, Inc."
+    },
+    {
+      "alignment": null,
+      "i": 133,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 134,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 135,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ddbe3330ea17db6c",
+      "text_len": 34,
+      "text_prefix": "Name: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 136,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "08e8b56813f2aca4",
+      "text_len": 35,
+      "text_prefix": "Title: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 137,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 138,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 139,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 140,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 141,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6b10564483557ddc",
+      "text_len": 40,
+      "text_prefix": "Schedule 1 \u2014 Scope and Capability Matrix"
+    },
+    {
+      "alignment": null,
+      "i": 142,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "35d24067309afce1",
+      "text_len": 106,
+      "text_prefix": "This schedule expresses the Parties' current intentions and is non-binding, in a"
+    },
+    {
+      "alignment": null,
+      "i": 143,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 144,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d7da0e7d94c91290",
+      "text_len": 29,
+      "text_prefix": "DE-LOI-StrategicSupplier-v1.0"
+    }
+  ],
+  "sections": [
+    {
+      "bottom_margin_mm": 35.0,
+      "diff_first_page_header_footer": true,
+      "left_margin_mm": 24.99,
+      "page_height_mm": 297.0,
+      "page_width_mm": 210.01,
+      "right_margin_mm": 20.0,
+      "top_margin_mm": 20.0
+    }
+  ],
+  "tables": [
+    {
+      "i": 0,
+      "n_cols": 2,
+      "n_rows": 9,
+      "rows": [
+        [
+          "Item",
+          "Detail"
+        ],
+        [
+          "Capability Category",
+          "modular_infrastructure"
+        ],
+        [
+          "Core Capability",
+          "Factory-built modular data-centre platforms (Galleon)"
+        ],
+        [
+          "Strategic Purposes",
+          "pipeline_visibility, engineering_integration"
+        ],
+        [
+          "Geographic Coverage",
+          ""
+        ],
+        [
+          "Joint IP Allocation",
+          "background"
+        ],
+        [
+          "Scoping complete",
+          "17 April 2026 + 30 days"
+        ],
+        [
+          "Framework Agreement issued",
+          "17 April 2026 + 60 days"
+        ],
+        [
+          "Framework Agreement executed",
+          "17 April 2026 + 90 days"
+        ]
+      ]
+    }
+  ]
+}

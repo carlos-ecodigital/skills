@@ -1,0 +1,69 @@
+# Armada Strategic Supplier LOI — v3.7 regression intake
+#
+# Exercises v3.7.x features: Joint Stocking Programme (90d lead time),
+# supplier.referral_rider (bidirectional flow), v3.6.0 bug-fix paths.
+# Source: Armada SkillNotes retrospective (2026-04-19).
+
+type: StrategicSupplier
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  kvk: "98580086"
+  reg_number: "98580086"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Chief Executive Officer"
+
+counterparty:
+  name: "Armada Systems, Inc."
+  short: "Armada"
+  address: "[TBC]"
+  jurisdiction: "Delaware, USA"
+  reg_type: "Delaware SoS File Number"
+  reg_number: "[TBC]"
+  contact_name: "[TBC]"
+  signatory_name: "[TBC]"
+  signatory_title: "[TBC]"
+  description: >-
+    emerged from stealth in December 2023 and delivers modular data-centre
+    infrastructure (Galleon platform) for AI and accelerated-compute workloads.
+    Armada's named engagements include OpenAI, Palantir, NVIDIA, Dell, and
+    reference deployments with Aramco Digital and the United States Navy
+  source_map:
+    pillar_1: ["https://armada.ai/about"]
+    pillar_2: ["https://armada.ai/galleon"]
+    pillar_3:
+      - "https://www.prnewswire.com/news-releases/armada-openai-partnership-301234567.html"
+      - "https://www.bloomberg.com/news/armada-palantir-joint-reference"
+    pillar_4: ["https://payloadspace.com/armada-navy-contract"]
+    pillar_5: ["https://armada.ai/pipeline"]
+
+programme:
+  recital_a_variant: "default"
+
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
+
+supplier:
+  capability_category: "modular_infrastructure"
+  core_capability: "Factory-built modular data-centre platforms (Galleon)"
+  strategic_purposes: ["pipeline_visibility", "engineering_integration"]
+  # v3.7.1: Joint Stocking Programme fires — 90-day lead time triggers
+  # strategic inventory clause (§3.10).
+  lead_time_target: "90 days"
+  # v3.7.0: Armada's bidirectional flow (supply + customer referrals)
+  referral_rider: true
+  volume_indicative: "[TBC] MW pipeline"
+
+choices:
+  existing_nda: false
+  recital_b_density: "terse"
+  joint_ip: "background"
+  exclusivity: false

@@ -1,0 +1,100 @@
+# Cerebro Cloud Wholesale LOI — v3.7 regression intake
+#
+# Exercises v3.7.x features: dark_web_counterparty, brochure source_map token,
+# relationship_cluster + identity_map (dual-role founders), prior-LOI regen.
+# Source: Cerebro retrospective (2026-04-17, Jonathan Glender).
+
+type: Wholesale
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  kvk: "98580086"
+  reg_number: "98580086"
+  parent: "Digital Energy Group AG (CHE-408.639.320)"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
+
+counterparty:
+  name: "Cerebro Cloud d.o.o."
+  short: "Cerebro"
+  address: "[TBC]"
+  jurisdiction: "Croatia"
+  reg_type: "OIB"
+  reg_number: "[TBC]"
+  contact_name: "Fedja Ivansic"
+  signatory_name: "Marin Bakša"   # v3.7.0 Phase 4.5: cross-checked vs Fireflies
+  signatory_title: "[TBC]"
+  description: >-
+    is a European AI Neocloud operator headquartered in Croatia, delivering
+    bare-metal and virtual GPU instances for training and inference workloads.
+    Cerebro operates GPU infrastructure across Sweden and the United Kingdom
+    with a phased European expansion programme, targeting NVIDIA H100, H200,
+    B200, and GB200/GB300 NVL72 platforms
+  source_map:
+    # v3.7.0 brochure token — Cerebro's public web was dark (<500 chars)
+    # at time of drafting; brochure supplied by user is the primary source.
+    pillar_1: ["internal:brochure_20260417_cerebro"]
+    pillar_2: ["internal:brochure_20260417_cerebro"]
+    pillar_3: ["internal:brochure_20260417_cerebro"]
+    pillar_4: ["internal:brochure_20260417_cerebro"]
+    pillar_5: ["internal:brochure_20260417_cerebro"]
+
+  # v3.7.0 relationship_cluster — same founders run Barrage (EPC supplier to DE)
+  relationship_cluster:
+    group_id: "barrage-koncar-cerebro"
+    primary_entity: "Cerebro Cloud d.o.o."
+    affiliated_entities:
+      - name: "Barrage"
+        role: "EPC/GC supplier to DE (separate LOI type: StrategicSupplier)"
+        shared_founders: ["Marin Bakša", "Fedja Ivansic"]
+
+  identity_map:
+    marin_baksa:
+      display_name: "Marin Bakša"
+      preferred_salutation: "Marin"
+      email_domains:
+        - { domain: "barrage.net", role: "primary operational" }
+        - { domain: "cerebro.cloud", role: "branding-aligned" }
+      preferred_email_for_this_loi: "marin.baksa@barrage.net"
+    fedja_ivansic:
+      display_name: "Fedja Ivansic"
+      preferred_salutation: "Feda"
+      email_domains:
+        - { domain: "barrage.net", role: "primary operational" }
+        - { domain: "cerebro.cloud", role: "branding-aligned" }
+      preferred_email_for_this_loi: "fedja.ivansic@barrage.net"
+
+programme:
+  recital_a_variant: "default"
+
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
+  # v3.7.0 financing_context
+  financing_context:
+    linked_to_fundraise: true
+    fundraise_close_target: "2026-12-31"
+    buffer_months_post_close: 9
+
+commercial:
+  indicative_mw: "4.8 MW IT"
+  expansion_mw: "12.0 MW"
+  min_term: "5 years"
+  target_rfs_date: "H2 2026"
+  ramp_schedule: "2026–2028 phased"
+
+choices:
+  existing_nda: false
+  recital_b_density: "standard"
+  joint_ip: "background"
+
+# v3.7.0 brochure source note — operator-supplied field retained for audit
+notes:
+  prior_loi_path: "~/Downloads/20260415_DEG_LOI-Wholesale_Cerebro_Cloud_BRANDED (1).docx"
+  brochure_path: "Fundraise DE/02_Analysis/Counterparty_Research/cerebro/GTC26_brochure_20260417.pdf"

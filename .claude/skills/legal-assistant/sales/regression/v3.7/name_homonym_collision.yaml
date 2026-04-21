@@ -1,0 +1,59 @@
+# Name Homonym Collision — v3.7 regression intake
+#
+# Exercises v3.7.0 Phase 4.5 signatory cross-check.
+# The user-supplied signatory "Marin Barrage" (a common transcription error)
+# should be cross-checked against Fireflies participants on @barrage.net,
+# where the true surname is "Bakša". This fixture represents the CORRECTED
+# state (after the cross-check caught the error); operators can diff against
+# the Cerebro fixture to see the before/after pattern.
+
+type: Wholesale
+
+provider:
+  legal_name: "Digital Energy Netherlands B.V."
+  short_name: "Digital Energy"
+  abbreviation: "DEN"
+  legal_form: "Besloten Vennootschap (B.V.)"
+  jurisdiction: "the Netherlands"
+  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
+  reg_type: "KvK"
+  reg_number: "98580086"
+  signatory_name: "Carlos Reuven"
+  signatory_title: "Director"
+
+counterparty:
+  name: "TestCo Cloud"
+  short: "TestCo"
+  address: "[TBC]"
+  jurisdiction: "[TBC]"
+  reg_number: "[TBC]"
+  # Contact name shares letters with counterparty domain — escalation trigger
+  contact_name: "Marin Bakša"
+  signatory_name: "Marin Bakša"   # CORRECTED (was "Marin Barrage" pre-Phase 4.5)
+  signatory_title: "[TBC]"
+  description: >-
+    is an example counterparty used to regression-test the Phase 4.5
+    signatory-name cross-check. The signatory's surname shares letters with
+    the counterparty-affiliated domain (testco.example) which is the known
+    homonym-collision pattern that Phase 4.5 is designed to catch
+  source_map:
+    pillar_1: ["https://example.com/about"]
+    pillar_2: ["https://example.com/products"]
+    pillar_3: ["https://example.com/customers"]
+    pillar_4: ["https://example.com/strategy"]
+    pillar_5: ["https://example.com/pipeline"]
+
+programme:
+  recital_a_variant: "default"
+
+dates:
+  loi_date: "17 April 2026"
+  validity_date: "17 April 2027"
+
+commercial:
+  indicative_mw: "5 MW IT"
+  min_term: "5 years"
+
+choices:
+  existing_nda: false
+  recital_b_density: "standard"
