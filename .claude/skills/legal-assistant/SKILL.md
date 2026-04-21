@@ -61,7 +61,7 @@ If a request falls outside the templated documents below, or requires legal judg
 ### Engine asymmetry (current state)
 
 - **Colocation:** `generate_loi.py` is a complete, deterministic Python engine. Runs end-to-end from YAML to a fully branded .docx.
-- **Site Sourcing:** the Annex A form-fill engine (`generate_site_hot.py`) is **not yet built**. Reason: the versioned .docx templates live on Git LFS and the local Obsidian SSOT checkout holds only 130-byte pointer stubs. Until the real binaries are fetched, the Site HoT workflow runs the intake to completion, writes `annex-a-data.json` to the SSOT, and flags document generation as a blocked step. See `sites/hot/templates/README.md` for fetch instructions.
+- **Site Sourcing:** the Site LOI engine (`sites/loi/generate_site_loi.py`) and Site HoT engine (`sites/hot/generate_site_hot.py`) are **LIVE** as of v4.0-rc1. Both produce bilingual EN/NL `.docx` artefacts via `document-factory/bilingual_body.py` + `signature_block.py`. LFS template binaries resolved (real Word files in `sites/hot/templates/`). End-to-end Van Gog LOI smoke produces a 46 KB bilingual `.docx` with zero format-validator issues; cross-doc gate surfaces expected `DataAcc-1` + `Esc-2` verdicts per registry `escalation_rules`. See `sites/_shared/sal_runbook.md` for operator workflow.
 
 ## Colocation Stream Workflow
 
@@ -526,9 +526,9 @@ Once confirmed:
 
 2. **Save `annex-a-data.json`** with version, template_version, created timestamp, operator, grower_slug, grower_name, status, all field key-value pairs, documents map, escalations list, missing_fields list.
 
-3. **Populate Annex A .docx** — **currently blocked**. Real templates are Git LFS stubs. Write a TODO marker file `HoT_Annex_A_{Name}_PENDING_ENGINE.md` in the grower folder alongside the JSON, noting the engine is not yet available. When `generate_site_hot.py` ships, re-run against this JSON to produce `DE-Site-HoT_Annex_A_{Name}.docx`. The engine pseudocode lives in `sites/hot/templates/README.md`.
+3. **Populate Annex A .docx** — `sites/hot/generate_site_hot.py` consumes `annex-a-data.json` + the v1.1 registry and form-fills the real Annex A template via a 3-pass XML walk (shaded cells, header table, notice addresses). Output: `DE-Site-HoT_Annex_A_{Name}.docx`. Single-partner v0.1; multi-partner fan-out queued for Wave 2.
 
-4. **Copy body template** to `contracts/hots/active/{grower-slug}/DE-Site-HoT_Body_{Name}.docx`. **Do NOT open or modify the body file.** (Today: the copy will itself be an LFS stub until binaries fetched; document that in the PENDING file.)
+4. **Copy body template** to `contracts/hots/active/{grower-slug}/DE-Site-HoT_Body_{Name}.docx`. Engine performs a byte-exact `shutil.copy2` with SHA-256 before/after verification. **Do NOT open or modify the body file.**
 
 5. **Save `intake-log.md`** with timestamped Q&A transcript of the full intake conversation. Include the automated-tool disclaimer at the bottom.
 

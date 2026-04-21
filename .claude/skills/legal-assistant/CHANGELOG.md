@@ -5,6 +5,175 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v4.0-rc1 — 2026-04-20 — Sites Stream
+
+**Major release.** First shipment of the Sites stream: Site LOI + Site HoT
+engines (both LIVE), 10 document parsers, cross-doc gate with 15 rules,
+HubSpot round-trip, Drive output router, full chassis spec layer. 533
+tests green; 181-test Sales regression intact.
+
+### Repo structure
+
+- Folder rename (atomic commit `daf849e`):
+  - `legal-assistant/colocation/` → `legal-assistant/sales/`
+  - `legal-assistant/de-site-hot/` → `legal-assistant/sites/hot/`
+  - Added `legal-assistant/sites/loi/` + `legal-assistant/sites/_shared/`
+- Git LFS binaries resolved — real Word templates (37 KB body + 20 KB Annex A) in `sites/hot/templates/` (was 130-byte stubs).
+- `grower-faq.md` imported into `legal-assistant/_shared/` (was worktree-local).
+
+### New engines
+
+- **`sites/loi/generate_site_loi.py` v0.1** — Site LOI engine. Loads
+  `deal.yaml`, decorates with role labels via `site_doc_base`, renders
+  bilingual EN/NL two-column `.docx` via `document-factory/bilingual_body`,
+  multi-party signature page via `document-factory/signature_block`
+  (formality=`non_binding`, KvK omitted per Van Gog pattern), runs
+  `cross_doc_gate` at LOI stage, emits QA report + gate-report. Van Gog
+  smoke produces a 46 KB .docx with 7 bilingual tables (§1-§7), zero
+  format-validator issues.
+- **`sites/hot/generate_site_hot.py` v0.1** — Site HoT engine. 3-pass
+  XML walk (shaded cells / header table / notice addresses) to form-fill
+  the locked Annex A. Body template copied byte-for-byte with SHA-256
+  before/after verification. Single-partner v0.1; multi-partner queued
+  for Wave 2 (stderr warning emitted).
+
+### New chassis (`sites/_shared/`)
+
+- `deal_yaml_schema.md` (v1.0, 259 lines) — single source of truth for
+  deal intake; asset × contribution × value-exchange model; HubSpot
+  field-map; data-authority chain (parsed doc > HubSpot > LOI intake >
+  Vragenformulier); gate-overrides schema.
+- `site_doc_base.py` — load_registry, iter_fields, fields_by_stage,
+  fields_by_asset, required_field_ids, derive_role_labels (authoritative
+  EN↔NL map), derive_addon_flags, docs_required_for_partner (partner-
+  subset logic), doc_is_stale, `SiteDocBase` abstract class.
+- `cross_doc_gate.py` — 15 rules across:
+  - Con-1..4 (contradictions: pricing drift, timeline, site location, partner identity)
+  - Contrib-1..2 (contribution-consistency)
+  - Gap-1..5 (TBC fields, mandatory missing, stage drift, doc-collection, doc-validity)
+  - DataAcc-1..3 (HubSpot identity, PDOK parcel, DSO postcode match)
+  - Esc-1..4 (consolidating registry `escalation_rules`: heat split, co-investment, missing landowner consent, joint signing)
+  - Override flow: `gate_overrides[]` entries downgrade `fail` → `warn`
+    for overridable rules with audit; non-overridable rules (Con-3,
+    Con-4, Gap-1, Gap-4, Contrib-2, DataAcc-1, DataAcc-2) remain
+    hard-fail.
+- `hubspot_sync.py` — HubSpotClient abstract surface, HUBSPOT_FIELD_MAP
+  (20+ Deal/Company/Contact properties mapped to deal.yaml paths),
+  `read_deal` / `validate` / `resolve` / `write_enrichment`.
+- `output_router.py` — Drive write to
+  `{Counterparty}_Project_Benelux_Ops/drafts/` with SHA-256 idempotency,
+  same-day `v1 → v1b → v1z → v1aa` suffix bumping, cross-day
+  `v1 → v2` major bumping, `drafts/_manifest.json` audit log,
+  `SITES_OUTPUT_ROUTER_DRY_RUN=1` environment flag,
+  `DriveUnavailable` exception.
+- `document_parsers/` — parser framework + 8 specialised parsers:
+  `base.py` (ParserError hierarchy, ParseResult, DocumentParser template
+  method), `generic_pdf.py` (fallback), `ato.py`, `sde_plus.py`,
+  `kadaster.py`, `kvk.py`, `bestemmingsplan.py`,
+  `landowner_consent.py`, `financier_consent.py`, `equipment_oem.py`
+  (auto-detects CHP/BESS/SolarPV).
+
+### Six spec files (`sites/_shared/*.md`, ~125 KB)
+
+- `asset_taxonomy.md` — Land / Property / Infrastructure / Equipment
+  classes; Money / Energy / Equity values; role-label derivation; Dutch
+  legal instruments; per-asset MSA forward-compat map.
+- `recital_b_pillars.md` — 5-pillar Recital B adapted for Site Partners
+  across 5 contribution profiles (grower, heating network, grid, BESS,
+  mixed); bilingual examples; Signal Test.
+- `deal_folder_layout.md` — `{Counterparty}_Project_Benelux_Ops/`
+  folder convention (canonical + legacy + typo variants captured),
+  chain-of-custody via SHA-256, redaction policy, version lifecycle.
+- `sal_runbook.md` — SAL self-serve workflow (intake → enrich → LOI →
+  docs → HoT), error-recovery table, escalation triggers mirroring
+  registry `escalation_rules`, Van Gog worked-example placeholder.
+- `portal_contract.md` — JSON payload schema for future intake portal.
+- `site_qa_gate.md` — 15+ Sites-specific QA rules (bilingual pair
+  balance, diacritic integrity, cover conventions, "Between/And" format,
+  KvK binding-only, Dutch law, native Word list/table tools).
+- `document_collection_checklist.md` — rendered view of registry
+  `supporting_documents` (15 entries) with per-asset groupings,
+  validity windows, review tiers, turnaround days, partner-subset rules.
+
+### Registry v1.1 (`sites/hot/field-registry.json`)
+
+- All 58 fields tagged with `stage` ∈ {loi, hot, both} + `asset` ∈
+  {identity, land, grid_interconnection, heat_supply, equipment_chp, …}.
+- 8 new equipment supporting_documents added
+  (bess_grid_sharing_agreement, bess_balancing_market_enrollment,
+  chp_commissioning_cert, chp_maintenance_contract, chp_gasketel_cert,
+  solar_pv_yield_report, solar_pv_connection_agreement,
+  co2_supply_contract).
+- Every supporting_documents entry gains `validity_days`, `review_tier`
+  ∈ {sal, legal_counsel}, `typical_days_to_receive` metadata.
+- New `_partner_subset_logic` describes when a doc is required per
+  partner based on contribution mix.
+- `tagging_notes` + `schema_changelog` added; `version` 1.0 → 1.1.
+- `escalation_rules` block untouched (consolidated by `cross_doc_gate`).
+
+### New templates
+
+- `sites/loi/templates/DE-LOI-Site-v1.0_TEMPLATE.md` — master LOI
+  template (623 lines) derived from the DocuSigned Van Gog LOI. Asset-
+  gated sections (BESS via §3.2, Heat via §3.3, Grid via §3.4, Land via
+  §3.5). §6.1.6 self-superseding confidentiality anchors LOI→HoT
+  handoff.
+- `sites/hot/templates/DE-HoT-Site-v1.0_TEMPLATE.md` — master HoT
+  template (1,360 lines) extracted verbatim from the locked body .docx;
+  35 clauses across 9 sections; 100% NL translations present; §7
+  confidentiality flagged non-shareable with LOI library (supersession
+  contract preserved).
+
+### document-factory additive extensions (v1.0 → v1.1, non-breaking)
+
+- `bilingual_body.py` — `render_bilingual_clause(...)` produces 2-col
+  tables with 50/50 split at 165 mm usable width, Cobalt heading bar,
+  invisible borders, `tblDescription="__bilingual_body__"` marker.
+  `validate_pair_balance(...)` checks count match, empty cells, NL/EN
+  length ratio ∈ [0.75, 1.33], nested-list depth parity.
+- `signature_block.py` — `SigParty` dataclass + `render_signature_page(...)`
+  produces bilingual role-label headers (`GRID CONTRIBUTOR / NETBIJDRAGER:`),
+  multi-party KvK-binding-only inclusion.
+- `format_validators.py` — `run_all()` aggregates 5 structural checks
+  (table widths, cell overflow, list nesting, diacritics — expanded
+  allowlist covers legal-standard chars `" " ² ³ • … — – °`, font
+  consistency flags non-Inter families).
+- `audit_document()` T0 exemption — skips T1..T10 rules for tables
+  carrying `tblDescription="__bilingual_body__"` marker (bilingual
+  layout tables aren't data tables).
+
+### Test battery
+
+- 533 tests green across 7 suites:
+  - Sales (colocation) regression:        181 passed (unchanged)
+  - document-factory:                      98 passed, 4 skipped
+  - sites/loi:                             25 passed
+  - sites/hot:                             12 passed
+  - sites/_shared/tests:                   94 passed
+  - sites/_shared/document_parsers/tests:  95 passed
+  - sites/tests (integration):             28 passed
+
+### Commits
+
+`daf849e` · `cab60dd` · `041e264` · `822744c` · `32c4448` · `b63dfe5` ·
+`2b26e4a` · `309dbbe` · `d9406e9` · `01014a5` · `db0125d` · `8828934` ·
+`ceec826` · `2298ba1` · `fc1b5f5` · `7366b94`
+
+### Deferred / forward notes
+
+- **Agent M** (LOI engine refactor to call `site_doc_base.derive_role_labels`
+  instead of its inline stub) still in flight — cosmetic, LOI works today.
+- **Agent R** (site_clause_library.md — LOI/HoT clause de-duplication)
+  still in flight.
+- **Multi-partner Annex A fan-out** — queued for Wave 2.
+- **Registry enum normalisation** — parsers emit bare tokens
+  ("Eigendom"/"Sole"); registry v1.1 uses slash-combined bilingual
+  enums; downstream normalisation layer queued for Phase E.
+- **Phase G (signed-HoT regression)** — deferred post-build: reconstruct
+  `deal.yaml` for 13 signed HoTs and assert structural XML parity.
+
+---
+
 ## v3.5.6 scope G + G-bis — 2026-04-17
 
 Phase 7.5 fail-closed enforcement (Scope G) + senior-counsel refinement pass (Scope G-bis, added during execution per user request). Three design decisions from `~/.claude/plans/v3.5.6-design-decisions.md` plus the senior-pass addition.

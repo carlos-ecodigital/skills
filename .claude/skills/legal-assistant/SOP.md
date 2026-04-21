@@ -134,8 +134,8 @@ Claude presents a full summary table before generating. Check everything. Ask fo
 
 Claude writes to the SSOT at `contracts/hots/active/{grower-slug}/`:
 - `annex-a-data.json` — structured field data
-- `DE-Site-HoT_Annex_A_{Company}.docx` — populated Annex A (currently pending LFS fetch — see caveat)
-- `DE-Site-HoT_Body_{Company}.docx` — locked bilingual body copy (also LFS-pending)
+- `DE-Site-HoT_Annex_A_{Company}.docx` — populated Annex A (LIVE; 3-pass XML form-fill via `sites/hot/generate_site_hot.py` v0.1)
+- `DE-Site-HoT_Body_{Company}.docx` — locked bilingual body copy (LIVE; `shutil.copy2` + SHA-256 verification)
 - `intake-log.md` — Q&A transcript
 - `status.md` — draft status + escalations + missing docs + next step
 
@@ -143,7 +143,7 @@ Carlos (or legal-counsel for legal questions) reviews before sending to the grow
 
 ### Current caveat
 
-The Site HoT `.docx` form-fill engine (`generate_site_hot.py`) is pending a Git LFS fetch of the template binaries. Until it ships, the intake runs to completion and writes `annex-a-data.json`, but the Annex A docx step writes a placeholder marker file. Body copy is also pending LFS. See `sites/hot/templates/README.md`.
+Site HoT engine is LIVE at v0.1 (commit `2298ba1`). Single-partner fill path is the primary supported case — multi-partner Annex A fan-out is queued for Wave 2 and emits a `WARN: multi-partner HoT…` on stderr when detected. Registry enum normalisation layer (bare tokens "Eigendom"/"Sole" → slash-combined bilingual "Full ownership / Vol eigendom" / "Sole / Zelfstandig bevoegd") is also queued — raw tokens surface through to QA today. See `sites/_shared/sal_runbook.md` for the full self-serve runbook.
 
 ---
 
