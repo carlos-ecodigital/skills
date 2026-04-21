@@ -5,6 +5,38 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.6.0 — 2026-04-20
+
+Seven production-blocking bug fixes surfaced by three field retrospectives: Cerebro Wholesale (Jonathan Glender, 2026-04-17), Armada Strategic Supplier (2026-04-19), InfraPartners Strategic Supplier (2026-04-19). Each fix written test-first per PRINCIPLES.md #4; 15 new tests in `tests/test_v3_6_0_bugs.py`. Plus three doc-only additions. Template filename version stays `DE-LOI-{Type}-v3.2` — skill release ≠ template version.
+
+### Fixed
+- **Bug 1 — Cl. 8.2 `tthe` typo (all non-EndUser types)** (Armada §2.1). Non-EU path concatenated `"...t" + "t"` producing `"tthe good faith"`. `clause_general` line 1583 — dropped redundant `t` from the first ternary fragment.
+- **Bug 2 — §8.1(b) "Project Finance and Assignment" leak in SS** (InfraPartners §4.1). Binding-provisions list hardcoded the Wholesale/Distributor Cl. 5 label; SS Cl. 5 is "Supply Chain and Delivery Commitment" and EP Cl. 5 is "IP and Deliverables". `clause_general` line 1577 — branch on `self.t` to emit the correct label per type.
+- **Bug 3 — §8.9 "(ALT-A)" drafting marker leak** (InfraPartners §4.2). Entire-Agreement clause referenced "any NDA referenced in Clause 6 (ALT-A)" regardless of `choices.existing_nda`. Line 1600 — gate on `self.choice("existing_nda")`: with NDA → "the NDA referenced in Clause 6"; without → no NDA reference at all.
+- **Bug 4 — Cl. 4.2 meta-commentary trailer (SS + WS)** (Armada §2.2). Template emitted "Each stage is designed to provide increasing commercial certainty and to support Digital Energy's project finance activities." — explains the LOI rather than creating obligation; R-22 class. Removed from both `clause4_ss` (line 1312) and `clause4_ws` (line 1384).
+- **Bug 5 — double-period on Recital B** (Armada §2.3, InfraPartners §4.3). Engine appended literal `.` to `counterparty.description` without stripping existing trailing period. `recitals()` line 696 — `desc.rstrip().rstrip(".")` before concat.
+- **Bug 6 — double-period on SS Cl. 3.1(b) `core_capability`** — same class as bug 5. `clause3_ss` line 1177 — `_cc.rstrip().rstrip(".")` before concat.
+- **Bug 7 — preamble missing company number for Party 2** (InfraPartners §4.4). Party 2 conditional required BOTH `cp_reg_type` AND `cp_reg_number` to render, silently dropping the number when `reg_type` was unset. Party 1 has a KvK fallback; Party 2 now has a "company number" generic fallback when `reg_type` is absent. `parties_preamble` lines 717-722.
+
+### Added
+- `tests/test_v3_6_0_bugs.py` — 15 new regression tests, one or more per bug, exercising the exact field-observed failure modes. RED-first per PRINCIPLES.md #4.
+- **Auto-version output filenames** (v3.6.0 item b). `generate_loi.py main()` — when target `.docx` exists, append `_v{N}` and increment until unique. Surfaces `[auto-version]` stderr note. Addresses file-confusion observed in all three retrospective sessions.
+- **SS strategic-purpose → commercial-intent cross-reference table** (v3.6.0 item k, InfraPartners §4.5). New section in SKILL.md Step 3 SS subsection. Clarifies RoFR → `pipeline_visibility` mapping (not `capacity_lock_in` as InfraPartners session initially attempted).
+- **DE signatory-title memo** (v3.6.0 item m). HTML comment block in SKILL.md Phase 6 summary template — notes Carlos Reuven holds CEO (Group AG) + Director (NL BV) titles; both legally valid; default is Director for NL BV pre-MSA; override via `provider.signatory_title` when CEO-signed variant needed.
+
+### Verified
+- 307/307 pytest tests pass (baseline 250 + 7 v3.5.6 scope G retained + 15 new v3.6.0 + v3.5.8 tripwires retained — full regression green).
+- 10 goldens regenerated; diff reviewed — only expected content changes (no `tthe`, no Cl. 4.2 meta-trailer, §8.1(b) per-type labels correct, no `(ALT-A)` marker, no double-period on forced trailing-period inputs, Party 2 reg_number appears without reg_type when provided).
+- All six `intake_example_*.yaml` regens QA PASS.
+- All four `regression/v3.5/*_intake.yaml` regens QA PASS.
+
+### Not in scope (future releases — see `~/.claude/plans/expressive-cooking-flamingo.md`)
+- **v3.6.1**: linter expansion (R-29 URL-content verify, R-30 double-period, R-31 contact==signatory), `--recital-b-only` flag, density profile, Recital A doc canonicalization, `--audit-only`, `SESSION_LOG.md` artifact.
+- **v3.6.2**: Phase 2.5/3.5/4.5/6/8 workflow additions, Fireflies MCP, HubSpot + ClickUp write auto-execution.
+- **v3.6.3**: `custom.*` YAML extension layer, `supplier.rofr` structured block, Joint Stocking + Co-Marketing clause templates.
+
+---
+
 ## v3.5.8 — 2026-04-19
 
 PRINCIPLES.md tripwire closure. Five principles (#1 / #4 / #5 / #6 / #12) moved from "pending v3.6" to implemented. Closes the items Jonathan + Carlos flagged as "house-of-cards" risk after the v3.5.5 post-mortem. Test harness grows from 139 → 250 passing checks in both repos. No render-logic change; no intake YAML change; no sibling docs change beyond PRINCIPLES.md.
