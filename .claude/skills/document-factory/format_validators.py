@@ -101,10 +101,14 @@ def validate_table_widths(doc, max_mm: float = DEFAULT_MAX_WIDTH_MM) -> List[str
 
 def validate_cell_overflow(doc, min_col_width_mm: float = 30.0) -> List[str]:
     """Detect cells whose longest single word is wider than the column.
-    Approximate heuristic: 2.3 mm per character at 10 pt Inter. Flags true
-    overflow risks (very long words in narrow columns), not normal text."""
+    Approximate heuristic: 2.1 mm per character at 10 pt Inter with ~5%
+    tolerance; flags true overflow risks (very long words in narrow
+    columns), not normal text. Word wrapping handles the lighter edge
+    cases; this catches only words Word cannot break without hyphenation.
+    """
     issues: List[str] = []
-    mm_per_char = 2.3  # approximation for 10 pt Inter
+    mm_per_char = 2.1        # calibrated to 10 pt Inter measured widths
+    tolerance = 0.05         # 5 % — absorbs kerning + inter-word slack
 
     for t_idx, table in enumerate(doc.tables):
         for c_idx, col in enumerate(table.columns):
@@ -121,10 +125,11 @@ def validate_cell_overflow(doc, min_col_width_mm: float = 30.0) -> List[str]:
                     for word in p.text.split():
                         if len(word) > longest:
                             longest = len(word)
-            if longest * mm_per_char > width_mm:
+            predicted_mm = longest * mm_per_char
+            if predicted_mm > width_mm * (1 + tolerance):
                 issues.append(
                     f"validate_cell_overflow: table {t_idx} col {c_idx} "
-                    f"longest word {longest} chars ≈ {longest * mm_per_char:.1f} mm "
+                    f"longest word {longest} chars ≈ {predicted_mm:.1f} mm "
                     f"> col width {width_mm:.1f} mm"
                 )
     return issues
