@@ -327,6 +327,13 @@ def validate(d: dict):
             f"choices.include_schedule must be a boolean (got: {inc_sched!r})"
         )
 
+    # v3.7.1: choices.auto_renumber: bool (default False)
+    auto_renum = choices.get("auto_renumber", False)
+    if not isinstance(auto_renum, bool):
+        errors.append(
+            f"choices.auto_renumber must be a boolean (got: {auto_renum!r})"
+        )
+
     # choices.confidentiality_opt_outs: list of valid keys
     opt_outs = choices.get("confidentiality_opt_outs", [])
     if opt_outs:
@@ -358,6 +365,36 @@ def validate(d: dict):
                 errors.append(
                     f"supplier.rofr.lock_out_style must be one of "
                     f"{sorted(valid_lock_out)} (got: {lock_out!r})"
+                )
+
+    # v3.7.1: supplier.co_marketing block (SS only)
+    co_marketing = supplier.get("co_marketing")
+    if co_marketing is not None:
+        if t != "StrategicSupplier":
+            errors.append(
+                "supplier.co_marketing is only valid for type=StrategicSupplier"
+            )
+        if isinstance(co_marketing, dict):
+            valid_framing = {"multi_supplier", "preferred", "exclusive"}
+            framing = co_marketing.get("framing", "multi_supplier")
+            if framing not in valid_framing:
+                errors.append(
+                    f"supplier.co_marketing.framing must be one of "
+                    f"{sorted(valid_framing)} (got: {framing!r})"
+                )
+            valid_logo = {"yes", "no", "per_event_approval"}
+            logo_use = co_marketing.get("logo_use", "per_event_approval")
+            if logo_use not in valid_logo:
+                errors.append(
+                    f"supplier.co_marketing.logo_use must be one of "
+                    f"{sorted(valid_logo)} (got: {logo_use!r})"
+                )
+            valid_press = {"none", "joint", "unilateral_allowed"}
+            press = co_marketing.get("press_at_loi", "none")
+            if press not in valid_press:
+                errors.append(
+                    f"supplier.co_marketing.press_at_loi must be one of "
+                    f"{sorted(valid_press)} (got: {press!r})"
                 )
 
     # supplier.referral_rider: bool (SS only)
@@ -576,6 +613,47 @@ _SUBJECT_BY_LOI = {
     "StrategicSupplier": "Strategic Supply and Infrastructure Partnership",
     "EcosystemPartnership": "Strategic Ecosystem Collaboration",
 }
+
+
+def _lead_time_under_six_months(value) -> bool:
+    """v3.7.1 — parse a lead_time_target string into days; return True if <180.
+
+    Accepted forms (case-insensitive): "90 days", "6 weeks", "3 months",
+    "90d", "6w", "3m". Falls back to False on unparseable input (safer
+    default — the clause doesn't fire).
+    """
+    if not value:
+        return False
+    s = str(value).strip().lower()
+    # Split numeric prefix from unit
+    m = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*(days?|weeks?|months?|d|w|m)\b", s)
+    if not m:
+        return False
+    n = float(m.group(1))
+    unit = m.group(2)
+    if unit.startswith("d"):
+        days = n
+    elif unit.startswith("w"):
+        days = n * 7
+    elif unit.startswith("m"):
+        days = n * 30  # approximate month
+    else:
+        return False
+    return days < 180
+
+
+def _has_super_factory_initiative(data: dict) -> bool:
+    """Return True if Super-Factory Initiative is in scope via either
+    `custom.definitions_include` or a verbatim `custom.definitions[].key`.
+    """
+    custom = data.get("custom", {}) or {}
+    if "super_factory_initiative" in (custom.get("definitions_include") or []):
+        return True
+    for item in custom.get("definitions", []) or []:
+        k = (item.get("key") or "").lower()
+        if "super-factory" in k or "super_factory" in k:
+            return True
+    return False
 
 
 def _load_common_defined_terms() -> dict:
@@ -1626,11 +1704,16 @@ class LOI:
                 "".join(rofr_lines),
             )
 
+        # v3.7.0 + v3.7.1: optional SS sub-clauses §3.9+. Use a counter so
+        # enabling only a subset still renders contiguous numbering (avoids
+        # the §3.9 → §3.11 gap when referral_rider=false + joint_stocking on).
+        _ss_opt_num = 9
+
         # v3.7.0: supplier.referral_rider — bidirectional flow sentence appended
         # to §3.1 equivalent. InfraPartners §3.2 pattern, Armada referral rider.
         if self.d.get("supplier", {}).get("referral_rider"):
             self.bp(
-                "3.9 Mutual Referral Rider. ",
+                f"3.{_ss_opt_num} Mutual Referral Rider. ",
                 f"In addition to the supply arrangements above, the Parties "
                 f"acknowledge a bidirectional referral interest: Digital Energy may "
                 f"introduce end-customers requiring the Supplier's products to the "
@@ -1640,6 +1723,137 @@ class LOI:
                 f"shall be set out in the Framework Agreement. Mutual "
                 f"non-circumvention obligations in Clause 7 apply to both "
                 f"referral directions."
+            )
+            _ss_opt_num += 1
+
+        # v3.7.1: Joint Stocking Programme — parametric on supplier.lead_time_target < 6 months
+        # (InfraPartners §5.6). Decouples manufacturing from site-specific demand to hit
+        # aggressive RFS targets. Mentions Super-Factory Initiative when that defined
+        # term is present in the intake (custom.definitions_include).
+        lt = self.d.get("supplier", {}).get("lead_time_target", "")
+        if _lead_time_under_six_months(lt):
+            sfi_tail = (
+                " through the Super-Factory Initiative"
+                if _has_super_factory_initiative(self.d)
+                else ""
+            )
+            self.bp(
+                f"3.{_ss_opt_num} Joint Stocking Programme. ",
+                f"The Parties acknowledge that a 90-day Ready-for-Service requires "
+                f"decoupling manufacturing from site-specific demand. The Parties "
+                f"intend to develop a joint stocking programme under which the "
+                f"Supplier maintains strategic inventory of modular units aligned "
+                f"to the Provider's active development pipeline, available to support "
+                f"accelerated deployment to the Provider's colocation customers and "
+                f"to the Supplier's customers seeking European AI capacity"
+                f"{sfi_tail}."
+            )
+            _ss_opt_num += 1
+
+        # v3.7.1: Reference and Co-Marketing (InfraPartners §5.7). Parameterizes
+        # the 6 sub-clauses (a–f) by:
+        #   - framing: multi_supplier | preferred | exclusive
+        #   - logo_use: yes | no | per_event_approval
+        #   - site_naming_approval_sla: e.g. "2 BD"
+        #   - press_at_loi: none | joint | unilateral_allowed
+        cm = self.d.get("supplier", {}).get("co_marketing") or {}
+        if cm:
+            framing = cm.get("framing", "multi_supplier")
+            logo_use = cm.get("logo_use", "per_event_approval")
+            sla = cm.get("site_naming_approval_sla", "2 Business Days")
+            press = cm.get("press_at_loi", "none")
+
+            self.bp(
+                f"3.{_ss_opt_num} Reference and Co-Marketing. ",
+                "The Parties intend to support reciprocal reference and co-marketing "
+                "activity under the following principles:",
+            )
+            _ss_opt_num += 1
+            # (a) framing — multi_supplier is the "Provider's programme" guard;
+            # preferred permits "preferred supplier" wording; exclusive permits
+            # sole-supplier wording (rare; requires prior Legal sign-off).
+            if framing == "multi_supplier":
+                self.p(
+                    f"(a) the {self.party} may reference its role as a strategic "
+                    f"modular infrastructure supplier to the Provider's programme, "
+                    f"provided such references avoid language implying exclusivity "
+                    f"or co-ownership of the programme;"
+                )
+            elif framing == "preferred":
+                self.p(
+                    f"(a) the {self.party} may reference its role as a preferred "
+                    f"supplier for the Provider's programme, provided exclusivity "
+                    f"language is reserved for confirmation in the Framework Agreement;"
+                )
+            else:  # exclusive
+                self.p(
+                    f"(a) the {self.party} may reference its role as sole named "
+                    f"supplier for the Provider's programme, consistent with the "
+                    f"exclusivity commitments to be formalised in the Framework Agreement;"
+                )
+            # (b) DE showcase of IP design
+            self.p(
+                f"(b) the Provider may showcase, to current and prospective "
+                f"colocation customers, non-confidential attributes of the "
+                f"{self.party}'s design, specifications, and performance data "
+                f"as disclosed to the Provider under this LOI's confidentiality "
+                f"terms;"
+            )
+            # (c) site-naming pre-approval
+            self.p(
+                f"(c) the {self.party} may describe the Provider's DEC site envelope "
+                f"(power, cooling, and dimensions) to its own prospects without naming "
+                f"specific sites; specific-site references require the Provider's "
+                f"written consent, which will not be unreasonably withheld and on a "
+                f"{sla} acknowledgement service level;"
+            )
+            # (d) logo use
+            if logo_use == "yes":
+                self.p(
+                    f"(d) each Party grants the other a limited, revocable right to "
+                    f"use its name and logo on website, investor materials, and sales "
+                    f"collateral, subject to the other Party's brand guidelines as "
+                    f"provided from time to time;"
+                )
+            elif logo_use == "per_event_approval":
+                self.p(
+                    f"(d) each Party may use the other's name and logo on specific "
+                    f"marketing materials subject to prior written approval on a "
+                    f"per-event basis, with brand guidelines supplied on request;"
+                )
+            else:  # no
+                self.p(
+                    f"(d) neither Party grants the other any right to use its name "
+                    f"or logo outside the confidential context of this LOI; marketing "
+                    f"rights will be negotiated in the Framework Agreement;"
+                )
+            # (e) press at LOI
+            if press == "none":
+                self.p(
+                    f"(e) the Parties shall not issue any joint press release or "
+                    f"public announcement in connection with this LOI; the first "
+                    f"joint announcement is deferred to the award of a Designated "
+                    f"Site under the Framework Agreement; and"
+                )
+            elif press == "joint":
+                self.p(
+                    f"(e) the Parties intend to issue a joint press release at the "
+                    f"execution of this LOI, the text of which shall be agreed in "
+                    f"writing by both Parties prior to release; and"
+                )
+            else:  # unilateral_allowed
+                self.p(
+                    f"(e) either Party may issue a unilateral press or investor "
+                    f"communication describing this LOI at a high level, provided "
+                    f"the text omits confidential commercial detail and is shared "
+                    f"in advance with the other Party; and"
+                )
+            # (f) commercial routing
+            self.p(
+                f"(f) commercial discussions initiated with any prospect introduced "
+                f"by the {self.party} to the Provider shall route through the "
+                f"Provider's sales process, consistent with the non-circumvention "
+                f"obligations in Clause 7."
             )
 
     def clause4_ss(self):
@@ -2579,21 +2793,112 @@ class LOI:
         if _inc_sched:
             self.schedule()
         self._inject_custom_clauses()
+        # v3.7.1: apply `custom.clauses` replace + insert-after modes after
+        # all body rendering is complete.
+        self._apply_custom_mutations()
+        # v3.7.1: opt-in post-template renumbering pass. Closes gaps in
+        # top-level clause numbering when conditional sub-clauses skip
+        # (e.g., clause4_ss emits 4.1 / 4.2 / 4.4 / 4.6 when only
+        # pipeline_visibility is in strategic_purposes — renumbering
+        # closes to 4.1 / 4.2 / 4.3 / 4.4). Opt-in to preserve goldens
+        # of pre-v3.7.1 callers.
+        if self.d.get("choices", {}).get("auto_renumber"):
+            self._renumber_clauses()
         self.footer()
         return self.doc
 
-    def _inject_custom_clauses(self):
-        """v3.7.0 — inject `custom.clauses[]` entries in append mode.
+    def _renumber_clauses(self):
+        """v3.7.1: close numbering gaps in top-level clauses (N.M).
 
-        v3.7.0 supports `mode: append` (appended at end of body).
-        `mode: replace` and `mode: insert-after:N` are validated in
-        load_intake but deferred to v3.7.1 for implementation.
+        Only renumbers paragraphs whose text starts with exactly `N.M` followed
+        by a word boundary. Body cross-references of the form "Clause N.M" or
+        "Clauses N.M" are updated via a final text-sweep. Sub-minor numbering
+        (N.M.X) is preserved — only the minor level renumbers.
         """
+        from collections import defaultdict
+
+        paras = self.doc.paragraphs
+        # Pass 1: group by major clause number, preserving document order
+        seen_order = defaultdict(list)  # major:int -> [original minor ints in order]
+        by_major = defaultdict(list)    # major:int -> [(para, orig_minor_int)]
+
+        for para in paras:
+            text = para.text.lstrip()
+            m = re.match(r"^(\d+)\.(\d+)(?!\d)(?!\.\d)", text)
+            if not m:
+                continue
+            major = int(m.group(1))
+            minor = int(m.group(2))
+            by_major[major].append((para, minor))
+            if minor not in seen_order[major]:
+                seen_order[major].append(minor)
+
+        # Pass 2: build remap per major; skip majors that are already contiguous
+        remap = {}  # "N.M" -> "N.M'"
+        for major, minors in seen_order.items():
+            expected = list(range(1, len(minors) + 1))
+            if minors == expected:
+                continue
+            new_minors = dict(zip(minors, expected))
+            for orig, new in new_minors.items():
+                if orig != new:
+                    remap[f"{major}.{orig}"] = f"{major}.{new}"
+
+        if not remap:
+            return
+
+        # Pass 3: rewrite paragraph prefixes. Sort remap keys by longest first
+        # to avoid substring collisions (e.g., when remapping 3.10 → 3.5, we
+        # don't want to apply 3.1 → 3.2 to the "3.1" inside "3.10").
+        #
+        # Regex pattern: match "M.N" only when not preceded by a digit and
+        # not followed by another digit or ".digit" — so "3.1" doesn't match
+        # inside "3.10" or "3.1.1".
+        sorted_keys = sorted(remap.keys(), key=lambda k: -len(k))
+
+        def substitute(text: str) -> str:
+            for old in sorted_keys:
+                new = remap[old]
+                pattern = re.compile(
+                    rf"(?<!\d)(?<!\.)\b{re.escape(old)}\b(?!\.\d)(?!\d)"
+                )
+                text = pattern.sub(new, text)
+            return text
+
+        for para in paras:
+            for run in para.runs:
+                if run.text:
+                    new_text = substitute(run.text)
+                    if new_text != run.text:
+                        run.text = new_text
+
+    def _inject_custom_clauses(self):
+        """v3.7.0 + v3.7.1 — inject `custom.clauses[]` entries.
+
+        Modes:
+        - `append` (v3.7.0): render at end of body in the order provided.
+        - `replace` (v3.7.1): find an existing paragraph whose text starts
+          with `{number}\\b` and overwrite its text + any immediate
+          sub-paragraphs that follow before the next numbered paragraph.
+        - `insert-after:N` (v3.7.1): find the paragraph starting with `N\\b`
+          and insert the new clause immediately after it (including sub-
+          clause lines).
+
+        Replace/insert-after are post-render mutations of the Document
+        object. Append stays inline at the end of body (pre-schedule).
+        """
+        append_items = []
+        post_items = []  # replace + insert-after
+
         for item in self.d.get("custom", {}).get("clauses", []) or []:
             mode = item.get("mode", "append")
-            if mode != "append":
-                # Validated as allowed but not yet implemented in body.
-                continue
+            if mode == "append":
+                append_items.append(item)
+            else:
+                post_items.append(item)
+
+        # Append happens inline now (current paragraph insertion order).
+        for item in append_items:
             number = item.get("number", "")
             heading = item.get("heading", "")
             text = item.get("text", "")
@@ -2603,6 +2908,155 @@ class LOI:
                 self.p(f"{number} {text}")
             for sub in item.get("sub_clauses", []) or []:
                 self.p(sub)
+
+        # Replace + insert-after are applied after all append items are
+        # in the document. Store for post-build processing in build().
+        self._pending_custom_mutations = post_items
+
+    def _apply_custom_mutations(self):
+        """v3.7.1 — apply `replace` + `insert-after:N` custom.clauses[] entries
+        to the already-rendered Document. Called from build() after append
+        items are inline-rendered.
+        """
+        mutations = getattr(self, "_pending_custom_mutations", None) or []
+        if not mutations:
+            return
+
+        for item in mutations:
+            mode = item.get("mode", "append")
+            target_number = item.get("number", "")
+            heading = item.get("heading", "")
+            text = item.get("text", "")
+            sub_clauses = item.get("sub_clauses", []) or []
+
+            if mode.startswith("insert-after:"):
+                target = mode.split(":", 1)[1].strip()
+                self._insert_clause_after(
+                    target, target_number, heading, text, sub_clauses
+                )
+            elif mode == "replace":
+                self._replace_clause(target_number, heading, text, sub_clauses)
+
+    def _find_paragraph_index(self, clause_number: str):
+        """Return the index of the first paragraph whose text begins with the
+        given clause number followed by whitespace or period-then-whitespace.
+        Returns -1 if not found.
+        """
+        target = clause_number.strip()
+        for idx, para in enumerate(self.doc.paragraphs):
+            text = para.text.lstrip()
+            # Match "3.8 " or "3.8. " but not "3.80" or "3.8.1"
+            if re.match(rf"^{re.escape(target)}(?=[\s.][^\d]|[\s.]$|\s)", text):
+                return idx
+            # Also match bold run pattern "3.8 Heading. "
+            if text.startswith(target + " ") or text.startswith(target + ". "):
+                return idx
+        return -1
+
+    def _span_end_index(self, start_idx: int) -> int:
+        """Find the end of the clause span that starts at `start_idx`.
+
+        A clause span ends at the next paragraph whose text starts with
+        another `N.M` token (at same or higher depth) or a new top-level
+        heading (`N. Title`), or at end-of-document.
+        """
+        paras = self.doc.paragraphs
+        start_text = paras[start_idx].text.lstrip()
+        m = re.match(r"^(\d+)\.(\d+)", start_text)
+        if not m:
+            return start_idx + 1
+        start_major = int(m.group(1))
+        for idx in range(start_idx + 1, len(paras)):
+            text = paras[idx].text.lstrip()
+            nm = re.match(r"^(\d+)\.(\d+)", text)
+            if nm:
+                return idx
+            nh = re.match(r"^(\d+)\.\s+[A-Z]", text)
+            if nh and int(nh.group(1)) >= start_major:
+                return idx
+            # Break on new heading patterns (Schedule, etc.)
+            if text.startswith("Schedule") or text.startswith("Signed "):
+                return idx
+        return len(paras)
+
+    def _replace_clause(self, target_number, heading, text, sub_clauses):
+        """Replace the paragraph at target_number + its body sub-paragraphs."""
+        idx = self._find_paragraph_index(target_number)
+        if idx < 0:
+            return  # silent — target not present in this LOI type
+        end = self._span_end_index(idx)
+
+        # Remove paragraphs idx .. end-1
+        body = self.doc.element.body
+        for _ in range(end - idx):
+            para = self.doc.paragraphs[idx]
+            p_el = para._element
+            p_el.getparent().remove(p_el)
+
+        # Insert replacement at the original idx. We create new paragraphs via
+        # python-docx append + reorder relative to the deleted span.
+        insert_before = (
+            self.doc.paragraphs[idx]._element if idx < len(self.doc.paragraphs) else None
+        )
+        new_paras = self._build_inserted_paragraphs(
+            target_number, heading, text, sub_clauses
+        )
+        for np_el in new_paras:
+            if insert_before is not None:
+                insert_before.addprevious(np_el)
+            else:
+                body.append(np_el)
+
+    def _insert_clause_after(self, after_number, new_number, heading, text, sub_clauses):
+        """Insert new_number's clause immediately after after_number."""
+        idx = self._find_paragraph_index(after_number)
+        if idx < 0:
+            return  # silent
+        end = self._span_end_index(idx)
+
+        # New paragraphs are inserted at position `end` (just before the
+        # next clause/span). Use addprevious to anchor.
+        insert_before = (
+            self.doc.paragraphs[end]._element if end < len(self.doc.paragraphs) else None
+        )
+        new_paras = self._build_inserted_paragraphs(
+            new_number, heading, text, sub_clauses
+        )
+        if insert_before is not None:
+            for np_el in new_paras:
+                insert_before.addprevious(np_el)
+        else:
+            body = self.doc.element.body
+            for np_el in new_paras:
+                body.append(np_el)
+
+    def _build_inserted_paragraphs(self, number, heading, text, sub_clauses):
+        """Render the new clause + sub_clauses into detached paragraph elements.
+
+        Returns list of lxml elements (the <w:p> XML) ready to be inserted
+        into the document body.
+        """
+        # Trick: render paragraphs using self.bp/self.p, then detach the
+        # tail paragraphs from the document so they can be re-inserted at
+        # the desired position.
+        starting_count = len(self.doc.paragraphs)
+        if heading:
+            self.bp(f"{number} {heading}. ", text)
+        else:
+            self.p(f"{number} {text}")
+        for sub in sub_clauses or []:
+            self.p(sub)
+
+        # Detach newly-appended paragraphs
+        new_paras = []
+        body = self.doc.element.body
+        all_paras = self.doc.paragraphs
+        appended = all_paras[starting_count:]
+        for para in appended:
+            p_el = para._element
+            p_el.getparent().remove(p_el)
+            new_paras.append(p_el)
+        return new_paras
 
     def _build_ep(self) -> Document:
         """v3.3: Ecosystem Partnership build pipeline.
@@ -3577,6 +4031,8 @@ def main():
 
     # v3.7.0: emit SESSION_LOG.md alongside the .docx
     _emit_session_log(output, data, qa_status, qa_lines)
+    # v3.7.1: emit 84-item audit checklist alongside the .docx
+    _emit_audit_checklist(output, doc, data)
 
 
 def _audit_only_mode(prior_loi_path: str):
@@ -3756,6 +4212,208 @@ def _emit_session_log(docx_path: str, data: dict, qa_status: str,
     with open(log_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
     return log_path
+
+
+def _emit_audit_checklist(docx_path: str, doc, data: dict) -> str:
+    """v3.7.1: emit `{stem}_AUDIT.txt` with per-customization substring
+    assertions.
+
+    Pattern lifted from InfraPartners §10 (84-item checklist). For each
+    assertion, writes `PASS: <label>` or `FAIL: <label>`. Target: 20+ core
+    assertions for any LOI + per-customization additions that scale up to
+    ~84 for a fully-configured SS LOI.
+
+    The checklist is read/curated by the operator during Phase 7 review,
+    NOT enforced by CI. FAIL lines are advisory — they flag content that
+    was expected but not rendered, which often points to a Phase 5 intake
+    oversight rather than an engine bug.
+    """
+    stem = os.path.splitext(os.path.basename(docx_path))[0]
+    audit_dir = os.path.dirname(os.path.abspath(docx_path))
+    audit_path = os.path.join(audit_dir, f"{stem}_AUDIT.txt")
+
+    text = _extract_text(doc)
+    assertions = []  # list of (label, expected_bool, predicate_result)
+
+    def assert_present(label: str, needle: str):
+        assertions.append((label, True, needle in text))
+
+    def assert_absent(label: str, needle: str):
+        assertions.append((label, False, needle in text))
+
+    t = data.get("type", "")
+    cp = data.get("counterparty", {}) or {}
+    choices = data.get("choices", {}) or {}
+    custom = data.get("custom", {}) or {}
+    supplier = data.get("supplier", {}) or {}
+
+    # ---- Core assertions (apply to all LOI types) ----
+    assert_present("Preamble — Digital Energy party intro",
+                   "(1) Digital Energy Netherlands B.V.")
+    assert_present("Preamble — counterparty party intro",
+                   f"(2) {cp.get('name', '')}")
+    assert_present("Recital A — canonical body opener",
+                   "develops and operates Digital Energy Centers")
+    assert_present("Recital B — counterparty short name",
+                   cp.get("short", cp.get("name", "")))
+    assert_present('Definitions — "DEC"', '"DEC"')
+    assert_present('Definitions — "Business Day"', '"Business Day"')
+    assert_present('Definitions — "Confidential Information"',
+                   '"Confidential Information"')
+    assert_present('Definitions — "Purpose"', '"Purpose"')
+    assert_present('Definitions — "Representatives"', '"Representatives"')
+    assert_present("Cl. 2 — Purpose and Scope heading", "2. Purpose and Scope")
+    # Cl. 3 exists under different names by type; just check "3.1" renders
+    assert_present("Cl. 3 — first sub-clause present", "3.1")
+    assert_present("Cl. 6 — Confidentiality heading + BINDING marker",
+                   "Confidentiality" if t == "EcosystemPartnership" else "Confidentiality")
+    assert_present("Cl. 6 — first sub-clause present", "6.1")
+    gen_cl = "7. General Provisions" if t == "EndUser" else "8. General Provisions"
+    assert_present(f"{gen_cl} — heading", gen_cl)
+    assert_present(f"{gen_cl} — BINDING marker", "(BINDING)")
+    # Validity date
+    val_date = data.get("dates", {}).get("validity_date", "")
+    if val_date:
+        assert_present(f"Validity — {val_date}", val_date)
+    assert_present("Signature block — Digital Energy attestation",
+                   "For and on behalf of Digital Energy")
+    # Footer
+    assert_present("Footer — template version tag", f"DE-LOI-{t}-v3.2")
+    # v3.6.0 bug-fix invariants — should never appear in any LOI
+    assert_absent('v3.6.0 bug — "tthe" typo', "tthe good faith")
+    assert_absent('v3.6.0 bug — "(ALT-A)" leftover', "(ALT-A)")
+    assert_absent('v3.6.0 bug — Recital B double-period', "..")
+
+    # Closing line
+    if t != "EcosystemPartnership":
+        assert_present("Closing — We look forward to working with you",
+                       "We look forward to working with you")
+
+    # ---- Type-specific assertions ----
+    if t in ("Distributor", "Wholesale"):
+        assert_present('Definitions — "MSA"', '"MSA"')
+    elif t == "StrategicSupplier":
+        assert_present('Definitions — "Framework Agreement"',
+                       '"Framework Agreement"')
+
+    # ---- Per-customization assertions ----
+    # supplier.rofr
+    rofr = supplier.get("rofr")
+    if rofr:
+        assert_present("RoFR §3.8 Preferred-Supplier present",
+                       "3.8 Preferred-Supplier and Right of First Refusal")
+        scope = rofr.get("site_scope", "")
+        if scope:
+            assert_present(f"RoFR — site_scope {scope!r} rendered", scope)
+        lock_out = rofr.get("lock_out_style", "sole_discretion")
+        if lock_out == "alignment":
+            assert_present("RoFR — alignment framing present",
+                           "good-faith dialogue")
+        elif lock_out == "hard_minimum":
+            assert_present("RoFR — hard_minimum commitment present",
+                           "not fewer than one Designated Site")
+        elif lock_out == "milestone":
+            assert_present("RoFR — milestone trigger present",
+                           "pre-commitment deliverables")
+
+    # supplier.referral_rider
+    if supplier.get("referral_rider"):
+        assert_present("Mutual Referral Rider heading present",
+                       "Mutual Referral Rider")
+        assert_present("Referral Rider — bidirectional phrasing",
+                       "bidirectional referral interest")
+
+    # Joint Stocking Programme
+    if _lead_time_under_six_months(supplier.get("lead_time_target", "")):
+        assert_present("Joint Stocking Programme heading present",
+                       "Joint Stocking Programme")
+        assert_present("Joint Stocking — 90-day RFS rationale",
+                       "90-day Ready-for-Service")
+
+    # Co-Marketing
+    cm = supplier.get("co_marketing") or {}
+    if cm:
+        assert_present("Reference and Co-Marketing heading present",
+                       "Reference and Co-Marketing")
+        framing = cm.get("framing", "multi_supplier")
+        if framing == "multi_supplier":
+            assert_present("Co-Marketing — multi-supplier framing guard",
+                           "avoid language implying exclusivity")
+        elif framing == "exclusive":
+            assert_present("Co-Marketing — exclusive framing",
+                           "sole named supplier")
+
+    # include_schedule
+    if choices.get("include_schedule") is False:
+        assert_absent("Schedule 1 suppressed (include_schedule=false)",
+                      "Schedule 1")
+        assert_absent("§8.1(a) Schedule 1 ref scrubbed",
+                      "and Schedule 1 of this LOI are non-binding")
+
+    # confidentiality_opt_outs
+    opt_outs = choices.get("confidentiality_opt_outs") or []
+    if "onward_sharing" in opt_outs:
+        assert_absent("§6 Onward-Sharing suppressed", "Onward-Sharing Controls")
+    if "compliance_confirmation" in opt_outs:
+        assert_absent("§6 Compliance Confirmation suppressed",
+                      "Compliance Confirmation")
+    if "metadata_protection" in opt_outs:
+        assert_absent("§6 Metadata Protection suppressed",
+                      "Metadata Protection")
+
+    # custom.definitions
+    for item in custom.get("definitions", []) or []:
+        key = item.get("key", "")
+        if key:
+            assert_present(f"custom.definitions — {key!r} injected", key)
+
+    # custom.definitions_include (library lookup)
+    library = _load_common_defined_terms()
+    for key in custom.get("definitions_include", []) or []:
+        entry = library.get(key)
+        if entry:
+            assert_present(
+                f"custom.definitions_include — {entry['name']!r} injected",
+                entry["name"],
+            )
+
+    # custom.clauses (all modes)
+    for item in custom.get("clauses", []) or []:
+        num = item.get("number", "")
+        head = item.get("heading", "")
+        if num:
+            assert_present(
+                f"custom.clauses[{num}] — rendered",
+                num,
+            )
+        if head:
+            assert_present(
+                f"custom.clauses[{num}] heading {head!r}",
+                head,
+            )
+
+    # Build output
+    pass_count = sum(
+        1 for _, expected, observed in assertions if expected == observed
+    )
+    fail_count = len(assertions) - pass_count
+
+    out_lines = [
+        f"# Audit Checklist — {os.path.basename(docx_path)}",
+        f"# Total assertions: {len(assertions)} | PASS: {pass_count} | FAIL: {fail_count}",
+        "",
+    ]
+    for label, expected, observed in assertions:
+        ok = expected == observed
+        out_lines.append(
+            f"{'PASS' if ok else 'FAIL'}: "
+            f"{'[must be present] ' if expected else '[must be absent] '}"
+            f"{label}"
+        )
+
+    with open(audit_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(out_lines) + "\n")
+    return audit_path
 
 
 if __name__ == "__main__":
