@@ -281,17 +281,21 @@ def _select_partner_for_section(
             return None
         if len(grid) == 1:
             return grid[0]
-        # Largest MVA wins; warn if ambiguous (tie or all-zero).
+        # Multiple candidates — always warn (the human needs to confirm).
+        # Largest MVA wins; ties broken by insertion order.
         grid_sorted = sorted(grid, key=_grid_mva, reverse=True)
         top_mva = _grid_mva(grid_sorted[0])
         tied = [p for p in grid_sorted if _grid_mva(p) == top_mva]
-        if len(tied) > 1 or top_mva == 0.0:
-            warnings.append(
-                f"Section B: {len(grid)} Grid Contributors "
-                f"({', '.join(p.get('legal_name', '?') for p in grid)}); "
-                f"using {grid_sorted[0].get('legal_name', '?')} "
-                f"(mva={top_mva})"
-            )
+        qualifier = (
+            "tied on MVA" if len(tied) > 1
+            else ("no MVA data" if top_mva == 0.0
+                  else f"picked largest MVA={top_mva}")
+        )
+        warnings.append(
+            f"Section B: {len(grid)} Grid Contributors "
+            f"({', '.join(p.get('legal_name', '?') for p in grid)}); "
+            f"{qualifier} → using {grid_sorted[0].get('legal_name', '?')}"
+        )
         return grid_sorted[0]
 
     # --- D / G.Landowner → Landowner ------------------------------------
