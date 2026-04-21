@@ -1,0 +1,506 @@
+{
+  "footer": [
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Group AG  \u00b7  Baarerstrasse 43, 6300 Zug, Switzerland  \u00b7  CHE-408.639.320  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "first_page_footer"
+    },
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Group AG  \u00b7  Baarerstrasse 43, 6300 Zug, Switzerland  \u00b7  CHE-408.639.320  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "footer"
+    }
+  ],
+  "n_paragraphs": 52,
+  "n_tables": 0,
+  "paragraphs": [
+    {
+      "alignment": null,
+      "i": 0,
+      "space_after_pt": 0.0,
+      "space_before_pt": 200.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 1,
+      "space_after_pt": 4.0,
+      "space_before_pt": 8.0,
+      "text_hash": "ce9098b1971e2d42",
+      "text_len": 16,
+      "text_prefix": "Letter of Intent"
+    },
+    {
+      "alignment": null,
+      "i": 2,
+      "space_after_pt": 0.0,
+      "space_before_pt": 2.0,
+      "text_hash": "1950ac32898be0a1",
+      "text_len": 44,
+      "text_prefix": "Joint AI Infrastructure Delivery Partnership"
+    },
+    {
+      "alignment": null,
+      "i": 3,
+      "space_after_pt": 0.0,
+      "space_before_pt": 16.0,
+      "text_hash": "f67645a45830bafd",
+      "text_len": 10,
+      "text_prefix": "2026-04-17"
+    },
+    {
+      "alignment": null,
+      "i": 4,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 5,
+      "space_after_pt": 2.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d05e9343a6dcb14b",
+      "text_len": 8,
+      "text_prefix": "Between:"
+    },
+    {
+      "alignment": null,
+      "i": 6,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 7,
+      "space_after_pt": 2.0,
+      "space_before_pt": 12.0,
+      "text_hash": "ab131b737d68ecb9",
+      "text_len": 4,
+      "text_prefix": "And:"
+    },
+    {
+      "alignment": null,
+      "i": 8,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d16a4ceae16ef6df",
+      "text_len": 28,
+      "text_prefix": "Example Bespoke Partner B.V."
+    },
+    {
+      "alignment": null,
+      "i": 9,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 10,
+      "space_after_pt": 2.0,
+      "space_before_pt": 2.0,
+      "text_hash": "90e0afd8c5a8cc05",
+      "text_len": 29,
+      "text_prefix": "Classification:  Confidential"
+    },
+    {
+      "alignment": null,
+      "i": 11,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 12,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "efab49e6858dbb3e",
+      "text_len": 79,
+      "text_prefix": "THIS LETTER OF INTENT (the \"LOI\") is dated 2026-04-17 and entered into between:"
+    },
+    {
+      "alignment": null,
+      "i": 13,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "89b2590e6f1f2196",
+      "text_len": 112,
+      "text_prefix": "(1) , a private limited liability company incorporated under the laws of the Net"
+    },
+    {
+      "alignment": null,
+      "i": 14,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "a2d119b4e8ddb5fc",
+      "text_len": 97,
+      "text_prefix": "(2) Example Bespoke Partner B.V., an entity incorporated under the laws of [TBC]"
+    },
+    {
+      "alignment": null,
+      "i": 15,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94139f6e4095abc6",
+      "text_len": 43,
+      "text_prefix": "(each a \"Party\" and together the \"Parties\")"
+    },
+    {
+      "alignment": null,
+      "i": 16,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2cbe40dde0c1847e",
+      "text_len": 8,
+      "text_prefix": "Recitals"
+    },
+    {
+      "alignment": null,
+      "i": 17,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "dc794b8fe48397a7",
+      "text_len": 415,
+      "text_prefix": "(A) Digital Energy develops and operates Digital Energy Centers (\"DECs\"), distri"
+    },
+    {
+      "alignment": null,
+      "i": 18,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "329433be14779ef6",
+      "text_len": 166,
+      "text_prefix": "(B) Example Partner (the \"Partner\") a Netherlands-based AI infrastructure soluti"
+    },
+    {
+      "alignment": null,
+      "i": 19,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6e0108e7669ad2ea",
+      "text_len": 195,
+      "text_prefix": "(C) The Parties recognise that the Provider's infrastructure and the Partner's m"
+    },
+    {
+      "alignment": null,
+      "i": 20,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f366d64d86ccbe6f",
+      "text_len": 39,
+      "text_prefix": "1. Partnership Model and Joint Offering"
+    },
+    {
+      "alignment": null,
+      "i": 21,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ba1ea2a6d7fc1f4d",
+      "text_len": 161,
+      "text_prefix": "1.1 The Parties intend to develop and market an integrated offering combining th"
+    },
+    {
+      "alignment": null,
+      "i": 22,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e036df3573b13ca9",
+      "text_len": 88,
+      "text_prefix": "(a) the Provider delivers energy, cooling, and facility infrastructure at its DE"
+    },
+    {
+      "alignment": null,
+      "i": 23,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "63de948120f89387",
+      "text_len": 110,
+      "text_prefix": "(b) the Partner delivers compute hardware procurement, deployment, lifecycle man"
+    },
+    {
+      "alignment": null,
+      "i": 24,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b97c17f470abbba9",
+      "text_len": 22,
+      "text_prefix": "2. Commercial Workshop"
+    },
+    {
+      "alignment": null,
+      "i": 25,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "68993265d06ac5ee",
+      "text_len": 166,
+      "text_prefix": "2.1 The Parties intend to conduct a joint commercial workshop within thirty (30)"
+    },
+    {
+      "alignment": null,
+      "i": 26,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cc4cc8d3cb409d80",
+      "text_len": 21,
+      "text_prefix": "3. Non-Binding Status"
+    },
+    {
+      "alignment": null,
+      "i": 27,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a633e7e62bcb28db",
+      "text_len": 170,
+      "text_prefix": "3.1 This LOI is non-binding. No Party is obliged to enter into any definitive ag"
+    },
+    {
+      "alignment": null,
+      "i": 28,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 29,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e016b5ff9042dc0f",
+      "text_len": 36,
+      "text_prefix": "We look forward to working with you."
+    },
+    {
+      "alignment": null,
+      "i": 30,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 31,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6d12ed914c5cc1df",
+      "text_len": 17,
+      "text_prefix": "Yours faithfully,"
+    },
+    {
+      "alignment": null,
+      "i": 32,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 33,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "14b3e11223935cd2",
+      "text_len": 21,
+      "text_prefix": "For and on behalf of "
+    },
+    {
+      "alignment": null,
+      "i": 34,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 35,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 36,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fbcd35b74947c6c4",
+      "text_len": 19,
+      "text_prefix": "Name: Carlos Reuven"
+    },
+    {
+      "alignment": null,
+      "i": 37,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "52357851457380e3",
+      "text_len": 20,
+      "text_prefix": "Title: Founder & CEO"
+    },
+    {
+      "alignment": null,
+      "i": 38,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 39,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 40,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 41,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 42,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 43,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "53b7424877894867",
+      "text_len": 49,
+      "text_prefix": "For and on behalf of Example Bespoke Partner B.V."
+    },
+    {
+      "alignment": null,
+      "i": 44,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 45,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 46,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b0d308dd61ec9ff7",
+      "text_len": 23,
+      "text_prefix": "Name: Example Signatory"
+    },
+    {
+      "alignment": null,
+      "i": 47,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "24aa4235c62622bd",
+      "text_len": 15,
+      "text_prefix": "Title: Director"
+    },
+    {
+      "alignment": null,
+      "i": 48,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 49,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 50,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 51,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "db59a631862aa723",
+      "text_len": 19,
+      "text_prefix": "DE-LOI-Bespoke-v1.0"
+    }
+  ],
+  "sections": [
+    {
+      "bottom_margin_mm": 35.0,
+      "diff_first_page_header_footer": true,
+      "left_margin_mm": 24.99,
+      "page_height_mm": 297.0,
+      "page_width_mm": 210.01,
+      "right_margin_mm": 20.0,
+      "top_margin_mm": 20.0
+    }
+  ],
+  "tables": []
+}

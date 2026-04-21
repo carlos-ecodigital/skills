@@ -1,0 +1,713 @@
+{
+  "footer": [
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Group AG  \u00b7  Baarerstrasse 43, 6300 Zug, Switzerland  \u00b7  CHE-408.639.320  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "first_page_footer"
+    },
+    {
+      "paragraphs": [
+        {
+          "alignment": "CENTER",
+          "text": "Digital Energy Group AG  \u00b7  Baarerstrasse 43, 6300 Zug, Switzerland  \u00b7  CHE-408.639.320  \u00b7  digital-energy.group"
+        }
+      ],
+      "which": "footer"
+    }
+  ],
+  "n_paragraphs": 75,
+  "n_tables": 0,
+  "paragraphs": [
+    {
+      "alignment": null,
+      "i": 0,
+      "space_after_pt": 0.0,
+      "space_before_pt": 200.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 1,
+      "space_after_pt": 4.0,
+      "space_before_pt": 8.0,
+      "text_hash": "ce9098b1971e2d42",
+      "text_len": 16,
+      "text_prefix": "Letter of Intent"
+    },
+    {
+      "alignment": null,
+      "i": 2,
+      "space_after_pt": 0.0,
+      "space_before_pt": 2.0,
+      "text_hash": "c68a3f8805525c97",
+      "text_len": 30,
+      "text_prefix": "for AI Infrastructure Services"
+    },
+    {
+      "alignment": null,
+      "i": 3,
+      "space_after_pt": 0.0,
+      "space_before_pt": 16.0,
+      "text_hash": "f67645a45830bafd",
+      "text_len": 10,
+      "text_prefix": "2026-04-17"
+    },
+    {
+      "alignment": null,
+      "i": 4,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 5,
+      "space_after_pt": 2.0,
+      "space_before_pt": 0.0,
+      "text_hash": "d05e9343a6dcb14b",
+      "text_len": 8,
+      "text_prefix": "Between:"
+    },
+    {
+      "alignment": null,
+      "i": 6,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 7,
+      "space_after_pt": 2.0,
+      "space_before_pt": 12.0,
+      "text_hash": "ab131b737d68ecb9",
+      "text_len": 4,
+      "text_prefix": "And:"
+    },
+    {
+      "alignment": null,
+      "i": 8,
+      "space_after_pt": 0.0,
+      "space_before_pt": 0.0,
+      "text_hash": "8b65f8bc2a6d6754",
+      "text_len": 12,
+      "text_prefix": "MDCS.AI B.V."
+    },
+    {
+      "alignment": null,
+      "i": 9,
+      "space_after_pt": 0.0,
+      "space_before_pt": 40.0,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 10,
+      "space_after_pt": 2.0,
+      "space_before_pt": 2.0,
+      "text_hash": "90e0afd8c5a8cc05",
+      "text_len": 29,
+      "text_prefix": "Classification:  Confidential"
+    },
+    {
+      "alignment": null,
+      "i": 11,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 12,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "efab49e6858dbb3e",
+      "text_len": 79,
+      "text_prefix": "THIS LETTER OF INTENT (the \"LOI\") is dated 2026-04-17 and entered into between:"
+    },
+    {
+      "alignment": null,
+      "i": 13,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "89b2590e6f1f2196",
+      "text_len": 112,
+      "text_prefix": "(1) , a private limited liability company incorporated under the laws of the Net"
+    },
+    {
+      "alignment": null,
+      "i": 14,
+      "space_after_pt": 6.0,
+      "space_before_pt": null,
+      "text_hash": "019ec33ca00a40aa",
+      "text_len": 82,
+      "text_prefix": "(2) MDCS.AI B.V., an entity incorporated under the laws of [TBC] (the \"Customer\""
+    },
+    {
+      "alignment": null,
+      "i": 15,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "94139f6e4095abc6",
+      "text_len": 43,
+      "text_prefix": "(each a \"Party\" and together the \"Parties\")"
+    },
+    {
+      "alignment": null,
+      "i": 16,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2cbe40dde0c1847e",
+      "text_len": 8,
+      "text_prefix": "Recitals"
+    },
+    {
+      "alignment": null,
+      "i": 17,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "dc794b8fe48397a7",
+      "text_len": 415,
+      "text_prefix": "(A) Digital Energy develops and operates Digital Energy Centers (\"DECs\"), distri"
+    },
+    {
+      "alignment": null,
+      "i": 18,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d32f8cdb9713ecd0",
+      "text_len": 468,
+      "text_prefix": "(B) MDCS (the \"Customer\") a Netherlands-based AI infrastructure solutions compan"
+    },
+    {
+      "alignment": null,
+      "i": 19,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6c6832f87769d50b",
+      "text_len": 336,
+      "text_prefix": "(C) The Customer is the developer of the \"Lorentz\" initiative, a programme estab"
+    },
+    {
+      "alignment": null,
+      "i": 20,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1e95803f40d924c1",
+      "text_len": 378,
+      "text_prefix": "(D) The Parties recognise that the Provider's infrastructure (secured grid capac"
+    },
+    {
+      "alignment": null,
+      "i": 21,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "d762ef7476761717",
+      "text_len": 283,
+      "text_prefix": "(E) This letter of intent (the \"LOI\") records the Parties' mutual interest in es"
+    },
+    {
+      "alignment": null,
+      "i": 22,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "f366d64d86ccbe6f",
+      "text_len": 39,
+      "text_prefix": "1. Partnership Model and Joint Offering"
+    },
+    {
+      "alignment": null,
+      "i": 23,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "919299bbdcc7efb6",
+      "text_len": 294,
+      "text_prefix": "1.1 Integrated solution. The Parties intend to develop and market an integrated "
+    },
+    {
+      "alignment": null,
+      "i": 24,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bf17cf31325f5336",
+      "text_len": 208,
+      "text_prefix": "1.2 Commercial Workshop. The Parties intend to conduct a joint commercial worksh"
+    },
+    {
+      "alignment": null,
+      "i": 25,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "433d30ec43377a2f",
+      "text_len": 178,
+      "text_prefix": "1.3 Preferred platform. The Parties intend that the Provider's colocation networ"
+    },
+    {
+      "alignment": null,
+      "i": 26,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "81467cdc3cb19782",
+      "text_len": 63,
+      "text_prefix": "(a) develop the joint colocation and managed-services offering;"
+    },
+    {
+      "alignment": null,
+      "i": 27,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "15880081802f529d",
+      "text_len": 75,
+      "text_prefix": "(b) define the Lorentz deployment roadmap on the Provider's infrastructure;"
+    },
+    {
+      "alignment": null,
+      "i": 28,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "047fc1849c5e661b",
+      "text_len": 77,
+      "text_prefix": "(c) build an initial enterprise target list from the Customer's account base."
+    },
+    {
+      "alignment": null,
+      "i": 29,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8de3bf4246e2e400",
+      "text_len": 42,
+      "text_prefix": "2. Indicative Capacity and Site Allocation"
+    },
+    {
+      "alignment": null,
+      "i": 30,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7a113dc0ca32c4d4",
+      "text_len": 162,
+      "text_prefix": "2.1 Designated Sites. The Provider intends to designate one or more sites within"
+    },
+    {
+      "alignment": null,
+      "i": 31,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "479a72b5f6b612cf",
+      "text_len": 132,
+      "text_prefix": "2.2 Phase 1. The Customer's initial deployment is anticipated to comprise up to "
+    },
+    {
+      "alignment": null,
+      "i": 32,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "a28eb2f2d09602df",
+      "text_len": 147,
+      "text_prefix": "2.3 No reservation. This LOI does not reserve capacity. Capacity allocation will"
+    },
+    {
+      "alignment": null,
+      "i": 33,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "11229ff6ee13aa5b",
+      "text_len": 21,
+      "text_prefix": "3. Indicative Pricing"
+    },
+    {
+      "alignment": null,
+      "i": 34,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "2bc3df54cc81f6cb",
+      "text_len": 218,
+      "text_prefix": "3.1 Commercial model. The services will be priced on a triple-net colocation mod"
+    },
+    {
+      "alignment": null,
+      "i": 35,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fde6c82ff549015e",
+      "text_len": 172,
+      "text_prefix": "3.2 Indicative proposal. The Provider will deliver an indicative pricing proposa"
+    },
+    {
+      "alignment": null,
+      "i": 36,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "95aa22da39528380",
+      "text_len": 139,
+      "text_prefix": "3.3 Term. The Parties anticipate an initial contract term of approximately five "
+    },
+    {
+      "alignment": null,
+      "i": 37,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6b11d328a4c50f42",
+      "text_len": 25,
+      "text_prefix": "4. Implementation Roadmap"
+    },
+    {
+      "alignment": null,
+      "i": 38,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c207f350aa366c6f",
+      "text_len": 186,
+      "text_prefix": "4.1 Following execution of this LOI, the Parties intend to proceed with technica"
+    },
+    {
+      "alignment": null,
+      "i": 39,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "7a5901e4f86f98c0",
+      "text_len": 49,
+      "text_prefix": "5. Non-Binding Status (BINDING AS TO THIS CLAUSE)"
+    },
+    {
+      "alignment": null,
+      "i": 40,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "5546aa2a34e8a8c7",
+      "text_len": 275,
+      "text_prefix": "5.1 Save for Clauses 5 (Non-Binding Status), 6 (Confidentiality), 8 (Governing L"
+    },
+    {
+      "alignment": null,
+      "i": 41,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "cc05a810fc17d2a9",
+      "text_len": 28,
+      "text_prefix": "6. Confidentiality (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 42,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "488555f015e30032",
+      "text_len": 246,
+      "text_prefix": "6.1 Each Party shall keep confidential all non-public information disclosed by t"
+    },
+    {
+      "alignment": null,
+      "i": 43,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6f87ba575f3099bf",
+      "text_len": 13,
+      "text_prefix": "7. Good Faith"
+    },
+    {
+      "alignment": null,
+      "i": 44,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ec07ca0a948a2646",
+      "text_len": 211,
+      "text_prefix": "7.1 The Parties will negotiate the MSA in good faith but neither Party is oblige"
+    },
+    {
+      "alignment": null,
+      "i": 45,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "33190a7c446bdb88",
+      "text_len": 43,
+      "text_prefix": "8. Governing Law and Jurisdiction (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 46,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "9c3ff6f6572ee84a",
+      "text_len": 205,
+      "text_prefix": "8.1 This LOI is governed by and construed in accordance with the laws of the Net"
+    },
+    {
+      "alignment": null,
+      "i": 47,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "ee50ad17007f8416",
+      "text_len": 20,
+      "text_prefix": "9. General (BINDING)"
+    },
+    {
+      "alignment": null,
+      "i": 48,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "c76abd418a840eb5",
+      "text_len": 119,
+      "text_prefix": "9.1 Entire agreement. This LOI constitutes the entire agreement between the Part"
+    },
+    {
+      "alignment": null,
+      "i": 49,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "3f33470dd09b2478",
+      "text_len": 88,
+      "text_prefix": "9.2 Amendments. Any amendment to this LOI must be in writing and signed by both "
+    },
+    {
+      "alignment": null,
+      "i": 50,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "1df28291e8296e32",
+      "text_len": 141,
+      "text_prefix": "9.3 Counterparts. This LOI may be executed in counterparts, each of which is an "
+    },
+    {
+      "alignment": null,
+      "i": 51,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 52,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "e016b5ff9042dc0f",
+      "text_len": 36,
+      "text_prefix": "We look forward to working with you."
+    },
+    {
+      "alignment": null,
+      "i": 53,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 54,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "6d12ed914c5cc1df",
+      "text_len": 17,
+      "text_prefix": "Yours faithfully,"
+    },
+    {
+      "alignment": null,
+      "i": 55,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 56,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "14b3e11223935cd2",
+      "text_len": 21,
+      "text_prefix": "For and on behalf of "
+    },
+    {
+      "alignment": null,
+      "i": 57,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 58,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 59,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "fbcd35b74947c6c4",
+      "text_len": 19,
+      "text_prefix": "Name: Carlos Reuven"
+    },
+    {
+      "alignment": null,
+      "i": 60,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "52357851457380e3",
+      "text_len": 20,
+      "text_prefix": "Title: Founder & CEO"
+    },
+    {
+      "alignment": null,
+      "i": 61,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 62,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 63,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 64,
+      "space_after_pt": 0.0,
+      "space_before_pt": null,
+      "text_hash": "fb69a709ae483c9d",
+      "text_len": 50,
+      "text_prefix": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014"
+    },
+    {
+      "alignment": null,
+      "i": 65,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 66,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "5bbdcef04166d700",
+      "text_len": 33,
+      "text_prefix": "For and on behalf of MDCS.AI B.V."
+    },
+    {
+      "alignment": null,
+      "i": 67,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 68,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "bc3204ca0e5d9256",
+      "text_len": 39,
+      "text_prefix": "Signature: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 69,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "238a4868a34d9338",
+      "text_len": 20,
+      "text_prefix": "Name: Niels van Rees"
+    },
+    {
+      "alignment": null,
+      "i": 70,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "b366bcdb4be94ca4",
+      "text_len": 17,
+      "text_prefix": "Title: Co-Founder"
+    },
+    {
+      "alignment": null,
+      "i": 71,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "8fcc7efbf553872c",
+      "text_len": 34,
+      "text_prefix": "Date: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 72,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "354a2396dffc0195",
+      "text_len": 35,
+      "text_prefix": "Place: ____________________________"
+    },
+    {
+      "alignment": null,
+      "i": 73,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": null,
+      "text_len": 0,
+      "text_prefix": ""
+    },
+    {
+      "alignment": null,
+      "i": 74,
+      "space_after_pt": null,
+      "space_before_pt": null,
+      "text_hash": "db59a631862aa723",
+      "text_len": 19,
+      "text_prefix": "DE-LOI-Bespoke-v1.0"
+    }
+  ],
+  "sections": [
+    {
+      "bottom_margin_mm": 35.0,
+      "diff_first_page_header_footer": true,
+      "left_margin_mm": 24.99,
+      "page_height_mm": 297.0,
+      "page_width_mm": 210.01,
+      "right_margin_mm": 20.0,
+      "top_margin_mm": 20.0
+    }
+  ],
+  "tables": []
+}
