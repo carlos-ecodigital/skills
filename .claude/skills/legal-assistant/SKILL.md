@@ -148,6 +148,15 @@ cd /Users/crmg/skills/.claude/skills/legal-assistant/colocation
 python3 generate_loi.py examples/intake.yaml --output /path/to/output.docx
 ```
 
+#### v3.7.0 CLI flags
+
+| Flag | Description |
+|---|---|
+| `--recital-b-only <path.docx>` | Regenerate Recital B only; replace paragraph in existing .docx and write `_v{N}.docx`. Error if path missing. |
+| `--audit-only` | Extract text from `prior_loi_path` (or `--prior <path>`); run full linter; emit `{basename}_audit.txt`. No regeneration. |
+| `--verify-source-urls` | Opt-in R-29 URL content verification: fetch each `source_map` URL and assert claim keywords present in ≥500 chars. Default OFF. |
+| `--phase-8-auto-execute` | Accepted and stored; Specialist C wires Phase 8 auto-actions in a future release. |
+
 ### Step 7: Quality Check (MANDATORY — automated + manual)
 
 **Automated (v3.2):** The generator runs a pre-save QA linter per `_shared/loi-qa-gate.md` (20 rules, severity `fail` / `warn` / `info`). On `fail`, the build is blocked unless `--override R-xx --override-reason "..."` is supplied. Every build emits `{output}_qa.txt`.
