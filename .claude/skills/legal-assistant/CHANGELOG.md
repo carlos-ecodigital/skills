@@ -5,6 +5,82 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.7.0 — 2026-04-20
+
+Consolidated release covering the full v3.6.1 + v3.6.2 + v3.6.3 + v3.7 roadmap from `~/.claude/plans/expressive-cooking-flamingo.md`. Three field retrospectives (Cerebro, Armada, InfraPartners) drove 29+ distinct improvement items across linter expansion, CLI tooling, phase-logic hardening, extensibility layer, and cross-skill ecosystem. Test baseline 307 → 368 passing. All additions backward-compatible — every new YAML field is optional with v3.6.0-matching defaults; all 10 goldens unchanged.
+
+Template filename stays `DE-LOI-{Type}-v3.2` (skill release ≠ template version).
+
+### Added — linter / CLI / session tooling (v3.6.1 scope)
+- **R-29 (fail)** — URL content verification. Opt-in via `--verify-source-urls` CLI flag (default OFF in v3.7.0; default-on in v3.8). For each `source_map[pillar_N]` URL, fetches and checks Recital B claim keywords appear in ≥500 chars of content. If missing → downgrade to `[TBC — url_content_insufficient]`.
+- **R-30 (fail)** — Double-period detector on rendered body. Excludes ellipsis and numbered-list prefixes.
+- **R-31 (warn)** — `contact_name == signatory_name` fires on case-insensitive match; "confirm intentional single-point-of-contact."
+- **R-27/R-28 normalization** — broadened to match bare `TBC` (not only `[TBC]`) for signatory detection + density counting.
+- **R-11 helper** — `certifications_in_source(intake)` surfaces detected ISO/SOC/PCI certs in QA report so Phase 5 makes the include/omit decision explicitly.
+- **R-21 narrowing** — `purpose-built` now allowed inside Clause 3 product-capability text; banned in Recital A/B/closing only.
+- **R-24 (warn)** — brochure-sourced pillars require tier-1 corroboration before signing.
+- **Brochure source_map token** — `source_map[pillar_N]` accepts `internal:brochure_{YYYYMMDD}_{slug}` tokens as tier-2 sources.
+- **`--recital-b-only <path>`** — regenerate Recital B only; replace paragraph in existing .docx; write `_v{N}`.
+- **`--audit-only`** — read `prior_loi_path`; run full linter; emit `{basename}_audit.txt` without regenerating.
+- **`--verify-source-urls`** — activates R-29.
+- **`--phase-8-auto-execute`** — CLI flag to activate real HubSpot + ClickUp writes (dry-run by default).
+- **`choices.recital_b_density: terse|standard|verbose`** — word-count cue for Recital B generation.
+- **`SESSION_LOG.md` artifact** — emitted alongside every `.docx` capturing decisions, CLI flags, QA summary, customizations.
+
+### Added — phase logic / doc sync (v3.6.1 + v3.6.2 scope)
+- **Recital A canonicalization** — deleted `sovereignty | integration | bespoke` variant options from SKILL.md, ASSEMBLY_GUIDE.md, and all 6 `intake_example_*.yaml`.
+- **Bespoke Recital A checklist gate** — Phase 5 requires operator confirmation of (a) non-commercial counterparty OR (b) canonical tail materially incorrect; justification captured in `choices.recital_a_bespoke_justification`.
+- **Categorical-vs-tactical descriptor table** added to `_shared/counterpart-description-framework.md`.
+- **Phase 2.5 name disambiguation** — WebSearch check for counterparty-name collision.
+- **Phase 3 systematic parallel source-capture** + prior-LOI `/extract`-first rule.
+- **Phase 3.5 public-web-dark detection** — `dark_web_counterparty: true` flag; elevated Phase 7.5 review.
+- **Phase 4.5 signatory-name cross-check** — Fireflies fuzzy match; domain-surname homonym escalation.
+- **Phase 5 newest-fixture starting point** — `colocation/examples/README.md` points to newest `regression/v{X.Y}/*` first.
+- **Phase 6 evidence-strength column** — per-pillar Tier-1/Tier-2/[TBC]; auto mode 10s non-blocking interrupt.
+- **Phase 8 auto-actions** — HubSpot + ClickUp wired; dry-run default + `--phase-8-auto-execute`.
+- **`allowed-tools` expanded** — `fireflies_search`, `fireflies_get_transcript`, `manage_crm_objects`, `clickup_create_task`.
+- **LOI sizing framework** — new `_shared/loi-sizing-framework.md` (R1–R4 ratios).
+- **`mark_chapter` hygiene rule** added.
+- **`scripts/artifact_storage.py`** — implements v3.5.3 J13 Drive upload (deferred since v3.5.3).
+
+### Added — extensibility schema (v3.6.3 scope)
+- **`custom.definitions[]`** — arbitrary `{key, text}` injected at top of Cl. 2.
+- **`custom.definitions_include[]`** — include-list resolves against new `_shared/loi-common-defined-terms.md` library (Super-Factory Initiative, Designated Site, Framework Agreement, DEC Block).
+- **`custom.clauses[]` with `mode: append`** — append arbitrary clauses to document body.
+- **`choices.confidentiality_opt_outs`** — suppress named §6 Tier B sub-clauses with auto-renumber.
+- **`choices.include_schedule: bool`** — when false, suppresses Schedule 1 + scrubs §8.1(a) + §4.2(d).
+- **`supplier.rofr`** — parameterizes §3.8 RoFR clause (styles: alignment | sole_discretion | hard_minimum | milestone).
+- **`supplier.referral_rider: bool`** — adds §3.9 Mutual Referral Rider.
+- **`counterparty.relationship_cluster` + `identity_map`** — structured metadata in QA report.
+- **`dates.financing_context`** — validated + surfaced in QA.
+- **`scripts/phase8_actions.py`** — dispatch payloads for Phase 8 actions.
+
+### Added — cross-skill ecosystem (v3.7 scope)
+- **`legal-assistant/_shared/fireflies-integration.md`** — call patterns for Phase 3 + 4.5.
+- **`legal-assistant/docs/tooling/image-ingest.md`** — HEIC→JPG `sips` tooling.
+- **`legal-assistant/docs/glossary.md`** — 20 DE acronyms.
+- **New sibling skill `de-executive-comms`** — executive-voice drafting with Gmail MCP fallback + tone markers + LOI cover email template + tone audit grid.
+
+### Changed
+- `clause6()` Tier B refactored to declarative list honoring `confidentiality_opt_outs`. Backward-compatible when opt_outs is empty.
+- `definitions()` now injects `custom.definitions[]` + `definitions_include[]` entries.
+- `build()` respects `choices.include_schedule` and calls `_inject_custom_clauses()` after signature.
+- `qa_lint()` emits new INFO lines for `relationship_cluster`, `identity_map`, `financing_context`, `certifications_detected`.
+
+### Verified
+- **368/368 pytest** tests pass (307 baseline + 25 specA linter + 36 specC extensibility).
+- **10 goldens unchanged** — all additions backward-compatible.
+- All schema additions validate on absence (default paths preserve v3.6.0 rendering).
+
+### Deferred to v3.7.1 (explicit scope cut — flagged for user decision)
+- **Joint Stocking Programme clause template** (InfraPartners §5.6) — parametric on `supplier.lead_time_target < 6 months`.
+- **Co-Marketing clause template** (InfraPartners §5.7) — parametric on `supplier.co_marketing`.
+- **84-item audit checklist generator** — `{output}_AUDIT.txt` emitter.
+- **`custom.clauses` modes `replace` + `insert-after:N`** — validated but body injection supports `append` only.
+- **Post-template renumbering pass** for arbitrary gap-closing (confidentiality opt-outs already auto-renumber via list approach).
+
+---
+
 ## v3.6.0 — 2026-04-20
 
 Seven production-blocking bug fixes surfaced by three field retrospectives: Cerebro Wholesale (Jonathan Glender, 2026-04-17), Armada Strategic Supplier (2026-04-19), InfraPartners Strategic Supplier (2026-04-19). Each fix written test-first per PRINCIPLES.md #4; 15 new tests in `tests/test_v3_6_0_bugs.py`. Plus three doc-only additions. Template filename version stays `DE-LOI-{Type}-v3.2` — skill release ≠ template version.
