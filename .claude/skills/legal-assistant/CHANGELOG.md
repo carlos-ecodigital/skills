@@ -5,6 +5,58 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.7.1 — 2026-04-20
+
+Closes the 5 items explicitly deferred from v3.7.0 (CHANGELOG `Deferred to v3.7.1` block). All additions backward-compatible; every new field is optional with v3.7.0-matching defaults.
+
+Test baseline 368 → **403 passing** (35 new in `tests/test_v3_7_1_deferred.py`).
+
+### Added — Joint Stocking Programme clause (InfraPartners §5.6)
+- **§3.10 Joint Stocking Programme** — fires on StrategicSupplier when `supplier.lead_time_target < 6 months`. Parses day/week/month units (e.g., `90 days`, `6 weeks`, `3 months`, `90d`, `6w`, `3m`).
+- References "through the Super-Factory Initiative" when that defined term is in scope via `custom.definitions_include: [super_factory_initiative, ...]` or a `custom.definitions[]` entry whose key matches.
+- Helper `_lead_time_under_six_months(value)` exposed for re-use.
+
+### Added — Co-Marketing clause parameterized (InfraPartners §5.7)
+- **§3.11 Reference and Co-Marketing** — 6 sub-clauses (a–f) parameterized via new `supplier.co_marketing` block:
+  - `framing: multi_supplier | preferred | exclusive` — controls sub-clause (a) language. Multi-supplier preserves DE's parallel-supply posture; exclusive permits sole-named-supplier wording (requires prior Legal sign-off).
+  - `logo_use: yes | no | per_event_approval` — controls sub-clause (d) rights.
+  - `site_naming_approval_sla` — rendered into sub-clause (c) site-envelope consent text. Default `"2 Business Days"`.
+  - `press_at_loi: none | joint | unilateral_allowed` — controls sub-clause (e) announcement posture. Default `none` defers joint announcements to the first Designated Site award under the Framework Agreement.
+- Validation: `framing`, `logo_use`, `press_at_loi` checked against enum; `co_marketing` block rejected on non-StrategicSupplier types.
+
+### Added — `custom.clauses[]` modes `replace` + `insert-after:N`
+- **`replace`** — the generator finds the existing paragraph whose text starts with `{number}` and rewrites its text + any immediately-following sub-paragraphs before the next numbered clause.
+- **`insert-after:N`** — the new clause is inserted immediately after clause `N`, before the subsequent numbered clause.
+- Both modes silently no-op on unknown clause numbers (downstream intake errors surface via the linter R-28 or the audit checklist).
+- Documented `append` remains the recommended mode for purely additive material.
+
+### Added — 84-item audit checklist generator
+- New emitter `_emit_audit_checklist(docx_path, doc, data)` writes `{stem}_AUDIT.txt` alongside the .docx + `_qa.txt` + `_SESSION_LOG.md` at end of `main()`.
+- **Core assertions (~20)** — preamble, Recitals A/B, key definitions, clause-heading presence by type, §6.1 and §8/§7 General Provisions markers, validity date, signature block, template footer tag, v3.6.0 bug-fix invariants (no `tthe`, no `(ALT-A)`, no Recital B double-period), closing line.
+- **Per-customization assertions** — expand the checklist with per-feature probes:
+  - `supplier.rofr` presence + style-specific text (alignment / hard_minimum / milestone).
+  - `supplier.referral_rider`, `supplier.co_marketing` (framing), `lead_time_target < 6mo` headings.
+  - `choices.include_schedule=false` → Schedule 1 absent + §8.1(a) scrubbed.
+  - `choices.confidentiality_opt_outs[*]` — each opt-out key asserts the corresponding §6 sub-clause is absent.
+  - `custom.definitions[*]` + `custom.definitions_include[*]` — each term/key asserts into Cl. 2.
+  - `custom.clauses[*]` — number + heading assertions regardless of mode.
+- Output format: `PASS: [must be present] <label>` / `FAIL: [must be absent] <label>`. Header includes total / PASS / FAIL counts. Operator-facing; not a CI gate.
+
+### Added — Opt-in post-template renumbering pass
+- **`choices.auto_renumber: bool`** (default `false`) — when `true`, the engine scans the rendered document for top-level clauses (N.M) and closes gaps in each major group. Closes the InfraPartners §2.4 / Armada §2.4 cosmetic issue where optional conditionals skip numbers (SS §4 with only `pipeline_visibility` leaves 4.1/4.2/4.4/4.6; renumbering collapses to 4.1/4.2/4.3/4.4).
+- Cross-references in the body (`Clause N.M` text) rewritten via safe regex (`(?<!\d)(?<!\.)\b{old}\b(?!\.\d)(?!\d)`) that avoids false positives on `N.M.X` sub-minor references.
+- **Default off** preserves v3.7.0 goldens byte-for-byte.
+
+### Changed
+- Optional §3 sub-clauses (§3.9 Mutual Referral Rider, §3.10 Joint Stocking, §3.11 Co-Marketing) use a shared counter (`_ss_opt_num`) so enabling only a subset still renders contiguous numbering (no §3.9 → §3.11 gap when referral_rider=false + joint_stocking on).
+- `_inject_custom_clauses()` now splits `append` (inline render) from `replace` + `insert-after:N` (post-build mutation via new `_apply_custom_mutations`).
+
+### Verified
+- **403/403 pytest** pass (368 baseline + 35 new v3.7.1 tests).
+- **10 goldens unchanged** — all v3.7.1 additions are either new optional branches (co_marketing, joint stocking, custom.clauses replace/insert-after) or opt-in (`auto_renumber`). Default paths render identically to v3.7.0.
+
+---
+
 ## v3.7.0 — 2026-04-20
 
 Consolidated release covering the full v3.6.1 + v3.6.2 + v3.6.3 + v3.7 roadmap from `~/.claude/plans/expressive-cooking-flamingo.md`. Three field retrospectives (Cerebro, Armada, InfraPartners) drove 29+ distinct improvement items across linter expansion, CLI tooling, phase-logic hardening, extensibility layer, and cross-skill ecosystem. Test baseline 307 → 368 passing. All additions backward-compatible — every new YAML field is optional with v3.6.0-matching defaults; all 10 goldens unchanged.
