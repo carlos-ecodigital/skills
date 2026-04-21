@@ -69,11 +69,14 @@ choices:
   # bespoke_closing: ""
 
 # --- Programme ---
-# EU-mission counterparty — use sovereignty variant for Recital A.
+# v3.7.0: Recital A is library-sourced (single canonical body + EP tail, v3.4).
+#   recital_a_variant: "default"  is the only production value.
+#   Legacy "sovereignty" key also resolves to canonical body.
+#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
 programme:
   platform_mw: "100+"
   site_count: "14"
-  recital_a_variant: "sovereignty"
+  recital_a_variant: "default"   # v3.4: canonical body. Legacy sovereignty key also resolves here.
 
 # --- Protection ---
 protection:

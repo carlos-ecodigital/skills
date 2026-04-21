@@ -1,0 +1,10 @@
+# v3.5.8 tripwire #1 — mirror integrity manifest.
+# Regenerate with tests/regen-mirror-manifest.sh (upstream repo).
+# Copy verbatim to staging; staging CI checks each file hashes to
+# the value listed here. Drift => mirror-edit discipline violation.
+#
+3adc81bab800ef517184d1170946ce336783f1b27882f2a50895687885726e54  tests/_fingerprint.py
+fb45b55ce0d0f0b2312291804ebd5d330f9eb492f2e955087475c8554ae64eb5  tests/conftest.py
+5492f11d6e80fda2943ea2101db3ea409edd33dedc01f230540fdea6cb710313  tests/test_golden_files.py
+f06e0b66d25d436f6a27d1813981f9310ce365bc030fb80e312328ad8cd10c7f  tests/test_visual_layout.py
+5e208c22d01fcf1e4e95e44fb906713bb1203cf7df7346e52567a2b8333215bb  tests/test_intake_structural_shape.py

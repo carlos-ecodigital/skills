@@ -174,6 +174,258 @@ tests green; 181-test Sales regression intact.
 
 ---
 
+## v3.7.1 — 2026-04-20
+
+Closes the 5 items explicitly deferred from v3.7.0 (CHANGELOG `Deferred to v3.7.1` block). All additions backward-compatible; every new field is optional with v3.7.0-matching defaults.
+
+Test baseline 368 → **403 passing** (35 new in `tests/test_v3_7_1_deferred.py`).
+
+### Added — Joint Stocking Programme clause (InfraPartners §5.6)
+- **§3.10 Joint Stocking Programme** — fires on StrategicSupplier when `supplier.lead_time_target < 6 months`. Parses day/week/month units (e.g., `90 days`, `6 weeks`, `3 months`, `90d`, `6w`, `3m`).
+- References "through the Super-Factory Initiative" when that defined term is in scope via `custom.definitions_include: [super_factory_initiative, ...]` or a `custom.definitions[]` entry whose key matches.
+- Helper `_lead_time_under_six_months(value)` exposed for re-use.
+
+### Added — Co-Marketing clause parameterized (InfraPartners §5.7)
+- **§3.11 Reference and Co-Marketing** — 6 sub-clauses (a–f) parameterized via new `supplier.co_marketing` block:
+  - `framing: multi_supplier | preferred | exclusive` — controls sub-clause (a) language. Multi-supplier preserves DE's parallel-supply posture; exclusive permits sole-named-supplier wording (requires prior Legal sign-off).
+  - `logo_use: yes | no | per_event_approval` — controls sub-clause (d) rights.
+  - `site_naming_approval_sla` — rendered into sub-clause (c) site-envelope consent text. Default `"2 Business Days"`.
+  - `press_at_loi: none | joint | unilateral_allowed` — controls sub-clause (e) announcement posture. Default `none` defers joint announcements to the first Designated Site award under the Framework Agreement.
+- Validation: `framing`, `logo_use`, `press_at_loi` checked against enum; `co_marketing` block rejected on non-StrategicSupplier types.
+
+### Added — `custom.clauses[]` modes `replace` + `insert-after:N`
+- **`replace`** — the generator finds the existing paragraph whose text starts with `{number}` and rewrites its text + any immediately-following sub-paragraphs before the next numbered clause.
+- **`insert-after:N`** — the new clause is inserted immediately after clause `N`, before the subsequent numbered clause.
+- Both modes silently no-op on unknown clause numbers (downstream intake errors surface via the linter R-28 or the audit checklist).
+- Documented `append` remains the recommended mode for purely additive material.
+
+### Added — 84-item audit checklist generator
+- New emitter `_emit_audit_checklist(docx_path, doc, data)` writes `{stem}_AUDIT.txt` alongside the .docx + `_qa.txt` + `_SESSION_LOG.md` at end of `main()`.
+- **Core assertions (~20)** — preamble, Recitals A/B, key definitions, clause-heading presence by type, §6.1 and §8/§7 General Provisions markers, validity date, signature block, template footer tag, v3.6.0 bug-fix invariants (no `tthe`, no `(ALT-A)`, no Recital B double-period), closing line.
+- **Per-customization assertions** — expand the checklist with per-feature probes:
+  - `supplier.rofr` presence + style-specific text (alignment / hard_minimum / milestone).
+  - `supplier.referral_rider`, `supplier.co_marketing` (framing), `lead_time_target < 6mo` headings.
+  - `choices.include_schedule=false` → Schedule 1 absent + §8.1(a) scrubbed.
+  - `choices.confidentiality_opt_outs[*]` — each opt-out key asserts the corresponding §6 sub-clause is absent.
+  - `custom.definitions[*]` + `custom.definitions_include[*]` — each term/key asserts into Cl. 2.
+  - `custom.clauses[*]` — number + heading assertions regardless of mode.
+- Output format: `PASS: [must be present] <label>` / `FAIL: [must be absent] <label>`. Header includes total / PASS / FAIL counts. Operator-facing; not a CI gate.
+
+### Added — Opt-in post-template renumbering pass
+- **`choices.auto_renumber: bool`** (default `false`) — when `true`, the engine scans the rendered document for top-level clauses (N.M) and closes gaps in each major group. Closes the InfraPartners §2.4 / Armada §2.4 cosmetic issue where optional conditionals skip numbers (SS §4 with only `pipeline_visibility` leaves 4.1/4.2/4.4/4.6; renumbering collapses to 4.1/4.2/4.3/4.4).
+- Cross-references in the body (`Clause N.M` text) rewritten via safe regex (`(?<!\d)(?<!\.)\b{old}\b(?!\.\d)(?!\d)`) that avoids false positives on `N.M.X` sub-minor references.
+- **Default off** preserves v3.7.0 goldens byte-for-byte.
+
+### Changed
+- Optional §3 sub-clauses (§3.9 Mutual Referral Rider, §3.10 Joint Stocking, §3.11 Co-Marketing) use a shared counter (`_ss_opt_num`) so enabling only a subset still renders contiguous numbering (no §3.9 → §3.11 gap when referral_rider=false + joint_stocking on).
+- `_inject_custom_clauses()` now splits `append` (inline render) from `replace` + `insert-after:N` (post-build mutation via new `_apply_custom_mutations`).
+
+### Verified
+- **403/403 pytest** pass (368 baseline + 35 new v3.7.1 tests).
+- **10 goldens unchanged** — all v3.7.1 additions are either new optional branches (co_marketing, joint stocking, custom.clauses replace/insert-after) or opt-in (`auto_renumber`). Default paths render identically to v3.7.0.
+
+---
+
+## v3.7.0 — 2026-04-20
+
+Consolidated release covering the full v3.6.1 + v3.6.2 + v3.6.3 + v3.7 roadmap from `~/.claude/plans/expressive-cooking-flamingo.md`. Three field retrospectives (Cerebro, Armada, InfraPartners) drove 29+ distinct improvement items across linter expansion, CLI tooling, phase-logic hardening, extensibility layer, and cross-skill ecosystem. Test baseline 307 → 368 passing. All additions backward-compatible — every new YAML field is optional with v3.6.0-matching defaults; all 10 goldens unchanged.
+
+Template filename stays `DE-LOI-{Type}-v3.2` (skill release ≠ template version).
+
+### Added — linter / CLI / session tooling (v3.6.1 scope)
+- **R-29 (fail)** — URL content verification. Opt-in via `--verify-source-urls` CLI flag (default OFF in v3.7.0; default-on in v3.8). For each `source_map[pillar_N]` URL, fetches and checks Recital B claim keywords appear in ≥500 chars of content. If missing → downgrade to `[TBC — url_content_insufficient]`.
+- **R-30 (fail)** — Double-period detector on rendered body. Excludes ellipsis and numbered-list prefixes.
+- **R-31 (warn)** — `contact_name == signatory_name` fires on case-insensitive match; "confirm intentional single-point-of-contact."
+- **R-27/R-28 normalization** — broadened to match bare `TBC` (not only `[TBC]`) for signatory detection + density counting.
+- **R-11 helper** — `certifications_in_source(intake)` surfaces detected ISO/SOC/PCI certs in QA report so Phase 5 makes the include/omit decision explicitly.
+- **R-21 narrowing** — `purpose-built` now allowed inside Clause 3 product-capability text; banned in Recital A/B/closing only.
+- **R-24 (warn)** — brochure-sourced pillars require tier-1 corroboration before signing.
+- **Brochure source_map token** — `source_map[pillar_N]` accepts `internal:brochure_{YYYYMMDD}_{slug}` tokens as tier-2 sources.
+- **`--recital-b-only <path>`** — regenerate Recital B only; replace paragraph in existing .docx; write `_v{N}`.
+- **`--audit-only`** — read `prior_loi_path`; run full linter; emit `{basename}_audit.txt` without regenerating.
+- **`--verify-source-urls`** — activates R-29.
+- **`--phase-8-auto-execute`** — CLI flag to activate real HubSpot + ClickUp writes (dry-run by default).
+- **`choices.recital_b_density: terse|standard|verbose`** — word-count cue for Recital B generation.
+- **`SESSION_LOG.md` artifact** — emitted alongside every `.docx` capturing decisions, CLI flags, QA summary, customizations.
+
+### Added — phase logic / doc sync (v3.6.1 + v3.6.2 scope)
+- **Recital A canonicalization** — deleted `sovereignty | integration | bespoke` variant options from SKILL.md, ASSEMBLY_GUIDE.md, and all 6 `intake_example_*.yaml`.
+- **Bespoke Recital A checklist gate** — Phase 5 requires operator confirmation of (a) non-commercial counterparty OR (b) canonical tail materially incorrect; justification captured in `choices.recital_a_bespoke_justification`.
+- **Categorical-vs-tactical descriptor table** added to `_shared/counterpart-description-framework.md`.
+- **Phase 2.5 name disambiguation** — WebSearch check for counterparty-name collision.
+- **Phase 3 systematic parallel source-capture** + prior-LOI `/extract`-first rule.
+- **Phase 3.5 public-web-dark detection** — `dark_web_counterparty: true` flag; elevated Phase 7.5 review.
+- **Phase 4.5 signatory-name cross-check** — Fireflies fuzzy match; domain-surname homonym escalation.
+- **Phase 5 newest-fixture starting point** — `colocation/examples/README.md` points to newest `regression/v{X.Y}/*` first.
+- **Phase 6 evidence-strength column** — per-pillar Tier-1/Tier-2/[TBC]; auto mode 10s non-blocking interrupt.
+- **Phase 8 auto-actions** — HubSpot + ClickUp wired; dry-run default + `--phase-8-auto-execute`.
+- **`allowed-tools` expanded** — `fireflies_search`, `fireflies_get_transcript`, `manage_crm_objects`, `clickup_create_task`.
+- **LOI sizing framework** — new `_shared/loi-sizing-framework.md` (R1–R4 ratios).
+- **`mark_chapter` hygiene rule** added.
+- **`scripts/artifact_storage.py`** — implements v3.5.3 J13 Drive upload (deferred since v3.5.3).
+
+### Added — extensibility schema (v3.6.3 scope)
+- **`custom.definitions[]`** — arbitrary `{key, text}` injected at top of Cl. 2.
+- **`custom.definitions_include[]`** — include-list resolves against new `_shared/loi-common-defined-terms.md` library (Super-Factory Initiative, Designated Site, Framework Agreement, DEC Block).
+- **`custom.clauses[]` with `mode: append`** — append arbitrary clauses to document body.
+- **`choices.confidentiality_opt_outs`** — suppress named §6 Tier B sub-clauses with auto-renumber.
+- **`choices.include_schedule: bool`** — when false, suppresses Schedule 1 + scrubs §8.1(a) + §4.2(d).
+- **`supplier.rofr`** — parameterizes §3.8 RoFR clause (styles: alignment | sole_discretion | hard_minimum | milestone).
+- **`supplier.referral_rider: bool`** — adds §3.9 Mutual Referral Rider.
+- **`counterparty.relationship_cluster` + `identity_map`** — structured metadata in QA report.
+- **`dates.financing_context`** — validated + surfaced in QA.
+- **`scripts/phase8_actions.py`** — dispatch payloads for Phase 8 actions.
+
+### Added — cross-skill ecosystem (v3.7 scope)
+- **`legal-assistant/_shared/fireflies-integration.md`** — call patterns for Phase 3 + 4.5.
+- **`legal-assistant/docs/tooling/image-ingest.md`** — HEIC→JPG `sips` tooling.
+- **`legal-assistant/docs/glossary.md`** — 20 DE acronyms.
+- **New sibling skill `de-executive-comms`** — executive-voice drafting with Gmail MCP fallback + tone markers + LOI cover email template + tone audit grid.
+
+### Changed
+- `clause6()` Tier B refactored to declarative list honoring `confidentiality_opt_outs`. Backward-compatible when opt_outs is empty.
+- `definitions()` now injects `custom.definitions[]` + `definitions_include[]` entries.
+- `build()` respects `choices.include_schedule` and calls `_inject_custom_clauses()` after signature.
+- `qa_lint()` emits new INFO lines for `relationship_cluster`, `identity_map`, `financing_context`, `certifications_detected`.
+
+### Verified
+- **368/368 pytest** tests pass (307 baseline + 25 specA linter + 36 specC extensibility).
+- **10 goldens unchanged** — all additions backward-compatible.
+- All schema additions validate on absence (default paths preserve v3.6.0 rendering).
+
+### Deferred to v3.7.1 (explicit scope cut — flagged for user decision)
+- **Joint Stocking Programme clause template** (InfraPartners §5.6) — parametric on `supplier.lead_time_target < 6 months`.
+- **Co-Marketing clause template** (InfraPartners §5.7) — parametric on `supplier.co_marketing`.
+- **84-item audit checklist generator** — `{output}_AUDIT.txt` emitter.
+- **`custom.clauses` modes `replace` + `insert-after:N`** — validated but body injection supports `append` only.
+- **Post-template renumbering pass** for arbitrary gap-closing (confidentiality opt-outs already auto-renumber via list approach).
+
+---
+
+## v3.6.0 — 2026-04-20
+
+Seven production-blocking bug fixes surfaced by three field retrospectives: Cerebro Wholesale (Jonathan Glender, 2026-04-17), Armada Strategic Supplier (2026-04-19), InfraPartners Strategic Supplier (2026-04-19). Each fix written test-first per PRINCIPLES.md #4; 15 new tests in `tests/test_v3_6_0_bugs.py`. Plus three doc-only additions. Template filename version stays `DE-LOI-{Type}-v3.2` — skill release ≠ template version.
+
+### Fixed
+- **Bug 1 — Cl. 8.2 `tthe` typo (all non-EndUser types)** (Armada §2.1). Non-EU path concatenated `"...t" + "t"` producing `"tthe good faith"`. `clause_general` line 1583 — dropped redundant `t` from the first ternary fragment.
+- **Bug 2 — §8.1(b) "Project Finance and Assignment" leak in SS** (InfraPartners §4.1). Binding-provisions list hardcoded the Wholesale/Distributor Cl. 5 label; SS Cl. 5 is "Supply Chain and Delivery Commitment" and EP Cl. 5 is "IP and Deliverables". `clause_general` line 1577 — branch on `self.t` to emit the correct label per type.
+- **Bug 3 — §8.9 "(ALT-A)" drafting marker leak** (InfraPartners §4.2). Entire-Agreement clause referenced "any NDA referenced in Clause 6 (ALT-A)" regardless of `choices.existing_nda`. Line 1600 — gate on `self.choice("existing_nda")`: with NDA → "the NDA referenced in Clause 6"; without → no NDA reference at all.
+- **Bug 4 — Cl. 4.2 meta-commentary trailer (SS + WS)** (Armada §2.2). Template emitted "Each stage is designed to provide increasing commercial certainty and to support Digital Energy's project finance activities." — explains the LOI rather than creating obligation; R-22 class. Removed from both `clause4_ss` (line 1312) and `clause4_ws` (line 1384).
+- **Bug 5 — double-period on Recital B** (Armada §2.3, InfraPartners §4.3). Engine appended literal `.` to `counterparty.description` without stripping existing trailing period. `recitals()` line 696 — `desc.rstrip().rstrip(".")` before concat.
+- **Bug 6 — double-period on SS Cl. 3.1(b) `core_capability`** — same class as bug 5. `clause3_ss` line 1177 — `_cc.rstrip().rstrip(".")` before concat.
+- **Bug 7 — preamble missing company number for Party 2** (InfraPartners §4.4). Party 2 conditional required BOTH `cp_reg_type` AND `cp_reg_number` to render, silently dropping the number when `reg_type` was unset. Party 1 has a KvK fallback; Party 2 now has a "company number" generic fallback when `reg_type` is absent. `parties_preamble` lines 717-722.
+
+### Added
+- `tests/test_v3_6_0_bugs.py` — 15 new regression tests, one or more per bug, exercising the exact field-observed failure modes. RED-first per PRINCIPLES.md #4.
+- **Auto-version output filenames** (v3.6.0 item b). `generate_loi.py main()` — when target `.docx` exists, append `_v{N}` and increment until unique. Surfaces `[auto-version]` stderr note. Addresses file-confusion observed in all three retrospective sessions.
+- **SS strategic-purpose → commercial-intent cross-reference table** (v3.6.0 item k, InfraPartners §4.5). New section in SKILL.md Step 3 SS subsection. Clarifies RoFR → `pipeline_visibility` mapping (not `capacity_lock_in` as InfraPartners session initially attempted).
+- **DE signatory-title memo** (v3.6.0 item m). HTML comment block in SKILL.md Phase 6 summary template — notes Carlos Reuven holds CEO (Group AG) + Director (NL BV) titles; both legally valid; default is Director for NL BV pre-MSA; override via `provider.signatory_title` when CEO-signed variant needed.
+
+### Verified
+- 307/307 pytest tests pass (baseline 250 + 7 v3.5.6 scope G retained + 15 new v3.6.0 + v3.5.8 tripwires retained — full regression green).
+- 10 goldens regenerated; diff reviewed — only expected content changes (no `tthe`, no Cl. 4.2 meta-trailer, §8.1(b) per-type labels correct, no `(ALT-A)` marker, no double-period on forced trailing-period inputs, Party 2 reg_number appears without reg_type when provided).
+- All six `intake_example_*.yaml` regens QA PASS.
+- All four `regression/v3.5/*_intake.yaml` regens QA PASS.
+
+### Not in scope (future releases — see `~/.claude/plans/expressive-cooking-flamingo.md`)
+- **v3.6.1**: linter expansion (R-29 URL-content verify, R-30 double-period, R-31 contact==signatory), `--recital-b-only` flag, density profile, Recital A doc canonicalization, `--audit-only`, `SESSION_LOG.md` artifact.
+- **v3.6.2**: Phase 2.5/3.5/4.5/6/8 workflow additions, Fireflies MCP, HubSpot + ClickUp write auto-execution.
+- **v3.6.3**: `custom.*` YAML extension layer, `supplier.rofr` structured block, Joint Stocking + Co-Marketing clause templates.
+
+---
+
+## v3.5.8 — 2026-04-19
+
+PRINCIPLES.md tripwire closure. Five principles (#1 / #4 / #5 / #6 / #12) moved from "pending v3.6" to implemented. Closes the items Jonathan + Carlos flagged as "house-of-cards" risk after the v3.5.5 post-mortem. Test harness grows from 139 → 250 passing checks in both repos. No render-logic change; no intake YAML change; no sibling docs change beyond PRINCIPLES.md.
+
+### Added — #5 Golden-file integration tests
+- `tests/_fingerprint.py` — deterministic .docx digest (paragraph count + per-paragraph text hash + space_before/after + alignment; table shape + cells; section margins in mm; footer alignment + text). Skips volatile fields (timestamps, absolute paths, UUIDs).
+- `tests/test_golden_files.py` — parametrised across 10 intakes (6 examples + 4 regression fixtures). For each, regenerates .docx, fingerprints it, diffs against committed `tests/goldens/<slug>.json`. Mismatch = test fails with human-readable paragraph-level diff.
+- `tests/conftest.py` — registers `--update-goldens` pytest flag. Workflow: edit render logic → `pytest --update-goldens` → review `git diff tests/goldens/` → commit alongside code. CI default (no flag) fails on any unexplained diff.
+- 10 goldens seeded in `tests/goldens/` per repo. Staging goldens were seeded from staging's own generator output (not mirrored from upstream) because the two generators have legitimate cosmetic divergence (`document-factory` vs `de-document-factory` import path).
+
+### Added — #6 Visual layout invariant tests
+- `tests/test_visual_layout.py` — module-scoped fixture generates one Polarise Wholesale LOI reference doc; 15 tests assert concrete `paragraph_format.space_after`, `alignment`, and section geometry values. Direct guard against the v3.5.5 Parties Preamble spacing bug (blank-paragraph spacers → ~15pt gap, vs 6pt via `space_after`).
+- Coverage: section geometry (A4 / margins 20-35-25-20 mm / `different_first_page_header_footer`), footer (CENTER alignment + NL entity + no Swiss AG leak), Parties Preamble (4 paragraphs, intro + 2 parties at 6pt `space_after`, opener/closing text), signature block (no KvK: label, no ACKNOWLEDGED AND AGREED, Place: field present twice), brand rename (zero `the Provider`, Digital Energy ≥ 20 occurrences).
+
+### Added — #12 Intake structural-shape linter
+- `tests/test_intake_structural_shape.py` — 79 tests asserting all 6 `intake_example_*.yaml` files share the consistent top-level contract (type / provider / counterparty / dates / programme / protection / choices) plus per-type additions (commercial / schedule_1 / partnership_mode / supplier / ecosystem).
+- Second-level shape checks: `provider` must carry the required identity fields; `counterparty` must carry `source_map`; dates + programme + recital_a_variant enum validated; source_map pillar keys + value types enforced. Regression guard against v3.5.2-era bug where one intake shipped with a missing sub-field and the generator tolerated it silently for one type only.
+- Positive-band checks: provider addresses must NOT contain "Zug" (v3.5.1 A'' — Swiss AG parent address leak guard); provider signatory_name must NOT be "Jelmer ten Wolde" (v3.5.1 A — default NL-BV pre-MSA signer is Carlos Reuven / Director).
+
+### Added — #4 Branch-specific test enforcement (CI)
+- Both repos' `legal-assistant-tests.yml` now carry an `Enforce test-changes-with-generator-changes` step that runs on every PR. Compares `git diff --name-only origin/<base>...HEAD`; if `generate_loi.py` appears in the diff but no file under `tests/` does, fails the job.
+- Escape hatch for documentation-only or pure-comment generator edits: include the literal marker `[skip-test-check]` in any commit message on the branch. Rationale: rare but real case (e.g., docstring-only edits), and the marker forces explicit acknowledgement of test skip.
+- CI checkout now uses `fetch-depth: 0` to make the merge-base diff reliable.
+
+### Added — #1 Mirror-edit discipline sentinel
+- `tests/mirror-manifest.txt` — sha256sum manifest of the test-harness files that must be byte-identical across upstream + staging. Committed verbatim in both repos.
+- `tests/test_mirror_integrity.py` — 7 tests verifying each manifest-listed file hashes to the expected value. Mismatch = silent drift caught in CI.
+- `tests/regen-mirror-manifest.sh` — upstream-only regeneration script. Workflow: mirror-edit upstream → regen → copy manifest to staging → commit to both.
+- **Scope decision:** `generate_loi.py` is intentionally excluded from the manifest because staging uses `de-document-factory/` import path (legitimate DEGitOS divergence); byte-level hashing would false-positive. Tripwire targets the silent-drift class — test-harness files that don't get the same PR-review scrutiny as generator edits. Generator drift is covered by the standard review process plus the new golden-file tests.
+
+### Changed — `docs/PRINCIPLES.md`
+- Status table updated: items 1 / 4 / 5 / 6 / 12 flipped from ⏳/🟡 to ✅. Only items 3 (additive-first) and 10 (layer contracts) remain at partial/pending — both are review-discipline items where automation is lower-leverage than checklist rigor.
+- "Priority for v3.6" sentence replaced with "Remaining work" pointing at items 3 and 10.
+
+### Verified
+- Upstream: 250/250 pytest tests pass (139 baseline + 10 goldens + 15 visual + 79 shape + 7 mirror-integrity).
+- Staging: 250/250 pytest tests pass (same split).
+- All 10 intake regens still QA PASS; regression fixtures unchanged.
+- Golden mismatch detection verified end-to-end by tampering a golden entry (set `n_paragraphs` 151 → 152): test failed with "paragraph count: expected 152 got 151". Restored → green. Replayed the same loop with a visual-layout assertion (changed expected margin): failed as expected. Restored → green.
+- Mirror-integrity drift detection verified: initial mirror exposed pre-existing cosmetic drift between upstream and staging `generate_loi.py` (~121 diff lines, all comment/wording plus the legitimate document-factory path). The drift is being tracked separately; mirror-manifest scope was narrowed to tests/ only for v3.5.8 to avoid false positives on legitimate generator-import divergence.
+
+### Not in scope
+- **#3 additive-first** — review-discipline; no automated tripwire proposed yet.
+- **#10 layer contracts** — versioning-rigor; partially covered by existing commit-message convention.
+- **Generator drift reconciliation** between upstream and staging `generate_loi.py` — surfaced by the mirror-integrity work; scheduled as a separate targeted PR so v3.5.8 stays additive-only.
+
+---
+
+## v3.5.7 — 2026-04-17
+
+Sibling docs sync — brings `ASSEMBLY_GUIDE.md`, `FEATURE_MATRIX.md`, and `SOP.md` to v3.5.6 state. Documentation-only change; no code change; all 139 pytest tests remain passing; all 10 intakes regenerate QA PASS.
+
+Executes the scoped edit plan in `~/.claude/plans/v3.5.4-sibling-docs-sync.md` (originally ~51 edits targeted), consolidated into coherent new sections rather than mechanical line-by-line patches.
+
+### Changed — ASSEMBLY_GUIDE.md
+- Section 1 heading: "LOI Type Selection (5 types, v3.2)" → "(5 types, v3.5)"; template versions DE-LOI-*-v3.2 → -v3.5
+- Bespoke-language examples (Distributor Cl. 3, 6 sub-examples): removed all `the Provider` / `The Provider` (brand rename — 6 occurrences replaced with `Digital Energy`); stripped `purpose-built AI colocation facilities` (7 occurrences; v3.4 banned body-wide)
+- "Signing Entity" section expanded with v3.5.1 canonical entity data table (NL BV + AG) and v3.5.2 entities-register pattern (A: explicit fields / B: `provider.entity` lookup / C: minimal `type:` only auto-expansion)
+- New section: **Parties Preamble** (v3.5.2 Scope A''') — structure, output format, brand-name defined term, v3.5.5 spacing fix
+- New section: **Recital B — Signal Test methodology** (v3.5.2 Scope 0) — 3-gate test, writer discipline, R-24/R-25/R-27/R-28 rules, v3.5.6 Scope D refinements (pillar diagnostic + sentence-boundary `[TBC]`)
+- New section: **Phase 7.5 — Mandatory legal-counsel two-pass review** (v3.4 + v3.5.6) — junior 4-point + senior six-axis; enforcement opt-in; sentinel hash mechanics
+- "Version Control" section: all five template rows bumped to v3.5 / 2026-04-17; `**v3.2 changes:**` one-line note replaced with **full changelog summary v3.2 → v3.5.7** covering every interim release
+
+### Changed — FEATURE_MATRIX.md
+- Stream header: "LOI/NCNDA v3.2 (5 sub-types)" → "v3.5 (5 sub-types)"
+- Clause Structure matrix: added **Parties Preamble** row (v3.5.2); **Recital B** row annotated with Signal Test 3-gate reference; **Cl. 5** row updated for SS (now "Supply Chain and Delivery Commitment", not revenue bankability) and EP (now "N/A — IP and Deliverables"); **Cl. 6** row annotated with EP "will exchange" (v3.5.3); **Schedule 1** row annotated with v3.5.1 `technical.gpu_platform` read from YAML
+- "v3.2 commonalities" section expanded to **per-release commonalities** (v3.2 / v3.4 / v3.5.1 / v3.5.2 / v3.5.3-cont / v3.5.6)
+- "Project Finance Features by Type" matrix: added SS + EP columns (was EU/DS/WS only); SS Cl. 5.1 marked "N/A — supply-side bankability (v3.4)"; EP marked "N/A — no Cl. 5 Finance"
+- "Commercial Features by Type" matrix: "Capacity in DEC Blocks" row → "Capacity in MW IT (v3.2 — DEC Blocks deprecated)"; all rows extended to SS + EP columns; expansion rights row annotated with v3.5.1 J3 non-numeric branch
+- New section: **v3.5.x Feature Additions — Cross-Type** — tabular summary of every new cross-type feature (Parties Preamble / brand term / entities register / minimal intake auto-expansion / Signal Test / footer entity derivation / Schedule 1 from YAML / Phase 7.5 enforcement / two-pass review / hybrid override-reason / R-23 pillar diagnostic / sentence-boundary `[TBC]` / `--migrate-check`) with "where it lives / introduced in / opt-in" columns
+- New section: **QA Linter Rules (R-1 → R-28) — coverage by type** — full catalogue table with severity / scope / version / notes
+
+### Changed — SOP.md
+- "v3.2 (v1.0 for SS/EP)" → "v3.5 engine (v1.0 for SS/EP)"
+- "Requesting a Colocation LOI (v3.3 flow)" → "(v3.5 flow)"
+- Recital A variant legacy-keys note added (v3.4 collapsed 3 variants to single canonical body + 5 tails; legacy keys accepted for backward-compat)
+- "What Claude will NOT do" section expanded with v3.4/v3.5.2/v3.5.6 anti-patterns (fabrication, inline citations, vanity financials, sig-block `[TBC]`) cross-referenced to R-23/R-24/R-25/R-27 + Signal Test writer discipline
+- New section: **Phase 7.5 — Mandatory legal-counsel two-pass review** (v3.4 + v3.5.6) — full workflow + enforcement opt-in + hash-bound sentinel
+- New section: **CLI reference** — exhaustive command list (standard run / `--migrate-check` / `--override` with hybrid reason formats / `--enforce-phase-7-5` / `--phase-7-5-pass`) + exit codes
+- "Questions?" section: single-line reference expanded to full skill-directory table with per-file purpose (SKILL.md / ASSEMBLY_GUIDE / FEATURE_MATRIX / CHANGELOG / PRINCIPLES / jonathan-memo delivery map / entities register / Recital A library / framework / QA gate / junior + senior review callees / regression fixtures)
+
+### Verified
+- 139/139 pytest tests pass in both repos (no code change)
+- All 10 intakes regenerate with QA PASS (6 examples + 4 regression fixtures)
+- Sibling docs pass staleness scan: zero remaining `the Provider` / `purpose-built` in active prose; zero stale `v3.2` / `v3.3` active version references; Phase 7.5 / Signal Test / Parties Preamble / entities register all surfaced consistently across all three files
+
+### Not in scope (deferred by design)
+- **Tripwire implementations** for PRINCIPLES.md #1 (mirror-hash pre-commit), #4 (branch-specific tests), #5 (golden-file integration), #6 (visual-layout tests), #12 (structural-shape linter for intakes) — carry to v3.6.
+- **HoT stream documentation** (DE Site HoT §12 in ASSEMBLY_GUIDE) — v3.5.x did not touch HoT; left unchanged.
+
+---
+
 ## v3.5.6 scope G + G-bis — 2026-04-17
 
 Phase 7.5 fail-closed enforcement (Scope G) + senior-counsel refinement pass (Scope G-bis, added during execution per user request). Three design decisions from `~/.claude/plans/v3.5.6-design-decisions.md` plus the senior-pass addition.
@@ -234,6 +486,31 @@ R-23 fabrication-gate upgrades per v3.5.6 design decisions (`~/.claude/plans/v3.
 - 160/160 tests pass both repos
 - All 10 intakes regenerate QA PASS
 - CLI smoke verified: thin reason rejected; verbose + structured short-code both accepted
+
+---
+
+## v3.5.6 scope I — 2026-04-17
+
+Framework worked-examples tier-1 / tier-2 URL re-verification. Documentation-only change; no code change; all 120 pytest tests remain passing.
+
+### Changed
+- `_shared/counterpart-description-framework.md` Worked Examples section: re-fetched every tier-1 / tier-2 URL across the four verified counterparties (Polarise, Civo, InfraPartners, SAG/Man of Solutions) on 2026-04-17.
+- Added a v3.5.6 verification-status table at the top of the Worked Examples section.
+- **Polarise Pillar 1**: companyhouse.de 403 → online-handelsregister.de HRB 17714 canonical; added polarise.eu/imprint.
+- **Polarise Pillar 3**: /newsroom deep-link 404 → newsroom index; swi.com → swi.com/announcements/.
+- **Polarise Pillar 5**: /sites/augsburg 404 → /newsroom.
+- **InfraPartners Pillar 2 + 3**: GlobeNewswire + Nscale shorthand paths → canonical full URLs.
+- **SAG Pillar 3**: /partners + /geography 404 → root (single-page site).
+- **Civo**: all URLs unchanged.
+
+### Material-fact surfaces
+- Polarise HRB 17714 Paderborn now framework-anchored; retires the `[Companyhouse.de placeholder]` pattern.
+- No claim text corrections required.
+
+### Verified
+- 120/120 pytest tests pass (no code change).
+- 19 URLs re-verified: 10 unchanged, 8 updated, 0 blocked, 0 pillar_4 (inferred).
+- No counterparty has all tier-1 sources gated.
 
 ---
 

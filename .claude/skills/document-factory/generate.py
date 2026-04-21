@@ -1436,6 +1436,19 @@ def profile_agreement(agreement_type="[Agreement Type]", subject=None,
     if title and agreement_type == "[Agreement Type]":
         agreement_type = title
 
+    # M2: refuse to render an agreement with placeholder data.
+    # Import lazily to avoid a circular import at module load.
+    from validators import validate_agreement_inputs
+    _resolved_formality = formality if formality is not None else _detect_formality(agreement_type)
+    validate_agreement_inputs(
+        agreement_type=agreement_type,
+        client=client,
+        client_address=client_address,
+        formality=_resolved_formality,
+        client_reg_type=client_reg_type,
+        client_reg_number=client_reg_number,
+    )
+
     doc = new_doc(diff_first=True)
     setup_first_page_header(doc.sections[0])
     setup_cont_header(doc.sections[0], title=_cover_title(agreement_type))

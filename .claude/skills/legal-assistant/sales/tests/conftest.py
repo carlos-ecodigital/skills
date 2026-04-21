@@ -15,3 +15,16 @@ _SKILLS_ROOT = os.path.dirname(_LEGAL_ASSISTANT)
 for p in (_COLOCATION, _LEGAL_ASSISTANT, _SKILLS_ROOT):
     if p not in sys.path:
         sys.path.insert(0, p)
+
+
+# --- v3.5.8 tripwire #5: golden-file pytest option ---
+
+def pytest_addoption(parser):
+    """Register `--update-goldens` flag for test_golden_files.py."""
+    parser.addoption(
+        "--update-goldens",
+        action="store_true",
+        default=False,
+        help="Regenerate golden fingerprints from current generator output "
+             "(v3.5.8 tripwire #5). Review the git diff before committing.",
+    )

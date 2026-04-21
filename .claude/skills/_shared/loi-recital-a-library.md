@@ -1,5 +1,7 @@
 # LOI Recital A — Canonical Library (v3.4)
 
+> **v3.4 canonicalization: single canonical body + per-type tail. Do not re-introduce variant prompts in downstream skills.**
+
 Single source of truth for Recital A language across all LOI types produced by `legal-assistant`. The generator `generate_loi.py` reads `RECITAL_A_BODY` + `RECITAL_A_TAIL_BY_TYPE` dicts that mirror this file.
 
 **Last synced to:** Master Pitch Narrative v3.2 + user polish 2026-04-17.

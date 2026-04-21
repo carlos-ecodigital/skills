@@ -322,9 +322,34 @@ Full rule catalogue: `_shared/loi-qa-gate.md`.
 
 ---
 
-## Worked examples — verified real counterparties (v3.4)
+## Worked examples — verified real counterparties (v3.4; URLs re-verified v3.5.6 2026-04-17)
 
-v3.4 replaces synthetic / partially-verified v3.2–v3.3 examples with four verified real counterparties. Every claim below is traceable to a tier-1 source (counterparty's own website + official registry + direct-quoted press). Corrections marked where v3.3 drafts contained fabrication.
+v3.4 replaces synthetic / partially-verified v3.2–v3.3 examples with four verified real counterparties. Every claim below is traceable to a tier-1 source (counterparty's own website + official registry + direct-quoted press). Corrections marked where v3.3 drafts contained fabrication. **v3.5.6 Scope I** re-fetched all tier-1 / tier-2 URLs on 2026-04-17 and canonicalised / repaired paths per the retry strategy below.
+
+### v3.5.6 scope I — URL re-verification status (2026-04-17)
+
+Retry strategy used: primary URL → official registry fallback → counterparty newsroom path variants (`/imprint`, `/newsroom`, `/press`, `/about`) → Wayback snapshot → leave-in-place annotation. No time-box.
+
+| Counterparty | Pillar | URL (v3.4) | Status | Action (v3.5.6) |
+|---|---|---|---|---|
+| Polarise | 1 | polarise.eu/about | 200 (no entity details on this page) | Kept for Pillar 2 products; added polarise.eu/imprint (verified: Polarise GmbH, Technologiepark 12, 33100 Paderborn, VAT DE454310057) |
+| Polarise | 1 | companyhouse.de/en/Polarise-GmbH-Paderborn | 403 bot-blocked | Replaced with online-handelsregister.de/handelsregisterauszug/nw/Paderborn/HRB/17714/Polarise-GmbH (HRB 17714, MDs Michel Boutouil + Tirat Demir, founded 10 Apr 2025) |
+| Polarise | 2 | polarise.eu | 200 | No change — product taxonomy confirmed |
+| Polarise | 3 | polarise.eu/newsroom/deutsche-telekom-industrial-ai-cloud | 404 deep-link | Replaced with polarise.eu/newsroom (DT Industrial AI Cloud Munich items 4 Feb 2026 + 5 Nov 2025 visible on index) |
+| Polarise | 3 | polarise.eu (NVIDIA Cloud Partner page) | 200 | No change — Preferred Partner + GB200/GB300 NVL72 confirmed |
+| Polarise | 3 | swi.com | 200 root; release lives on /announcements/ | Replaced with swi.com/announcements/ (24 Feb 2026 Polarise entry) |
+| Polarise | 5 | polarise.eu/sites/augsburg | 404 | Replaced with polarise.eu/newsroom (10 Mar 2026 Amberg–Unterallgäu item: 30 MW → 120 MW) |
+| InfraPartners | 1 | linkedin.com/company/infrapartnersllc | 200 | No change |
+| InfraPartners | 2 | globenewswire shorthand path | Non-canonical | Replaced with canonical: globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html |
+| InfraPartners | 3 | nscale.com shorthand path | 404 | Replaced with canonical: nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway |
+| SAG / MoS | 1–3 | sovereignaigrid.nl (+ /partners + /geography deep-links) | Root 200; deep-links 404 (single-page site) | Collapsed all deep-link refs to sovereignaigrid.nl root |
+| Civo | 1–3 | civo.com/about, civo.com, civo.com/uk-sovereign-cloud | All 200 | No change (fully verified) |
+
+**Counts**: 19 URL entries re-verified. 10 unchanged. 8 updated (canonicalisation / single-page collapse / broken-deep-link → index). 0 left annotated-as-blocked after retries. 0 pillar_4 re-verified (inferred-context by design).
+
+**Material-fact surfaces**: Polarise HRB 17714 (Amtsgericht Paderborn) now anchored in framework — retires the `[Companyhouse.de placeholder]` pattern. MDs Michel Boutouil + Tirat Demir and incorporation date 10 Apr 2025 surfaced by registry but not inserted into claim text (consistent with framework "document what is public; do not invent" rule — insert only if a future live run needs them).
+
+**Structural red flags**: none. No counterparty has all tier-1 sources gated.
 
 ### Tier-2 qualifier pattern (v3.5.3-cont scope H — reference pattern, no live counterparty)
 
@@ -363,19 +388,37 @@ counterparty:
 
 ---
 
+## Categorical vs. Tactical Descriptor Decision Table (v3.7.0)
+
+Use this table when deciding whether a counterparty claim belongs in Recital B (durable descriptor) or Cl. 3 (context / expansion rationale). **Tactical claims without third-party corroboration stay out of Recital B.**
+
+| Claim | Tactical or Categorical? | Goes in | Why |
+|---|---|---|---|
+| "operates 22 MW of GPU capacity" | Tactical (self-announced) | Cl. 3 context | Self-sourced MW count; no third-party verification |
+| "operates GPU infrastructure across Sweden and UK" | Categorical | Recital B | Multi-jurisdiction fact; operational reality |
+| "targeting 200 MW expansion" | Tactical | Cl. 3 expansion rationale | Forward-looking self-claim |
+| "with a phased European expansion programme" | Categorical | Recital B | Directional descriptor |
+| "delivers bare-metal and virtual GPU instances" | Categorical | Recital B | Product-class description |
+| "NVIDIA Preferred Partner" | Credentialled (tier-1 endorsement) | Recital B, named | Third-party endorsement anchors the claim |
+| "supports H100, H200, B200, GB200/GB300 NVL72" | Categorical (product capability) | Recital B | Capability class; operator brochure + vendor platform docs corroborate |
+| "99% fossil-free power, PUE ≈ 1.1" | Tactical (self-announced) | Cl. 3 context or omit | Specific metrics without third-party cert |
+| "fossil-free energy profile consistent with sustainability commitments" | Categorical | Recital B | Directional, not numeric |
+
+---
+
 ### ✅ Polarise GmbH (Wholesale — fully verified)
 
-**Source map (tier-1 unless noted):**
-- Pillar 1: [polarise.eu/about](https://polarise.eu/about), [Companyhouse.de Polarise GmbH Paderborn](https://www.companyhouse.de/en/Polarise-GmbH-Paderborn)
-- Pillar 2: [polarise.eu](https://polarise.eu) (product taxonomy: AI Factories, bare-metal GPU, Virtual AI Cloud Core, Dedicated Private Cloud, AI Studio Drive)
-- Pillar 3: [polarise.eu/newsroom/deutsche-telekom-industrial-ai-cloud](https://polarise.eu/newsroom) (Deutsche Telekom Munich anchor customer), [polarise.eu NVIDIA Cloud Partner page](https://polarise.eu) (GB200 NVL72, GB300 NVL72), [swi.com press release](https://swi.com) (SWI Stoneweg Icona majority investment, EUR 0.5bn valuation, EUR 1.0bn growth commitment — tier-1: investor-facing direct-quoted release)
+**Source map (tier-1 unless noted; v3.5.6 re-verified 2026-04-17):**
+- Pillar 1: [polarise.eu/imprint](https://polarise.eu/imprint) (Polarise GmbH, Technologiepark 12, 33100 Paderborn, VAT DE454310057), [online-handelsregister.de HRB 17714 Paderborn](https://www.online-handelsregister.de/handelsregisterauszug/nw/Paderborn/HRB/17714/Polarise-GmbH) (Amtsgericht Paderborn HRB 17714; MDs Michel Boutouil, Tirat Demir; founded 10 Apr 2025) <!-- v3.5.6 re-verified 2026-04-17: companyhouse.de/en 403 bot-blocked; replaced with canonical DE registry; polarise.eu/about does not carry entity details, /imprint does -->
+- Pillar 2: [polarise.eu](https://polarise.eu) (product taxonomy: AI Factories, Bare Metal, Virtual AI Cloud Core, Dedicated Private Cloud, AI Studio Drive)
+- Pillar 3: [polarise.eu/newsroom](https://polarise.eu/newsroom) (Deutsche Telekom Munich Industrial AI Cloud anchor customer — items dated 4 Feb 2026 + 5 Nov 2025), [polarise.eu NVIDIA Cloud Partner page](https://polarise.eu) (Preferred Partner; GB200 NVL72, GB300 NVL72), [swi.com/announcements/](https://swi.com/announcements/) (SWI Stoneweg Icona majority investment, EUR 0.5bn valuation, EUR 1.0bn growth commitment — 24 Feb 2026 entry; tier-1 investor-facing) <!-- v3.5.6 re-verified 2026-04-17: /newsroom/deutsche-telekom-industrial-ai-cloud deep-link 404, index confirms item; swi.com root 200 but release lives on /announcements/ -->
 - Pillar 4: inferred from Phase 1 context (European sovereign AI wholesale demand)
-- Pillar 5: [polarise.eu/sites/augsburg](https://polarise.eu) (announced 30 MW, scalable to 120 MW Augsburg expansion)
+- Pillar 5: [polarise.eu/newsroom](https://polarise.eu/newsroom) (10 Mar 2026 Amberg–Unterallgäu / Greater Augsburg Area item: initial 30 MW, scalable to 120 MW) <!-- v3.5.6 re-verified 2026-04-17: /sites/augsburg 404; claim sourced to /newsroom item -->
 
 **Draft Recital B (146 words):**
-> Polarise GmbH is a German limited liability company with its registered seat at Technologiepark 12, 33100 Paderborn, Germany [Companyhouse.de]. Polarise operates AI-ready data centers and a sovereign GPU cloud platform under the "Europe's Gateway for Sovereign AI" positioning, with sites in Munich, Oslo, and Frankfurt and an announced expansion of 30 MW (scalable to 120 MW) in the Augsburg area [polarise.eu]. Polarise is a Preferred NVIDIA Partner and NVIDIA Cloud Partner deploying GB200/GB300 NVL72 platforms, and supports Deutsche Telekom's Industrial AI Cloud in Munich [polarise.eu/newsroom]. In 2026 SWI Stoneweg Icona Group (Euronext Amsterdam) acquired a majority stake at a EUR 0.5bn valuation with a EUR 1.0bn growth commitment, and Macquarie has committed up to EUR 117m in senior financing [swi.com; polarise.eu/newsroom].
+> Polarise GmbH is a German limited liability company with its registered seat at Technologiepark 12, 33100 Paderborn, Germany [online-handelsregister.de, HRB 17714]. Polarise operates AI-ready data centers and a sovereign GPU cloud platform under the "Europe's Gateway for Sovereign AI" positioning, with sites in Munich, Oslo, and Frankfurt and an announced expansion of 30 MW (scalable to 120 MW) in the Augsburg area [polarise.eu]. Polarise is a Preferred NVIDIA Partner and NVIDIA Cloud Partner deploying GB200/GB300 NVL72 platforms, and supports Deutsche Telekom's Industrial AI Cloud in Munich [polarise.eu/newsroom]. In 2026 SWI Stoneweg Icona Group (Euronext Amsterdam) acquired a majority stake at a EUR 0.5bn valuation with a EUR 1.0bn growth commitment, and Macquarie has committed up to EUR 117m in senior financing [swi.com/announcements; polarise.eu/newsroom].
 
-**Why this example works:** every material claim has a tier-1 URL. Scale signals (funding, partnerships, deployed platforms) are attributed to direct-quoted press from Polarise's own newsroom or the investor's own release. Forward plans (Augsburg 30 MW → 120 MW) are on Polarise's own site. Registration number placeholder is [Companyhouse.de]; full HRB can be pulled on demand if required at signing.
+**Why this example works:** every material claim has a tier-1 URL. Scale signals (funding, partnerships, deployed platforms) are attributed to direct-quoted press from Polarise's own newsroom or the investor's own release. Forward plans (Augsburg 30 MW → 120 MW) are on Polarise's own newsroom. Registration number HRB 17714 Paderborn is now framework-anchored via the DE online-handelsregister canonical URL (v3.5.6 re-verification).
 
 ### ✅ Civo LTD (End User — fully verified)
 
@@ -395,10 +438,10 @@ counterparty:
 
 **⚠️ Prior v3.3 draft contained two fabrications:** "Ready-for-Service within 90 days of site-preparation completion" (no tier-1 source — not on infrapartners.llc, not on LinkedIn, not in Nscale or Caddis press releases) and "80% off-site completion" presented as a Counterparty-asserted fact (the figure is in tier-2 press at ainvest.com, but infrapartners.llc itself is effectively a placeholder page with no such claim). Both must be removed or reframed.
 
-**Source map (v3.4 corrected):**
+**Source map (v3.4 corrected; v3.5.6 re-verified 2026-04-17):**
 - Pillar 1: [linkedin.com/company/infrapartnersllc](https://www.linkedin.com/company/infrapartnersllc) (HQ London, offices London/Dublin/Cluj/Houston, founded 2018, 51–200 employees)
-- Pillar 2: [globenewswire.com/news-release/infrapartners-caddis 2025-03-05](https://www.globenewswire.com) (quote from Michalis Grigoratos, CEO: "modular data centre solutions for AI workloads" — tier-1 direct-quoted press)
-- Pillar 3: [nscale.com/press-releases/nscale-and-infrapartners](https://www.nscale.com) (60 MW Glomfjord Norway AI data centre partnership, Nscale x InfraPartners — tier-1 joint-release); [globenewswire/Caddis press release](https://www.globenewswire.com) (targeted 100 MW combined pipeline with Caddis Cloud Solutions across EMEA + North America — tier-1, joint release from Caddis quoting InfraPartners CEO)
+- Pillar 2: [globenewswire.com 2025-03-05 InfraPartners-Caddis strategic partnership](https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html) (quote from Michalis Grigoratos, CEO: "modular data centre solutions for AI workloads" — tier-1 direct-quoted press) <!-- v3.5.6 re-verified 2026-04-17: shorthand path non-canonical; replaced with full canonical URL -->
+- Pillar 3: [nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway](https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway) (60 MW Glomfjord Norway AI data centre partnership, Nscale x InfraPartners, 25 Mar 2025 — tier-1 joint-release); [globenewswire/Caddis press release](https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html) (targeted 100 MW combined pipeline with Caddis Cloud Solutions across EMEA + North America — tier-1, joint release) <!-- v3.5.6 re-verified 2026-04-17: shorthand nscale path 404; replaced with full canonical -->
 - Pillar 4: inferred from Phase 1 (Provider supply-chain de-risking)
 - Pillar 5: [TBC] (jurisdiction of Infrapartners LLC not public; combined pipeline target split between Caddis + Nscale named projects)
 
@@ -415,10 +458,10 @@ counterparty:
 
 **⚠️ Prior v3.3 draft contained Dutch-language jargon not matching actual site:** "centrale knooppunt" was used as if quoted from sovereignaigrid.nl, but the site actually uses "Consortium coördinatie & governance" — paraphrased closer to "consortium coordination & governance entity" in English. Additionally, "operating within the EuroHPC AI Gigafactory ecosystem" was presented as confirmed, but the EuroHPC JU has not independently designated SAG as a Gigafactory recipient — the consortium self-identifies that way. Corrections required.
 
-**Source map (v3.4 corrected):**
+**Source map (v3.4 corrected; v3.5.6 re-verified 2026-04-17):**
 - Pillar 1: [sovereignaigrid.nl](https://sovereignaigrid.nl) (consortium roster names Man of Solutions B.V. as parentOrganization / coordination entity), KVK registry = [TBC] (Man of Solutions B.V.'s own KVK number not embedded on consortium site)
 - Pillar 2: [sovereignaigrid.nl](https://sovereignaigrid.nl) ("Consortium coördinatie & governance" — actual Dutch label; translates cleanly to "consortium coordination and governance entity")
-- Pillar 3: [sovereignaigrid.nl/partners](https://sovereignaigrid.nl) (public partner roster: Easy Solar Group, Digital Energy Group AG, SourceParts.eu, Desert.Solutions), [sovereignaigrid.nl/geography](https://sovereignaigrid.nl) (Velsen-Noord NL primary, Verviers BE, Germany in development)
+- Pillar 3: [sovereignaigrid.nl](https://sovereignaigrid.nl) (public partner roster: Easy Solar Group, Digital Energy Group AG, SourceParts.eu, Desert.Solutions; geography: Velsen-Noord NL primary, Verviers BE, Germany in development) <!-- v3.5.6 re-verified 2026-04-17: /partners + /geography deep-links 404 (single-page site); all content lives on root -->
 - Pillar 4: inferred from Phase 1 (federated institutional sovereign-AI pathway on Provider platform)
 - Pillar 5: self-described as "first consortium implementing Article 12b multi-site regulation under the EuroHPC AI Gigafactory programme" — self-assertion, attribute accordingly; not independently verified from EuroHPC JU designation
 
