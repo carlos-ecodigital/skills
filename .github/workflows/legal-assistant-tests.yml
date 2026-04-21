@@ -53,8 +53,8 @@ jobs:
           echo "--- Changed files ---"
           echo "$CHANGED"
           echo "---------------------"
-          GEN_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/colocation/generate_loi\.py$' || true)
-          TEST_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/colocation/tests/' || true)
+          GEN_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/generate_loi\.py$' || true)
+          TEST_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/tests/' || true)
           if [ -n "$GEN_TOUCHED" ] && [ -z "$TEST_TOUCHED" ]; then
             # Check for the escape-hatch marker across the PR commits.
             if git log --format=%B "$BASE"...HEAD | grep -q '\[skip-test-check\]'; then
