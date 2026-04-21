@@ -388,6 +388,24 @@ counterparty:
 
 ---
 
+## Categorical vs. Tactical Descriptor Decision Table (v3.7.0)
+
+Use this table when deciding whether a counterparty claim belongs in Recital B (durable descriptor) or Cl. 3 (context / expansion rationale). **Tactical claims without third-party corroboration stay out of Recital B.**
+
+| Claim | Tactical or Categorical? | Goes in | Why |
+|---|---|---|---|
+| "operates 22 MW of GPU capacity" | Tactical (self-announced) | Cl. 3 context | Self-sourced MW count; no third-party verification |
+| "operates GPU infrastructure across Sweden and UK" | Categorical | Recital B | Multi-jurisdiction fact; operational reality |
+| "targeting 200 MW expansion" | Tactical | Cl. 3 expansion rationale | Forward-looking self-claim |
+| "with a phased European expansion programme" | Categorical | Recital B | Directional descriptor |
+| "delivers bare-metal and virtual GPU instances" | Categorical | Recital B | Product-class description |
+| "NVIDIA Preferred Partner" | Credentialled (tier-1 endorsement) | Recital B, named | Third-party endorsement anchors the claim |
+| "supports H100, H200, B200, GB200/GB300 NVL72" | Categorical (product capability) | Recital B | Capability class; operator brochure + vendor platform docs corroborate |
+| "99% fossil-free power, PUE ≈ 1.1" | Tactical (self-announced) | Cl. 3 context or omit | Specific metrics without third-party cert |
+| "fossil-free energy profile consistent with sustainability commitments" | Categorical | Recital B | Directional, not numeric |
+
+---
+
 ### ✅ Polarise GmbH (Wholesale — fully verified)
 
 **Source map (tier-1 unless noted; v3.5.6 re-verified 2026-04-17):**
