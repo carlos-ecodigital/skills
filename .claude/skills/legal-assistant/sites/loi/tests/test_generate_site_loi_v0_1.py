@@ -237,14 +237,34 @@ def test_dry_run_produces_no_output(tmp_path):
     assert list(tmp_path.glob("*.docx")) == []
 
 
-def test_hydrate_from_hubspot_is_passthrough():
-    deal = {"slug": "x", "site_partners": []}
-    assert engine.hydrate_from_hubspot(deal) is deal
+def test_hydrate_from_hubspot_preserves_deal_when_no_client():
+    """Without a HubSpot client, hydrate is a no-op on original payload.
+
+    Phase 0 refactor (rc3): assert behaviour, not identity. Post-Phase 1
+    the method may add an ``enrichment`` scaffold; it must never destroy
+    or mutate existing top-level keys.
+    """
+    import copy
+    deal = {"slug": "x", "site_partners": [], "hubspot_deal_id": None}
+    original = copy.deepcopy(deal)
+    result = engine.hydrate_from_hubspot(deal)
+    for k, v in original.items():
+        assert result[k] == v, f"key {k!r} was mutated: {result[k]!r} != {v!r}"
 
 
-def test_parse_documents_is_passthrough(tmp_path):
+def test_parse_documents_noop_when_no_documents(tmp_path):
+    """With no ``documents`` key, parse_documents preserves the payload.
+
+    Phase 0 refactor (rc3): assert behaviour, not identity. Post-Phase 1
+    the method may add a ``parser_log`` under ``enrichment``; it must
+    never destroy or mutate existing top-level keys.
+    """
+    import copy
     deal = {"slug": "x", "site_partners": []}
-    assert engine.parse_documents(deal, tmp_path) is deal
+    original = copy.deepcopy(deal)
+    result = engine.parse_documents(deal, tmp_path)
+    for k, v in original.items():
+        assert result[k] == v, f"key {k!r} was mutated: {result[k]!r} != {v!r}"
 
 
 def test_cross_doc_gate_returns_empty_list():

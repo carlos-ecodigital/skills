@@ -294,10 +294,20 @@ def test_sitedocbase_stage_fields_for_loi():
     assert len(fields) == 16  # 15 'both' + 1 'loi'
 
 
-def test_sitedocbase_hydrate_from_hubspot_passthrough():
+def test_sitedocbase_hydrate_from_hubspot_preserves_deal_when_no_client():
+    """Without a HubSpot client, hydrate is a no-op on original payload.
+
+    Phase 0 refactor (rc3): assert behaviour, not identity. Post-Phase 1
+    the method may add an ``enrichment`` scaffold; it must never destroy
+    or mutate existing top-level keys.
+    """
+    import copy
     base = _ConcreteSite()
-    deal = {"x": 1}
-    assert base.hydrate_from_hubspot(deal) is deal
+    deal = {"x": 1, "hubspot_deal_id": None}
+    original = copy.deepcopy(deal)
+    result = base.hydrate_from_hubspot(deal)
+    for k, v in original.items():
+        assert result[k] == v, f"key {k!r} was mutated: {result[k]!r} != {v!r}"
 
 
 def test_sitedocbase_run_cross_doc_gate_empty():
