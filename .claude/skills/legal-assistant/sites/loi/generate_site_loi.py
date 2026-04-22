@@ -44,11 +44,56 @@ if str(_SHARED_PATH) not in sys.path:
 
 from bilingual_body import render_bilingual_clause  # noqa: E402
 from format_validators import run_all as run_format_validators  # noqa: E402
-from generate import DE_ENTITIES  # noqa: E402
+from generate import DE_ENTITIES, COBALT, SLATE_800, SLATE_900, FONT, Party, add_cover  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
 import cross_doc_gate as cdg  # noqa: E402
 import site_doc_base as sdb  # noqa: E402
 from site_doc_base import derive_role_labels as sdb_derive_role_labels  # noqa: E402
+from docx.shared import Mm, Pt  # noqa: E402
+
+
+# ---------------------------------------------------------------------------
+# Placeholder sanitisation
+# ---------------------------------------------------------------------------
+
+#: Values treated as missing / render-as-[TBC]. Engine never leaks raw
+#: ``None``, ``"TODO(...)"`` or similar author-placeholder strings into
+#: the generated docx.
+_TBC_TOKEN = "[TBC]"
+
+
+def _sanitise(value, *, fallback: str = _TBC_TOKEN) -> str:
+    """Normalise a value for rendering.
+
+    - ``None`` → ``[TBC]``
+    - any string starting with ``"TODO("`` → ``[TBC]``
+    - any empty / whitespace-only string → ``[TBC]``
+    - already-``[TBC]`` / ``[TBD_*]`` → ``[TBC]``
+    - everything else → ``str(value)``
+    """
+    if value is None:
+        return fallback
+    s = str(value).strip()
+    if not s:
+        return fallback
+    if s.startswith("TODO(") or s.startswith("[TBD_") or s == "[TBC]":
+        return fallback
+    return s
+
+
+# ---------------------------------------------------------------------------
+# Page-layout helper — narrow margins so bilingual tables fit
+# ---------------------------------------------------------------------------
+
+def _set_narrow_margins(doc: Document) -> None:
+    """Set 20 mm L/R and 25 mm T/B on every section so bilingual tables
+    (USABLE_WIDTH_MM=165) render without overflow. Default python-docx
+    margins are 31.75 mm which leaves only 146.5 mm usable — too narrow."""
+    for section in doc.sections:
+        section.left_margin = Mm(20)
+        section.right_margin = Mm(20)
+        section.top_margin = Mm(25)
+        section.bottom_margin = Mm(20)
 
 # Phase B6 integration complete — imports from site_doc_base.
 # Back-compat alias so existing tests that reference ``engine._derive_role_labels``
@@ -604,17 +649,92 @@ def load_deal(deal_yaml_path: Path) -> dict:
     return deal
 
 
-def hydrate_from_hubspot(deal: dict) -> dict:
-    """TODO(Phase B7 / hubspot_sync.py): read Deal + associated Companies
-    + Contacts, resolve conflicts per data-authority chain, write
-    enrichment back. Currently a passthrough."""
+def hydrate_from_hubspot(deal: dict, client=None) -> dict:
+    """Hydrate deal.yaml from HubSpot via hubspot_sync.read_deal + validate
+    + resolve. Passthrough when ``client`` is ``None`` or when the deal
+    has no ``hubspot_deal_id``. Phase B7 wiring."""
+    if client is None or not deal.get("hubspot_deal_id"):
+        return deal
+    try:
+        import hubspot_sync as _hs
+        hs_view = _hs.read_deal(client, deal)
+        conflicts = _hs.validate(deal, hs_view)
+        deal = _hs.resolve(deal, conflicts)
+    except Exception as exc:
+        deal.setdefault("enrichment", {}).setdefault("sync_warnings", []).append(
+            f"hubspot_sync: {type(exc).__name__}: {exc}"
+        )
     return deal
 
 
 def parse_documents(deal: dict, documents_dir: Path) -> dict:
-    """TODO(Phase B5 / document_parsers): iterate deal['documents'][],
-    invoke each parser, populate enrichment targets. Currently a
-    passthrough."""
+    """Iterate ``deal['documents'][]``, dispatch to the matching parser,
+    merge outputs into ``deal.enrichment``, record per-doc audit trail in
+    ``deal.enrichment.parser_log``. Passthrough when no documents attached.
+    Phase B5 wiring."""
+    if not deal.get("documents"):
+        return deal
+    try:
+        from document_parsers.base import (
+            ParserError, CorruptDocError, UnreadableScanError,
+        )
+        from document_parsers.ato import ATOParser
+        from document_parsers.sde_plus import SDEPlusParser
+        from document_parsers.kadaster import KadasterParser
+        from document_parsers.kvk import KvKParser
+        from document_parsers.bestemmingsplan import BestemmingsplanParser
+        from document_parsers.landowner_consent import LandownerConsentParser
+        from document_parsers.financier_consent import FinancierConsentParser
+        from document_parsers.equipment_oem import EquipmentOEMParser
+        from document_parsers.generic_pdf import GenericPDFParser
+    except ImportError:
+        return deal
+
+    parser_map = {
+        "ato_document": ATOParser,
+        "sde_plus_plus": SDEPlusParser,
+        "kadaster_uittreksel": KadasterParser,
+        "kvk_uittreksel": KvKParser,
+        "bestemmingsplan_excerpt": BestemmingsplanParser,
+        "landowner_consent": LandownerConsentParser,
+        "financier_consent": FinancierConsentParser,
+        "chp_commissioning_cert": EquipmentOEMParser,
+        "chp_maintenance_contract": EquipmentOEMParser,
+        "chp_gasketel_cert": EquipmentOEMParser,
+        "bess_grid_sharing_agreement": EquipmentOEMParser,
+        "bess_balancing_market_enrollment": EquipmentOEMParser,
+        "solar_pv_yield_report": EquipmentOEMParser,
+        "solar_pv_connection_agreement": EquipmentOEMParser,
+        "co2_supply_contract": GenericPDFParser,
+    }
+
+    log: list[dict] = deal.setdefault("enrichment", {}).setdefault("parser_log", [])
+    for doc_entry in deal.get("documents", []):
+        doc_type = doc_entry.get("type")
+        doc_path_str = doc_entry.get("path")
+        if not doc_type or not doc_path_str:
+            continue
+        parser_cls = parser_map.get(doc_type, GenericPDFParser)
+        full_path = Path(doc_path_str) if Path(doc_path_str).is_absolute() \
+            else documents_dir / doc_path_str
+        if not full_path.exists():
+            log.append({"doc_type": doc_type, "status": "missing",
+                        "path": str(full_path)})
+            continue
+        try:
+            result = parser_cls(full_path).parse()
+            log.append({
+                "doc_type": doc_type, "status": "parsed",
+                "parser": result.parser_name, "version": result.parser_version,
+                "fields": len(result.fields_populated),
+                "warnings": result.warnings, "confidence": result.confidence,
+            })
+            deal["enrichment"].update(result.fields_populated)
+        except (CorruptDocError, UnreadableScanError) as exc:
+            log.append({"doc_type": doc_type, "status": "error", "error": str(exc)})
+        except ParserError as exc:
+            log.append({"doc_type": doc_type, "status": "parser_error",
+                        "error": str(exc)})
     return deal
 
 
@@ -638,28 +758,66 @@ def build_document(deal: dict) -> Document:
     }
 
     doc = Document()
-
-    # Title / cover block (TODO: delegate to document-factory.add_cover
-    # bilingual extension when that lands; inline for v0.1)
-    p = doc.add_paragraph()
-    r = p.add_run("Letter of Intent / Intentieverklaring")
-    r.bold = True
-    r.font.size = __import__("docx").shared.Pt(16)
-
-    p = doc.add_paragraph()
-    r = p.add_run("for a Digital Energy Center Project / voor een Digital Energy Center-project")
-    r.italic = True
-
-    p = doc.add_paragraph()
-    r = p.add_run("between / tussen")
-    p = doc.add_paragraph(provider_party.legal_name)
-    p = doc.add_paragraph("and / en")
-    for sp in site_partners:
-        doc.add_paragraph(sp.get("legal_name", "[TBC]"))
+    _set_narrow_margins(doc)
 
     loi_date = deal.get("timeline", {}).get("loi_drafted_date") or date.today().isoformat()
-    doc.add_paragraph(f"Date / Datum: {loi_date}")
-    doc.add_paragraph()  # spacer
+
+    # Cover page — delegate to document-factory.add_cover for the IB-standard
+    # title hierarchy (28pt bold title + 14pt subject + 11pt date + party
+    # blocks), then append a small bilingual subtitle line so the Dutch
+    # translation is visible on the cover. This replaces the inline
+    # `doc.add_paragraph()` runs that had no branding, no hierarchy, and
+    # bled into Section L on the first page.
+    party_blocks = [
+        Party(
+            legal_name=provider_party.legal_name,
+            address=provider_party.address,
+            registration_type=provider_party.registration_type,
+            registration_number=provider_party.registration_number,
+        ),
+    ]
+    for sp in site_partners:
+        party_blocks.append(Party(
+            legal_name=_sanitise(sp.get("legal_name")),
+            address=_sanitise(sp.get("registered_address"), fallback=""),
+            registration_type="KvK" if _sanitise(sp.get("kvk"), fallback="") else None,
+            registration_number=_sanitise(sp.get("kvk"), fallback=None)
+                if _sanitise(sp.get("kvk"), fallback="") else None,
+        ))
+    add_cover(
+        doc,
+        agreement_type="Letter of Intent",
+        subject="for a Digital Energy Center Project",
+        date_str=loi_date,
+        parties=party_blocks,
+        formality="non_binding",
+        classification="Confidential",
+        cover_title="Letter of Intent",
+    )
+
+    # Bilingual subtitle: the Dutch translations of Title + Subject, set just
+    # below the English block so Dutch readers see the header at a glance.
+    nl_subtitle = doc.add_paragraph()
+    nl_subtitle.paragraph_format.space_before = Pt(0)
+    nl_subtitle.paragraph_format.space_after = Pt(2)
+    nl_r = nl_subtitle.add_run("Intentieverklaring")
+    nl_r.italic = True
+    nl_r.font.name = FONT
+    nl_r.font.size = Pt(16)
+    nl_r.font.color.rgb = SLATE_900
+
+    nl_sub2 = doc.add_paragraph()
+    nl_sub2.paragraph_format.space_before = Pt(0)
+    nl_sub2.paragraph_format.space_after = Pt(12)
+    nl_sub2_r = nl_sub2.add_run("voor een Digital Energy Center-project")
+    nl_sub2_r.italic = True
+    nl_sub2_r.font.name = FONT
+    nl_sub2_r.font.size = Pt(11)
+    nl_sub2_r.font.color.rgb = SLATE_800
+
+    # Page break so Section 1 starts on its own page
+    from docx.enum.text import WD_BREAK
+    doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
     # §1 Parties
     en, nl = _clause_1_parties(provider, site_partners)
@@ -724,56 +882,104 @@ def build_document(deal: dict) -> Document:
                             heading="7. Execution",
                             heading_nl="7. Ondertekening")
 
-    # Section L — Locations (v0.1: simple bullet list; bilingual table
-    # upgrade pending Phase D final).
+    # Section L — Locations (bilingual two-column table)
     locations = deal.get("locations") or []
     if locations:
-        p = doc.add_paragraph()
-        r = p.add_run("Section L — Locations / Locaties")
-        r.bold = True
-        for loc in locations:
-            parts = [
-                f"Parcel: {loc.get('parcel_id', '[TBC]')}",
-                f"Address: {loc.get('address', '[TBC]')}",
-                f"DSO: {loc.get('dso', '[TBC]')}",
-                f"Municipality: {loc.get('municipality', '[TBC]')}",
-            ]
-            doc.add_paragraph("  \u2022  " + "  |  ".join(parts))
+        en_rows: List[str] = []
+        nl_rows: List[str] = []
+        for i, loc in enumerate(locations, 1):
+            parcel = _sanitise(loc.get("parcel_id"))
+            addr = _sanitise(loc.get("address"))
+            dso = _sanitise(loc.get("dso"))
+            muni = _sanitise(loc.get("municipality"))
+            postcode = _sanitise(loc.get("postcode"), fallback="")
+            zoning = _sanitise(loc.get("bestemmingsplan_designation"), fallback="")
+            en_rows.append(
+                f"Location {i}: parcel {parcel}; address {addr}"
+                + (f", {postcode}" if postcode else "")
+                + f"; municipality {muni}; DSO {dso}"
+                + (f"; zoning {zoning}" if zoning else "")
+                + "."
+            )
+            nl_rows.append(
+                f"Locatie {i}: kadaster {parcel}; adres {addr}"
+                + (f", {postcode}" if postcode else "")
+                + f"; gemeente {muni}; netbeheerder {dso}"
+                + (f"; bestemming {zoning}" if zoning else "")
+                + "."
+            )
+        render_bilingual_clause(
+            doc, en_rows, nl_rows,
+            heading="Section L — Locations",
+            heading_nl="Bijlage L — Locaties",
+        )
 
-    # Section R — Roles + Parties
-    p = doc.add_paragraph()
-    r = p.add_run("Section R — Roles and Parties / Rollen en Partijen")
-    r.bold = True
+    # Section R — Roles + Parties (bilingual two-column table)
+    en_rows: List[str] = []
+    nl_rows: List[str] = []
     for sp in site_partners:
         en_lbls, nl_lbls = sdb_derive_role_labels(sp)
         sp["_role_labels_en"] = en_lbls
         sp["_role_labels_nl"] = nl_lbls
-        role_line = ", ".join(en_lbls) + " / " + ", ".join(nl_lbls) if en_lbls else ""
-        p = doc.add_paragraph()
-        r = p.add_run(f"{sp.get('legal_name', '[TBC]')}")
-        r.bold = True
-        if role_line:
-            doc.add_paragraph(f"  Roles: {role_line}")
-        kvk = sp.get("kvk")
-        if kvk:
-            doc.add_paragraph(f"  KvK: {kvk}")
+
+        legal_name = _sanitise(sp.get("legal_name"))
+        kvk = _sanitise(sp.get("kvk"), fallback="")
+        kvk_en = f" (KvK {kvk})" if kvk else ""
+        kvk_nl = f" (KvK {kvk})" if kvk else ""
         sig = sp.get("signatory") or {}
-        doc.add_paragraph(f"  Signatory: {sig.get('name', '[TBC]')} ({sig.get('title', '[TBC]')})")
+        sig_name = _sanitise(sig.get("name"))
+        sig_title = _sanitise(sig.get("title"))
+
+        en_roles = ", ".join(en_lbls) if en_lbls else _TBC_TOKEN
+        nl_roles = ", ".join(nl_lbls) if nl_lbls else _TBC_TOKEN
+
+        contribs_en = []
+        contribs_nl = []
         for contrib in sp.get("contributions") or []:
+            asset = contrib.get("asset", _TBC_TOKEN)
+            instrument = contrib.get("instrument", _TBC_TOKEN)
             details = contrib.get("details") or {}
-            detail_str = ", ".join(f"{k}={v}" for k, v in details.items()
-                                   if not k.endswith("_doc") and not k.endswith("_doc_ref"))
-            doc.add_paragraph(
-                f"  Contributes: {contrib.get('asset')} via {contrib.get('instrument')} "
-                f"[{detail_str}]"
-            )
+            kvs = []
+            for k, v in details.items():
+                if k.endswith("_doc") or k.endswith("_doc_ref") or k.endswith("_hash"):
+                    continue
+                vs = _sanitise(v, fallback="")
+                if vs:
+                    kvs.append(f"{k}={vs}")
+            detail_str = ("; " + ", ".join(kvs)) if kvs else ""
+            contribs_en.append(f"contributes {asset} via {instrument}{detail_str}")
+            contribs_nl.append(f"levert {asset} via {instrument}{detail_str}")
+
+        returns_en = []
+        returns_nl = []
         for ret in sp.get("returns") or []:
+            value = ret.get("value", _TBC_TOKEN)
+            instrument = ret.get("instrument", _TBC_TOKEN)
             details = ret.get("details") or {}
-            detail_str = ", ".join(f"{k}={v}" for k, v in details.items())
-            doc.add_paragraph(
-                f"  Receives: {ret.get('value')} via {ret.get('instrument')} "
-                f"[{detail_str}]"
-            )
+            kvs = []
+            for k, v in details.items():
+                vs = _sanitise(v, fallback="")
+                if vs and not k.endswith("_hash"):
+                    kvs.append(f"{k}={vs}")
+            detail_str = ("; " + ", ".join(kvs)) if kvs else ""
+            returns_en.append(f"receives {value} via {instrument}{detail_str}")
+            returns_nl.append(f"ontvangt {value} via {instrument}{detail_str}")
+
+        en_rows.append(
+            f"{legal_name}{kvk_en}. Roles: {en_roles}. Signatory: {sig_name} ({sig_title}). "
+            + ("Contributions: " + "; ".join(contribs_en) + ". " if contribs_en else "")
+            + ("Returns: " + "; ".join(returns_en) + "." if returns_en else "")
+        )
+        nl_rows.append(
+            f"{legal_name}{kvk_nl}. Rollen: {nl_roles}. Ondertekenaar: {sig_name} ({sig_title}). "
+            + ("Bijdragen: " + "; ".join(contribs_nl) + ". " if contribs_nl else "")
+            + ("Vergoedingen: " + "; ".join(returns_nl) + "." if returns_nl else "")
+        )
+    render_bilingual_clause(
+        doc, en_rows, nl_rows,
+        heading="Section R — Roles and Parties",
+        heading_nl="Bijlage R — Rollen en Partijen",
+    )
 
     # Signature page
     doc.add_page_break()
@@ -782,12 +988,12 @@ def build_document(deal: dict) -> Document:
         sig = sp.get("signatory") or {}
         sig_parties.append(
             SigParty(
-                legal_name=sp.get("legal_name", "[TBC]"),
+                legal_name=_sanitise(sp.get("legal_name")),
                 role_labels_en=sp.get("_role_labels_en", []),
                 role_labels_nl=sp.get("_role_labels_nl", []),
-                signatory_name=sig.get("name", ""),
-                signatory_title=sig.get("title", ""),
-                kvk=None,  # LOI omits KvK
+                signatory_name=_sanitise(sig.get("name"), fallback=""),
+                signatory_title=_sanitise(sig.get("title"), fallback=""),
+                kvk=None,  # LOI omits KvK (per Van Gog non-binding pattern)
             )
         )
     render_signature_page(doc, provider_party, sig_parties, formality="non_binding")
@@ -810,12 +1016,14 @@ def write_qa_report(deal: dict, doc: Document, gate_verdicts: list[dict],
     for v in gate_verdicts:
         lines.append(f"  - {v}")
     lines.append("")
-    lines.append("Integration TODOs (for later streams):")
-    lines.append("  - Phase B6: replace inline _derive_role_labels with site_doc_base.derive_labels")
-    lines.append("  - Phase B7: hubspot_sync round-trip + conflict resolution")
-    lines.append("  - Phase B5: document_parsers enrichment of [TBC] fields")
-    lines.append("  - Phase B8: cross_doc_gate invocation")
-    lines.append("  - Phase D-final: Section L / Section R as bilingual tables (current v0.1 is bullet list)")
+    lines.append("Integration status:")
+    lines.append("  - Phase B6 role-label derivation: WIRED (site_doc_base.derive_role_labels)")
+    lines.append("  - Phase B8 cross-doc gate invocation:   WIRED (see verdicts above)")
+    lines.append("  - Phase B7 hubspot_sync round-trip:     WIRED (passthrough if no client supplied)")
+    lines.append("  - Phase B5 document_parsers enrichment: WIRED (passthrough if no docs uploaded)")
+    lines.append("  - Section L + R rendering:              WIRED as bilingual two-column tables (was bullet list)")
+    lines.append("  - Cover page:                           WIRED via document-factory.add_cover (was inline paragraphs)")
+    lines.append("  - Page margins:                         20mm L/R (narrow, for bilingual-table fit)")
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
 
