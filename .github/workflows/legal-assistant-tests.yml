@@ -3,6 +3,15 @@ name: legal-assistant tests
 # v3.5.x Scope T — gate PRs that touch legal-assistant on the pytest harness.
 # 88 tests as of v3.5.4; add to tests/ per the discipline rule: no render-
 # logic change ships without a unit test exercising the new branch.
+#
+# v4.0-rc3.1 (Sites stream) — expanded to cover:
+#   - sites/loi  (25 tests)
+#   - sites/hot  (22 tests)
+#   - sites/_shared  (130 tests: 110 chassis + 20 normalise_placeholder)
+#   - sites/_shared/document_parsers  (95 tests)
+#   - sites/tests  (integration, 38 tests)
+# Plus a scaffolding-marker gate that blocks rc-level TODO markers from
+# reaching the engine production path.
 
 on:
   pull_request:
@@ -16,6 +25,7 @@ on:
     branches:
       - main
       - 'carlos/loi-v3.5*'
+      - 'carlos/sites-stream-v4.0*'
     paths:
       - '.claude/skills/legal-assistant/**'
       - '.claude/skills/_shared/counterpart-description-framework.md'
@@ -38,6 +48,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest python-docx pyyaml lxml
+          # PyMuPDF is optional — sites parsers degrade gracefully without
+          # it. Install explicitly so the parser test suite actually runs.
+          pip install pymupdf
 
       # v3.5.8 PRINCIPLES.md tripwire #4: render-logic changes must ship
       # with a test change. Escape hatch for doc-only / comment-only edits
@@ -53,24 +66,76 @@ jobs:
           echo "--- Changed files ---"
           echo "$CHANGED"
           echo "---------------------"
-          GEN_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/generate_loi\.py$' || true)
-          TEST_TOUCHED=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/tests/' || true)
-          if [ -n "$GEN_TOUCHED" ] && [ -z "$TEST_TOUCHED" ]; then
-            # Check for the escape-hatch marker across the PR commits.
-            if git log --format=%B "$BASE"...HEAD | grep -q '\[skip-test-check\]'; then
-              echo "generate_loi.py changed without test changes; [skip-test-check] marker present — allowed."
-              exit 0
-            fi
-            echo "ERROR: generate_loi.py changed with no accompanying tests/ change."
-            echo "v3.5.8 PRINCIPLES.md tripwire #4: render-logic changes must ship"
-            echo "with a test exercising the new branch. If this change is genuinely"
-            echo "test-free (e.g. pure docstring edit), add [skip-test-check] to any"
-            echo "commit message on the branch."
+          # Colocation (sales/) gate
+          SALES_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/generate_loi\.py$' || true)
+          SALES_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/tests/' || true)
+          # Sites/LOI gate
+          SITES_LOI_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/loi/generate_site_loi\.py$' || true)
+          SITES_LOI_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/loi/tests/' || true)
+          # Sites/HoT gate
+          SITES_HOT_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/hot/generate_site_hot\.py$' || true)
+          SITES_HOT_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/hot/tests/' || true)
+          # Shared chassis gate
+          SITES_SHARED_SRC=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/_shared/[^/]+\.py$' || true)
+          SITES_SHARED_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/_shared/tests/' || true)
+          # Escape hatch
+          if git log --format=%B "$BASE"...HEAD | grep -q '\[skip-test-check\]'; then
+            echo "Escape-hatch [skip-test-check] present — test-balance check skipped."
+            exit 0
+          fi
+          fail=0
+          if [ -n "$SALES_GEN" ] && [ -z "$SALES_TESTS" ]; then
+            echo "ERROR: sales/generate_loi.py changed with no accompanying sales/tests/ change."
+            fail=1
+          fi
+          if [ -n "$SITES_LOI_GEN" ] && [ -z "$SITES_LOI_TESTS" ]; then
+            echo "ERROR: sites/loi/generate_site_loi.py changed with no accompanying sites/loi/tests/ change."
+            fail=1
+          fi
+          if [ -n "$SITES_HOT_GEN" ] && [ -z "$SITES_HOT_TESTS" ]; then
+            echo "ERROR: sites/hot/generate_site_hot.py changed with no accompanying sites/hot/tests/ change."
+            fail=1
+          fi
+          if [ -n "$SITES_SHARED_SRC" ] && [ -z "$SITES_SHARED_TESTS" ]; then
+            echo "ERROR: sites/_shared/*.py changed with no accompanying sites/_shared/tests/ change."
+            fail=1
+          fi
+          if [ "$fail" -ne 0 ]; then
+            echo "Render-logic changes must ship with a test exercising the new branch."
+            echo "If this change is genuinely test-free (pure docstring / comment),"
+            echo "add [skip-test-check] to any commit message on the branch."
             exit 1
           fi
           echo "OK: generator/test change balance satisfied."
 
-      - name: Run legal-assistant tests
+      # rc3.1 tripwire — scaffolding markers on the engine production path.
+      # v0.1 scaffolding (``TODO(Phase B5)``, ``TODO: delegate to ...``) is
+      # what let placeholder-leaks + passthrough stubs reach production in
+      # rc1. Fail the build if any engine .py (excluding tests/) still
+      # carries such a marker.
+      - name: Scaffolding-marker gate (sites production path)
+        run: |
+          set -e
+          echo "Scanning sites/ production code for TODO(Phase …) / TODO: delegate markers…"
+          # Production path only — exclude tests/ dirs and .md files.
+          hits=$(find .claude/skills/legal-assistant/sites -name '*.py' \
+                   -not -path '*/tests/*' \
+                   -print0 \
+                 | xargs -0 grep -En 'TODO\(Phase |TODO: delegate to ' || true)
+          if [ -n "$hits" ]; then
+            echo "----- scaffolding markers found -----"
+            echo "$hits"
+            echo "-------------------------------------"
+            echo "Fail: sites/ production code must not carry rc-level"
+            echo "scaffolding markers. Replace the stub with a real"
+            echo "implementation (or delete the line) before merging."
+            exit 1
+          fi
+          echo "OK: no scaffolding markers on sites/ production path."
+
+      # --- legal-assistant/sales (colocation) -----------------------------
+
+      - name: Run legal-assistant/sales tests
         working-directory: .claude/skills/legal-assistant/sales
         run: |
           python -m pytest tests/ -v
@@ -83,7 +148,6 @@ jobs:
             echo "--- Regenerating: $f ---"
             python3 generate_loi.py "$f"
           done
-          # Cleanup generated artefacts (CI log only)
           rm -f *.docx *_qa.txt
 
       - name: Smoke-regen v3.5 regression fixtures
@@ -95,3 +159,50 @@ jobs:
             python3 generate_loi.py "$f"
           done
           rm -f *.docx *_qa.txt
+
+      # --- legal-assistant/sites (Sites stream — rc3.1) -------------------
+
+      - name: Run legal-assistant/sites/_shared tests (chassis + parsers)
+        working-directory: .claude/skills/legal-assistant/sites/_shared
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Run legal-assistant/sites/_shared/document_parsers tests
+        working-directory: .claude/skills/legal-assistant/sites/_shared/document_parsers
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Run legal-assistant/sites/loi tests
+        working-directory: .claude/skills/legal-assistant/sites/loi
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Run legal-assistant/sites/hot tests
+        working-directory: .claude/skills/legal-assistant/sites/hot
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Run legal-assistant/sites/tests (integration)
+        working-directory: .claude/skills/legal-assistant/sites/tests
+        run: |
+          python -m pytest . -v
+
+      - name: Smoke-regen Van Gog LOI
+        working-directory: .claude/skills/legal-assistant/sites/loi
+        run: |
+          set -e
+          python3 generate_site_loi.py examples/deal_van-gog.yaml --out-dir /tmp/rc3-smoke
+          ls -la /tmp/rc3-smoke
+          rm -rf /tmp/rc3-smoke
+
+      - name: Smoke-regen Moerman HoT
+        working-directory: .claude/skills/legal-assistant/sites/hot
+        run: |
+          set -e
+          if [ -f examples/deal_moerman.yaml ]; then
+            python3 generate_site_hot.py examples/deal_moerman.yaml --out-dir /tmp/rc3-hot-smoke
+            ls -la /tmp/rc3-hot-smoke
+            rm -rf /tmp/rc3-hot-smoke
+          else
+            echo "NOTE: sites/hot/examples/deal_moerman.yaml not present — skipping smoke-regen."
+          fi
