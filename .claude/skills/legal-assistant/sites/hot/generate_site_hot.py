@@ -45,6 +45,7 @@ import zipfile
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Dict, List, Optional, Tuple
 from xml.etree import ElementTree as ET
 
@@ -62,9 +63,8 @@ _SHARED_PATH = Path(__file__).resolve().parents[1] / "_shared"
 if str(_SHARED_PATH) not in sys.path:
     sys.path.insert(0, str(_SHARED_PATH))
 
-import cross_doc_gate as cdg  # noqa: E402
 import enum_normaliser as en  # noqa: E402
-import hubspot_sync as _hs  # noqa: E402
+import hubspot_sync as _hs  # noqa: E402  # used via type hint + wrappers
 import site_doc_base as sdb  # noqa: E402
 
 # Document parsers (Phase B5 wiring). Heavy imports are lazy-attempted —
@@ -718,7 +718,11 @@ def populate_annex_a(
                     continue
                 if field_id in values:
                     existing_vp_text = _paragraph_text(vp)
-                    rendered = _render_select_value(existing_vp_text, values[field_id])
+                    # Sanitise at the cell-write boundary so Annex A never
+                    # leaks None / TODO(*) / [TBD_*] / raw dicts into the
+                    # form-fill XML (rc3.1 — chassis normalise_placeholder).
+                    safe_val = sdb.normalise_placeholder(values[field_id])
+                    rendered = _render_select_value(existing_vp_text, safe_val)
                     _set_paragraph_text(vp, rendered)
                     fields_written.append(field_id)
                 else:
@@ -744,7 +748,10 @@ def populate_annex_a(
                 if hdr_key and hdr_key in values:
                     ps = tc.findall(W + "p")
                     if ps:
-                        _set_paragraph_text(ps[0], str(values[hdr_key]))
+                        _set_paragraph_text(
+                            ps[0],
+                            sdb.normalise_placeholder(values[hdr_key]),
+                        )
                         fields_written.append(hdr_key)
 
     # --- Pass 3: notice-address table (Table 2) -----------------------
@@ -773,7 +780,10 @@ def populate_annex_a(
                     continue
                 ps = cell.findall(W + "p")
                 if ps:
-                    _set_paragraph_text(ps[0], str(values[field_id]))
+                    _set_paragraph_text(
+                        ps[0],
+                        sdb.normalise_placeholder(values[field_id]),
+                    )
                     fields_written.append(field_id)
 
     # Re-zip mutated XML, preserving all other .docx parts verbatim.
@@ -809,302 +819,95 @@ def load_deal(deal_yaml_path: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Phase B7 — HubSpot hydration (real or fake client)
+# Pipeline hooks — delegate to the chassis singleton (rc3.1)
 # ---------------------------------------------------------------------------
+#
+# Historical note: rc1 + rc2 had HubSpot hydration + document parsing +
+# cross-doc gate implemented as module-level functions, each with its own
+# parser map, per-partner routing helpers, and gate wiring. rc3.1
+# absorbed the canonical (HoT-flavour) implementation into
+# ``SiteDocBase`` so LOI + HoT agree.  Module-level wrappers below
+# preserve the rc1/rc2 CLI contract and existing test API.
+
+
+def _engine() -> "SiteHoT":
+    """Lazily-constructed singleton ``SiteHoT`` for the module wrappers."""
+    global _SINGLETON
+    if _SINGLETON is None:
+        _SINGLETON = SiteHoT()
+    return _SINGLETON
+
+
+_SINGLETON: Optional["SiteHoT"] = None
 
 
 def hydrate_from_hubspot(
     deal: dict,
     client: Optional["_hs.HubSpotClient"] = None,
 ) -> dict:
-    """Round-trip HubSpot Deal + Companies + Contacts into ``deal``.
+    """Module-level wrapper → ``SiteHoT.hydrate_from_hubspot``.
 
-    If ``client`` is None and ``deal['hubspot_deal_id']`` is absent the
-    call is a safe passthrough (useful for fixtures that don't carry a
-    HubSpot ID yet).  Tests inject a FakeHubSpotClient via ``client=``;
-    production wiring supplies the real MCP-backed client.
-
-    Populates:
-      * ``hubspot.*`` identity/pipeline block
-      * ``owner.hubspot_owner_id``
-      * ``commercial.*`` envelope
-      * ``site_partners[]`` (one per associated Company, with signatories)
-      * ``hubspot.raw_extra`` (unmapped properties)
-      * ``hubspot.conflict_log`` (after validate+resolve)
-
-    Returns the mutated deal dict (same object).
+    Populates deal['hubspot'] + owner + commercial + site_partners on a
+    successful round-trip; records non-fatal errors under
+    ``enrichment.sync_warnings``. Safe passthrough when ``client`` is None
+    or ``deal['hubspot_deal_id']`` is absent.
     """
-    if client is None or deal.get("hubspot_deal_id") is None:
-        return deal
-
-    # 1. Hydrate from HubSpot
-    _hs.read_deal(client, deal)
-
-    # 2. Validate against HubSpot snapshot + resolve conflicts
-    view = {
-        "deal": client.read_deal(deal["hubspot_deal_id"]),
-        "companies": client.read_associated_companies(deal["hubspot_deal_id"]),
-        "contacts": client.read_associated_contacts(deal["hubspot_deal_id"]),
-    }
-    conflicts = _hs.validate(deal, view)
-    if conflicts:
-        _hs.resolve(deal, conflicts)
-    return deal
-
-
-# ---------------------------------------------------------------------------
-# Phase B5 — Document parser enrichment
-# ---------------------------------------------------------------------------
-
-
-# doc_type -> parser class. equipment_* entries all route to the single
-# EquipmentOEMParser which auto-detects CHP/BESS/PV from the text.
-_PARSER_MAP: Dict[str, Any] = {}
-if _PARSERS_AVAILABLE:
-    _PARSER_MAP = {
-        "ato_document": ATOParser,
-        "kadaster_uittreksel": KadasterParser,
-        "kvk_uittreksel": KvKParser,
-        "bestemmingsplan_excerpt": BestemmingsplanParser,
-        "sde_plus_plus": SDEPlusParser,
-        "landowner_consent": LandownerConsentParser,
-        "financier_consent": FinancierConsentParser,
-        "chp_commissioning_cert": EquipmentOEMParser,
-        "bess_grid_sharing_agreement": EquipmentOEMParser,
-        "solar_pv_yield_report": EquipmentOEMParser,
-        "generic_pdf": GenericPDFParser,
-    }
-
-
-def _partner_grid_details(partner: dict) -> dict:
-    for c in partner.get("contributions") or []:
-        if c.get("asset") == "grid_interconnection":
-            c.setdefault("details", {})
-            return c["details"]
-    # Create one if absent so parsers never fail silently.
-    c = {"asset": "grid_interconnection", "details": {}}
-    partner.setdefault("contributions", []).append(c)
-    return c["details"]
-
-
-def _partner_land_details(partner: dict) -> dict:
-    for c in partner.get("contributions") or []:
-        if c.get("asset") in ("land", "property"):
-            c.setdefault("details", {})
-            return c["details"]
-    c = {"asset": "land", "details": {}}
-    partner.setdefault("contributions", []).append(c)
-    return c["details"]
-
-
-# Section-to-path: parser field_id -> (partner-scoped) dotted accessor.
-# Each entry is (target_kind, write_fn) where write_fn takes (partner, value).
-def _merge_parser_field(partner: dict, field_id: str, value: Any) -> bool:
-    """Write a parser field into the correct slot on `partner`.
-    Returns True if the field was recognised and written."""
-    # A. Identity
-    if field_id == "A1_legal_name":
-        partner["legal_name"] = value
-        return True
-    if field_id == "A2_kvk_number":
-        partner["kvk"] = str(value) if value is not None else value
-        return True
-    if field_id == "A3_registered_address":
-        partner["registered_address"] = value
-        return True
-    if field_id == "A4_signatory_name":
-        partner.setdefault("signatory", {})["name"] = value
-        return True
-    if field_id == "A5_signatory_title":
-        partner.setdefault("signatory", {})["title"] = value
-        return True
-    if field_id == "A6_signing_authority":
-        partner.setdefault("signatory", {})["signing_authority"] = value
-        return True
-
-    # B. Grid connection → contributions[asset=grid_interconnection].details
-    if field_id.startswith("B") and field_id[1].isdigit():
-        gd = _partner_grid_details(partner)
-        mapping = {
-            "B1_dso": "dso",
-            "B2_ean_code": "ean_code",
-            "B3_ato_reference": "ato_reference",
-            "B4_total_connection_mva": "total_connection_mva",
-            "B5_total_import_mw": "total_import_mw",
-            "B6_total_export_mw": "total_export_mw",
-        }
-        key = mapping.get(field_id)
-        if key is not None:
-            gd[key] = value
-            return True
-
-    # D. Land → contributions[asset=land].details
-    if field_id in ("D1_kadaster_parcels", "D2_title_type",
-                    "D3_encumbrances", "D4_zoning_designation"):
-        ld = _partner_land_details(partner)
-        mapping = {
-            "D1_kadaster_parcels": "kadaster_parcels",
-            "D2_title_type": "title_type",
-            "D3_encumbrances": "encumbrances",
-            "D4_zoning_designation": "zoning_designation",
-        }
-        ld[mapping[field_id]] = value
-        return True
-
-    # Meta-fields (start with "_") → preserved under partner.enrichment_meta.
-    if field_id.startswith("_"):
-        meta = partner.setdefault("_enrichment_meta", {})
-        meta[field_id] = value
-        return True
-
-    return False
-
-
-def _resolve_target_partner(deal: dict, doc_entry: dict) -> Optional[int]:
-    """Identify which Site Partner a parsed doc belongs to.
-
-    Precedence:
-      1. ``partner_entity_idx`` on doc entry (explicit).
-      2. ``partner_idx`` (legacy alias).
-      3. fallback: partner[0] (single-partner deals).
-    """
-    idx = doc_entry.get("partner_entity_idx")
-    if idx is None:
-        idx = doc_entry.get("partner_idx")
-    if idx is None and len(deal.get("site_partners") or []) == 1:
-        idx = 0
-    if idx is not None:
-        try:
-            idx = int(idx)
-        except (TypeError, ValueError):
-            return None
-        partners = deal.get("site_partners") or []
-        if 0 <= idx < len(partners):
-            return idx
-    return None
+    return _engine().hydrate_from_hubspot(deal, client=client)
 
 
 def parse_documents(deal: dict, documents_dir: Path) -> dict:
-    """Phase B5 — iterate deal['documents'][], dispatch each to the
-    matching parser, merge fields_populated into the deal.
+    """Module-level wrapper → ``SiteHoT.parse_documents``.
 
-    Per-document entry shape (from deal.yaml or hydrate stage)::
-
-        { "type": "kvk_uittreksel",
-          "path": "kvk_vangog.pdf",              # relative to documents_dir
-          "partner_entity_idx": 0,                # which Site Partner it proves
-          "uploaded_at": "2026-04-18",            # for staleness checks
-          ... }
-
-    Parser outputs are normalised through ``enum_normaliser`` so registry
-    enum fields receive canonical values (not parser bare tokens). Parser
-    warnings + per-doc audit entries are appended to
-    ``deal['enrichment']['parser_log']`` for traceability.
+    Iterates ``deal['documents'][]``, dispatches each to the matching
+    parser in ``SiteHoT.PARSER_MAP`` (narrowed against LOI-only docs),
+    routes parser outputs into the right Site Partner via
+    ``_merge_parser_field``, records a per-doc audit trail on
+    ``deal.enrichment.parser_log``. Safe no-op when ``deal['documents']``
+    is empty / missing.
     """
-    # Always normalise any enums already present in deal.yaml (manual
-    # authoring may produce bare tokens).
-    try:
-        registry = sdb.load_registry()
-    except Exception:
-        registry = None
-
-    enrichment = deal.setdefault("enrichment", {})
-    parser_log: List[dict] = enrichment.setdefault("parser_log", [])
-
-    if not _PARSERS_AVAILABLE:
-        parser_log.append({
-            "status": "skipped",
-            "reason": "PyMuPDF unavailable; parser chassis not importable",
-        })
-        if registry is not None:
-            en.normalise_deal_yaml(deal, registry)
-        return deal
-
-    for doc_entry in (deal.get("documents") or []):
-        doc_type = doc_entry.get("type")
-        rel_path = doc_entry.get("path")
-        if not doc_type or not rel_path:
-            parser_log.append({
-                "status": "skipped",
-                "doc": doc_entry,
-                "reason": "doc entry missing type or path",
-            })
-            continue
-        doc_path = Path(rel_path)
-        if not doc_path.is_absolute():
-            doc_path = documents_dir / doc_path
-        if not doc_path.exists():
-            parser_log.append({
-                "status": "missing",
-                "doc_type": doc_type,
-                "path": str(doc_path),
-            })
-            continue
-
-        parser_cls = _PARSER_MAP.get(doc_type, GenericPDFParser)
-        try:
-            result = parser_cls(doc_path).parse()
-        except Exception as exc:
-            parser_log.append({
-                "status": "error",
-                "doc_type": doc_type,
-                "path": str(doc_path),
-                "error_class": exc.__class__.__name__,
-                "message": str(exc),
-            })
-            continue
-
-        # Normalise parser output (enum canonicalisation)
-        if registry is not None:
-            fields_populated = en.normalise_parse_result(
-                result.fields_populated, registry
-            )
-        else:
-            fields_populated = result.fields_populated
-
-        partner_idx = _resolve_target_partner(deal, doc_entry)
-        merged: List[str] = []
-        unmerged: List[str] = []
-        if partner_idx is not None:
-            partner = deal["site_partners"][partner_idx]
-            for fid, value in fields_populated.items():
-                if _merge_parser_field(partner, fid, value):
-                    merged.append(fid)
-                else:
-                    unmerged.append(fid)
-        else:
-            # Global / deal-level meta (e.g. SDE++ parser)
-            deal_meta = deal.setdefault("_enrichment_meta", {})
-            for fid, value in fields_populated.items():
-                if fid.startswith("_"):
-                    deal_meta[fid] = value
-                    merged.append(fid)
-                else:
-                    unmerged.append(fid)
-
-        parser_log.append({
-            "status": "ok",
-            "doc_type": doc_type,
-            "path": str(doc_path),
-            "partner_entity_idx": partner_idx,
-            "doc_hash": result.doc_hash,
-            "parser_version": result.parser_version,
-            "confidence": result.confidence,
-            "fields_merged": merged,
-            "fields_unmerged": unmerged,
-            "warnings": result.warnings,
-        })
-
-    # Second normalisation pass after all parser writes land.
-    if registry is not None:
-        en.normalise_deal_yaml(deal, registry)
-    return deal
+    return _engine().parse_documents(deal, documents_dir)
 
 
-def run_cross_doc_gate(deal: dict, prior_loi_deal: Optional[dict] = None) -> list[dict]:
-    """Phase B8 — invoke the cross-doc gate in HoT stage."""
-    verdicts = cdg.run(deal, stage="hot", prior_loi_deal=prior_loi_deal)
-    return cdg.to_dict_list(verdicts)
+def run_cross_doc_gate(
+    deal: dict, prior_loi_deal: Optional[dict] = None
+) -> list[dict]:
+    """Module-level wrapper → ``SiteHoT.run_cross_doc_gate``.
+
+    HoT stage fires the full rule set. ``prior_loi_deal`` enables
+    Gap-4/Gap-5 continuity checks (HoT must not contradict a prior LOI).
+    """
+    return _engine().run_cross_doc_gate(deal, prior_loi_deal=prior_loi_deal)
+
+
+# ---------------------------------------------------------------------------
+# SiteHoT — subclass of the shared chassis (rc3.1)
+# ---------------------------------------------------------------------------
+
+
+class SiteHoT(sdb.SiteDocBase):
+    """HoT-stage Site document engine.
+
+    Overrides ``PARSER_MAP`` to narrow against ``SITE_LOI_ONLY_DOCS``
+    (SDE++, CO2 supply, solar PV yield — those live at LOI stage only).
+    Inherits real ``hydrate_from_hubspot`` + ``parse_documents`` +
+    ``run_cross_doc_gate`` from the chassis. Annex A form-fill is HoT-
+    specific and stays as module-level ``populate_annex_a`` + its helpers;
+    ``render_document`` is therefore not provided in rc3.1 (the CLI
+    ``main()`` orchestrates body + Annex A directly).
+
+    Wave 2 (v0.2): multi-partner HoT; a future ``render_document``
+    override can park the current ``main()`` body in the class.
+    """
+
+    stage = "hot"
+
+    #: Narrow the inherited LOI-stage-broadest PARSER_MAP against the
+    #: doc types that live only at LOI stage.
+    PARSER_MAP = MappingProxyType({
+        k: v
+        for k, v in sdb.DEFAULT_PARSER_MAP.items()
+        if k not in sdb.SITE_LOI_ONLY_DOCS
+    })
 
 
 # ---------------------------------------------------------------------------

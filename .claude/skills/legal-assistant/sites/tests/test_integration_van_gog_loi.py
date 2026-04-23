@@ -44,11 +44,20 @@ def test_van_gog_loi_file_produced(tmp_path, van_gog_yaml_path):
     assert qa.stat().st_size > 100               # non-empty QA
 
 
-def test_van_gog_loi_has_7_bilingual_tables(tmp_path, van_gog_yaml_path):
+def test_van_gog_loi_has_9_bilingual_tables(tmp_path, van_gog_yaml_path):
+    """Van Gog LOI renders nine bilingual two-column tables:
+
+    - §1..§7 → 7 clause-body tables
+    - Section L (Locations) → 1 table (rc2)
+    - Section R (Role Schedule) → 1 table (rc2)
+
+    Pre-rc2 this was 7 (§1..§7 only); L + R were prose paragraphs.
+    rc2 promoted both to bilingual two-column tables to match the
+    document-factory framework + the Van Gog paper LOI.
+    """
     docx, _ = _generate(tmp_path, van_gog_yaml_path)
     d = Document(str(docx))
-    # §1..§7 each → 1 two-column bilingual table.
-    assert len(d.tables) == 7
+    assert len(d.tables) == 9
     # Every table has exactly 2 columns (EN / NL)
     for t in d.tables:
         assert len(t.columns) == 2
