@@ -71,15 +71,21 @@ jobs:
           # Colocation (sales/) gate
           SALES_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/generate_loi\.py$' || true)
           SALES_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sales/tests/' || true)
-          # Sites/LOI gate
+          # Sites/LOI gate. Accept tests in any of: sites/loi/tests/,
+          # sites/tests/ (integration), sites/_shared/tests/ (chassis-level
+          # behavioural tests that exercise LOI via the shared base class).
+          # rc3.2 / rc3.3 / rc3.4 surfaced this — engine refactors legitimately
+          # ship test coverage in adjacent dirs; the rc3.1-original strict
+          # path was over-narrow.
           SITES_LOI_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/loi/generate_site_loi\.py$' || true)
-          SITES_LOI_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/loi/tests/' || true)
-          # Sites/HoT gate
+          SITES_LOI_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/(loi/tests|tests|_shared/tests)/' || true)
+          # Sites/HoT gate (same widening — sites/tests/ + sites/_shared/tests/).
           SITES_HOT_GEN=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/hot/generate_site_hot\.py$' || true)
-          SITES_HOT_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/hot/tests/' || true)
-          # Shared chassis gate
+          SITES_HOT_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/(hot/tests|tests|_shared/tests)/' || true)
+          # Shared chassis gate. Accept tests in sites/_shared/tests/ AND
+          # sites/tests/ — chassis changes often need integration coverage.
           SITES_SHARED_SRC=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/_shared/[^/]+\.py$' || true)
-          SITES_SHARED_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/_shared/tests/' || true)
+          SITES_SHARED_TESTS=$(echo "$CHANGED" | grep -E '^\.claude/skills/legal-assistant/sites/(_shared/tests|tests)/' || true)
           # Escape hatch
           if git log --format=%B "$BASE"...HEAD | grep -q '\[skip-test-check\]'; then
             echo "Escape-hatch [skip-test-check] present — test-balance check skipped."
