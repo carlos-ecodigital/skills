@@ -92,6 +92,43 @@ MM_PER_INCH = 25.4
 # Public API
 # ---------------------------------------------------------------------------
 
+#: Tracks ``id(doc)`` values for which ``ensure_bilingual_layout`` has run.
+#: Module-level so re-application within the same process is a no-op.
+_LAYOUT_APPLIED: set = set()
+
+
+def ensure_bilingual_layout(doc) -> None:
+    """Idempotently set narrow A4 margins on every section in ``doc``.
+
+    Bilingual two-column tables are sized at ``USABLE_WIDTH_MM = 165 mm``,
+    which only fits inside A4 (210 mm) when L/R margins are 20 mm each.
+    The default python-docx margins (31.75 mm) leave only 146.5 mm
+    usable — too narrow.
+
+    Margins set per section:
+      - Left:   20 mm
+      - Right:  20 mm
+      - Top:    25 mm
+      - Bottom: 20 mm
+
+    Idempotent: re-application on the same doc is a no-op (tracked by
+    ``id(doc)``). Safe to call from multiple call-sites within a single
+    render pass.
+
+    This helper is invoked transparently from the first call to
+    ``render_bilingual_clause()`` per doc, so engines that exclusively
+    use the bilingual API never need to call it directly.
+    """
+    if id(doc) in _LAYOUT_APPLIED:
+        return
+    for section in doc.sections:
+        section.left_margin = Mm(20)
+        section.right_margin = Mm(20)
+        section.top_margin = Mm(25)
+        section.bottom_margin = Mm(20)
+    _LAYOUT_APPLIED.add(id(doc))
+
+
 def render_bilingual_clause(
     doc,
     en_paragraphs: List[str],
@@ -129,6 +166,10 @@ def render_bilingual_clause(
             "bilingual clause paragraph-count mismatch: "
             f"EN={len(en_paragraphs)} NL={len(nl_paragraphs)}"
         )
+
+    # First-call hook — guarantees the doc has the narrow margins required
+    # for the 165 mm USABLE_WIDTH bilingual table to fit on A4. Idempotent.
+    ensure_bilingual_layout(doc)
 
     n_rows = (1 if heading is not None else 0) + len(en_paragraphs)
     if n_rows == 0:
