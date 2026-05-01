@@ -59,7 +59,10 @@ The bridge discovers the latest session's scripts via glob, never copies them. W
 | Unpack .docx to XML | docx | `unpack()` |
 | Repack XML to .docx | docx | `pack()` |
 | Insert comments | docx | `add_comment()` |
-| .docx → PDF (LibreOffice) | docx | `to_pdf_libreoffice()` |
+| Accept tracked changes (LibreOffice) | docx | `accept_changes()` |
+| .docx → PDF (Word, canonical) | — | `to_pdf_word()` (uses local docx2pdf) |
+| .docx → PDF (LibreOffice, headless) | docx | `to_pdf_libreoffice()` |
+| .docx → PDF (auto-fallback) | both | `to_pdf(prefer="word"\|"libreoffice")` |
 | .doc → .docx conversion | docx | `doc_to_docx()` |
 | PDF → images | pdf | `pdf_to_images()` |
 | PDF form field check | pdf | `check_pdf_form()` |
@@ -73,8 +76,36 @@ The bridge discovers the latest session's scripts via glob, never copies them. W
 | Capability | Script | Notes |
 |---|---|---|
 | Branded .docx creation | `generate.py` | python-docx, DE brand, 5 profiles |
-| .docx → PDF (Word) | `docx_to_pdf.py` | Higher fidelity than LibreOffice |
-| Accept tracked changes | `accept_changes.py` | Word-only (canonical rendering) |
+| Accept tracked changes (Word path) | `accept_changes.py` | Now delegates: `--engine word\|libreoffice` (default LibreOffice on macOS) |
+| Visual regression QA | `tools/visual_qa.py` | docx → pdf → pHash → HTML report |
+
+## Engine selection — Word vs LibreOffice
+
+**Word (canonical, slower, fragile):**
+- Higher fidelity for final user-facing output (kerning, font rendering, complex tables)
+- On macOS uses AppleScript — hangs if Word has open docs or modal dialogs
+- Use when shipping the final PDF to a client or counsel
+
+**LibreOffice (reliable, fast, headless):**
+- Session-independent — no dependency on Word state
+- Used by `tools/visual_qa.py` pipeline (must be deterministic)
+- Default for batch/CI work
+- Acceptance semantics may diverge slightly from Word (rare; tested on real docs)
+
+`bridge.to_pdf(prefer="word")` (default) tries Word first, automatically falls back to LibreOffice if Word fails. `bridge.to_pdf(prefer="libreoffice")` skips Word entirely.
+
+## Out-of-scope wrappers (deliberately not implemented)
+
+The bridge does NOT expose these even though Anthropic provides them, because document-factory's domain is .docx creation only:
+
+| Anthropic provides | Why not in bridge |
+|---|---|
+| `pptx/scripts/thumbnail.py` (deck previews) | Belongs in `collateral-studio` — that skill creates .pptx |
+| `pptx/scripts/add_slide.py` | Deck assembly is `collateral-studio`'s job |
+| `xlsx/scripts/office/unpack.py` + `pack.py` | Spreadsheet editing is `financial-model-interpreter`'s job |
+| `pdf/scripts/fill_pdf_form_with_annotations.py` | Permit forms are `permit-drafter`'s job |
+
+If those skills need bridge access, they should add a thin wrapper or use a shared `_shared/office_bridge.py`. We don't pre-build wrappers nobody calls.
 
 ## Recommended workflow for external documents
 
@@ -85,7 +116,10 @@ python3 generate.py --profile agreement --entity nl --client "Arco Vreugdenhil" 
 # 2. Validate before sending
 python3 office_bridge.py validate output.docx
 
-# 3. Convert to PDF
-python3 docx_to_pdf.py output.docx        # Word (preferred)
-python3 office_bridge.py to-pdf output.docx  # LibreOffice (fallback)
+# 3. Convert to PDF (auto-fallback)
+python3 -c "from office_bridge import OfficeBridge; OfficeBridge().to_pdf('output.docx')"
+
+# 4. If counsel returns a redlined version, accept the changes
+python3 accept_changes.py output_redlined.docx -o output_clean.docx
+# (uses LibreOffice on macOS; --engine word for canonical Word semantics)
 ```
