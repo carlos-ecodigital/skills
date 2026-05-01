@@ -49,6 +49,32 @@ def _extract_domain(cp: dict) -> str:
     return domain
 
 
+# v3.7.7 — canonical HubSpot pipeline mapping per
+# `_shared/hubspot-pipeline-routing.md` (Jonathan, PR #83 / #36).
+#
+# Source of truth: the routing doc. Update both this map AND the doc when
+# pipeline names change. The canonicality test in
+# `tests/test_v3_7_7_canonical_pipeline.py` blocks regressions where a
+# stale name (e.g. v3.7.4's "Commercial") slips into the deal payload.
+_LOI_TYPE_TO_PIPELINE: dict[str, tuple[str, str]] = {
+    # type: (pipeline name, default stage on intake)
+    "EndUser":               ("COMPUTE 1/2 - 2026 DC Colo Capacity Sale", "Lead"),
+    "Wholesale":             ("COMPUTE 1/2 - 2026 DC Colo Capacity Sale", "Lead"),
+    "Distributor":           ("COMPUTE 2/2 - 2026 DC Colo Channel Partners", "Identified"),
+    "StrategicSupplier":     ("COMPUTE 2/2 - 2026 DC Colo Channel Partners", "Identified"),
+    "EcosystemPartnership":  ("COMPUTE 2/2 - 2026 DC Colo Channel Partners", "Identified"),
+}
+
+# Safe default for unknown types — never silently emit a non-canonical
+# name. P2 Channel is the most generic LOI-applicable pipeline.
+_LOI_DEFAULT_PIPELINE = ("COMPUTE 2/2 - 2026 DC Colo Channel Partners", "Identified")
+
+
+def _resolve_pipeline(loi_type: str) -> tuple[str, str]:
+    """Map LOI type → (pipeline name, default stage)."""
+    return _LOI_TYPE_TO_PIPELINE.get(loi_type, _LOI_DEFAULT_PIPELINE)
+
+
 def hubspot_search_company(intake: dict) -> dict:
     """v3.7.4 — return a SEARCH payload for the orchestrator to run BEFORE
     creating a HubSpot company. Searches by domain (exact, when present)
@@ -131,6 +157,8 @@ def hubspot_upsert_company(
     domain = _extract_domain(cp)
     loi_type = intake.get("type", "Unknown")
 
+    pipeline_name, default_stage = _resolve_pipeline(loi_type)
+
     if "link_to_id" in dedup_decision:
         company_id = dedup_decision["link_to_id"]
         company_payload = {
@@ -149,8 +177,8 @@ def hubspot_upsert_company(
             "operation": "create",
             "properties": {
                 "dealname": f"LOI-{loi_type}-{name}",
-                "dealstage": "loi_sent",
-                "pipeline": "Commercial",
+                "dealstage": default_stage,
+                "pipeline": pipeline_name,
             },
             "associations": [{"to": "companies", "match_by": "id",
                               "value": company_id}],
@@ -191,8 +219,8 @@ def hubspot_upsert_company(
             "operation": "create",
             "properties": {
                 "dealname": f"LOI-{loi_type}-{name}",
-                "dealstage": "loi_sent",
-                "pipeline": "Commercial",
+                "dealstage": default_stage,
+                "pipeline": pipeline_name,
             },
             # Association by domain works because we just created the
             # company with this domain — no ambiguity on this run.
