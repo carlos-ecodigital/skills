@@ -242,6 +242,84 @@ def validate_pair_balance(
     return issues
 
 
+def render_schedule_table(
+    doc,
+    columns_en: List[str],
+    columns_nl: List[str],
+    rows: List[List],
+) -> None:
+    """Render an N-column bilingual schedule table.
+
+    Used for bankable annexes (Sites LOI Section L locations / Section R
+    roles + parties) that need a real tabular layout rather than the
+    bilingual two-column prose layout offered by ``render_bilingual_clause``.
+
+    Layout:
+      - One header row, Cobalt fill, EN on line 1 / NL on line 2 per cell.
+      - One data row per ``rows[i]``. A cell value that is a ``list`` is
+        rendered as an inline bullet sublist within the cell; everything
+        else is rendered as a single paragraph (passed through ``str()``).
+      - Reuses ``_apply_table_chrome`` for chrome consistency
+        (fixed layout, full usable width, ``__bilingual_body__`` audit
+        marker, invisible borders).
+
+    Args:
+        doc: python-docx ``Document``.
+        columns_en: English column headings (one per column).
+        columns_nl: Dutch column headings — must match ``columns_en`` length.
+        rows: Each item is a list of cell values. Cell values may be
+            scalars (rendered as one paragraph) or lists of strings
+            (rendered as a bullet sublist within the cell). Cell count
+            per row must match the column count.
+
+    Raises:
+        ValueError: if column lists differ in length, or any row has a
+            different cell count.
+    """
+    if len(columns_en) != len(columns_nl):
+        raise ValueError(
+            "schedule-table column-count mismatch: "
+            f"EN={len(columns_en)} NL={len(columns_nl)}"
+        )
+    n_cols = len(columns_en)
+    if n_cols == 0:
+        return
+
+    for i, row in enumerate(rows):
+        if len(row) != n_cols:
+            raise ValueError(
+                f"schedule-table row {i} has {len(row)} cells, "
+                f"expected {n_cols}"
+            )
+
+    # First-call hook — guarantees the doc has the narrow margins the
+    # 165 mm USABLE_WIDTH table needs to fit on A4.
+    ensure_bilingual_layout(doc)
+
+    n_rows = 1 + len(rows)  # header + data rows
+    table = doc.add_table(rows=n_rows, cols=n_cols)
+    table.alignment = WD_TABLE_ALIGNMENT.LEFT
+    table.autofit = False
+
+    # Apply chrome: fixed layout, full usable width, marker, invisible borders.
+    # Schedule tables show interior borders so the columns visually separate;
+    # we override after _apply_table_chrome wipes them.
+    _apply_table_chrome(table._tbl)
+    _set_n_col_widths(table, n_cols)
+    _enable_grid_borders(table._tbl)
+
+    # Header row — Cobalt fill, EN on line 1 + NL on line 2 (italic), white text
+    header_cells = table.rows[0].cells
+    for j, (en, nl) in enumerate(zip(columns_en, columns_nl)):
+        _render_schedule_header(header_cells[j], en, nl)
+
+    # Data rows
+    for i, row in enumerate(rows):
+        data_cells = table.rows[i + 1].cells
+        for j, value in enumerate(row):
+            _render_schedule_cell(data_cells[j], value)
+
+
 # ---------------------------------------------------------------------------
 # Private helpers
 # ---------------------------------------------------------------------------
@@ -406,3 +484,99 @@ def _strip_list_prefix(line: str) -> str:
     if m:
         return stripped[m.end():]
     return stripped
+
+
+# ---------------------------------------------------------------------------
+# Schedule-table helpers (rc3.2)
+# ---------------------------------------------------------------------------
+
+def _set_n_col_widths(table, n_cols: int) -> None:
+    """Set N equal column widths summing to USABLE_WIDTH_MM.
+
+    Generalises ``_set_col_widths`` (which is hardcoded to 2 cols) to the
+    schedule-table case where the column count is data-driven.
+    """
+    col_mm = USABLE_WIDTH_MM / n_cols
+    # Python-docx layer
+    for j in range(n_cols):
+        table.columns[j].width = Mm(col_mm)
+    # XML layer (tblGrid)
+    tbl = table._tbl
+    grid = tbl.find(qn("w:tblGrid"))
+    if grid is not None:
+        tbl.remove(grid)
+    grid = OxmlElement("w:tblGrid")
+    for _ in range(n_cols):
+        col = OxmlElement("w:gridCol")
+        col.set(qn("w:w"), str(_mm_to_twips(col_mm)))
+        grid.append(col)
+    tbl.insert(list(tbl).index(tbl.find(qn("w:tblPr"))) + 1, grid)
+
+
+def _enable_grid_borders(tbl) -> None:
+    """Replace the ``_apply_table_chrome`` invisible-borders block with a
+    light slate grid so schedule columns visually separate.
+
+    Schedule tables are bankable annexes; readers expect the cell grid to
+    be visible. Bilingual clause bodies (which keep invisible borders)
+    are a different layout choice.
+    """
+    tblPr = _get_or_create_tblPr(tbl)
+    borders_existing = tblPr.find(qn("w:tblBorders"))
+    if borders_existing is not None:
+        tblPr.remove(borders_existing)
+    borders = OxmlElement("w:tblBorders")
+    for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
+        b = OxmlElement(f"w:{edge}")
+        b.set(qn("w:val"), "single")
+        b.set(qn("w:sz"), "4")  # 1/2 pt
+        b.set(qn("w:space"), "0")
+        b.set(qn("w:color"), SLATE_300_HEX)
+        borders.append(b)
+    tblPr.append(borders)
+
+
+def _render_schedule_header(cell, en: str, nl: str) -> None:
+    """Schedule header cell: Cobalt fill, EN on line 1 (bold), NL on
+    line 2 (italic), white text."""
+    _shade_cell(cell, COBALT_HEX)
+    _clear_cell_paragraphs(cell)
+    p = cell.paragraphs[0]
+    r_en = p.add_run(en)
+    r_en.bold = True
+    r_en.font.name = FONT
+    r_en.font.size = HEADING_FONT_SIZE
+    r_en.font.color.rgb = WHITE
+    if nl:
+        p_nl = cell.add_paragraph()
+        r_nl = p_nl.add_run(nl)
+        r_nl.italic = True
+        r_nl.font.name = FONT
+        r_nl.font.size = BODY_FONT_SIZE
+        r_nl.font.color.rgb = WHITE
+
+
+def _render_schedule_cell(cell, value) -> None:
+    """Schedule data cell. ``list`` → bullet sublist; otherwise ``str()``."""
+    _clear_cell_paragraphs(cell)
+    if isinstance(value, list):
+        first = True
+        for item in value:
+            if first:
+                p = cell.paragraphs[0]
+                first = False
+            else:
+                p = cell.add_paragraph()
+            r = p.add_run(f"•  {item}")
+            r.font.name = FONT
+            r.font.size = BODY_FONT_SIZE
+            r.font.color.rgb = SLATE_800
+        if first:
+            # Empty list — leave the (empty) first paragraph in place.
+            return
+    else:
+        p = cell.paragraphs[0]
+        r = p.add_run("" if value is None else str(value))
+        r.font.name = FONT
+        r.font.size = BODY_FONT_SIZE
+        r.font.color.rgb = SLATE_800

@@ -20,8 +20,10 @@ from bilingual_body import (
     _list_depth,
     _strip_list_prefix,
     render_bilingual_clause,
+    render_schedule_table,
     validate_pair_balance,
 )
+from generate import COBALT_HEX
 
 
 # ---------------------------------------------------------------------------
@@ -273,3 +275,141 @@ def test_strip_list_prefix_removes_bullet():
 
 def test_strip_list_prefix_leaves_plain_prose_alone():
     assert _strip_list_prefix("Just prose.") == "Just prose."
+
+
+# ---------------------------------------------------------------------------
+# render_schedule_table — rc3.2 N-column bilingual schedule
+# ---------------------------------------------------------------------------
+
+def _shade_fill(cell) -> str:
+    shd = cell._tc.find(".//" + qn("w:shd"))
+    return shd.get(qn("w:fill")) if shd is not None else ""
+
+
+def test_schedule_table_column_count_must_match():
+    doc = Document()
+    with pytest.raises(ValueError, match="column-count mismatch"):
+        render_schedule_table(
+            doc,
+            columns_en=["A", "B", "C"],
+            columns_nl=["A", "B"],
+            rows=[],
+        )
+
+
+def test_schedule_table_row_cell_count_must_match_columns():
+    doc = Document()
+    with pytest.raises(ValueError, match="row 0"):
+        render_schedule_table(
+            doc,
+            columns_en=["Party", "Roles"],
+            columns_nl=["Partij", "Rollen"],
+            rows=[["Only one cell"]],
+        )
+
+
+def test_schedule_table_renders_header_plus_data_rows():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["Party", "Roles", "Signatory"],
+        columns_nl=["Partij", "Rollen", "Ondertekenaar"],
+        rows=[
+            ["Counterparty A B.V.", "Grid Contributor", "Jane Roe"],
+            ["Counterparty B B.V.", "Landowner", "John Doe"],
+        ],
+    )
+    assert len(doc.tables) == 1
+    table = doc.tables[0]
+    # 1 header + 2 data = 3 rows; 3 cols
+    assert len(table.rows) == 3
+    assert len(table.columns) == 3
+
+
+def test_schedule_table_multi_value_cell_renders_bullets():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["Party", "Contributions"],
+        columns_nl=["Partij", "Bijdragen"],
+        rows=[
+            [
+                "Counterparty A B.V.",
+                ["grid_interconnection", "land", "equipment_bess"],
+            ],
+        ],
+    )
+    table = doc.tables[0]
+    contrib_cell = table.rows[1].cells[1]
+    text = contrib_cell.text
+    # Three bullet items, each present
+    assert "grid_interconnection" in text
+    assert "land" in text
+    assert "equipment_bess" in text
+    # Bullet glyph used for sublist rendering
+    assert "•" in text
+    # Each bullet on its own paragraph
+    assert len(contrib_cell.paragraphs) == 3
+
+
+def test_schedule_table_handles_empty_rows():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["Party", "Roles"],
+        columns_nl=["Partij", "Rollen"],
+        rows=[],
+    )
+    table = doc.tables[0]
+    # Header row only
+    assert len(table.rows) == 1
+    assert len(table.columns) == 2
+
+
+def test_schedule_table_header_cell_fill_is_cobalt():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["Party"],
+        columns_nl=["Partij"],
+        rows=[["Counterparty"]],
+    )
+    table = doc.tables[0]
+    header_cell = table.rows[0].cells[0]
+    assert _shade_fill(header_cell).upper() == COBALT_HEX.upper()
+
+
+def test_schedule_table_marker_set_on_table():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["A"],
+        columns_nl=["A"],
+        rows=[["1"]],
+    )
+    table = doc.tables[0]
+    desc = table._tbl.find(".//" + qn("w:tblDescription"))
+    assert desc is not None
+    assert desc.get(qn("w:val")) == BILINGUAL_MARKER
+
+
+def test_schedule_table_header_stacks_en_and_nl():
+    doc = Document()
+    render_schedule_table(
+        doc,
+        columns_en=["Party"],
+        columns_nl=["Partij"],
+        rows=[["Counterparty"]],
+    )
+    table = doc.tables[0]
+    header_cell = table.rows[0].cells[0]
+    paras = header_cell.paragraphs
+    # EN on first paragraph, NL on second
+    assert any("Party" == r.text for r in paras[0].runs)
+    assert len(paras) >= 2
+    assert any("Partij" == r.text for r in paras[1].runs)
+    # NL run must be italic; EN run must be bold
+    nl_run = next(r for r in paras[1].runs if r.text == "Partij")
+    en_run = next(r for r in paras[0].runs if r.text == "Party")
+    assert nl_run.italic is True
+    assert en_run.bold is True
