@@ -46,39 +46,22 @@ from bilingual_body import render_bilingual_clause  # noqa: E402
 from format_validators import run_all as run_format_validators  # noqa: E402
 from generate import DE_ENTITIES, COBALT, SLATE_800, SLATE_900, FONT, Party, add_cover  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
-import cross_doc_gate as cdg  # noqa: E402
 import site_doc_base as sdb  # noqa: E402
 from site_doc_base import derive_role_labels as sdb_derive_role_labels  # noqa: E402
 from docx.shared import Mm, Pt  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
-# Placeholder sanitisation
+# Placeholder sanitisation — chassis-authoritative (rc3.1)
 # ---------------------------------------------------------------------------
 
-#: Values treated as missing / render-as-[TBC]. Engine never leaks raw
-#: ``None``, ``"TODO(...)"`` or similar author-placeholder strings into
-#: the generated docx.
-_TBC_TOKEN = "[TBC]"
-
-
-def _sanitise(value, *, fallback: str = _TBC_TOKEN) -> str:
-    """Normalise a value for rendering.
-
-    - ``None`` → ``[TBC]``
-    - any string starting with ``"TODO("`` → ``[TBC]``
-    - any empty / whitespace-only string → ``[TBC]``
-    - already-``[TBC]`` / ``[TBD_*]`` → ``[TBC]``
-    - everything else → ``str(value)``
-    """
-    if value is None:
-        return fallback
-    s = str(value).strip()
-    if not s:
-        return fallback
-    if s.startswith("TODO(") or s.startswith("[TBD_") or s == "[TBC]":
-        return fallback
-    return s
+# Values treated as missing / render-as-[TBC]. Engine never leaks raw
+# ``None``, ``"TODO(...)"`` or similar author-placeholder strings into
+# the generated docx. The authoritative implementation lives on the
+# chassis so LOI + HoT agree; this alias preserves the existing call-site
+# signature ``_sanitise(value, fallback=...)`` across the module.
+from site_doc_base import TBC_TOKEN as _TBC_TOKEN  # noqa: E402
+from site_doc_base import normalise_placeholder as _sanitise  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -649,101 +632,48 @@ def load_deal(deal_yaml_path: Path) -> dict:
     return deal
 
 
+# ---------------------------------------------------------------------------
+# Pipeline hooks — delegate to the chassis singleton (rc3.1)
+# ---------------------------------------------------------------------------
+#
+# Historical note: rc1 + rc2 had hydrate_from_hubspot / parse_documents /
+# run_cross_doc_gate implemented as module-level functions with their
+# parser map + hubspot round-trip inlined. rc3.1 absorbed those into
+# ``SiteDocBase`` so LOI + HoT agree.  Module-level wrappers stay — they
+# keep the existing CLI contract (``engine.hydrate_from_hubspot(deal)``)
+# and the existing test API working.
+
+
+def _engine() -> "SiteLOI":
+    """Return a lazily-constructed singleton ``SiteLOI`` for the module
+    wrappers. Separate from the class so tests and callers that prefer
+    explicit instantiation can still do ``SiteLOI()`` directly."""
+    global _SINGLETON
+    if _SINGLETON is None:
+        _SINGLETON = SiteLOI()
+    return _SINGLETON
+
+
+_SINGLETON: Optional["SiteLOI"] = None
+
+
 def hydrate_from_hubspot(deal: dict, client=None) -> dict:
-    """Hydrate deal.yaml from HubSpot via hubspot_sync.read_deal + validate
-    + resolve. Passthrough when ``client`` is ``None`` or when the deal
-    has no ``hubspot_deal_id``. Phase B7 wiring."""
-    if client is None or not deal.get("hubspot_deal_id"):
-        return deal
-    try:
-        import hubspot_sync as _hs
-        hs_view = _hs.read_deal(client, deal)
-        conflicts = _hs.validate(deal, hs_view)
-        deal = _hs.resolve(deal, conflicts)
-    except Exception as exc:
-        deal.setdefault("enrichment", {}).setdefault("sync_warnings", []).append(
-            f"hubspot_sync: {type(exc).__name__}: {exc}"
-        )
-    return deal
+    """Module-level wrapper → ``SiteLOI.hydrate_from_hubspot``."""
+    return _engine().hydrate_from_hubspot(deal, client=client)
 
 
 def parse_documents(deal: dict, documents_dir: Path) -> dict:
-    """Iterate ``deal['documents'][]``, dispatch to the matching parser,
-    merge outputs into ``deal.enrichment``, record per-doc audit trail in
-    ``deal.enrichment.parser_log``. Passthrough when no documents attached.
-    Phase B5 wiring."""
-    if not deal.get("documents"):
-        return deal
-    try:
-        from document_parsers.base import (
-            ParserError, CorruptDocError, UnreadableScanError,
-        )
-        from document_parsers.ato import ATOParser
-        from document_parsers.sde_plus import SDEPlusParser
-        from document_parsers.kadaster import KadasterParser
-        from document_parsers.kvk import KvKParser
-        from document_parsers.bestemmingsplan import BestemmingsplanParser
-        from document_parsers.landowner_consent import LandownerConsentParser
-        from document_parsers.financier_consent import FinancierConsentParser
-        from document_parsers.equipment_oem import EquipmentOEMParser
-        from document_parsers.generic_pdf import GenericPDFParser
-    except ImportError:
-        return deal
-
-    parser_map = {
-        "ato_document": ATOParser,
-        "sde_plus_plus": SDEPlusParser,
-        "kadaster_uittreksel": KadasterParser,
-        "kvk_uittreksel": KvKParser,
-        "bestemmingsplan_excerpt": BestemmingsplanParser,
-        "landowner_consent": LandownerConsentParser,
-        "financier_consent": FinancierConsentParser,
-        "chp_commissioning_cert": EquipmentOEMParser,
-        "chp_maintenance_contract": EquipmentOEMParser,
-        "chp_gasketel_cert": EquipmentOEMParser,
-        "bess_grid_sharing_agreement": EquipmentOEMParser,
-        "bess_balancing_market_enrollment": EquipmentOEMParser,
-        "solar_pv_yield_report": EquipmentOEMParser,
-        "solar_pv_connection_agreement": EquipmentOEMParser,
-        "co2_supply_contract": GenericPDFParser,
-    }
-
-    log: list[dict] = deal.setdefault("enrichment", {}).setdefault("parser_log", [])
-    for doc_entry in deal.get("documents", []):
-        doc_type = doc_entry.get("type")
-        doc_path_str = doc_entry.get("path")
-        if not doc_type or not doc_path_str:
-            continue
-        parser_cls = parser_map.get(doc_type, GenericPDFParser)
-        full_path = Path(doc_path_str) if Path(doc_path_str).is_absolute() \
-            else documents_dir / doc_path_str
-        if not full_path.exists():
-            log.append({"doc_type": doc_type, "status": "missing",
-                        "path": str(full_path)})
-            continue
-        try:
-            result = parser_cls(full_path).parse()
-            log.append({
-                "doc_type": doc_type, "status": "parsed",
-                "parser": result.parser_name, "version": result.parser_version,
-                "fields": len(result.fields_populated),
-                "warnings": result.warnings, "confidence": result.confidence,
-            })
-            deal["enrichment"].update(result.fields_populated)
-        except (CorruptDocError, UnreadableScanError) as exc:
-            log.append({"doc_type": doc_type, "status": "error", "error": str(exc)})
-        except ParserError as exc:
-            log.append({"doc_type": doc_type, "status": "parser_error",
-                        "error": str(exc)})
-    return deal
+    """Module-level wrapper → ``SiteLOI.parse_documents``."""
+    return _engine().parse_documents(deal, documents_dir)
 
 
 def run_cross_doc_gate(deal: dict) -> list[dict]:
-    """Run the Phase B8 cross-doc gate against the deal. For LOI stage,
-    only LOI-applicable rules fire (Gap-4/Gap-5 and Con-* are HoT-stage).
-    Returns a list of serialisable verdict dicts."""
-    verdicts = cdg.run(deal, stage="loi")
-    return cdg.to_dict_list(verdicts)
+    """Module-level wrapper → ``SiteLOI.run_cross_doc_gate``.
+
+    LOI stage fires only LOI-applicable rules; Gap-4/Gap-5 and Con-* are
+    HoT-stage and are quiet here.
+    """
+    return _engine().run_cross_doc_gate(deal)
 
 
 def build_document(deal: dict) -> Document:
@@ -1026,6 +956,33 @@ def write_qa_report(deal: dict, doc: Document, gate_verdicts: list[dict],
     lines.append("  - Page margins:                         20mm L/R (narrow, for bilingual-table fit)")
     out_path.write_text("\n".join(lines), encoding="utf-8")
     return out_path
+
+
+# ---------------------------------------------------------------------------
+# SiteLOI — subclass of the shared chassis (rc3.1)
+# ---------------------------------------------------------------------------
+
+
+class SiteLOI(sdb.SiteDocBase):
+    """LOI-stage Site document engine.
+
+    Inherits the full ``PARSER_MAP`` (LOI stage is the broadest document-
+    set stage), the real ``hydrate_from_hubspot`` + ``parse_documents`` +
+    ``run_cross_doc_gate`` implementations, and ``normalise_placeholder``
+    via the module-level ``_sanitise`` alias. Adds nothing beyond
+    ``render_document`` (which wraps the module-level ``build_document``
+    so we don't duplicate its body).
+
+    Module-level wrappers (``hydrate_from_hubspot``, ``parse_documents``,
+    ``run_cross_doc_gate``, ``build_document``) delegate to this class via
+    the ``_engine()`` singleton. That preserves the rc1/rc2 CLI contract
+    and existing test API.
+    """
+
+    stage = "loi"
+
+    def render_document(self, deal: dict) -> Document:
+        return build_document(deal)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
