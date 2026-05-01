@@ -461,12 +461,27 @@ def phase8_intake():
 
 
 def test_phase8_hubspot_payload(phase8_intake):
+    """v3.7.4 update: bare call (no dedup_decision) now returns a SEARCH
+    payload to enforce dedup-check-first. The full upsert payload is
+    asserted in test_v3_7_4_hubspot_dedup.py with explicit decisions."""
     sys.path.insert(0, str(SKILL_ROOT))
     from scripts import phase8_actions
     payload = phase8_actions.hubspot_upsert_company(phase8_intake, "/tmp/out.docx")
-    assert payload["tool"] == "manage_crm_objects"
-    assert len(payload["dispatch"]) == 2
-    assert payload["dispatch"][0]["properties"]["name"] == "Acme Corp"
+    assert payload["tool"] == "search_crm_objects"
+    assert payload["action"] == "hubspot_search_company"
+    assert payload["requires_operator_review"] is True
+    # Then with force_create: full create payload
+    payload2 = phase8_actions.hubspot_upsert_company(
+        phase8_intake, "/tmp/out.docx",
+        dedup_decision={
+            "force_create": True,
+            "reason": "test fixture: search returned zero matches",
+            "search_run_at": "2026-04-30T10:00:00Z",
+        },
+    )
+    assert payload2["tool"] == "manage_crm_objects"
+    assert len(payload2["dispatch"]) == 2
+    assert payload2["dispatch"][0]["properties"]["name"] == "Acme Corp"
 
 
 def test_phase8_clickup_payload(phase8_intake):

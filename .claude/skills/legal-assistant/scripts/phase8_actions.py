@@ -12,6 +12,14 @@ and deterministic.
 Default: `dry_run=True`. The caller must explicitly pass `dry_run=False`
 (driven by the `--phase-8-auto-execute` CLI flag) to produce a real-write
 payload.
+
+v3.7.4 — HubSpot duplicate-check before company create. Calling
+`hubspot_upsert_company` without a `dedup_decision` returns a SEARCH
+payload, forcing the orchestrator to run dedup-check first and surface
+candidates to the operator. Only after the operator passes back a
+`dedup_decision` (link_to_id OR force_create with reason) does the
+function emit the actual create/update payload. Eliminates the silent-
+duplicate failure modes documented in `test_v3_7_4_hubspot_dedup.py`.
 """
 from __future__ import annotations
 
@@ -30,48 +38,185 @@ ACTION_KEYS = {
 }
 
 
-def hubspot_upsert_company(intake: dict, output_path: str) -> dict:
-    """Build the payload to create/update a HubSpot company + deal.
+def _extract_domain(cp: dict) -> str:
+    """Pull domain from `counterparty.domain` or fallback to `website`."""
+    domain = cp.get("domain") or ""
+    if not domain:
+        website = cp.get("website") or ""
+        domain = (
+            website.replace("https://", "").replace("http://", "").rstrip("/")
+        )
+    return domain
 
-    Does NOT invoke the MCP tool; returns a payload the orchestrator
-    can pass to `manage_crm_objects`.
+
+def hubspot_search_company(intake: dict) -> dict:
+    """v3.7.4 — return a SEARCH payload for the orchestrator to run BEFORE
+    creating a HubSpot company. Searches by domain (exact, when present)
+    AND by name (fuzzy fallback for missing/typo'd domains).
+
+    The orchestrator runs each query against `search_crm_objects`
+    (read-only), aggregates candidates, and surfaces them to the
+    operator. The operator decides — link to existing or force-create —
+    and passes the decision back via `hubspot_upsert_company(...,
+    dedup_decision=...)`.
     """
     cp = intake.get("counterparty", {})
     name = cp.get("name", "")
-    domain = cp.get("domain") or cp.get("website", "").replace("https://", "").replace(
-        "http://", ""
-    ).rstrip("/")
+    domain = _extract_domain(cp)
 
-    company_payload = {
-        "objectType": "companies",
-        "operation": "upsert",
-        "properties": {
-            "name": name,
-            "domain": domain,
-            "description": cp.get("description", ""),
-            "lifecyclestage": "opportunity",
-            "loi_status": "LOI Sent — Draft",
-        },
-    }
-
-    loi_type = intake.get("type", "Unknown")
-    deal_payload = {
-        "objectType": "deals",
-        "operation": "upsert",
-        "properties": {
-            "dealname": f"LOI-{loi_type}-{name}",
-            "dealstage": "loi_sent",
-            "pipeline": "Commercial",
-        },
-        "associations": [{"to": "companies", "match_by": "domain", "value": domain}],
-    }
+    queries: list[dict] = []
+    if domain:
+        queries.append({
+            "objectType": "companies",
+            "filters": {"propertyName": "domain", "operator": "EQ", "value": domain},
+            "properties": ["name", "domain", "lifecyclestage", "createdate"],
+            "limit": 5,
+        })
+    if name:
+        queries.append({
+            "objectType": "companies",
+            "filters": {"propertyName": "name", "operator": "CONTAINS_TOKEN",
+                        "value": name},
+            "properties": ["name", "domain", "lifecyclestage", "createdate"],
+            "limit": 10,
+        })
 
     return {
-        "action": "hubspot_upsert_company",
-        "tool": "manage_crm_objects",
-        "dispatch": [company_payload, deal_payload],
-        "output_path": output_path,
+        "action": "hubspot_search_company",
+        "tool": "search_crm_objects",
+        "dispatch": queries,
+        # When domain is missing, search may legitimately return zero
+        # rows even when a duplicate exists under a misspelled name.
+        # Force operator review either way.
+        "requires_operator_review": True,
+        "review_prompt": (
+            f"HubSpot dedup-check for {name!r}: review the search "
+            f"results. If a match is found, call hubspot_upsert_company "
+            f"with dedup_decision={{'link_to_id': '<hubspot_id>', "
+            f"'match_confidence': 'high|medium|low', 'match_property': "
+            f"'<domain_exact|name_fuzzy|...>'}}. If no match (truly new "
+            f"entity), call with dedup_decision={{'force_create': True, "
+            f"'reason': '<≥15 chars>', 'search_run_at': '<ISO8601>'}}."
+        ),
+        "intake_signature": {
+            "name": name,
+            "domain": domain,
+            "type": intake.get("type"),
+        },
     }
+
+
+def hubspot_upsert_company(
+    intake: dict, output_path: str, dedup_decision: dict | None = None
+) -> dict:
+    """Build the payload to create/update a HubSpot company + deal.
+
+    v3.7.4 — duplicate-check enforced. Without `dedup_decision`, returns
+    a SEARCH payload (search-first); the orchestrator runs the search,
+    surfaces candidates, and re-calls with a decision. With a decision
+    the function emits either:
+      - `dedup_decision={'link_to_id': '<id>', ...}` → UPDATE on the
+        existing record + association by id (no duplicate created).
+      - `dedup_decision={'force_create': True, 'reason': '...',
+        'search_run_at': '<ISO8601>'}` → CREATE-only with audit trail
+        recording that a search ran and no link was made.
+    """
+    if dedup_decision is None:
+        # No decision yet — return the search payload. Caller must run
+        # the search, surface results to the operator, and re-call.
+        return hubspot_search_company(intake)
+
+    cp = intake.get("counterparty", {})
+    name = cp.get("name", "")
+    domain = _extract_domain(cp)
+    loi_type = intake.get("type", "Unknown")
+
+    if "link_to_id" in dedup_decision:
+        company_id = dedup_decision["link_to_id"]
+        company_payload = {
+            "objectType": "companies",
+            "operation": "update",
+            "objectId": company_id,
+            "properties": {
+                # Conservative on UPDATE — only refresh LOI-relevant
+                # properties; do NOT clobber name/domain/lifecyclestage.
+                "loi_status": "LOI Sent — Draft",
+                "loi_last_sent": intake.get("dates", {}).get("loi_date", ""),
+            },
+        }
+        deal_payload = {
+            "objectType": "deals",
+            "operation": "create",
+            "properties": {
+                "dealname": f"LOI-{loi_type}-{name}",
+                "dealstage": "loi_sent",
+                "pipeline": "Commercial",
+            },
+            "associations": [{"to": "companies", "match_by": "id",
+                              "value": company_id}],
+        }
+        return {
+            "action": "hubspot_link_company",
+            "tool": "manage_crm_objects",
+            "dispatch": [company_payload, deal_payload],
+            "output_path": output_path,
+            "dedup_audit": {
+                "operation": "link",
+                "linked_to_id": company_id,
+                "match_confidence": dedup_decision.get("match_confidence"),
+                "match_property": dedup_decision.get("match_property"),
+            },
+        }
+
+    if dedup_decision.get("force_create"):
+        reason = dedup_decision.get("reason", "")
+        if len(reason) < 15:
+            raise ValueError(
+                "dedup_decision.force_create requires a reason ≥ 15 chars "
+                "documenting why the search produced no usable match"
+            )
+        company_payload = {
+            "objectType": "companies",
+            "operation": "create",
+            "properties": {
+                "name": name,
+                "domain": domain,
+                "description": cp.get("description", ""),
+                "lifecyclestage": "opportunity",
+                "loi_status": "LOI Sent — Draft",
+            },
+        }
+        deal_payload = {
+            "objectType": "deals",
+            "operation": "create",
+            "properties": {
+                "dealname": f"LOI-{loi_type}-{name}",
+                "dealstage": "loi_sent",
+                "pipeline": "Commercial",
+            },
+            # Association by domain works because we just created the
+            # company with this domain — no ambiguity on this run.
+            "associations": [{"to": "companies", "match_by": "domain",
+                              "value": domain}] if domain else [],
+        }
+        return {
+            "action": "hubspot_upsert_company",
+            "tool": "manage_crm_objects",
+            "dispatch": [company_payload, deal_payload],
+            "output_path": output_path,
+            "dedup_audit": {
+                "operation": "create",
+                "force_create": True,
+                "reason": reason,
+                "search_run_at": dedup_decision.get("search_run_at", ""),
+            },
+        }
+
+    raise ValueError(
+        "dedup_decision must contain either 'link_to_id' or "
+        "'force_create: True' (with reason). Got: "
+        f"{sorted(dedup_decision)}"
+    )
 
 
 def clickup_create_task(intake: dict, output_path: str) -> dict:

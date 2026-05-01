@@ -5,6 +5,38 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.7.4 — 2026-04-30
+
+HubSpot dedup-check enforced before any company create. Closes silent-duplicate failure modes observed when counterparty domain is missing, mistyped, or shared across parent/subsidiary entities. User instruction 2026-04-30. Template filename version stays `DE-LOI-{Type}-v3.2`.
+
+### Fixed
+- **`phase8_actions.hubspot_upsert_company` no longer creates silent duplicates.** Pre-v3.7.4 the function emitted an `operation: "upsert"` payload that relied on HubSpot's domain-based dedup. With domain missing/wrong/shared, that produced duplicate company records on every LOI.
+
+### Added
+- **`phase8_actions.hubspot_search_company(intake)`** — new function returning a SEARCH payload (parallel queries: domain-exact + name-fuzzy). Surfaces matches via `requires_operator_review: True` flag; review-prompt embedded in payload.
+- **`hubspot_upsert_company(intake, output, dedup_decision=...)` two-mode behaviour:**
+  - Without `dedup_decision`: returns the search payload (search-first enforcement). Calling `manage_crm_objects` is impossible without an explicit operator decision.
+  - With `dedup_decision={"link_to_id": "<id>", "match_confidence": "...", "match_property": "..."}`: emits UPDATE on the existing record (refreshing only `loi_status` + `loi_last_sent`; never clobbers `name`/`domain`/`lifecyclestage`) + new deal associated by id.
+  - With `dedup_decision={"force_create": True, "reason": "<≥15 chars>", "search_run_at": "<ISO8601>"}`: emits CREATE-only with audit trail. Reason ≥ 15 chars enforced.
+  - Malformed `dedup_decision` raises `ValueError` (no silent fallback).
+- **Dedup audit trail** captured in payload: every action carries `dedup_audit` with `operation`, `linked_to_id` OR `force_create + reason + search_run_at`. Reviewable post-merge.
+- **`tests/test_v3_7_4_hubspot_dedup.py`** — 7 tests: search payload shape, missing-domain handling, search-first contract, link-to-existing path, force-create path, malformed-decision rejection, run_phase_8_actions integration.
+
+### Changed
+- **SKILL.md Phase 8 action 1** — rewritten as two-step flow (dedup-search → operator-decides → link-or-create). Explicit guarantee: silent duplicates impossible.
+- **`tests/test_v3_7_0_extensibility.py::test_phase8_hubspot_payload`** — updated to assert the new search-first contract; full upsert payload assertion moved to v3.7.4 test file with explicit `dedup_decision`.
+
+### Verified
+- 492/492 pytest tests pass.
+- Search-first enforcement verified — bare call returns `tool: "search_crm_objects"` (read-only).
+- Force-create path verified — `tool: "manage_crm_objects"`, operation `create`, audit trail captured.
+- Link path verified — UPDATE on linked id, no name/domain clobber, deal associated by id.
+
+### Audit notes (logged for follow-up, NOT in scope)
+- **Staging-only v3.7.3 (PR #81)** — `v3.7.3 — advisor feedback (Cl. 4.2 / 5.3 / 7.3)` shipped on staging 2026-04-28 with no matching upstream PR. PRINCIPLES.md #1 mirror-discipline violation. Three substantive clause refinements (Cl. 4.2(b) Wholesale SOF reframe, Cl. 5.3 lender-acknowledgment closed-list, Cl. 7.3 deemed-introduction by category). Back-mirror to upstream as v3.7.5 in follow-up PR.
+
+---
+
 ## v4.0-rc1 — 2026-04-20 — Sites Stream
 
 **Major release.** First shipment of the Sites stream: Site LOI + Site HoT
