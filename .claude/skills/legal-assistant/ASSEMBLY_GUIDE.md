@@ -477,6 +477,56 @@ If a conditional trigger is false, strip the dependent cells entirely; do not le
 
 The NDA/confidentiality policy in `_shared/nda-policy-positions.md` applies to the HoT's confidentiality clause (body Cl. 7 — not editable at this stage). If a grower proposes alternative confidentiality terms, that is a **body modification** request and must be escalated to `legal-counsel`.
 
-### 12.7 Generation caveat (2026-04-13)
+### 12.7 Site LOI — bilingual cover, schedule table, data-driven §1 (rc3.2 / rc3.3)
 
-The form-fill engine `generate_site_hot.py` is **not yet built**. The versioned .docx templates in `sites/hot/templates/` are Git LFS pointer stubs (130 B each); the real binaries must be fetched before the engine can be written. See `sites/hot/templates/README.md` for fetch instructions. Until resolved: the intake runs to completion, `annex-a-data.json` is written, the Annex A docx step writes a `PENDING_ENGINE.md` placeholder, and the body is copied (also a stub until fetch).
+The Site LOI engine (`sites/loi/generate_site_loi.py`) consumes
+document-factory primitives directly; no engine-local cover/margin/
+table builders remain.
+
+- **Cover page** is bilingual via `add_cover(bilingual=True,
+  title_nl="Intentieverklaring", subject_nl="voor een Digital
+  Energy Center-project", party_labels="bilingual",
+  render_classification=False)`. EN title stacks above NL title;
+  party labels render as "Between / Tussen:" / "And / En:".
+  Confidentiality classification is omitted from the footer per
+  `feedback_cover_page_title.md` — the cover's deal-folder context
+  carries the implication.
+- **Page margins** are 20 mm L/R + 25 mm T / 20 mm B, applied via
+  `bilingual_body.ensure_bilingual_layout(doc)`. Idempotent — engine
+  doesn't need to set them by hand. The first
+  `render_bilingual_clause()` call invokes it transparently.
+- **Section L** (Locations) and **Section R** (Roles, Contributions,
+  Returns) render via
+  `bilingual_body.render_schedule_table(doc, columns_en, columns_nl,
+  rows)` — true bilingual N-column tables with Cobalt-shaded
+  bilingual header rows and bullet sublists for multi-value cells.
+  No more prose-sentence concatenation.
+- **§1 Parties** is loaded from
+  `sites/loi/templates/clauses/de-loi-site-v1.0.yaml` via the
+  `sites/_shared/site_clause_library.py` loader. Engine call:
+  `site_clause_library.render_bilingual_section(doc, ["1.1", "1.2",
+  "1.3", "1.4"], heading_en="1. Parties", heading_nl="1. Partijen",
+  provider=provider, ...)`. §2–§7 migrate post-rc3 (one section per
+  PR; checklist at `plans/rc3-migration-remaining-sections.md`).
+
+### 12.8 Placeholder canon — `[TBC]`
+
+`[TBC]` is the canonical placeholder token across the Sites stream
+(rc3.1). Every rendered value passes through
+`sites/_shared/site_doc_base.normalise_placeholder(value,
+fallback="[TBC]")` at the cell-write boundary — explicit branches
+handle `None`, empty / whitespace, `TODO(*)`, `[TBD_*]`, bool, int,
+float, list, tuple, dict; no `str()` fallthrough. R-27
+(fabrication gate) on the colocation side aligns: `[TBC]` rendered
+literally in sig-block Name / Title is a fail.
+
+### 12.9 HoT engine status (rc3.1, current)
+
+`sites/hot/generate_site_hot.py v0.1` is **LIVE**. 3-pass XML form-
+fill (shaded cells / header table / notice addresses) of the locked
+Annex A; body template copied byte-for-byte with SHA-256
+verification before/after. Single-partner v0.1; multi-partner is
+queued for Wave 2 (stderr warning emitted). Every cell-write call
+routes through `sdb.normalise_placeholder` — verified at rc3.4 —
+so the form-fill XML never carries raw `None`, `TODO(*)`, or
+`[TBD_*]` tokens.

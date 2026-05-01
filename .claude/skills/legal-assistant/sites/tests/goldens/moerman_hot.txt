@@ -1,0 +1,1246 @@
+Binding Heads of Terms
+(Bindende Contractvoorwaarden)
+
+for / voor
+Digital Energy Center Project
+
+between / tussen
+
+Digital Energy Group AG
+and / en
+
+[Grower — See Annex A, Item A.1]
+
+Page 1 of 8
+
+English
+
+1. Parties
+
+Dutch
+
+1. Partijen
+
+1.1 Digital Energy Group AG, a company incorporated under 
+Swiss law, registered under CHE-408.639.320, with its 
+registered office at Baarerstrasse 43, 6300 Zug, Switzerland, 
+including its permitted successors and assigns ("Digital 
+Energy").
+1.2 The company identified in Annex A, Item A.1, a Dutch 
+private limited company (besloten vennootschap), registered 
+with the Trade Register (Kamer van Koophandel) under the 
+number in Item A.2, with its registered office at the address in 
+Item A.3, including its permitted successors and assigns 
+("Grower").
+1.3 Digital Energy and the Grower are each referred to as a 
+"Party" and together as the "Parties".
+
+1.1 Digital Energy Group AG, een vennootschap opgericht 
+naar Zwitsers recht, geregistreerd onder CHE-408.639.320, 
+met statutaire zetel aan Baarerstrasse 43, 6300 Zug, 
+Zwitserland, met inbegrip van haar toegestane rechtsopvolgers 
+en rechtverkrijgenden ("Digital Energy").
+1.2 De vennootschap vermeld in Bijlage A, Punt A.1, een 
+besloten vennootschap met beperkte aansprakelijkheid, 
+ingeschreven bij de Kamer van Koophandel onder het nummer 
+in Punt A.2, met statutaire zetel op het adres in Punt A.3, met 
+inbegrip van haar toegestane rechtsopvolgers en 
+rechtverkrijgenden ("Teler").
+1.3 Digital Energy en de Teler worden afzonderlijk aangeduid 
+als "Partij" en gezamenlijk als "Partijen".
+
+2. Recitals
+
+2. Overwegingen
+
+2.1 The Grower owns and operates a greenhouse facility at the 
+location specified in Annex A, Item A.7, with a current size per 
+Item A.8 and planned expansion per Items A.9–A.10, used for 
+the cultivation specified in Item A.11 and requiring industrial-
+scale heating for horticultural operations.
+2.2 Digital Energy has developed the Digital Energy Center 
+("DEC"), which captures and reuses waste heat from AI-
+computing data centers.
+
+2.1 De Teler bezit en exploiteert een glastuinbouwbedrijf op de 
+locatie vermeld in Bijlage A, Punt A.7, met een huidige 
+oppervlakte conform Punt A.8 en geplande uitbreiding conform 
+Punten A.9–A.10, gebruikt voor de teelt vermeld in Punt A.11 
+en waarvoor industriële tuinbouwverwarming nodig is.
+2.2 Digital Energy heeft het Digital Energy Center ("DEC") 
+ontwikkeld, dat restwarmte van AI-datacenters opvangt en 
+hergebruikt.
+
+3. Binding Nature and Exclusivity
+
+3. Bindende Aard en Exclusiviteit
+
+3.1 Binding Effect. These Heads of Terms ("HoT") constitute 
+a legally binding agreement. The Parties shall negotiate, 
+prepare, and execute definitive agreements ("Agreements") in 
+good faith and in accordance with the terms herein.
+3.2 Obligation to Sign. Both Parties commit to finalize and 
+sign the Agreements before expiry of the Exclusivity Period, 
+unless a Valid Withdrawal Event occurs and is properly 
+invoked in accordance with Section 3.4.
+
+3.3 Valid Withdrawal Events. A "Valid Withdrawal Event" 
+means any of the following circumstances, to the extent not 
+already addressed herein and not caused by the withdrawing 
+Party's breach: (a) failure to secure financing on terms 
+consistent with the Project's financial assumptions; (b) an 
+increase in Project costs exceeding 20% of the budgeted costs 
+as at the Effective Date; (c) failure to obtain necessary 
+regulatory approvals or permits; (d) failure to obtain DSO 
+(netbeheerder) authorization; or (e) failure to obtain SDE++ 
+subsidy.
+
+3.4 Withdrawal Procedure. A Party invoking a Valid 
+Withdrawal Event shall: (a) provide written notice to the other 
+Party within fourteen (14) days of becoming aware of such 
+event, together with reasonable supporting evidence; and (b) if 
+the event is capable of remedy, first use commercially 
+reasonable efforts to remedy it within thirty (30) days before 
+withdrawing.
+3.5 Withdrawal Consequences. Upon valid invocation of a 
+Valid Withdrawal Event in accordance with Section 3.4, the 
+affected Party may terminate these HoT by written notice. 
+Upon such termination, neither Party shall have further 
+obligations hereunder, except that Sections 7 (Confidentiality) 
+and 8 (General Provisions) shall survive.
+
+3.1 Bindend Karakter. Deze Contractvoorwaarden ("HoT") 
+vormen een juridisch bindende overeenkomst. De Partijen 
+zullen te goeder trouw en overeenkomstig de hierin 
+opgenomen voorwaarden definitieve overeenkomsten 
+("Overeenkomsten") onderhandelen, voorbereiden en 
+uitvoeren.
+3.2 Ondertekeningsverplichting. Beide Partijen verplichten 
+zich de Overeenkomsten te finaliseren en te ondertekenen 
+vóór het verstrijken van de Exclusiviteitsperiode, tenzij een 
+Geldige Terugtrekkingsgrond zich voordoet en naar behoren 
+wordt ingeroepen overeenkomstig Artikel 3.4.
+
+3.3 Geldige Terugtrekkingsgronden. Een "Geldige 
+Terugtrekkingsgrond" betekent een van de volgende 
+omstandigheden, voor zover niet reeds hierin geadresseerd en 
+niet veroorzaakt door een tekortkoming van de zich 
+terugtrekkende Partij: (a) het niet verkrijgen van financiering op 
+voorwaarden die consistent zijn met de financiële 
+uitgangspunten van het Project; (b) een stijging van de 
+Projectkosten met meer dan 20% van de begrote kosten per 
+de Ingangsdatum; (c) het niet verkrijgen van noodzakelijke 
+goedkeuringen of vergunningen; (d) het niet verkrijgen van 
+goedkeuring van de netbeheerder ("DSO"); of (e) het niet 
+verkrijgen van SDE++-subsidie.
+
+3.4 Terugtrekkingsprocedure. Een Partij die een Geldige 
+Terugtrekkingsgrond inroept, dient: (a) de andere Partij binnen 
+veertien (14) dagen na kennisneming van een dergelijke 
+gebeurtenis schriftelijk in kennis te stellen, samen met redelijke 
+ondersteunende documentatie; en (b) indien de gebeurtenis 
+voor herstel vatbaar is, eerst gedurende dertig (30) dagen 
+commercieel redelijke inspanningen te verrichten om deze te 
+verhelpen alvorens zich terug te trekken.
+3.5 Gevolgen van Terugtrekking. Bij geldige inroeping van 
+een Geldige Terugtrekkingsgrond overeenkomstig Artikel 3.4, 
+kan de betrokken Partij deze HoT beëindigen door middel van 
+schriftelijke kennisgeving. Na een dergelijke beëindiging 
+hebben de Partijen geen verdere verplichtingen uit hoofde 
+hiervan, met dien verstande dat Artikel 7 (Vertrouwelijkheid) en 
+Artikel 8 (Algemene Bepalingen) van kracht blijven.
+
+Page 2 of 8
+
+3.6 Exclusivity Period. These HoT take effect on the date of 
+signature by both Parties ("Effective Date") and remain in 
+force until the earlier of: (a) one (1) calendar year from the 
+Effective Date; or (b) execution of the Agreements (the 
+"Exclusivity Period").
+
+3.7 Grower Exclusivity. During the Exclusivity Period, the 
+Grower shall not: (a) enter into any agreement or arrangement 
+that conflicts with, or materially prejudices, the Project; (b) 
+reduce the electrical grid capacity available for this Project; or 
+(c) take any action preventing or delaying realization of a 
+secondary allocation point (secundair allocatiepunt, "SAP") for 
+Digital Energy's benefit.
+3.8 Breach of Exclusivity. Any breach by the Grower of 
+Section 3.7 shall entitle Digital Energy to: (a) seek specific 
+performance; (b) terminate these HoT with immediate effect 
+and recover its documented costs and expenses incurred in 
+connection with the Project; and/or (c) claim damages for 
+losses suffered.
+
+3.6 Exclusiviteitsperiode. Deze HoT worden van kracht op de 
+datum van ondertekening door beide Partijen 
+("Ingangsdatum") en blijven van kracht tot de vroegste van: 
+(a) één (1) kalenderjaar na de Ingangsdatum; of (b) 
+ondertekening van de Overeenkomsten (de 
+"Exclusiviteitsperiode").
+
+3.7 Exclusiviteit van de Teler. Gedurende de 
+Exclusiviteitsperiode zal de Teler niet: (a) enige overeenkomst 
+of regeling aangaan die in strijd is met, of wezenlijk afbreuk 
+doet aan, het Project; (b) de beschikbare 
+elektriciteitsnetcapaciteit voor dit Project verminderen; of (c) 
+enige handeling verrichten die de realisatie van een secundair 
+allocatiepunt ("SAP") ten behoeve van Digital Energy 
+verhindert of vertraagt.
+3.8 Schending van Exclusiviteit. Elke schending door de 
+Teler van Artikel 3.7 geeft Digital Energy het recht om: (a) 
+nakoming te vorderen; (b) deze HoT met onmiddellijke ingang 
+te beëindigen en haar gedocumenteerde kosten en uitgaven in 
+verband met het Project terug te vorderen; en/of (c) 
+schadevergoeding te vorderen voor geleden verliezen.
+
+4. Project Scope
+
+4. Projectomvang
+
+4.1 Objectives and Definitions. The project ("Project") 
+comprises the co-location of a DEC on the Grower's property 
+to: (a) supply heat to the greenhouse facility as more 
+particularly described in Annex A ("Greenhouse"); and (b) 
+potentially supply heat to third parties ("Heat Sales") via 
+pipelines connected to the DEC.
+4.2 Project Company. Digital Energy shall incorporate a 
+Dutch private limited company as the special-purpose vehicle 
+for the Project ("ProjectBV") within sixty (60) days of the 
+Effective Date. All Agreements shall be entered into by, or 
+assigned to, the ProjectBV.
+4.3 Costs. Each Party bears its own costs under these HoT 
+and the Agreements. Digital Energy finances and manages the 
+ProjectBV.
+4.4 Digital Energy Responsibilities. Digital Energy (through 
+the ProjectBV) is responsible for all DEC aspects: planning, 
+design, procurement, installation, commissioning, operation, 
+maintenance, decommissioning, and removal at Agreement 
+expiry (collectively, "Develop and Maintain").
+
+4.5 DEC Components. The DEC shall include at minimum: (a) 
+Electrical: step-down transformers; low-voltage distribution 
+panels and cables; power distribution units (PDUs); 
+uninterruptible power supplies (UPS). (b) Energy Storage: 
+battery energy storage systems (BESS) for backup power and 
+energy cost optimization. (c) Thermal: coolant distribution 
+units (CDUs); heat exchangers; dry coolers. (d) Computing: 
+servers, GPUs, ASICs; fiber optic connectivity; routers, 
+switches, firewalls. (e) Mechanical: equipment racks; 
+containerized enclosures or buildings; foundations; gas 
+connections; water connections.
+
+4.6 Base Electrical Connection. (a) The connection point 
+where the medium-voltage supply interfaces with the DEC's 
+step-down transformers is the "Base DEC Electrical 
+Connection Point". (b) The Grower shall Develop and 
+Maintain the medium-voltage infrastructure from its existing 
+connection to the Base DEC Electrical Connection Point, not 
+exceeding the length specified in Annex A, Item D.7. Any costs 
+for infrastructure exceeding this length shall be borne by the 
+ProjectBV. (c) The ProjectBV shall Develop and Maintain all 
+infrastructure from the Base DEC Electrical Connection Point 
+to the DEC, including transformers and low-voltage systems 
+("Base DEC Electrical Connection").
+
+4.1 Doelstellingen en Definities. Het project ("Project") 
+omvat de co-locatie van een DEC op het terrein van de Teler 
+voor: (a) het leveren van warmte aan het glastuinbouwbedrijf 
+zoals nader omschreven in Bijlage A ("Kas"); en (b) het 
+mogelijk leveren van warmte aan derden ("Warmteverkoop") 
+via leidingen aangesloten op het DEC.
+4.2 Projectvennootschap. Digital Energy zal binnen zestig 
+(60) dagen na de Ingangsdatum een Nederlandse besloten 
+vennootschap oprichten als special purpose vehicle voor het 
+Project ("ProjectBV"). Alle Overeenkomsten worden 
+aangegaan door, of overgedragen aan, de ProjectBV.
+4.3 Kosten. Elke Partij draagt haar eigen kosten uit hoofde 
+van deze HoT en de Overeenkomsten. Digital Energy 
+financiert en beheert de ProjectBV.
+4.4 Verantwoordelijkheden van Digital Energy. Digital 
+Energy (via de ProjectBV) is verantwoordelijk voor alle DEC-
+aspecten: planning, ontwerp, inkoop, installatie, 
+ingebruikname, exploitatie, onderhoud, ontmanteling en 
+verwijdering bij het einde van de Overeenkomsten 
+(gezamenlijk "Ontwikkelen en Onderhouden").
+
+4.5 DEC-componenten. Het DEC omvat minimaal: (a) 
+Elektrisch: step-down transformatoren; 
+laagspanningsverdeelpanelen en -kabels; power distribution 
+units (PDU's); noodstroomvoorzieningen (UPS). (b) 
+Energieopslag: batterijopslagsystemen (BESS) voor 
+noodstroomvoorziening en optimalisatie van energiekosten. (c) 
+Thermisch: koelmiddeldistributie-eenheden (CDU's); 
+warmtewisselaars; droge koelers. (d) Computing: servers, 
+GPU's, ASIC's; glasvezelconnectiviteit; routers, switches, 
+firewalls. (e) Mechanisch: apparatuurrekken; 
+gecontaineriseerde behuizingen of gebouwen; funderingen; 
+gasaansluitingen; wateraansluitingen.
+
+4.6 Basis Elektrische Aansluiting. (a) Het aansluitpunt waar 
+de middenspanningstoevoer verbinding maakt met de step-
+down transformatoren van het DEC is het "Basis DEC 
+Elektrisch Aansluitpunt". (b) De Teler zal de 
+middenspanningsinfrastructuur Ontwikkelen en Onderhouden 
+vanaf haar bestaande aansluiting tot aan het Basis DEC 
+Elektrisch Aansluitpunt, met een lengte van maximaal de 
+lengte vermeld in Bijlage A, Punt D.7. Eventuele kosten voor 
+infrastructuur die deze lengte overschrijdt, komen voor 
+rekening van de ProjectBV. (c) De ProjectBV zal alle 
+infrastructuur Ontwikkelen en Onderhouden vanaf het Basis 
+DEC Elektrisch Aansluitpunt tot aan het DEC, inclusief 
+transformatoren en laagspanningssystemen ("Basis DEC 
+
+Page 3 of 8
+
+4.7 Future Electrical Connection. (a) The Parties shall 
+negotiate in good faith and agree on the feasibility, financing, 
+design, construction, and maintenance of any upgraded 
+connection ("Future DEC Electrical Connection") using the 
+Grower's infrastructure or primary allocation point (primair 
+allocatiepunt, "PAP"). (b) Ownership, control, maintenance, 
+usage rights, and liabilities for the Future DEC Electrical 
+Connection shall be allocated pro rata based on each Party's 
+documented capital contribution, to the extent permitted by 
+law. Capital contributions shall be determined in the 
+Agreements.
+
+4.8 Heat Transfer. (a) The ProjectBV shall establish a heat 
+transfer point ("DEC Heat Transfer Point") on the secondary 
+side of the DEC's heat exchangers, at the isolation valves 
+connecting to the Grower's Heat Pipeline. (b) The Grower 
+shall Develop and Maintain the pipeline from the DEC Heat 
+Transfer Point to the Greenhouse boiler room ("Grower's Heat 
+Pipeline").
+4.9 Third-Party Distribution. The Parties shall negotiate in 
+good faith and agree on the feasibility, financing, design, 
+construction, and maintenance of pipelines (other than the 
+Grower's Heat Pipeline) for Heat Sales to third parties ("DEC 
+Heat Distribution Pipeline").
+4.10 Optional Provisions. If indicated as "Include" in Annex 
+A, Items F.1–F.2: (a) CHP Lease: Digital Energy shall lease 
+the Grower's combined heat and power unit 
+(warmtekrachtkoppeling, "CHP") for the fee specified in Item 
+F.1a. (b) Grower Co-Investment: The Grower may elect to 
+co-invest up to the percentage specified in Item F.2a of Project 
+costs in cash, in exchange for a pro-rata share of ProjectBV 
+profits. This election must be exercised before Agreement 
+execution. No voting rights shall attach to such investment.
+
+Elektrische Aansluiting").
+4.7 Toekomstige Elektrische Aansluiting. (a) De Partijen 
+zullen te goeder trouw onderhandelen en overeenstemming 
+bereiken over de haalbaarheid, financiering, ontwerp, bouw en 
+onderhoud van een eventuele verzwaarde aansluiting 
+("Toekomstige DEC Elektrische Aansluiting") met 
+gebruikmaking van de infrastructuur van de Teler of het primair 
+allocatiepunt ("PAP"). (b) Eigendom, controle, onderhoud, 
+gebruiksrechten en aansprakelijkheden voor de Toekomstige 
+DEC Elektrische Aansluiting worden pro rata verdeeld op basis 
+van de gedocumenteerde kapitaalinbreng van elke Partij, voor 
+zover wettelijk toegestaan. Kapitaalinbreng wordt vastgesteld 
+in de Overeenkomsten.
+
+4.8 Warmteoverdracht. (a) De ProjectBV zal een 
+warmteoverdrachtspunt ("DEC Warmteoverdrachtspunt") 
+realiseren aan de secundaire zijde van de warmtewisselaars 
+van het DEC, bij de afsluiters die verbonden zijn met de 
+Warmteleiding van de Teler. (b) De Teler zal de leiding 
+Ontwikkelen en Onderhouden vanaf het DEC 
+Warmteoverdrachtspunt naar de ketelruimte van de Kas 
+("Warmteleiding van de Teler").
+4.9 Distributie aan Derden. De Partijen zullen te goeder trouw 
+onderhandelen en overeenstemming bereiken over de 
+haalbaarheid, financiering, ontwerp, bouw en onderhoud van 
+leidingen (anders dan de Warmteleiding van de Teler) voor 
+Warmteverkoop aan derden ("DEC 
+Warmtedistributieleiding").
+4.10 Optionele Bepalingen. Indien aangegeven als 
+"Opnemen" in Bijlage A, Punten F.1–F.2: (a) WKK-Lease: 
+Digital Energy zal de warmtekrachtkoppeling ("WKK") van de 
+Teler leasen voor de vergoeding vermeld in Punt F.1a. (b) Co-
+Investering Teler: De Teler kan ervoor kiezen tot het 
+percentage vermeld in Punt F.2a van de Projectkosten in 
+contanten te co-investeren, in ruil voor een pro rata aandeel in 
+de winsten van de ProjectBV. Deze keuze moet worden 
+gemaakt vóór ondertekening van de Overeenkomsten. Aan 
+een dergelijke investering zijn geen stemrechten verbonden.
+
+5. Agreements
+
+5. Overeenkomsten
+
+5.1 Parties and Term. (a) The Agreements shall be between 
+ProjectBV and the Grower. (b) Initial term: thirty (30) years 
+from execution. (c) Automatic renewal for successive periods 
+of five (5) years each, unless either Party gives written 
+termination notice at least five (5) years before expiry of the 
+then-current term.
+5.2 Negotiation Principles. The Parties shall negotiate the 
+Agreements in good faith and on commercially reasonable 
+terms, ensuring long-term stability, continuity, and investment 
+security for ProjectBV. The Parties may agree to term 
+extensions, a right of first refusal ("ROFR"), or acquisition 
+conditions.
+
+5.3 ProjectBV Obligations. (a) Electrical Connection: 
+Provide the Base DEC Electrical Connection. (b) Heat Supply: 
+Supply heat at the DEC Heat Transfer Point: (i) target outlet 
+temperature per Annex A, Item C.1, ±5%; (ii) contingent on the 
+Grower maintaining a return temperature ensuring ΔT of at 
+least 15°C; if the Grower fails to maintain the required return 
+temperature, the ProjectBV's obligation to meet the target 
+outlet temperature shall be suspended to that extent; (iii) 
+delivery basis: delivered-as-produced ("DAP"), using 
+commercially reasonable efforts; and (iv) price per Item C.4. (c) 
+Third-Party Heat: Subject to DEC Heat Distribution Pipeline 
+availability, the ProjectBV may deliver heat to third parties.
+
+5.1 Partijen en Looptijd. (a) De Overeenkomsten worden 
+gesloten tussen de ProjectBV en de Teler. (b) Initiële looptijd: 
+dertig (30) jaar vanaf ondertekening. (c) Automatische 
+verlenging met opeenvolgende perioden van vijf (5) jaar, tenzij 
+een van de Partijen ten minste vijf (5) jaar voor het verstrijken 
+van de dan lopende termijn schriftelijk opzegt.
+5.2 Onderhandelingsprincipes. De Partijen zullen te goeder 
+trouw en op commercieel redelijke voorwaarden over de 
+Overeenkomsten onderhandelen, waarbij lange-termijn 
+stabiliteit, continuïteit en investeringszekerheid voor de 
+ProjectBV wordt gewaarborgd. De Partijen kunnen 
+overeenstemming bereiken over termijnverlengingen, een 
+voorkeursrecht ("ROFR"), of overnamevoorwaarden.
+
+5.3 Verplichtingen van de ProjectBV. (a) Elektrische 
+Aansluiting: De Basis DEC Elektrische Aansluiting verzorgen. 
+(b) Warmtelevering: Warmte leveren bij het DEC 
+Warmteoverdrachtspunt: (i) beoogde afgiftetemperatuur 
+conform Bijlage A, Punt C.1, ±5%; (ii) afhankelijk van het 
+handhaven door de Teler van een retourtemperatuur die een 
+ΔT van ten minste 15°C waarborgt; indien de Teler de vereiste 
+retourtemperatuur niet handhaaft, wordt de verplichting van de 
+ProjectBV om de beoogde afgiftetemperatuur te halen in 
+zoverre opgeschort; (iii) leveringsbasis: geleverd-als-
+geproduceerd ("DAP"), met commercieel redelijke 
+inspanningen; en (iv) prijs conform Punt C.4. (c) Warmte aan 
+Derden: Onder voorbehoud van beschikbaarheid van de DEC 
+Warmtedistributieleiding, mag de ProjectBV warmte leveren 
+aan derden.
+
+Page 4 of 8
+
+5.4 Grower Obligations. (a) Infrastructure: Provide a fully 
+functional Grower's Heat Pipeline and Base DEC Electrical 
+Connection Point. (b) Base Project Connection: Make 
+available an existing grid connection dedicated to the Project 
+("Base Project Connection"), comprising the capacities 
+specified in Annex A, Items B.7–B.9 ("Base Connection 
+Capacity", "Base Import Capacity", and "Base Export 
+Capacity"). (c) Future Project Connection: Subject to DSO 
+approval, apply for and make available a future grid connection 
+("Future Project Connection"), expected to comprise the 
+capacities in Items B.10–B.12 ("Future Connection 
+Capacity", "Future Import Capacity", and "Future Export 
+Capacity"). (d) DSO Costs: ProjectBV bears DSO costs for 
+the Future Project Connection, provided: (i) the Grower 
+submits the application only after Agreement execution, or with 
+prior written consent; and (ii) costs incurred before ProjectBV 
+incorporation are reimbursed within the period in Item E.2, plus 
+interest at EURIBOR + 2% from the due date if payment is 
+late.
+
+5.4(e) SAP Configuration. The Grower shall facilitate SAP 
+realization and submit necessary DSO applications for grid or 
+ATO (Aansluit- en Transportovereenkomst) reconfiguration. 
+Priority: (i) Cable Pooling: SAP registered in ProjectBV's 
+name, governed by a Cable Pooling agreement, enabling 
+ProjectBV to contract its own electricity supplier; (ii) MLOEA: If 
+cable pooling is not approved, SAP in the Grower's name 
+under MLOEA (meerdere leveranciers op één aansluiting), with 
+contractual provisions ensuring ProjectBV access; or (iii) 
+Alternative: If neither is feasible, the Grower shall facilitate 
+ProjectBV's use through a capacity allocation agreement on 
+terms to be negotiated in good faith.
+
+5.5 Land Rights. (a) Grant: The Grower shall provide land for 
+the DEC for no additional fee or payment. (b) Legal Form: The 
+Grower shall grant (or procure the grant of) a right of 
+superficies (opstalrecht) and/or enter into a Right in Rem 
+Agreement ("ZRO", Zakelijk Recht Overeenkomst) enabling 
+DEC construction, operation, and maintenance. (c) Area: 
+Approximately the area per MW specified in Annex A, Item 
+D.5, for the combined Base Connection Capacity and Future 
+Connection Capacity. (d) Establishment: The right of 
+superficies shall be established by notarial deed, with 
+easements (erfdienstbaarheden) if necessary. (e) Extension: 
+The Grower shall cooperate in creating additional land rights if 
+Future Connection Capacity becomes available. (f) Zoning: 
+The Parties shall cooperate to ensure compliance with 
+applicable zoning (bestemmingsplan) per Item D.4. (g) Third-
+Party Consents: If the Grower is not the landowner or does 
+not have unencumbered title, the landowner ("Landowner") 
+and/or land financier ("Land Financier") shall co-sign the 
+Agreements.
+
+5.4 Verplichtingen van de Teler. (a) Infrastructuur: Een 
+volledig functionele Warmteleiding van de Teler en Basis DEC 
+Elektrisch Aansluitpunt beschikbaar stellen. (b) Basis 
+Projectaansluiting: Een bestaande netaansluiting 
+beschikbaar stellen voor het Project ("Basis 
+Projectaansluiting"), bestaande uit de capaciteiten vermeld in 
+Bijlage A, Punten B.7–B.9 ("Basis Aansluitcapaciteit", "Basis 
+Importcapaciteit", en "Basis Exportcapaciteit"). (c) 
+Toekomstige Projectaansluiting: Onder voorbehoud van 
+DSO-goedkeuring, aanvragen en beschikbaar stellen van een 
+toekomstige netaansluiting ("Toekomstige 
+Projectaansluiting"), naar verwachting bestaande uit de 
+capaciteiten in Punten B.10–B.12 ("Toekomstige 
+Aansluitcapaciteit", "Toekomstige Importcapaciteit", en 
+"Toekomstige Exportcapaciteit"). (d) DSO-kosten: De 
+ProjectBV draagt de DSO-kosten voor de Toekomstige 
+Projectaansluiting, mits: (i) de Teler de aanvraag pas indient 
+na ondertekening van de Overeenkomsten, of met 
+voorafgaande schriftelijke toestemming; en (ii) kosten gemaakt 
+vóór oprichting van de ProjectBV worden vergoed binnen de 
+termijn in Punt E.2, vermeerderd met rente van EURIBOR + 
+2% vanaf de vervaldatum bij te late betaling.
+
+5.4(e) SAP-configuratie. De Teler zal de SAP-realisatie 
+faciliteren en de benodigde DSO-aanvragen indienen voor 
+herconfiguratie van het net of de ATO (Aansluit- en 
+Transportovereenkomst). Volgorde: (i) Cable Pooling: SAP 
+geregistreerd op naam van de ProjectBV, beheerst door een 
+Cable Pooling-overeenkomst, waardoor de ProjectBV haar 
+eigen elektriciteitsleverancier kan contracteren; (ii) MLOEA: 
+Indien cable pooling niet wordt goedgekeurd, SAP op naam 
+van de Teler onder MLOEA (meerdere leveranciers op één 
+aansluiting), met contractuele bepalingen die toegang voor de 
+ProjectBV waarborgen; of (iii) Alternatief: Indien geen van 
+beide haalbaar is, zal de Teler het gebruik door de ProjectBV 
+faciliteren via een capaciteitsallocatieovereenkomst op 
+voorwaarden die te goeder trouw worden onderhandeld.
+
+5.5 Grondrechten. (a) Verlening: De Teler stelt grond 
+beschikbaar voor het DEC zonder aanvullende vergoeding of 
+betaling. (b) Juridische Vorm: De Teler zal een recht van 
+opstal verlenen (of doen verlenen) en/of een Zakelijk Recht 
+Overeenkomst ("ZRO") aangaan die de bouw, exploitatie en 
+onderhoud van het DEC mogelijk maakt. (c) Oppervlakte: 
+Circa de oppervlakte per MW vermeld in Bijlage A, Punt D.5, 
+voor de gecombineerde Basis Aansluitcapaciteit en 
+Toekomstige Aansluitcapaciteit. (d) Vestiging: Het recht van 
+opstal wordt bij notariële akte gevestigd, met 
+erfdienstbaarheden indien nodig. (e) Uitbreiding: De Teler zal 
+meewerken aan het vestigen van aanvullende grondrechten 
+indien Toekomstige Aansluitcapaciteit beschikbaar komt. (f) 
+Bestemmingsplan: De Partijen werken samen om naleving 
+van het toepasselijke bestemmingsplan conform Punt D.4 te 
+waarborgen. (g) Toestemmingen van Derden: Indien de 
+Teler niet de grondeigenaar is of geen onbezwaarde titel heeft, 
+dient de grondeigenaar ("Grondeigenaar") en/of 
+grondfinancier ("Grondfinancier") de Overeenkomsten mede 
+te ondertekenen.
+
+5.6 Operational Flexibility. (a) The Parties shall cooperate to 
+maximize DEC uptime and efficiency. (b) ProjectBV may curtail 
+or suspend operations upon fourteen (14) days' prior written 
+notice if adverse market conditions, equipment failure, 
+regulatory constraints, or other circumstances make operation 
+commercially unviable, provided ProjectBV demonstrates to 
+the Grower's reasonable satisfaction that such circumstances 
+existed. Any curtailment exceeding ninety (90) consecutive 
+days requires the Grower's prior written consent.
+5.7 Subsidy Cooperation. The Parties shall cooperate in 
+good faith to apply for and secure SDE++ and other applicable 
+subsidies for the Project's benefit. The Parties shall submit the 
+
+5.6 Operationele Flexibiliteit. (a) De Partijen werken samen 
+om de uptime en efficiëntie van het DEC te maximaliseren. (b) 
+De ProjectBV mag de activiteiten inkorten of opschorten na 
+veertien (14) dagen voorafgaande schriftelijke kennisgeving 
+indien ongunstige marktomstandigheden, apparatuurstoringen, 
+regelgevende beperkingen of andere omstandigheden de 
+exploitatie commercieel onhaalbaar maken, mits de ProjectBV 
+naar redelijke tevredenheid van de Teler aantoont dat 
+dergelijke omstandigheden bestonden. Elke inkorting van meer 
+dan negentig (90) opeenvolgende dagen vereist voorafgaande 
+schriftelijke toestemming van de Teler.
+5.7 Subsidiesamenwerking. De Partijen werken te goeder 
+
+Page 5 of 8
+
+SDE++ application within the next available application window 
+following the Effective Date.
+
+trouw samen om SDE++ en andere toepasselijke subsidies 
+aan te vragen en te verkrijgen ten behoeve van het Project. De 
+Partijen dienen de SDE++-aanvraag in binnen de 
+eerstvolgende beschikbare aanvraagperiode na de 
+Ingangsdatum.
+
+6. Costs and Revenues
+
+6. Kosten en Opbrengsten
+
+6.1 DEC Costs and Revenues. ProjectBV bears all costs and 
+retains all revenues directly attributable to the DEC ("DEC 
+Costs" and "DEC Revenues"), including without limitation: (a) 
+energy costs, including revenue from negative-priced electricity 
+consumption; (b) energy tax (Energiebelasting, "EB"); the 
+Parties shall evaluate combined EB volumes per Item C.5; (c) 
+DSO grid charges: fixed ("kW-Contract") and variable ("kW-
+Max"); (d) energy trading (PPAs, OTC, day-ahead/intraday 
+markets); (e) ancillary services (FCR, aFRR, mFRR); and (f) 
+grid services (capacity-limiting contracts, redispatch, 
+congestion management).
+6.2 Greenhouse Costs and Revenues. The Grower bears all 
+costs and retains all revenues directly attributable to the 
+Greenhouse ("Greenhouse Costs" and "Greenhouse 
+Revenues").
+6.3 Heat Sales Sharing. Net income from third-party Heat 
+Sales (excluding heat to the Grower) is shared per Annex A, 
+Item E.1. "Net income" means gross revenues minus 
+distribution costs (maintenance, pumping, and applicable taxes 
+on heat sales, excluding corporate income tax), which costs 
+are also shared in the same proportion.
+6.4 Billing Pass-Through. If SAP configuration requires one 
+Party to receive invoices or revenues intended for the other, 
+such amounts shall be reimbursed within the period in Item 
+E.2.
+6.5 Audit Rights. Each Party may, upon thirty (30) days' 
+notice, audit the other Party's records relating to shared costs 
+and revenues under this Section 6, at the auditing Party's 
+expense. Audits shall be conducted during normal business 
+hours and not more than once per calendar year.
+6.6 Disputed Amounts. If a Party disputes an invoice, it shall 
+pay the undisputed amount and notify the other Party of the 
+dispute within fourteen (14) days. The Parties shall resolve the 
+dispute in accordance with Section 8.5.
+
+6.1 DEC-kosten en -opbrengsten. De ProjectBV draagt alle 
+kosten en behoudt alle opbrengsten die rechtstreeks aan het 
+DEC zijn toe te rekenen ("DEC-kosten" en "DEC-
+opbrengsten"), waaronder: (a) energiekosten, inclusief 
+opbrengsten uit het verbruik van negatief geprijsde elektriciteit; 
+(b) Energiebelasting ("EB"); de Partijen evalueren 
+gecombineerde EB-volumes conform Punt C.5; (c) DSO-
+netkosten: vast ("kW-Contract") en variabel ("kW-Max"); (d) 
+energiehandel (PPA's, OTC, day-ahead/intraday markten); (e) 
+systeemdiensten (FCR, aFRR, mFRR); en (f) netdiensten 
+(capaciteitsbeperkende contracten, redispatch, 
+congestiebeheer).
+6.2 Kaskosten en -opbrengsten. De Teler draagt alle kosten 
+en behoudt alle opbrengsten die rechtstreeks aan de Kas zijn 
+toe te rekenen ("Kaskosten" en "Kasopbrengsten").
+6.3 Verdeling Warmteverkoop. Netto-inkomsten uit 
+Warmteverkoop aan derden (exclusief warmte aan de Teler) 
+worden verdeeld conform Bijlage A, Punt E.1. "Netto-
+inkomsten" betekent bruto-opbrengsten minus 
+distributiekosten (onderhoud, pompen, en toepasselijke 
+belastingen op warmteverkoop, exclusief 
+vennootschapsbelasting), welke kosten ook in dezelfde 
+verhouding worden verdeeld.
+6.4 Doorbelasting. Indien de SAP-configuratie vereist dat een 
+Partij facturen of opbrengsten ontvangt die bestemd zijn voor 
+de andere Partij, worden dergelijke bedragen vergoed binnen 
+de termijn in Punt E.2.
+6.5 Auditrechten. Elke Partij kan, na dertig (30) dagen 
+kennisgeving, de administratie van de andere Partij met 
+betrekking tot gedeelde kosten en opbrengsten onder dit 
+Artikel 6 controleren, op kosten van de auditerende Partij. 
+Audits worden uitgevoerd tijdens normale kantooruren en niet 
+meer dan eenmaal per kalenderjaar.
+6.6 Betwiste Bedragen. Indien een Partij een factuur betwist, 
+betaalt zij het onbetwiste bedrag en stelt zij de andere Partij 
+binnen veertien (14) dagen van het geschil in kennis. De 
+Partijen lossen het geschil op overeenkomstig Artikel 8.5.
+
+7. Confidentiality
+
+7. Vertrouwelijkheid
+
+7.1 Obligation. Each Party shall keep strictly confidential 
+these HoT and all information disclosed in connection with the 
+Project ("Confidential Information").
+7.2 Permitted Disclosures. Disclosure is permitted: (a) as 
+required by law, court order, or regulatory authority; (b) to 
+affiliates, financiers, and professional advisors (legal, technical, 
+commercial) on a need-to-know basis, if bound by 
+confidentiality obligations no less protective than this Section 
+7; (c) for inclusion in subsidy applications, regulatory filings, or 
+permit applications, to the extent required; or (d) with prior 
+written consent.
+7.3 Exclusions. Confidential Information excludes information 
+that: (a) enters the public domain other than through breach by 
+the receiving Party; (b) was known to the receiving Party 
+before disclosure; (c) is independently developed by the 
+receiving Party; or (d) is received from a third party without 
+breach of any confidentiality obligation owed to the disclosing 
+Party.
+7.4 Return of Information. Upon termination, each Party shall 
+return or destroy Confidential Information of the other Party 
+upon request, except to the extent retention is required by law 
+
+7.1 Verplichting. Elke Partij houdt deze HoT en alle informatie 
+die in verband met het Project wordt verstrekt strikt 
+vertrouwelijk ("Vertrouwelijke Informatie").
+7.2 Toegestane Openbaarmakingen. Openbaarmaking is 
+toegestaan: (a) indien vereist door wet, rechterlijk bevel, of 
+toezichthoudende instantie; (b) aan gelieerde ondernemingen, 
+financiers, en professionele adviseurs (juridisch, technisch, 
+commercieel) op need-to-know basis, indien gebonden door 
+geheimhoudingsverplichtingen die niet minder beschermend 
+zijn dan dit Artikel 7; (c) voor opname in subsidieaanvragen, 
+regelgevende dossiers, of vergunningaanvragen, voor zover 
+vereist; of (d) met voorafgaande schriftelijke toestemming.
+7.3 Uitzonderingen. Vertrouwelijke Informatie omvat niet 
+informatie die: (a) openbaar wordt anders dan door schending 
+door de ontvangende Partij; (b) de ontvangende Partij reeds 
+bekend was vóór openbaarmaking; (c) zelfstandig is 
+ontwikkeld door de ontvangende Partij; of (d) is ontvangen van 
+een derde zonder schending van enige 
+geheimhoudingsverplichting jegens de verstrekkende Partij.
+7.4 Teruggave van Informatie. Bij beëindiging zal elke Partij 
+op verzoek Vertrouwelijke Informatie van de andere Partij 
+
+Page 6 of 8
+
+or for bona fide record-keeping purposes.
+7.5 Duration. These obligations continue for two (2) years 
+after termination of these HoT.
+
+retourneren of vernietigen, behalve voor zover bewaring 
+wettelijk vereist is of voor legitieme archiveringsdoeleinden.
+7.5 Duur. Deze verplichtingen blijven van kracht gedurende 
+twee (2) jaar na beëindiging van deze HoT.
+
+8. General Provisions
+
+8. Algemene Bepalingen
+
+8.1 Costs. Each Party bears its own costs in negotiating and 
+preparing these HoT and the Agreements.
+8.2 Assignment. (a) Neither Party may assign or transfer any 
+rights or obligations without prior written consent. (b) 
+Exception: Digital Energy may assign to ProjectBV upon 
+incorporation. Digital Energy shall remain jointly and severally 
+liable for ProjectBV's obligations until the Agreements are 
+executed, at which point Digital Energy shall be released.
+8.3 Governing Law. These HoT and the Agreements are 
+governed by Dutch law.
+8.4 Jurisdiction. Disputes are submitted exclusively to the 
+District Court of Amsterdam (Rechtbank Amsterdam).
+8.5 Dispute Resolution. Before initiating court proceedings, 
+the Parties shall attempt to resolve disputes through good faith 
+negotiations between senior executives for at least fifteen (15) 
+business days.
+8.6 Entire Agreement. These HoT constitute the entire 
+agreement on this subject matter and supersede all prior 
+negotiations and representations, except in the case of fraud 
+or fraudulent misrepresentation.
+8.7 Amendments. Amendments require written agreement 
+signed by both Parties.
+
+8.8 Waiver. No failure or delay in exercising any right shall 
+operate as a waiver thereof, nor shall any single exercise 
+preclude further exercise.
+8.9 Severability. If any provision is held invalid or 
+unenforceable, the remaining provisions continue in full force. 
+The Parties shall negotiate in good faith to replace the invalid 
+provision with a valid provision achieving substantially the 
+same effect.
+8.10 Force Majeure. Neither Party is liable for failure to 
+perform due to events beyond its reasonable control, provided 
+the affected Party: (a) notifies the other promptly; (b) uses 
+commercially reasonable efforts to mitigate; and (c) resumes 
+performance as soon as reasonably practicable.
+8.11 Notices. Notices must be in writing to the addresses in 
+Annex A, Section G. Notices by email are deemed received on 
+the next business day; notices by courier are deemed received 
+upon confirmed delivery.
+8.12 Third Party Rights. These HoT do not confer any rights 
+on third parties, except that ProjectBV (once incorporated) may 
+enforce rights granted to it herein.
+8.13 Counterparts. These HoT may be executed in 
+counterparts, each deemed an original, together constituting 
+one agreement. Electronic signatures have the same legal 
+effect as original signatures.
+
+8.1 Kosten. Elke Partij draagt haar eigen kosten voor het 
+onderhandelen en opstellen van deze HoT en de 
+Overeenkomsten.
+8.2 Overdracht. (a) Geen van de Partijen mag rechten of 
+verplichtingen overdragen of cederen zonder voorafgaande 
+schriftelijke toestemming. (b) Uitzondering: Digital Energy mag 
+overdragen aan de ProjectBV na oprichting. Digital Energy blijft 
+hoofdelijk aansprakelijk voor de verplichtingen van de 
+ProjectBV totdat de Overeenkomsten zijn ondertekend, waarna 
+Digital Energy wordt ontslagen.
+8.3 Toepasselijk Recht. Op deze HoT en de Overeenkomsten 
+is Nederlands recht van toepassing.
+8.4 Bevoegde Rechter. Geschillen worden exclusief 
+voorgelegd aan de Rechtbank Amsterdam.
+8.5 Geschillenbeslechting. Alvorens een gerechtelijke 
+procedure te starten, trachten de Partijen geschillen op te 
+lossen door te goeder trouw te onderhandelen tussen senior 
+leidinggevenden gedurende ten minste vijftien (15) werkdagen.
+8.6 Volledige Overeenkomst. Deze HoT vormen de volledige 
+overeenkomst over dit onderwerp en vervangen alle eerdere 
+onderhandelingen en verklaringen, behalve in geval van fraude 
+of frauduleuze misleiding.
+8.7 Wijzigingen. Wijzigingen vereisen schriftelijke 
+overeenstemming ondertekend door beide Partijen.
+
+8.8 Afstand van Recht. Het niet of vertraagd uitoefenen van 
+enig recht houdt geen afstand daarvan in, noch zal enige 
+eenmalige uitoefening verdere uitoefening uitsluiten.
+8.9 Scheidbaarheid. Indien enige bepaling ongeldig of niet-
+afdwingbaar wordt geacht, blijven de overige bepalingen 
+volledig van kracht. De Partijen onderhandelen te goeder trouw 
+om de ongeldige bepaling te vervangen door een geldige 
+bepaling met in wezen hetzelfde effect.
+8.10 Overmacht. Geen van de Partijen is aansprakelijk voor 
+het niet nakomen van verplichtingen als gevolg van 
+gebeurtenissen buiten haar redelijke controle, mits de getroffen 
+Partij: (a) de andere Partij onverwijld informeert; (b) 
+commercieel redelijke inspanningen levert om de gevolgen te 
+beperken; en (c) de nakoming zo spoedig als redelijkerwijs 
+mogelijk hervat.
+8.11 Kennisgevingen. Kennisgevingen dienen schriftelijk te 
+geschieden aan de adressen in Bijlage A, Sectie G. 
+Kennisgevingen per e-mail worden geacht te zijn ontvangen op 
+de volgende werkdag; kennisgevingen per koerier worden 
+geacht te zijn ontvangen bij bevestigde aflevering.
+8.12 Rechten van Derden. Deze HoT verlenen geen rechten 
+aan derden, behalve dat de ProjectBV (na oprichting) de aan 
+haar hierin verleende rechten kan afdwingen.
+8.13 Exemplaren. Deze HoT kunnen in meerdere exemplaren 
+worden ondertekend, waarbij elk exemplaar als origineel geldt 
+en alle exemplaren samen één overeenkomst vormen. 
+Elektronische handtekeningen hebben dezelfde rechtskracht 
+als originele handtekeningen.
+
+9. Execution / Ondertekening
+
+Each signatory represents and warrants that they have full authority to execute these HoT on behalf of the Party they represent. / 
+Elke ondertekenaar verklaart en garandeert dat hij/zij volledig bevoegd is om deze HoT te ondertekenen namens de Partij die hij/zij  
+vertegenwoordigt.
+
+Page 7 of 8
+
+DIGITAL ENERGY GROUP AG
+
+GROWER / TELER [per A.1]
+
+________________________________
+Name: Jonathan Mattis Glender
+Title: Chairman of the Board
+Date:
+
+LANDOWNER / GRONDEIGENAAR
+(if applicable / indien van toepassing)
+
+________________________________
+Name:
+Title:
+Date:
+
+________________________________
+Name: [per A.4]
+Title: [per A.5]
+Date:
+
+LAND FINANCIER / GRONDFINANCIER
+(if applicable / indien van toepassing)
+
+________________________________
+Name:
+Title:
+Date:
+
+Annex A: Variable Schedule (integral part) / Variabelenoverzicht (integraal onderdeel)
+
+— End of Heads of Terms / Einde Contractvoorwaarden —
+
+Page 8 of 8
+
+
+
+--- ANNEX A ---
+
+ANNEX A — VARIABLE SCHEDULE
+BIJLAGE A — VARIABELENOVERZICHT
+
+to the Binding Heads of Terms | bij de Bindende Contractvoorwaarden
+
+Project:
+
+DEKWAKEL-01
+
+Version:
+
+1.0
+
+Date:
+
+30-04-2026
+
+Legend: Yellow = Required | Green = Conditional
+
+Description
+
+Omschrijving
+
+Value / Waarde
+
+A. GROWER & GREENHOUSE | TELER & KAS
+
+A.1 Legal name
+A.2 KVK number
+A.3 Registered address
+
+A.4 Signatory name
+A.5 Signatory title
+A.6 Signing authority
+
+A.7 Greenhouse location
+A.8 Current size (ha)
+A.9 Planned size (ha)
+A.10 Expansion timeline
+A.11 Cultivation type
+
+A.1 Statutaire naam
+A.2 KVK-nummer
+A.3 Statutair adres
+
+A.4 Naam ondertekenaar
+A.5 Functie ondertekenaar
+A.6 Tekenbevoegdheid
+
+A.7 Kaslocatie
+A.8 Huidige oppervlakte
+A.9 Geplande oppervlakte
+A.10 Uitbreidingsplanning
+A.11 Teelttype
+
+B. ELECTRICAL CONNECTION | ELEKTRISCHE AANSLUITING (per ATO)
+
+B.1 DSO
+B.2 EAN code
+B.3 ATO reference
+
+B.4 Total connection
+B.5 Total import
+B.6 Total export
+
+B.7 Base connection
+B.8 Base import
+B.9 Base export
+
+B.1 Netbeheerder
+B.2 EAN-code
+B.3 ATO-referentie
+
+B.4 Totale aansluiting
+B.5 Totale import
+B.6 Totale export
+
+B.7 Basis aansluiting
+B.8 Basis import
+B.9 Basis export
+
+B.10 Future connection (DSO subject)
+B.11 Future import
+B.12 Future export
+B.13 SAP configuration
+
+B.10 Toekomstige aansluiting
+B.11 Toekomstige import
+B.12 Toekomstige export
+B.13 SAP-configuratie
+
+C. HEAT SUPPLY | WARMTELEVERING
+
+C.1 Target outlet temp (°C)
+C.2 Expected return temp (°C)
+C.3 Minimum ΔT
+C.4 Heat price (EUR/MWh)
+C.5 Combined EB calculation
+
+C.1 Beoogde afgiftetemperatuur
+C.2 Verwachte retourtemperatuur
+C.3 Minimum ΔT
+C.4 Warmteprijs
+C.5 Gecombineerde EB-berekening
+
+D. LAND & PROPERTY | GROND & EIGENDOM
+
+D.1 Kadaster parcel(s)
+D.2 Title type
+D.3 Encumbrances
+D.4 Zoning designation
+
+D.5 Land area per MW (m²)
+D.6 Right of superficies term
+D.7 MV cable length (max)
+
+D.8 Landowner name (if different)
+D.9 Landowner signatory
+D.10 Land Financier name
+D.11 Land Financier signatory
+
+D.1 Kadastraal perceel
+D.2 Eigendomstype
+D.3 Bezwaringen
+D.4 Bestemmingsplan
+
+D.5 Grondoppervlakte per MW
+D.6 Looptijd opstalrecht
+D.7 MS-kabellengte (max)
+
+D.8 Naam grondeigenaar (indien anders)
+D.9 Ondertekenaar grondeigenaar
+D.10 Naam grondfinancier
+D.11 Ondertekenaar grondfinancier
+
+E. COMMERCIAL TERMS | COMMERCIËLE VOORWAARDEN
+
+E.1 Heat sales split (DE:Grower)
+E.2 Payment/pass-through term
+E.3 Effective Date
+
+E.4 Initial term
+E.5 Renewal periods
+E.6 Renewal notice
+E.7 Confidentiality period
+
+E.1 Verdeling warmteverkoop
+E.2 Betalingstermijn
+E.3 Ingangsdatum
+
+E.4 Initiële looptijd
+E.5 Verlengingsperioden
+E.6 Opzegtermijn verlenging
+E.7 Geheimhoudingstermijn
+
+Moerman Paprika B.V.
+27178957
+Harteveldlaan 16, 2671 VH Naaldwijk
+
+Jan Moerman
+Directeur
+☑
+ Sole | 
+
+☐
+
+ Joint
+
+Harteveldlaan 16, 2671 VH Naaldwijk
+8.5
+8.5
+N/A
+☐
+
+ Vegetables | 
+
+ Flowers | 
+
+ Plants
+
+☐
+
+☑
+
+☐
+
+ Enexis | 
+
+☐
+
+☐
+
+ Stedin | 
+
+ Liander | 
+
+☐
+Other
+871687510000012345
+WI-2024-ATO-00456
+
+4.8
+4.0
+1.0
+
+2.4
+2.0
+0.5
+
+4.8
+4.0
+1.0
+☑
+Other
+
+ Cable pooling | 
+
+☐
+
+ MLOEA | 
+
+☐
+
+55
+35
+15 °C (fixed)
+18
+☐
+
+ Yes | 
+
+☑
+
+ No | 
+
+☑
+
+ TBD
+
+ Full ownership | 
+
+Naaldwijk, Sectie B, Nr 4521
+☑
+Other
+☐
+ None | 
+Glastuinbouw
+
+ Mortgage | 
+
+☑
+
+☐
+
+☐
+
+ Other
+
+ Erfpacht | 
+
+☐
+
+250
+30
+150
+
+[____________]
+[____________]
+[____________]
+[____________]
+
+50 : 50
+30
+01-04-2026
+
+30 years (fixed)
+5 years each (fixed)
+5 years (fixed)
+2 years post-term (fixed)
+
+ 
+ 
+ 
+E.8 Withdrawal notice
+E.9 Withdrawal cure period
+E.10 ProjectBV incorporation
+E.11 Curtailment notice
+E.12 Max curtailment w/o consent
+
+E.8 Terugtrekkingskennisgeving
+E.9 Hersteltermijn
+E.10 Oprichting ProjectBV
+E.11 Kennisgeving inkorting
+E.12 Max inkorting zonder toestemming
+
+14 days (fixed)
+30 days (fixed)
+60 days (fixed)
+14 days (fixed)
+90 days (fixed)
+
+F. OPTIONAL PROVISIONS | OPTIONELE BEPALINGEN
+
+F.1 CHP lease
+F.1a CHP lease fee
+F.2 Grower co-investment
+F.2a Co-investment % (max 50%)
+
+F.1 WKK-lease
+F.1a WKK-leasevergoeding
+F.2 Co-investering Teler
+F.2a Co-investeringspercentage
+
+G. NOTICE ADDRESSES | ADRESSEN VOOR KENNISGEVINGEN
+
+Party / Partij
+
+Digital Energy
+
+Grower / Teler
+
+Address / Adres
+
+Baarerstrasse 43, 6300 Zug, CH
+
+Harteveldlaan 16, 2671 VH Naaldwijk
+
+Landowner / Grondeigenaar
+
+[per D.8]
+
+Land Financier / Grondfinancier
+
+[per D.10]
+
+Execution / Ondertekening
+
+Digital Energy Group AG
+
+____________________________
+Name: Jonathan Mattis Glender | Title: Chairman | Date:
+
+☑
+
+ Delete
+
+ Include | 
+
+☐
+EUR [____] per [____]
+☐
+[____] %
+
+ Include | 
+
+ Delete
+
+☑
+
+Email
+
+contact@digitalenergy.ch
+
+jan@moermanpaprika.nl
+
+[____________]
+
+[____________]
+
+Grower / Teler: [A.1]
+
+____________________________
+Name: [A.4] | Title: [A.5] | Date:
+
+— End of Annex A / Einde Bijlage A —
+
+

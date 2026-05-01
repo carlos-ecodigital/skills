@@ -8,6 +8,7 @@ from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
 from format_validators import (
+    _INTER_10PT_AVG_MM,
     run_all,
     validate_cell_overflow,
     validate_diacritics,
@@ -63,6 +64,22 @@ def test_table_widths_passes_on_exact_165mm():
 
 
 # ---------------------------------------------------------------------------
+# Inter font calibration constant
+# ---------------------------------------------------------------------------
+
+def test_inter_calibration_in_expected_range():
+    """Sanity-check that the measured Inter 10 pt avg advance is in a
+    plausible band (1.9–2.3 mm). Catches accidental UPM / point-size
+    regressions and guards against the fontTools-missing fallback being
+    silently shipped in CI.
+    """
+    assert 1.9 <= _INTER_10PT_AVG_MM <= 2.3, (
+        f"Inter 10pt calibration {_INTER_10PT_AVG_MM:.4f} mm outside "
+        f"expected 1.9–2.3 mm band — fontTools missing or font corrupt?"
+    )
+
+
+# ---------------------------------------------------------------------------
 # validate_cell_overflow
 # ---------------------------------------------------------------------------
 
@@ -81,7 +98,8 @@ def test_cell_overflow_flags_excessively_long_word():
     doc = Document()
     table = doc.add_table(rows=1, cols=1)
     table.columns[0].width = Mm(40)
-    # 25-char word at 2.3 mm/char = ~57.5 mm, overflows 40 mm column
+    # 24-char word at ~2.115 mm/char (measured Inter 10pt) ≈ 50.8 mm,
+    # overflows 40 mm column.
     table.rows[0].cells[0].text = "Supercalifragilisticexpi"
     issues = validate_cell_overflow(doc)
     assert any("longest word" in i for i in issues)

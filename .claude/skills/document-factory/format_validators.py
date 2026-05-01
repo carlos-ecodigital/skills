@@ -24,6 +24,7 @@ order.
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import List
 
 from docx.oxml.ns import qn
@@ -66,6 +67,67 @@ DEFAULT_MAX_LIST_DEPTH = 3
 #: Default expected font family.
 DEFAULT_FONT_FAMILY = FONT  # "Inter"
 
+#: Bundled Inter font path. Used by ``validate_cell_overflow`` to compute
+#: an evidence-backed average advance width. SIL OFL 1.1 licence
+#: bundled alongside.
+_INTER_FONT_PATH = (
+    Path(__file__).parent / "assets" / "fonts" / "Inter-Regular.ttf"
+)
+
+#: Specimen used to compute the average advance width — Latin alpha + digits
+#: + the NL diacritics that appear in real Sites-stream content.
+_INTER_SPECIMEN = (
+    "abcdefghijklmnopqrstuvwxyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    "0123456789"
+    "éëïöüç"
+)
+
+
+def _measure_inter_avg_advance_mm(point_size: float = 10.0) -> float:
+    """Compute the average advance width of ``_INTER_SPECIMEN`` at
+    ``point_size`` pt, in millimetres, against the bundled Inter Regular
+    .ttf.
+
+    Falls back to the legacy ``2.1 mm`` constant if ``fontTools`` is not
+    installed or the font file is missing — the validator stays
+    operational on minimal environments, with a known imprecise
+    estimate. CI installs ``fonttools`` and bundles the font, so the
+    fallback only matters for ad-hoc local runs without the dev deps.
+    """
+    try:
+        from fontTools.ttLib import TTFont  # type: ignore
+    except Exception:
+        return 2.1
+    if not _INTER_FONT_PATH.exists():
+        return 2.1
+    font = TTFont(str(_INTER_FONT_PATH))
+    cmap = font.getBestCmap()
+    hmtx = font["hmtx"]
+    upm = font["head"].unitsPerEm
+    total = 0
+    n = 0
+    for ch in _INTER_SPECIMEN:
+        cp = ord(ch)
+        if cp not in cmap:
+            continue
+        glyph_name = cmap[cp]
+        adv, _lsb = hmtx[glyph_name]
+        total += adv
+        n += 1
+    if n == 0:
+        return 2.1
+    avg_units = total / n
+    # advance(units) / UPM gives ems; * pt-size = pt; / 72 = inch; * 25.4 = mm
+    return avg_units / upm * point_size / 72.0 * MM_PER_INCH
+
+
+#: Pre-computed at import time so each ``validate_cell_overflow`` call is
+#: a constant lookup rather than an O(n) font walk. Re-measured on every
+#: import — measured value is authoritative; the legacy 5 % tolerance is
+#: removed since the constant is now empirical, not a guess.
+_INTER_10PT_AVG_MM = _measure_inter_avg_advance_mm(10.0)
+
 
 # ---------------------------------------------------------------------------
 # Individual validators
@@ -101,14 +163,18 @@ def validate_table_widths(doc, max_mm: float = DEFAULT_MAX_WIDTH_MM) -> List[str
 
 def validate_cell_overflow(doc, min_col_width_mm: float = 30.0) -> List[str]:
     """Detect cells whose longest single word is wider than the column.
-    Approximate heuristic: 2.1 mm per character at 10 pt Inter with ~5%
-    tolerance; flags true overflow risks (very long words in narrow
-    columns), not normal text. Word wrapping handles the lighter edge
-    cases; this catches only words Word cannot break without hyphenation.
+
+    Uses ``_INTER_10PT_AVG_MM`` — the average advance width measured at
+    import time against the bundled Inter Regular.ttf at 10 pt over a
+    Latin + NL-diacritic specimen. The legacy 5 % tolerance is removed:
+    the constant is empirical, not a guess.
+
+    Catches words Word cannot break without hyphenation (e.g. legal
+    compound nouns, slugged identifiers). Word wrapping handles the
+    lighter edge cases on its own.
     """
     issues: List[str] = []
-    mm_per_char = 2.1        # calibrated to 10 pt Inter measured widths
-    tolerance = 0.05         # 5 % — absorbs kerning + inter-word slack
+    mm_per_char = _INTER_10PT_AVG_MM
 
     for t_idx, table in enumerate(doc.tables):
         for c_idx, col in enumerate(table.columns):
@@ -126,7 +192,7 @@ def validate_cell_overflow(doc, min_col_width_mm: float = 30.0) -> List[str]:
                         if len(word) > longest:
                             longest = len(word)
             predicted_mm = longest * mm_per_char
-            if predicted_mm > width_mm * (1 + tolerance):
+            if predicted_mm > width_mm:
                 issues.append(
                     f"validate_cell_overflow: table {t_idx} col {c_idx} "
                     f"longest word {longest} chars ≈ {predicted_mm:.1f} mm "
