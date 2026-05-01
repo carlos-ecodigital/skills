@@ -224,3 +224,16 @@ All 5 types run the same linter; rule applicability varies by clause scope. Ever
 | Brand layer | Via `document-factory` (cover page, headers, footers) | Self-contained (pre-formatted bilingual template) |
 | Body mutability | Full (script builds from scratch) | Locked; REFUSE body modification |
 | Output name pattern | `YYYYMMDD_DEG_LOI-{Type}_{Company}_(STATUS).docx` | `DE-Site-HoT_Annex_A_{Company}.docx` + body copy |
+
+### Sites stream — quality gates (rc3 status)
+
+| Gate | Status | Where it lives | Wired in |
+|---|---|---|---|
+| **`[TBC]` fabrication gate** | **WIRED** | `sites/_shared/site_doc_base.normalise_placeholder` — canonical sanitiser; explicit branches for None / empty / `TODO(*)` / `[TBD_*]` / bool / int / list / dict; `[TBC]` is the canonical placeholder token. Routed through every cell-write boundary in LOI + HoT engines. | rc3.1 |
+| **Scaffolding-marker gate** | **WIRED (CI)** | `.github/workflows/legal-assistant-tests.yml` — fails the build on any `TODO(Phase ` or `TODO: delegate to ` marker on `sites/**/*.py` (excluding `tests/`). | rc3.1 |
+| **Render-logic-requires-tests tripwire** | **WIRED (CI)** | Same workflow. Triggers when `generate_site_loi.py` / `generate_site_hot.py` / `site_doc_base.py` change without a paired test change. Escape hatch: `[skip-test-check]` in any commit message. | rc3.1 |
+| **Bilingual cover + auto-margin layout** | **WIRED** | `document-factory/generate.py::add_cover(bilingual=True, ...)` + `bilingual_body.ensure_bilingual_layout(doc)`. Sites LOI engine consumes both. | rc3.2 |
+| **Schedule-table primitive** | **WIRED** | `bilingual_body.render_schedule_table(doc, columns_en, columns_nl, rows)`. Sections L + R use it. | rc3.2 |
+| **Template-as-data clause library** | **WIRED (§1 only)** | `sites/_shared/site_clause_library.py` + `sites/loi/templates/clauses/de-loi-site-v1.0.yaml`. §2–§7 migrate post-rc3. | rc3.3 |
+| **Font-metric calibration** | **WIRED** | `document-factory/format_validators.py::_INTER_10PT_AVG_MM` — measured from bundled Inter Regular.ttf via `fontTools` at import time. Used by `validate_cell_overflow`; replaces magic 2.1 mm + 5 % tolerance. | rc3.4 |
+| **Visual regression** | **ADVISORY (CI)** | `sites/tests/test_visual_regression.py` — renders Van Gog LOI + Moerman HoT through LibreOffice → pdfminer → diffs against committed `tests/goldens/*.txt`. Runs on a separate `visual-regression` CI job marked `continue-on-error: true`; mismatches surface in the log but do not block merge. | rc3.4 |

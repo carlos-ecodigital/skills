@@ -5,6 +5,244 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v4.0-rc3 — Architecture refinement complete (rc3.1 → rc3.4)
+
+The four-phase rc3 architectural refactor (plan: `plans/warm-splashing-riddle.md`)
+addressed eight audit items lifted from the rc2 review by relocating
+engine-local helpers onto their proper modules, gating future
+regressions in CI, and replacing magic-number heuristics with measured
+values. Each phase shipped on its own PR; this entry is the
+consolidated summary. v4.0-rc3 is **complete**.
+
+| Phase | PR | Theme |
+|---|---|---|
+| rc3.1 | #30 | Shared utilities onto chassis (`SiteDocBase`) + CI coverage for `sites/` |
+| rc3.2 | (off main) | document-factory primitives (bilingual cover, schedule table, ensure_bilingual_layout) + LOI engine wiring |
+| rc3.3 | (off main) | Template-as-data: `site_clause_library` YAML loader + §1 Parties proof of concept |
+| rc3.4 | this PR | HoT parity polish + advisory visual-regression CI + fontTools-measured `validate_cell_overflow` + final docs pass |
+
+---
+
+## v4.0-rc3.4 — 2026-04-30 — Sites Stream: HoT parity + visual regression + validator calibration
+
+**Phase 4 of the rc3 refactor (final).** Closes Items 8 + 9 + 10 of the
+plan; consolidates the rc3.1–rc3.4 documentation in one combined pass.
+
+### HoT parity (Item 9)
+
+Verified against rc3.1's Phase 1c work — every `_set_paragraph_text`
+call in `populate_annex_a()` already routes through
+`sdb.normalise_placeholder` (Pass 1 cell-fill, Pass 2 header table,
+Pass 3 notice-address table). `write_qa_report()` emits only field-id
+strings + warnings, so raw values never reach the QA path. **No fix
+required** — verification recorded in commit history.
+
+### Visual-regression test (Item 10)
+
+- New `sites/tests/test_visual_regression.py` (~210 LOC). Runs each
+  fixture end-to-end: `deal.yaml → engine.main() → .docx → soffice
+  --headless --convert-to pdf → pdfminer.six text extract → set-
+  membership compare to tests/goldens/<slug>.txt`.
+- Two fixtures wired:
+  - **Van Gog LOI** via `sites/loi/examples/deal_van-gog.yaml`.
+  - **Moerman HoT** via `sites/tests/fixtures/phase_g_moerman.yaml`
+    (body + Annex A concatenated text).
+- `GOLDEN_REGEN=1` flag rewrites goldens from current output (manual
+  refresh path; CI never sets this).
+- Skips gracefully when `libreoffice` / `soffice` is missing or
+  `pdfminer.six` is uninstalled — local dev without the dependencies
+  still runs all other suites green.
+- Initial goldens captured locally against the rc3.4 engine output:
+  `goldens/van_gog_loi.txt` (835 lines) + `goldens/moerman_hot.txt`
+  (1,245 lines).
+
+### CI workflow (`legal-assistant-tests.yml`)
+
+- Main `test` job pip-installs `fonttools` + `pdfminer.six` so the
+  validator's calibration pass and the visual-regression test collect
+  cleanly. PyMuPDF coverage retained.
+- New `visual-regression` job (`needs: test`, `continue-on-error: true`):
+  - Ubuntu runner; installs `libreoffice` via apt
+  - Runs `pytest sites/tests/test_visual_regression.py -v`
+  - **Advisory only** — golden mismatches surface in the CI log but do
+    not block merge. LibreOffice font-render flakiness across runners
+    makes hard gating impractical (per the plan's user-decision
+    section).
+
+### `validate_cell_overflow` font-metric calibration (Item 8 — Option A)
+
+- **Bundled Inter Regular.ttf** at `document-factory/assets/fonts/`
+  (~876 KB Google Fonts variable build, default axis weight=400 →
+  Regular). SIL OFL 1.1 licence text bundled at
+  `LICENCE-Inter.txt`.
+- `fontTools` declared as dev dep in CI's pip install step.
+- New module-level `_INTER_10PT_AVG_MM` — average advance width
+  measured at import time across `[a-zA-Z0-9]` + NL diacritics
+  (`éëïöüç`). Resolves to ~2.115 mm. Used by `validate_cell_overflow`
+  in place of the magic 2.1 constant.
+- **5 % tolerance removed.** The constant is empirical, not a guess —
+  re-introducing slack would re-introduce the fudge factor the audit
+  flagged.
+- Graceful fallback to 2.1 mm when `fontTools` is missing OR the asset
+  is absent (local dev without the dev deps stays operational).
+- New regression test `test_inter_calibration_in_expected_range`
+  asserts the constant lands in 1.9–2.3 mm — catches font swaps,
+  UPM regressions, and silent-fallback activation in CI.
+
+### Tests
+
+- 17 format-validator tests (was 16) — added the calibration sanity
+  test.
+- 2 visual-regression tests — initial goldens captured.
+- All other suites green: 22 HoT + 25 LOI + 130 _shared + 95 parsers +
+  40 integration (was 38, +2 visual-regression collected here too) +
+  434 Sales + 175 document-factory.
+
+### Final docs pass
+
+Single combined update of:
+
+- `legal-assistant/CHANGELOG.md` — this entry + rc3.2 + rc3.3 + the
+  consolidated rc3-complete header above.
+- `legal-assistant/SKILL.md` — refresh stale rc1/rc2 wording where
+  rc3 changed the picture; no behaviour change.
+- `legal-assistant/ASSEMBLY_GUIDE.md` §12 Sites — Section R is a
+  schedule table (rc3.2), cover is bilingual (rc3.2), placeholder
+  canon is `[TBC]` (rc3.1), §1 Parties is data-driven via
+  `site_clause_library` (rc3.3); §12.7 obsolete-engine caveat
+  removed.
+- `legal-assistant/FEATURE_MATRIX.md` — `[TBC] fabrication gate`
+  flipped to **WIRED** for Sites; new rows for **Visual regression**
+  and **Scaffolding-marker gate**.
+
+---
+
+## v4.0-rc3.3 — 2026-04-30 — Sites Stream: template-as-data infra + §1 Parties
+
+**Phase 3 of the rc3 refactor.** Closes Item 6 (template `.md` files
+not consumed at runtime) on the **phased delivery** decided at plan
+time: rc3 ships the YAML loader infrastructure + migrates §1 Parties
+as proof of concept; §2–§7 migrate incrementally post-rc3 without a
+re-release gate.
+
+### New module — `sites/_shared/site_clause_library.py`
+
+- `Clause` dataclass: `section_id`, `heading_en`, `heading_nl`,
+  `en: list[str]`, `nl: list[str]`, `asset_gate: Optional[dict]`,
+  `render_order: int`.
+- `load_clauses(path: Path) -> dict[str, Clause]` — YAML loader.
+  Single-process cache to avoid re-parsing on every `build_document()`.
+- `get_clause(section_id: str, lang: str = "en") -> list[str]` —
+  `[TBC]` fallback when section absent.
+- `render_bilingual_section(doc, section_id, **placeholder_subs)` —
+  pulls the clause, substitutes `{{dotted.path}}` placeholders against
+  a context dict, and dispatches to `render_bilingual_clause`. No
+  Jinja2 dependency — Jinja-lite regex substitution.
+
+### New data file — `sites/loi/templates/clauses/de-loi-site-v1.0.yaml`
+
+- §1 Parties (1.1, 1.2, 1.3, 1.4) verbatim from Van Gog rc2 strings;
+  EN + NL copy lifted directly from `site_clause_library.md`.
+- Schema per the plan: `clauses: [{section_id, heading_en, heading_nl,
+  en, nl, asset_gate}, ...]`.
+
+### Engine wiring — `sites/loi/generate_site_loi.py`
+
+- `_clause_1_parties()` deleted. Section 1 render block becomes
+  `site_clause_library.render_bilingual_section(doc, ["1.1", "1.2",
+  "1.3", "1.4"], heading_en="1. Parties", heading_nl="1. Partijen",
+  provider=provider, ...)`.
+- §2–§7 retained as engine-local `_clause_*()` functions; each gains a
+  `TODO(rc3-migration)` stub comment pointing to the YAML + library.
+  Migration continues in post-rc3 PRs (one section ≈ one PR).
+
+### Test discipline
+
+- `sites/_shared/tests/test_site_clause_library.py` — 10 tests (load,
+  get_clause hit/miss, placeholder subs EN+NL, asset_gate ignored at
+  load, render_bilingual_section dispatch, etc.).
+- `sites/loi/tests/test_generate_site_loi_v0_1.py` — existing 25 tests
+  stay green; §1 text bit-identical to rc2 (the YAML is a verbatim
+  copy of the inline strings).
+
+### Out of scope (deferred, per plan)
+
+- §2–§7 migration — designed; one PR per section; no re-release gate.
+- `site_clause_library.md` lint step asserting the .md's verbatim
+  blocks match the YAML.
+- Multi-language beyond EN/NL.
+
+---
+
+## v4.0-rc3.2 — 2026-04-30 — Sites Stream: document-factory primitives + LOI engine wiring
+
+**Phase 2 of the rc3 refactor.** Closes Items 2 + 3 + 4 of the plan.
+
+### `document-factory/generate.py::add_cover` — bilingual extension
+
+- New optional kwargs: `bilingual: bool = False`, `title_nl:
+  Optional[str] = None`, `subject_nl: Optional[str] = None`,
+  `party_labels: str = "en"` (`"en" | "nl" | "bilingual"`),
+  `render_classification: bool = True`.
+- Defaults preserve current behaviour — non-breaking to colocation +
+  MIA callers.
+- When `bilingual=True`: EN title above NL title (stacked, matching
+  Van Gog layout); same stacking for subject. Party labels become
+  bilingual ("Between / Tussen:" / "And / En:").
+- When `render_classification=False` (rc3 default for Sites callers
+  per memory rule `feedback_cover_page_title.md`): classification
+  block omitted entirely from the footer. Existing colocation callers
+  pass `render_classification=True` explicitly — no behaviour change.
+
+### `document-factory/bilingual_body.py` — new primitives
+
+- `ensure_bilingual_layout(doc) -> None` — idempotent. Sets 20 mm L/R
+  + 25 mm T / 20 mm B on every section. Internal `id(doc)` set
+  prevents redundant re-application.
+- `render_bilingual_clause()` first-call path now invokes
+  `ensure_bilingual_layout(doc)` transparently — engine no longer
+  needs to set margins by hand.
+- `render_schedule_table(doc, columns_en, columns_nl, rows) -> None`
+  — true bilingual N-column schedule:
+  - Bilingual header row (Cobalt fill) with EN on line 1, NL on line 2
+    per cell.
+  - One data row per `rows[i]`. Multi-value cells (lists) render as
+    inline bullet sublists.
+  - Reuses `_apply_table_chrome`; tagged with marker
+    `__bilingual_body__` for audit exemption.
+
+### LOI engine wiring — `sites/loi/generate_site_loi.py`
+
+- `_set_narrow_margins()` deleted (moved to `ensure_bilingual_layout`).
+- Cover call rewritten to use the new bilingual kwargs:
+  `add_cover(..., bilingual=True, title_nl="Intentieverklaring",
+  subject_nl="voor een Digital Energy Center-project",
+  party_labels="bilingual", render_classification=False)`. Inline NL
+  subtitle block + manual page break deleted.
+- Section R rewritten as `render_schedule_table(doc, columns_en=["Party",
+  "Roles", "Contributions", "Returns", "Signatory"], columns_nl=...,
+  rows=[[sp.legal_name, ..., ...], ...])`. Prose-sentence builder
+  deleted.
+- Section L rewritten similarly via `render_schedule_table` with
+  Location / Address / DSO / Municipality / Zoning columns.
+
+### Tests
+
+- `document-factory/test_add_cover_bilingual.py` — 8 tests covering
+  bilingual title rendering, NL subtitle, party-label modes,
+  monolingual default unchanged, classification opt-out, page break.
+- `document-factory/test_bilingual_body.py` — extended with 6
+  `render_schedule_table` tests (column-count match, multi-value cell
+  bullets, empty rows, Cobalt header shading, marker set).
+- `document-factory/test_ensure_bilingual_layout.py` — 5 tests
+  (idempotent on second call, 20 mm L/R applied, no regression on
+  colocation LOI + MIA).
+- All 25 LOI tests stay green; signature page renders 3 Van Gog
+  entities each with their bilingual role-label header on
+  regeneration.
+
+---
+
 ## v4.0-rc3.1 — 2026-04-22 — Sites Stream: shared chassis + CI coverage
 
 **Phase 1 of the rc3 architectural refactor** (plan: `plans/warm-splashing-riddle.md`).
