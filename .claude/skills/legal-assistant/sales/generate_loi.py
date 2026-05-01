@@ -2073,7 +2073,7 @@ class LOI:
             self.bp("4.2 Change of Control. ",
                      f"If, during the term of this LOI, a Competitor acquires Control (as defined in Clause 1.1, \u201cAffiliate\u201d) of the {self.party}, Digital Energy may terminate this LOI by written notice with immediate effect. Upon such termination, the confidentiality and non-circumvention obligations in Clauses 6 and 7 shall continue for their stated survival periods.")
             self.bp("4.3 Associated Counterparties. ",
-                     f"The {self.party} acknowledges that Digital Energy maintains relationships with Associated Counterparties at each DEC site. The sharing of any Site Identifier by Digital Energy shall be deemed an introduction of all Associated Counterparties for that site for the purposes of Clause 7.")
+                     f"The {self.party} acknowledges that Digital Energy maintains relationships with Associated Counterparties at each DEC site. The sharing of any Site Identifier by Digital Energy shall constitute a deemed introduction for the purposes of Clause 7, on the terms set out in Clause 7.3 (Deemed Introduction by Category, including the named-list backstop).")
             self.bp("4.4 Governance. ", "The Parties intend to establish a joint steering committee or equivalent governance mechanism, the terms of which will be set out in the MSA.")
             self.bp("4.5 Implementation Roadmap. ", "Following execution of this LOI, the Parties intend to proceed as follows:")
             self.p("(a) Commercial scoping (target: 30 days post-LOI) \u2014 The Parties will define the partnership scope, target customer segments, capacity estimates, and economic framework.", bold=False)
@@ -2087,7 +2087,7 @@ class LOI:
             # v3.2: Cl. 4.2 arrows replaced with institutional prose + numbered list.
             self.bp("4.2 Contractual Sequence. ", "The Parties acknowledge the intended progression of commercial instruments:")
             self.p("(a) this LOI, setting out non-binding commercial intent;")
-            self.p("(b) a Sales Order Form or equivalent binding capacity commitment with indicative pricing;")
+            self.p("(b) a Sales Order Form or equivalent non-binding capacity and pricing summary, prepared during technical scoping for planning purposes;")
             self.p("(c) the Master Services Agreement (MSA), containing definitive commercial terms; and")
             # v3.7.0: include_schedule-aware phrasing (mirrors clause4_ss §4.2(d))
             if self.d.get("choices", {}).get("include_schedule", True) is False:
@@ -2130,7 +2130,7 @@ class LOI:
         self.bp("5.2 Assignment. ", f"Neither Party may assign its rights or obligations under this LOI without the prior written consent of the other Party, except that:")
         self.p("(a) Digital Energy may assign this LOI, or any rights under it, to any Financing Party or security trustee as security for project finance obligations; and")
         self.p(f"(b) Digital Energy may assign this LOI to any Affiliate or special-purpose vehicle within its corporate group without the {self.party}'s consent, provided Digital Energy remains liable for the performance of the assignee's obligations.")
-        self.bp("5.3 Lender Acknowledgment. ", f"The {self.party} acknowledges and agrees that, upon Digital Energy's written request, the {self.party} shall negotiate in good faith and execute a direct agreement (or lender acknowledgment letter) with Digital Energy's Financing Party within 30 Business Days of such request. Such direct agreement may include, as is customary in project finance transactions: (a) step-in rights for the Financing Party upon a Provider default; (b) cure periods in favour of the Financing Party; and (c) information rights enabling the Financing Party to monitor the commercial relationship. The terms of any such direct agreement shall be commercially reasonable and consistent with market practice for project finance transactions.")
+        self.bp("5.3 Lender Acknowledgment. ", f"The {self.party} acknowledges and agrees that, upon Digital Energy's written request, the {self.party} shall negotiate in good faith and execute a direct agreement (or lender acknowledgment letter) with Digital Energy's Financing Party within 30 Business Days of such request. Such direct agreement shall be limited to the following customary items only: (a) notice of Digital Energy default; (b) cure periods in favour of the Financing Party; (c) step-in and substitution rights, limited to the performance of Digital Energy's obligations under the MSA; and (d) information rights enabling the Financing Party to monitor the commercial relationship. No direct agreement shall, without the {self.party}'s separate written consent, alter, amend, or worsen the {self.party}'s pricing, service levels, liability profile, indemnity scope, or payment obligations under the MSA. The terms of any such direct agreement shall be commercially reasonable and consistent with market practice for project finance transactions.")
 
     def clause5_ss(self):
         """v3.4: Cl. 5 for Strategic Supplier — Supply Chain and Delivery Commitment.
@@ -2168,13 +2168,20 @@ class LOI:
             f"continuity from qualified suppliers materially supports that "
             f"financing. Upon Digital Energy's written request, the {self.party} "
             f"shall negotiate in good faith with Digital Energy's Financing "
-            f"Party to confirm supply arrangements on financed projects, "
-            f"including reasonable cooperation with customary direct-agreement "
-            f"or acknowledgment mechanics (step-in, cure periods, information "
-            f"rights), within 30 Business Days of such request. The terms of "
-            f"any such direct agreement shall be commercially reasonable and "
-            f"consistent with market practice for project finance supply "
-            f"arrangements."
+            f"Party to confirm supply arrangements on financed projects within "
+            f"30 Business Days of such request. Such direct agreement shall be "
+            f"limited to the following customary items only: (a) notice of "
+            f"Digital Energy default; (b) cure periods in favour of the "
+            f"Financing Party; (c) step-in and substitution rights, limited to "
+            f"the performance of Digital Energy's obligations under the "
+            f"Framework Agreement; and (d) information rights enabling the "
+            f"Financing Party to monitor the supply relationship. No direct "
+            f"agreement shall, without the {self.party}'s separate written "
+            f"consent, alter, amend, or worsen the {self.party}'s pricing, "
+            f"service levels, liability profile, indemnity scope, or payment "
+            f"obligations under the Framework Agreement. The terms of any such "
+            f"direct agreement shall be commercially reasonable and consistent "
+            f"with market practice for project finance supply arrangements."
         )
 
     def clause6(self):
@@ -2288,7 +2295,7 @@ class LOI:
             self.p(f"(b) circumvent, avoid, or bypass Digital Energy in order to deal directly or indirectly with any Associated Counterparty in connection with the development, ownership, or operation of colocation or energy infrastructure on or adjacent to a site identified by Digital Energy.")
 
         self.bp("7.2 Duration. ", f"The obligations in this Clause 7 shall continue for {nc_dur} after the earlier of: (a) the expiry or termination of this LOI; or (b) the expiry or termination of the {downstream}, if one is executed.")
-        self.bp("7.3 Deemed Introduction. ", f"Digital Energy's sharing of any Site Identifier with the {self.party} shall constitute a deemed introduction of all Associated Counterparties for that site. Digital Energy is not required to separately name each Associated Counterparty.")
+        self.bp("7.3 Deemed Introduction by Category. ", f"Digital Energy's sharing of any Site Identifier with the {self.party} shall constitute a deemed introduction of all Associated Counterparties for that site, as defined by category in Clause 1 (Definitions). Digital Energy is not required to name each Associated Counterparty individually. Upon the {self.party}'s written request, Digital Energy shall, within ten (10) Business Days, provide a list of the named Associated Counterparties for the relevant Site Identifier, to enable the {self.party} to comply with this Clause 7.")
 
         if self.t == "Distributor":
             self.bp("7.4 Scope \u2014 Private and Public Bodies. ", "The non-circumvention obligations in Clause 7.1 apply to:")

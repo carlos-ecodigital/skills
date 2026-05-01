@@ -5,6 +5,28 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.7.5 — 2026-04-30 (back-mirror of staging PR #81 v3.7.3)
+
+Back-mirror of board-advisor (Santiago) feedback on the Polarise Wholesale LOI (2026-04-23 review, locked with Jelmer + Carlos 2026-04-28). Originally shipped to staging on 2026-04-28 as PR #81 v3.7.3; never mirrored upstream — caught during 2026-04-30 cross-repo audit (PRINCIPLES.md #1 mirror-discipline violation). Closing now. Template filename version stays `DE-LOI-{Type}-v3.2`.
+
+Three clause refinements that reduce customer-counsel pushback without weakening DE's project-finance bankability or non-circumvention protection.
+
+### Changed
+- **Cl. 4.2(b) Wholesale — SOF reframed as non-binding planning instrument.** Pre-v3.7.5 text described the Sales Order Form as "binding capacity commitment with indicative pricing", which conflicted with Cl. 4.6 (capacity reserved only at MSA). New text: "non-binding capacity and pricing summary, prepared during technical scoping for planning purposes". Aligns 4.1, 4.2, 4.6 around a single principle: capacity reserved at MSA execution, not before.
+- **Cl. 5.3 Lender Acknowledgment (EU / DS / WS) — closed-list scope with no-worse-off carve-out.** Pre-v3.7.5 used open-ended "may include, as is customary in project finance" with three illustrative items. New text uses closed list "shall be limited to the following customary items only" (notice of default, cure periods, step-in/substitution, information rights), bounds step-in/substitution to performance of DE's MSA obligations, and adds explicit no-worse-off carve-out covering pricing, service levels, liability profile, indemnity scope, and payment obligations. Mirrors advisor recommendation plus indemnity-scope addition (Jelmer) and step-in scope bound (Jelmer).
+- **Cl. 5.3 Financing Continuity Acknowledgment (SS) — same closed-list shape, Framework-Agreement-bounded.** SS variant restructured in parallel with the EU/DS/WS variant; step-in/substitution bounded to performance of DE obligations under the Framework Agreement.
+- **Cl. 7.3 Deemed Introduction → Deemed Introduction by Category.** Pre-v3.7.5 text triggered deemed introduction of "all Associated Counterparties" without naming, which sophisticated customer counsel could not reconcile with their compliance posture. New text retains category-based deemed introduction (categories defined in Cl. 1) and adds a 10-Business-Day named-list backstop on Customer's written request.
+- **Cl. 4.3 Distributor — cross-references Cl. 7.3.** Distributor's standalone restatement of the deemed-introduction mechanic now defers to Cl. 7.3 (single source of truth, inherits the new named-list backstop).
+
+### Added
+- `tests/test_v3_7_3_advisor_feedback.py` — 21 regression tests mirroring staging's coverage. Filename retains `v3_7_3` (matches staging) so semantic mapping back to advisor feedback is preserved despite the upstream version-number gap.
+
+### Verified
+- 513/513 pytest tests pass on upstream.
+- 9 goldens regenerated (EU / WS / DS / DS-referral / SS / SS-infrapartners / Polarise / Cudo / SAG); EP unchanged. v3.7.x kitchen-sink + retrospective fixtures regenerated to reflect new clause text.
+
+---
+
 ## v3.7.4 — 2026-04-30
 
 HubSpot dedup-check enforced before any company create. Closes silent-duplicate failure modes observed when counterparty domain is missing, mistyped, or shared across parent/subsidiary entities. User instruction 2026-04-30. Template filename version stays `DE-LOI-{Type}-v3.2`.

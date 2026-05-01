@@ -531,9 +531,9 @@
       "i": 56,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "d478caced955be4a",
-      "text_len": 89,
-      "text_prefix": "(b) a Sales Order Form or equivalent binding capacity commitment with indicative"
+      "text_hash": "77fa423064e21ec2",
+      "text_len": 135,
+      "text_prefix": "(b) a Sales Order Form or equivalent non-binding capacity and pricing summary, p"
     },
     {
       "alignment": null,
@@ -684,8 +684,8 @@
       "i": 73,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "0311d9a7a5c2e06d",
-      "text_len": 736,
+      "text_hash": "f5933029e8141913",
+      "text_len": 1025,
       "text_prefix": "5.3 Lender Acknowledgment. The Customer acknowledges and agrees that, upon Digit"
     },
     {
@@ -954,9 +954,9 @@
       "i": 103,
       "space_after_pt": null,
       "space_before_pt": null,
-      "text_hash": "57d3568c87a24bff",
-      "text_len": 257,
-      "text_prefix": "7.3 Deemed Introduction. Digital Energy's sharing of any Site Identifier with th"
+      "text_hash": "14e0222568447cce",
+      "text_len": 552,
+      "text_prefix": "7.3 Deemed Introduction by Category. Digital Energy's sharing of any Site Identi"
     },
     {
       "alignment": null,
