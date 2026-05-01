@@ -136,10 +136,11 @@ def test_r29_fetch_failure_flagged():
 def test_r30_double_period_caught():
     """R-30: body contains '..' (not '...') -> FAIL."""
     data = _ws_base()
-    # Inject double period into description
-    data["counterparty"]["description"] = (
-        "is a GPU cloud provider.. offering compute [TBC -- synthetic example]"
-    )
+    # v3.8.0: inject double period via slot 5 claim (description removed).
+    data["counterparty"]["recital_b"]["bargain_relevant_fact"] = {
+        "claim": "with announced anchor capacity.. across European sites",
+        "source": {"tier": 1, "url": "https://example.com/", "retrieved": "2026-05-01"},
+    }
     loi, doc = _build_loi(data)
     from generate_loi import _extract_text
     text = _extract_text(doc)
@@ -224,9 +225,12 @@ def test_r11_certifications_in_source_populated():
     """certifications_in_source(intake) returns list of detected ISO/certs."""
     from generate_loi import certifications_in_source
     data = _ws_base()
-    data["counterparty"]["description"] = (
-        "certified under ISO 27001 and ISO 14001, pursuing SOC 2 [TBC -- synthetic example]"
-    )
+    # v3.8.0: certifications scanned across slot fields, not description.
+    # Inject via slot 5 claim.
+    data["counterparty"]["recital_b"]["bargain_relevant_fact"] = {
+        "claim": "certified under ISO 27001 and ISO 14001, pursuing SOC 2",
+        "source": {"tier": 1, "url": "https://example.com/", "retrieved": "2026-05-01"},
+    }
     certs = certifications_in_source(data)
     assert isinstance(certs, list)
     assert len(certs) >= 1
@@ -407,9 +411,11 @@ def _ws_with_brochure_pillar(pillar_key: str = "pillar_1") -> dict:
 def test_brochure_token_accepted_by_r23():
     """internal:brochure_* token in source_map -> R-23 does NOT fail (tier-2 accepted)."""
     data = _ws_with_brochure_pillar("pillar_1")
-    data["counterparty"]["description"] = (
-        "operates 22 MW of GPU capacity across European sites [TBC -- synthetic example]"
-    )
+    # v3.8.0: inject material claim via slot 5 (description removed).
+    data["counterparty"]["recital_b"]["bargain_relevant_fact"] = {
+        "claim": "with 22 MW of GPU capacity across European sites",
+        "source": {"tier": 2, "url": "internal:brochure_20260501_test", "retrieved": "2026-05-01"},
+    }
     status, lines = _qa(data)
     r23_fail = [l for l in lines if "R-23" in l and "[FAIL]" in l]
     assert not r23_fail, (

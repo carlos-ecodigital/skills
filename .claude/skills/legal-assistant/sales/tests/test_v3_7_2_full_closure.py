@@ -223,11 +223,12 @@ def test_r29_fetch_exception_info_not_warn(simple_ws_intake):
 
 def test_density_terse_warns_on_long_desc(simple_ws_intake):
     simple_ws_intake.setdefault("choices", {})["recital_b_density"] = "terse"
-    # Use a very long description (200+ words)
-    simple_ws_intake["counterparty"]["description"] = (
-        "is a company that does " + ("various things in various ways " * 40) +
-        "with many partnerships"
-    )
+    # v3.8.0: density measurement now spans slot block. A long slot-5
+    # claim makes the assembled recital exceed terse band.
+    simple_ws_intake["counterparty"]["recital_b"]["bargain_relevant_fact"] = {
+        "claim": "with " + ("various things in various ways " * 40),
+        "source": {"tier": 1, "url": "https://example.com/", "retrieved": "2026-05-01"},
+    }
     loi, doc, _ = _build(simple_ws_intake)
     _, lines = generate_loi.qa_lint(
         doc, simple_ws_intake, loi.qa_findings, loi.overrides, loi.override_reason,

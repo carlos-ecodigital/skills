@@ -1,63 +1,79 @@
-# Brochure-Sourced Recital B — v3.7 regression intake
-#
-# Exercises v3.7.0 brochure source_map token:
-#   source_map[pillar_N]: ["internal:brochure_{YYYYMMDD}_{slug}"]
-# R-23 passes (tier-2 source accepted); R-24 WARNs that tier-1 public
-# corroboration is still needed before signing.
-
 type: Wholesale
-
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  reg_number: "98580086"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  reg_number: '98580086'
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "BrochureCo Compute"
-  short: "BrochureCo"
-  address: "[TBC]"
-  jurisdiction: "[TBC]"
-  reg_number: "[TBC]"
-  contact_name: "[TBC]"
-  signatory_name: "[TBC]"
-  signatory_title: "[TBC]"
-  description: >-
-    is an AI compute operator whose public web presence is minimal but whose
-    operator-supplied GTC 2026 brochure (dated 2026-04-17, nine pages) sets
-    out identity, capacity targets, site list, and platform support across
-    NVIDIA H100, H200, B200, and GB200/GB300 NVL72 architectures. Brochure
-    content is treated as tier-2 per the counterpart-description-framework
-    and pillar claims will require tier-1 public corroboration before signing
+  name: BrochureCo Compute
+  short: BrochureCo
+  address: '[TBC]'
+  jurisdiction: '[TBC]'
+  reg_number: '[TBC]'
+  contact_name: '[TBC]'
+  signatory_name: '[TBC]'
+  signatory_title: '[TBC]'
   source_map:
-    pillar_1: ["internal:brochure_20260417_brochureco"]
-    pillar_2: ["internal:brochure_20260417_brochureco"]
+    pillar_1:
+    - internal:brochure_20260417_brochureco
+    pillar_2:
+    - internal:brochure_20260417_brochureco
     pillar_3:
-      - "internal:brochure_20260417_brochureco"
-      - "https://example.com/brochureco-press-release"
-    pillar_4: ["internal:brochure_20260417_brochureco"]
-    pillar_5: ["internal:brochure_20260417_brochureco"]
-
+    - internal:brochure_20260417_brochureco
+    - https://example.com/brochureco-press-release
+    pillar_4:
+    - internal:brochure_20260417_brochureco
+    pillar_5:
+    - internal:brochure_20260417_brochureco
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: '[TBC]'
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
-  recital_a_variant: "default"
-
+  recital_a_variant: default
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
-
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027
 commercial:
-  indicative_mw: "4.8 MW IT"
-  min_term: "5 years"
-
+  indicative_mw: 4.8 MW IT
+  min_term: 5 years
 choices:
   existing_nda: false
-  recital_b_density: "standard"
-
+  recital_b_density: standard
 notes:
-  brochure_path: "Fundraise DE/02_Analysis/Counterparty_Research/brochureco/GTC26_brochure_20260417.pdf"
+  brochure_path: Fundraise DE/02_Analysis/Counterparty_Research/brochureco/GTC26_brochure_20260417.pdf

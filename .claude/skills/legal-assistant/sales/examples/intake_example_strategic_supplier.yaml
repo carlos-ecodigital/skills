@@ -1,102 +1,89 @@
-# LOI Generation Intake — Strategic Supplier Example (DE-LOI-SS-v1.0)
-# Seeded from the InfraPartners profile (regenerated as SS under v3.2).
-# v3.2 engine: produces cover + Recital A + Recital B automatically.
-# Clauses 1–8 + Schedule 1 drafted from the markdown template at:
-#   templates/DE-LOI-StrategicSupplier-v1.0_TEMPLATE.md
-
 type: StrategicSupplier
-
-# --- Provider ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  kvk: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty ---
-# Recital B should follow _shared/counterpart-description-framework.md:
-# 5 pillars, 80–150 words, supplier-tuned (pillar 3 emphasis: manufacturing /
-# engineering track record + delivered projects + capability scale).
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  kvk: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "InfraPartners LLC"
-  short: "InfraPartners"
-  address: "1 Canada Square, Canary Wharf, London E14 5AB, United Kingdom"
-  jurisdiction: "England and Wales"
-  reg_type: "Companies House"
-  reg_number: "00000000"
-  contact_name: "TBC"
-  contact_title: "Chief Executive Officer"
-  salutation: "TBC"
-  signatory_name: "TBC"
-  signatory_title: "Chief Executive Officer"
-  # v3.4: CORRECTED — removed "80% off-site completion" (tier-2 only — AInvest
-  # article, not on infrapartners.llc itself) and "Ready-for-Service within 90
-  # days" (unsourced — no tier-1 InfraPartners-attributed source found).
-  # Jurisdiction [TBC] flagged for signing-stage confirmation.
-  description: >-
-    is a digital-infrastructure company founded in 2018, headquartered in
-    London with offices in Dublin, Cluj, and Houston. InfraPartners designs
-    and delivers prefabricated, modular data-centre solutions for AI
-    workloads, with manufacturing operations in the United States and Romania.
-    InfraPartners' announced pipeline includes a 60 MW AI data centre in
-    Glomfjord, Norway, in partnership with Nscale, and a combined target of
-    over 100 MW of AI data-center projects across EMEA and North America, in
-    partnership with Caddis Cloud Solutions. The jurisdiction of incorporation
-    and registration number of Infrapartners LLC shall be confirmed in the
-    Definitive Documentation [TBC]
-  # v3.4: source_map enforces R-23 fabrication gate. Every material numeric
-  # claim in the description above is backed by a tier-1 URL here.
+  name: InfraPartners LLC
+  short: InfraPartners
+  address: 1 Canada Square, Canary Wharf, London E14 5AB, United Kingdom
+  jurisdiction: England and Wales
+  reg_type: Companies House
+  reg_number: '00000000'
+  contact_name: TBC
+  contact_title: Chief Executive Officer
+  salutation: TBC
+  signatory_name: TBC
+  signatory_title: Chief Executive Officer
   source_map:
-    pillar_1:  # identity & scale
-      - "https://www.linkedin.com/company/infrapartnersllc"
-    pillar_2:  # core business
-      - "https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html"
-    pillar_3:  # track record / pipeline
-      - "https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway"
-      - "https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html"
-    pillar_4: "inferred from Phase 1 (Provider supply-chain de-risking)"
-    pillar_5: "[TBC]"
-
-# --- Supplier-specific ---
+    pillar_1:
+    - https://www.linkedin.com/company/infrapartnersllc
+    pillar_2:
+    - https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html
+    pillar_3:
+    - https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway
+    - https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html
+    pillar_4: inferred from Phase 1 (Provider supply-chain de-risking)
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: England and Wales
+      registration:
+        type: Companies House
+        number: '00000000'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 supplier:
-  capability_category: "modular_infra"
-  core_capability: >-
-    modular DEC infrastructure design and engineering, off-site prefabrication
-    and factory manufacturing, on-site assembly and integration, commissioning
-    support, and ongoing design iteration for next-generation accelerator
-    architectures
+  capability_category: modular_infra
+  core_capability: modular DEC infrastructure design and engineering, off-site prefabrication
+    and factory manufacturing, on-site assembly and integration, commissioning support,
+    and ongoing design iteration for next-generation accelerator architectures
   strategic_purposes:
-    - "engineering_integration"
-    - "pipeline_visibility"
-  lead_time_target: "Ready-for-Service within 90 days of site-preparation completion"
-  volume_indicative: "indicative target of 5–10 modular DEC units per year"
-  geographic_coverage: "Europe, Middle East, and Africa (EMEA)"
-
-# --- Choices ---
+  - engineering_integration
+  - pipeline_visibility
+  lead_time_target: Ready-for-Service within 90 days of site-preparation completion
+  volume_indicative: "indicative target of 5\u201310 modular DEC units per year"
+  geographic_coverage: Europe, Middle East, and Africa (EMEA)
 choices:
-  joint_ip: "foreground"
+  joint_ip: foreground
   exclusivity: false
   existing_nda: false
-  # bespoke_closing: ""   # optional — linter-checked (R-5/R-6/R-9)
-
-# --- Programme ---
-# v3.7.0: Recital A is library-sourced (single canonical body + SS tail, v3.4).
-#   recital_a_variant: "default"  is the only production value.
-#   Legacy variant keys resolve to canonical body. Bespoke by exception only.
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"   # v3.4: canonical body. Bespoke requires justification — see SKILL.md Phase 5 gate.
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  nc_duration: "24 months"
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  nc_duration: 24 months
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "15 April 2026"
-  validity_date: "15 April 2027"
+  loi_date: 15 April 2026
+  validity_date: 15 April 2027

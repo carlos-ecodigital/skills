@@ -1,88 +1,84 @@
-# LOI Generation Intake — Ecosystem Partnership Example (DE-LOI-EP-v1.0)
-# v3.2 engine: produces cover + Recital A + Recital B automatically.
-# Clauses 1–7 + (optional) Schedule 1 drafted from the markdown template at:
-#   templates/DE-LOI-EcosystemPartnership-v1.0_TEMPLATE.md
-
 type: EcosystemPartnership
-
-# --- Provider ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  kvk: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty (example: a plausible European research consortium) ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  kvk: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "European Institute for Sovereign AI Infrastructure e.V."
-  short: "EISAI"
-  address: "Alexanderplatz 1, 10178 Berlin, Germany"
-  jurisdiction: "Germany"
-  reg_type: "Vereinsregister"
-  reg_number: "VR XXXXX"
-  contact_name: "Dr. [TBC]"
-  contact_title: "Executive Director"
-  salutation: "Dr [TBC]"
-  signatory_name: "[TBC]"
-  signatory_title: "Executive Director"
-  # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
-  description: >-
-    is a European research and policy institute founded in 2023 and hosted
-    under [governance form] in Berlin, convening 22 member institutions
-    across 11 EU member states on sovereign AI infrastructure, energy-
-    efficient compute, and sustainable datacentre design. The institute has
-    published 14 peer-reviewed papers, convened 6 working groups on
-    federated AI infrastructure since 2024, and co-ordinates the EU's
-    informal dialogue on Article 12b hosting arrangements for sovereign
-    compute. The relationship is intended to support joint thought-
-    leadership on sovereign AI infrastructure in the European Union and
-    co-ordinated contribution to emerging EU compute-infrastructure
-    standards [TBC — synthetic example]
+  name: European Institute for Sovereign AI Infrastructure e.V.
+  short: EISAI
+  address: Alexanderplatz 1, 10178 Berlin, Germany
+  jurisdiction: Germany
+  reg_type: Vereinsregister
+  reg_number: VR XXXXX
+  contact_name: Dr. [TBC]
+  contact_title: Executive Director
+  salutation: Dr [TBC]
+  signatory_name: '[TBC]'
+  signatory_title: Executive Director
   source_map:
-    pillar_1: "[TBC]"
-    pillar_2: "[TBC]"
-    pillar_3: "[TBC]"
-    pillar_4: "inferred from Phase 1 context"
-    pillar_5: "[TBC]"
-
-# --- Ecosystem-specific ---
+    pillar_1: '[TBC]'
+    pillar_2: '[TBC]'
+    pillar_3: '[TBC]'
+    pillar_4: inferred from Phase 1 context
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: e.V.
+      jurisdiction: Germany
+      registration:
+        type: Vereinsregister
+        number: VR XXXXX
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 ecosystem:
-  relationship_type: "research_consortium"
+  relationship_type: research_consortium
   collaboration_themes:
-    - "sovereign AI infrastructure"
-    - "sustainable datacentre design"
-    - "energy-recycling integration in compute"
-    - "EU industrial policy alignment"
+  - sovereign AI infrastructure
+  - sustainable datacentre design
+  - energy-recycling integration in compute
+  - EU industrial policy alignment
   joint_activity_categories:
-    - "publications"
-    - "events"
-    - "working_groups"
-    - "advocacy"
-
-# --- Choices ---
+  - publications
+  - events
+  - working_groups
+  - advocacy
 choices:
-  announcement_protocol: "mutual_approval"
-  logo_use: "reciprocal"
-  # bespoke_closing: ""
-
-# --- Programme ---
-# v3.7.0: Recital A is library-sourced (single canonical body + EP tail, v3.4).
-#   recital_a_variant: "default"  is the only production value.
-#   Legacy "sovereignty" key also resolves to canonical body.
-#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
+  announcement_protocol: mutual_approval
+  logo_use: reciprocal
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"   # v3.4: canonical body. Legacy sovereignty key also resolves here.
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  confidentiality_survival: "2 years"
-
-# --- Dates ---
+  confidentiality_survival: 2 years
 dates:
-  loi_date: "1 May 2026"
-  validity_date: "1 May 2027"
+  loi_date: 1 May 2026
+  validity_date: 1 May 2027

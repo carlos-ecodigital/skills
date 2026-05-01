@@ -1,100 +1,106 @@
-# InfraPartners Strategic Supplier LOI (v6 ready-to-send) — v3.7 regression
-#
-# Exercises v3.7.x features: custom.definitions[] (Super-Factory Initiative),
-# custom.clauses[] (insert-after mode), confidentiality_opt_outs (3 suppressions),
-# choices.include_schedule=false, supplier.co_marketing, supplier.rofr.
-# Source: InfraPartners v6 retrospective (2026-04-19).
-
 type: StrategicSupplier
-
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  kvk: "98580086"
-  reg_number: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Chief Executive Officer"
-
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  kvk: '98580086'
+  reg_number: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Chief Executive Officer
 counterparty:
-  name: "InfraPartners LLC"
-  short: "InfraPartners"
-  address: "[TBC]"
-  jurisdiction: "England and Wales"
-  reg_type: "Companies House"
-  reg_number: "[TBC]"
-  contact_name: "Michalis Grigoratos"
-  signatory_name: "Michalis Grigoratos"
-  signatory_title: "Chief Executive Officer"
-  description: >-
-    is a digital-infrastructure company founded in 2018, headquartered in
-    London, with manufacturing facilities in Houston, Texas and Cluj, Romania,
-    and annual production capacity of approximately 1.2 GW. The Supplier
-    designs, manufactures off-site, and deploys standardised modular data-centre
-    infrastructure for AI and accelerated-compute workloads. Named engagements
-    include Nscale, Caddis Cloud Solutions, JLL, Emerald AI, and a collaboration
-    with EPRI, NVIDIA, and Prologis on distributed inference facilities at
-    United States utility substations
+  name: InfraPartners LLC
+  short: InfraPartners
+  address: '[TBC]'
+  jurisdiction: England and Wales
+  reg_type: Companies House
+  reg_number: '[TBC]'
+  contact_name: Michalis Grigoratos
+  signatory_name: Michalis Grigoratos
+  signatory_title: Chief Executive Officer
   source_map:
-    pillar_1: ["https://www.linkedin.com/company/infrapartnersllc"]
+    pillar_1:
+    - https://www.linkedin.com/company/infrapartnersllc
     pillar_2:
-      - "https://thetechcapital.com/ai-data-centre-manufacturer-infrapartners-expands-global-yearly-production-capacity-to-1-2gw/"
+    - https://thetechcapital.com/ai-data-centre-manufacturer-infrapartners-expands-global-yearly-production-capacity-to-1-2gw/
     pillar_3:
-      - "https://www.nscale.com/press-releases/nscale-infrapartners-60mw-glomfjord"
-      - "https://www.globenewswire.com/news-release/2025/03/05/infrapartners-caddis-cloud-strategic-partnership"
-      - "https://www.jll.com/en-uk/newsroom/infrapartners-jll-ai-data-center"
-    pillar_4: ["https://www.rtoinsider.com/emerald-ai-infrapartners-flex-ready"]
+    - https://www.nscale.com/press-releases/nscale-infrapartners-60mw-glomfjord
+    - https://www.globenewswire.com/news-release/2025/03/05/infrapartners-caddis-cloud-strategic-partnership
+    - https://www.jll.com/en-uk/newsroom/infrapartners-jll-ai-data-center
+    pillar_4:
+    - https://www.rtoinsider.com/emerald-ai-infrapartners-flex-ready
     pillar_5:
-      - "https://finance.yahoo.com/news/epri-nvidia-prologis-infrapartners-130000450.html"
-
+    - https://finance.yahoo.com/news/epri-nvidia-prologis-infrapartners-130000450.html
+  recital_b:
+    legal_identity:
+      legal_form: LLC
+      jurisdiction: United States
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
-  recital_a_variant: "default"
-
+  recital_a_variant: default
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
-
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027
 supplier:
-  capability_category: "modular_infrastructure"
-  core_capability: "Prefabricated modular AI data-centre infrastructure"
-  strategic_purposes: ["pipeline_visibility", "engineering_integration"]
-  # v3.7.1: structured RoFR on 1-3 Designated Sites with alignment framing
+  capability_category: modular_infrastructure
+  core_capability: Prefabricated modular AI data-centre infrastructure
+  strategic_purposes:
+  - pipeline_visibility
+  - engineering_integration
   rofr:
-    site_scope: "1-3 Designated Sites"
-    response_window: "20 Business Days"
-    lock_out_style: "alignment"
+    site_scope: 1-3 Designated Sites
+    response_window: 20 Business Days
+    lock_out_style: alignment
     continues_on_remaining: true
-  # v3.7.1: Co-Marketing with multi-supplier framing (preserves DE's
-  # parallel-supplier posture for Vertiv / Armada / others)
   co_marketing:
-    framing: "multi_supplier"
-    logo_use: "per_event_approval"
-    site_naming_approval_sla: "2 Business Days"
-    press_at_loi: "none"
-
+    framing: multi_supplier
+    logo_use: per_event_approval
+    site_naming_approval_sla: 2 Business Days
+    press_at_loi: none
 choices:
   existing_nda: false
-  joint_ip: "background"
+  joint_ip: background
   exclusivity: false
-  # v3.7.0: suppress 3 §6 sub-clauses deemed not material for SS relationship
   confidentiality_opt_outs:
-    - "onward_sharing"
-    - "compliance_confirmation"
-    - "metadata_protection"
-  # v3.7.0: SS Schedule 1 deemed redundant vs body clauses for this deal
+  - onward_sharing
+  - compliance_confirmation
+  - metadata_protection
   include_schedule: false
-  recital_b_density: "standard"
-
-# v3.7.0 custom extension layer — Super-Factory Initiative + stocking programme
-# + co-marketing scope were previously applied as post-processing scripts in
-# the v6 session; now shipped as first-class YAML.
+  recital_b_density: standard
 custom:
   definitions_include:
-    - super_factory_initiative
-    - designated_site
-    - framework_agreement
+  - super_factory_initiative
+  - designated_site
+  - framework_agreement

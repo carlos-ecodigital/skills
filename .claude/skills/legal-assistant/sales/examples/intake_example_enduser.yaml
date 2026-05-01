@@ -1,68 +1,77 @@
-# LOI Generation Intake — End User Example
-# Fill all fields, then run: python generate_loi.py intake_eu.yaml
-
 type: EndUser
-
-# --- Provider (pre-filled defaults) ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  kvk: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  kvk: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "Meridian AI B.V."
-  short: "Meridian"
-  address: "Keizersgracht 500, 1017 EK Amsterdam, Netherlands"
-  jurisdiction: "the Netherlands"
-  reg_type: "KvK"
-  reg_number: "87654321"
-  contact_name: "Lisa Bakker"
-  contact_title: "Chief Technology Officer"
-  salutation: "Ms Bakker"
-  signatory_name: "Lisa Bakker"
-  signatory_title: "Chief Technology Officer"
-  # v3.4: synthetic example — material claims marked [TBC] to pass R-23.
-  # Real EU LOI intake would use counterparty.source_map with tier-1 URLs.
-  description: "is a Netherlands-based AI startup developing large language models for the European legal and compliance market, currently serving 20+ enterprise clients [TBC — synthetic example]"
+  name: Meridian AI B.V.
+  short: Meridian
+  address: Keizersgracht 500, 1017 EK Amsterdam, Netherlands
+  jurisdiction: the Netherlands
+  reg_type: KvK
+  reg_number: '87654321'
+  contact_name: Lisa Bakker
+  contact_title: Chief Technology Officer
+  salutation: Ms Bakker
+  signatory_name: Lisa Bakker
+  signatory_title: Chief Technology Officer
   source_map:
-    pillar_1: "[TBC]"
-    pillar_2: "[TBC]"
-    pillar_3: "[TBC]"
-    pillar_4: "inferred from Phase 1 context"
-    pillar_5: "[TBC]"
-
-# --- Commercial ---
+    pillar_1: '[TBC]'
+    pillar_2: '[TBC]'
+    pillar_3: '[TBC]'
+    pillar_4: inferred from Phase 1 context
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: the Netherlands
+      registration:
+        type: KvK
+        number: '87654321'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 commercial:
   service_type:
-    - bare_metal
-  indicative_capacity: "approximately 120 kW IT"
-  min_term: "12 months"
-
-# --- Choices ---
+  - bare_metal
+  indicative_capacity: approximately 120 kW IT
+  min_term: 12 months
 choices:
   pricing: false
   existing_nda: false
-
-# --- Programme ---
-# v3.7.0: Recital A is library-sourced (single canonical body + EU tail, v3.4).
-#   recital_a_variant: "default"  is the only production value.
-#   Legacy keys (sovereignty, integration) resolve to canonical body.
-#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"   # v3.4: canonical body. Legacy sovereignty/integration keys also resolve here.
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "1 May 2026"
-  validity_date: "1 May 2027"
+  loi_date: 1 May 2026
+  validity_date: 1 May 2027

@@ -1,64 +1,85 @@
-# Dual-Role Founder — v3.7 regression intake
-#
-# Exercises v3.7.0 Phase 2 dual-role detection:
-# counterparty.relationship_cluster populated with an affiliated entity
-# where `shared_founders` overlaps with primary_entity's identity_map.
-# Phase 2 should emit the dual-role warning.
-
 type: Wholesale
-
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  reg_number: "98580086"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  reg_number: '98580086'
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "TwoHatCo Cloud Ltd"
-  short: "TwoHatCo"
-  address: "[TBC]"
-  jurisdiction: "[TBC]"
-  reg_number: "[TBC]"
-  contact_name: "[TBC]"
-  signatory_name: "Alice Founder"
-  signatory_title: "[TBC]"
-  description: >-
-    is a fictional AI compute customer operated by the same founders who run
-    a separately-incorporated infrastructure supplier to Digital Energy,
-    illustrating the dual-role relationship pattern that Phase 2 must detect
-    and prompt the operator to confirm scope for
+  name: TwoHatCo Cloud Ltd
+  short: TwoHatCo
+  address: '[TBC]'
+  jurisdiction: '[TBC]'
+  reg_number: '[TBC]'
+  contact_name: '[TBC]'
+  signatory_name: Alice Founder
+  signatory_title: '[TBC]'
   source_map:
-    pillar_1: ["https://example.com/about"]
-    pillar_2: ["https://example.com/products"]
-    pillar_3: ["https://example.com/customers"]
-    pillar_4: ["https://example.com/strategy"]
-    pillar_5: ["https://example.com/pipeline"]
-
+    pillar_1:
+    - https://example.com/about
+    pillar_2:
+    - https://example.com/products
+    pillar_3:
+    - https://example.com/customers
+    pillar_4:
+    - https://example.com/strategy
+    pillar_5:
+    - https://example.com/pipeline
   relationship_cluster:
-    group_id: "twohat-dual-role-2026"
-    primary_entity: "TwoHatCo Cloud Ltd"
+    group_id: twohat-dual-role-2026
+    primary_entity: TwoHatCo Cloud Ltd
     affiliated_entities:
-      - name: "TwoHatCo Supply Co"
-        role: "EPC/GC supplier to DE (separate LOI type: StrategicSupplier)"
-        shared_founders: ["Alice Founder", "Bob Cofounder"]
-
+    - name: TwoHatCo Supply Co
+      role: 'EPC/GC supplier to DE (separate LOI type: StrategicSupplier)'
+      shared_founders:
+      - Alice Founder
+      - Bob Cofounder
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: '[TBC]'
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
-  recital_a_variant: "default"
-
+  recital_a_variant: default
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
-
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027
 commercial:
-  indicative_mw: "10 MW IT"
-  min_term: "5 years"
-
+  indicative_mw: 10 MW IT
+  min_term: 5 years
 choices:
   existing_nda: false
-  recital_b_density: "standard"
+  recital_b_density: standard

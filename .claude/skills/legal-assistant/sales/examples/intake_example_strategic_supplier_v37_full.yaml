@@ -1,174 +1,160 @@
-# Strategic Supplier — v3.7.x KITCHEN SINK example
-#
-# Exercises every v3.7.0 + v3.7.1 + v3.7.2 extensibility field:
-#   - choices.recital_b_density (v3.7.0)
-#   - choices.confidentiality_opt_outs (v3.7.0)
-#   - choices.include_schedule: false (v3.7.0)
-#   - choices.auto_renumber (v3.7.1)
-#   - supplier.rofr (v3.7.0 structured)
-#   - supplier.referral_rider (v3.7.0)
-#   - supplier.co_marketing (v3.7.1 parameterized)
-#   - supplier.lead_time_target < 6 months → Joint Stocking (v3.7.1)
-#   - counterparty.relationship_cluster + identity_map (v3.7.0)
-#   - dates.financing_context (v3.7.0)
-#   - custom.definitions_include (Super-Factory, Designated Site, Framework Agreement)
-#   - custom.definitions[] (inline custom term)
-#   - custom.clauses[] with append + replace + insert-after:N modes
-#
-# Used by tests/test_v3_7_2_integration.py to verify all feature branches
-# fire together without conflict, and as the operator-facing canonical
-# example for "show me how to use everything."
-
 type: StrategicSupplier
-
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  kvk: "98580086"
-  reg_number: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Chief Executive Officer"
-
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  kvk: '98580086'
+  reg_number: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Chief Executive Officer
 counterparty:
-  name: "ExampleSupplier AG"
-  short: "ExampleSupplier"
-  address: "[TBC]"
-  jurisdiction: "Switzerland"
-  reg_type: "CHE"
-  reg_number: "[TBC]"
-  contact_name: "Alex Example"
-  signatory_name: "Alex Example"
-  signatory_title: "Chief Executive Officer"
-  description: >-
-    is a modular data-centre infrastructure supplier with factory
-    production capacity in Zurich and Cluj, named engagements with
-    NVIDIA, Dell, and HPE, and a European pipeline of active deployments
+  name: ExampleSupplier AG
+  short: ExampleSupplier
+  address: '[TBC]'
+  jurisdiction: Switzerland
+  reg_type: CHE
+  reg_number: '[TBC]'
+  contact_name: Alex Example
+  signatory_name: Alex Example
+  signatory_title: Chief Executive Officer
   source_map:
-    pillar_1: ["https://example.com/about"]
-    pillar_2: ["https://example.com/products"]
+    pillar_1:
+    - https://example.com/about
+    pillar_2:
+    - https://example.com/products
     pillar_3:
-      - "https://example.com/customers"
-      - "internal:brochure_20260420_examplesupplier"
-    pillar_4: ["https://example.com/strategy"]
-    pillar_5: ["https://example.com/pipeline"]
-
-  # v3.7.0: dual-role (supplier entity + adjacent customer entity) awareness
+    - https://example.com/customers
+    - internal:brochure_20260420_examplesupplier
+    pillar_4:
+    - https://example.com/strategy
+    pillar_5:
+    - https://example.com/pipeline
   relationship_cluster:
-    group_id: "example-group-2026"
-    primary_entity: "ExampleSupplier AG"
+    group_id: example-group-2026
+    primary_entity: ExampleSupplier AG
     affiliated_entities:
-      - name: "ExampleCustomer Cloud"
-        role: "AI-compute customer of DE (separate LOI type: Wholesale)"
-        shared_founders: ["Alex Example"]
-
+    - name: ExampleCustomer Cloud
+      role: 'AI-compute customer of DE (separate LOI type: Wholesale)'
+      shared_founders:
+      - Alex Example
   identity_map:
     alex_example:
-      display_name: "Alex Example"
-      preferred_salutation: "Alex"
+      display_name: Alex Example
+      preferred_salutation: Alex
       email_domains:
-        - { domain: "examplesupplier.com", role: "primary operational" }
-        - { domain: "examplecustomer.com", role: "branding-aligned" }
-      preferred_email_for_this_loi: "alex@examplesupplier.com"
-
+      - domain: examplesupplier.com
+        role: primary operational
+      - domain: examplecustomer.com
+        role: branding-aligned
+      preferred_email_for_this_loi: alex@examplesupplier.com
+  recital_b:
+    legal_identity:
+      legal_form: AG
+      jurisdiction: Switzerland
+      registration:
+        type: CHE
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"
-
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 dates:
-  loi_date: "20 April 2026"
-  validity_date: "20 April 2027"
+  loi_date: 20 April 2026
+  validity_date: 20 April 2027
   financing_context:
     linked_to_fundraise: true
-    fundraise_close_target: "2026-12-31"
+    fundraise_close_target: '2026-12-31'
     buffer_months_post_close: 9
-
 supplier:
-  capability_category: "modular_infrastructure"
-  core_capability: "Prefabricated modular AI data-centre infrastructure"
-  strategic_purposes: ["pipeline_visibility", "engineering_integration"]
-
-  # v3.7.1: Joint Stocking fires (90 days < 6 months)
-  lead_time_target: "90 days"
-  volume_indicative: "indicative target of 5–10 modular units per year"
-  geographic_coverage: "Europe"
-
-  # v3.7.0: structured RoFR with alignment framing on 1-3 Designated Sites
+  capability_category: modular_infrastructure
+  core_capability: Prefabricated modular AI data-centre infrastructure
+  strategic_purposes:
+  - pipeline_visibility
+  - engineering_integration
+  lead_time_target: 90 days
+  volume_indicative: "indicative target of 5\u201310 modular units per year"
+  geographic_coverage: Europe
   rofr:
-    site_scope: "1-3 Designated Sites"
-    response_window: "20 Business Days"
-    lock_out_style: "alignment"
+    site_scope: 1-3 Designated Sites
+    response_window: 20 Business Days
+    lock_out_style: alignment
     continues_on_remaining: true
-
-  # v3.7.0: SS bidirectional flow (supply + mutual referral)
   referral_rider: true
-
-  # v3.7.1: Co-Marketing with multi-supplier framing, press deferred
   co_marketing:
-    framing: "multi_supplier"
-    logo_use: "per_event_approval"
-    site_naming_approval_sla: "2 Business Days"
-    press_at_loi: "none"
-
+    framing: multi_supplier
+    logo_use: per_event_approval
+    site_naming_approval_sla: 2 Business Days
+    press_at_loi: none
 choices:
-  joint_ip: "background"
+  joint_ip: background
   exclusivity: false
   existing_nda: false
-  recital_b_density: "standard"
-  # v3.7.0: suppress 3 §6 sub-clauses
+  recital_b_density: standard
   confidentiality_opt_outs:
-    - "onward_sharing"
-    - "compliance_confirmation"
-    - "metadata_protection"
-  # v3.7.0: suppress Schedule 1 + scrub §8.1(a) + §4.2(d) refs
+  - onward_sharing
+  - compliance_confirmation
+  - metadata_protection
   include_schedule: false
-  # v3.7.1: close any remaining numbering gaps after conditionals fire
   auto_renumber: true
-
-# v3.7.0: custom extension layer
 custom:
-  # Library lookups
   definitions_include:
-    - super_factory_initiative
-    - designated_site
-    - framework_agreement
-  # Inline custom definitions
+  - super_factory_initiative
+  - designated_site
+  - framework_agreement
   definitions:
-    - key: "ExampleTerm"
-      text: >-
-        means the bespoke programme described in Annex Z of this LOI
-        covering joint marketing and customer-reference mechanics.
-  # Mode: append, replace, insert-after all exercised
+  - key: ExampleTerm
+    text: means the bespoke programme described in Annex Z of this LOI covering joint
+      marketing and customer-reference mechanics.
   clauses:
-    - number: "9.1"
-      mode: "append"
-      heading: "Bespoke Annex Coordination"
-      text: >-
-        The Parties intend to maintain a shared annex register coordinating
-        commercial, technical, and delivery dependencies in one location;
-        details to be formalised in the Framework Agreement.
-    - number: "3.7"
-      mode: "replace"
-      heading: "IP Allocation (Bespoke)"
-      text: >-
-        Each Party retains all right, title, and interest in its background
-        IP. Foreground IP developed jointly will be allocated per the
-        principles set out in the Framework Agreement, with cross-licensing
-        where operationally necessary.
-    - number: "3.12"
-      mode: "insert-after:3.11"
-      heading: "Operational Review Cadence"
-      text: >-
-        The Parties shall convene a quarterly operational review covering
-        pipeline status, stocking levels, and outstanding design-integration
-        items, with an annual strategic alignment session.
-
+  - number: '9.1'
+    mode: append
+    heading: Bespoke Annex Coordination
+    text: The Parties intend to maintain a shared annex register coordinating commercial,
+      technical, and delivery dependencies in one location; details to be formalised
+      in the Framework Agreement.
+  - number: '3.7'
+    mode: replace
+    heading: IP Allocation (Bespoke)
+    text: Each Party retains all right, title, and interest in its background IP.
+      Foreground IP developed jointly will be allocated per the principles set out
+      in the Framework Agreement, with cross-licensing where operationally necessary.
+  - number: '3.12'
+    mode: insert-after:3.11
+    heading: Operational Review Cadence
+    text: The Parties shall convene a quarterly operational review covering pipeline
+      status, stocking levels, and outstanding design-integration items, with an annual
+      strategic alignment session.
 protection:
-  nc_duration: "24 months"
-  confidentiality_survival: "3 years"
+  nc_duration: 24 months
+  confidentiality_survival: 3 years

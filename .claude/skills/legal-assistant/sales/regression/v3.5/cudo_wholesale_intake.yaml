@@ -1,102 +1,92 @@
-# Cudo Compute Wholesale LOI — v3.5 regression intake
-#
-# Tier-1 facts verified via cudocompute.com/about:
-#   - UK HQ: Kemp House, 160 City Road, London EC1V 2NX
-#   - NVIDIA Preferred Partner status (explicit badge)
-#   - NVIDIA-certified engineers operationally
-#   - Infrastructure partnerships: NVIDIA, Supermicro, Dell, Lenovo, HPE,
-#     NetApp, Red Hat
-#   - Conapto deployment relationship (Stefan Nilsson, COO, quoted)
-#   - Capacity pipeline: 250MW+ contracted end 2026; 750MW+ targeted end 2027
-# Reg number [TBC] — Companies House lookup needed at signing stage.
-
 type: Wholesale
-
-# --- Provider (entities register lookup pattern — v3.5.2 Scope Q) ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  kvk: "98580086"
-  reg_number: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty (Cudo Compute) ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  kvk: '98580086'
+  reg_number: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "Cudo Compute Limited"
-  short: "Cudo"
-  address: "Kemp House, 160 City Road, London EC1V 2NX, United Kingdom"
-  jurisdiction: "England and Wales"
-  legal_form: "private company limited by shares"
-  reg_type: "Companies House"
-  reg_number: "[TBC]"
-  contact_name: "[TBC]"
-  contact_title: "[TBC]"
-  salutation: "[TBC]"
-  signatory_name: "[TBC]"
-  signatory_title: "[TBC]"
-  # Recital B — Signal Test compliant. Named endorsers all tier-1:
-  # NVIDIA (credentialled partnership), Conapto (named deployment
-  # relationship via Stefan Nilsson quote), and the published
-  # infrastructure-vendor roster (Supermicro/Dell/Lenovo/HPE/NetApp/Red Hat)
-  # as operational-scale signal. Zero inline citations; zero vanity-
-  # financial; zero self-slogans.
-  description: >-
-    is a UK-headquartered AI infrastructure operator headquartered at Kemp
-    House, London, specialising in production AI cluster design, power and
-    site provisioning, and large-scale GPU training and inference
-    deployment. Cudo is a recognised NVIDIA Preferred Partner with
-    NVIDIA-certified engineering staff and delivers infrastructure in
-    partnership with Supermicro, Dell, Lenovo, HPE, NetApp, and Red Hat.
-    Named deployments include Cudo's operational relationship with
-    Conapto under a shared high-density GPU design and deployment pattern
+  name: Cudo Compute Limited
+  short: Cudo
+  address: Kemp House, 160 City Road, London EC1V 2NX, United Kingdom
+  jurisdiction: England and Wales
+  legal_form: private company limited by shares
+  reg_type: Companies House
+  reg_number: '[TBC]'
+  contact_name: '[TBC]'
+  contact_title: '[TBC]'
+  salutation: '[TBC]'
+  signatory_name: '[TBC]'
+  signatory_title: '[TBC]'
   source_map:
     pillar_1:
-      - "https://www.cudocompute.com/about"
+    - https://www.cudocompute.com/about
     pillar_2:
-      - "https://www.cudocompute.com/about"
+    - https://www.cudocompute.com/about
     pillar_3:
-      - "https://www.cudocompute.com/about"
-    pillar_4: "inferred from Phase 1 context (wholesale AI-compute infrastructure operator)"
-    pillar_5: "[TBC]"   # 250MW+ / 750MW+ pipeline is self-announced — fails Signal Test gate 1; belongs in Cl. 3 context, not Recital B
-
-# --- Commercial ---
+    - https://www.cudocompute.com/about
+    pillar_4: inferred from Phase 1 context (wholesale AI-compute infrastructure operator)
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: England and Wales
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 commercial:
-  indicative_mw: "10"
-  expansion_mw: "[TBC]"
-  min_term: "5 years"
-
-# --- Schedule 1 technical ---
+  indicative_mw: '10'
+  expansion_mw: '[TBC]'
+  min_term: 5 years
 schedule_1:
   technical:
-    gpu_platform: "NVIDIA H200 SXM (indicative; subject to technical scoping)"
-    rack_density_kw: "130"
-    cooling: "Direct-to-chip liquid cooling"
-    designated_sites: "[TBC]"
-
-# --- Choices ---
+    gpu_platform: NVIDIA H200 SXM (indicative; subject to technical scoping)
+    rack_density_kw: '130'
+    cooling: Direct-to-chip liquid cooling
+    designated_sites: '[TBC]'
 choices:
   pricing: false
   phasing: false
   existing_nda: false
-
-# --- Programme ---
 programme:
-  platform_mw: "100+"
-  recital_a_variant: "default"
-
-# --- Protection ---
+  platform_mw: 100+
+  recital_a_variant: default
 protection:
-  nc_duration: "24 months"
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  nc_duration: 24 months
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027
