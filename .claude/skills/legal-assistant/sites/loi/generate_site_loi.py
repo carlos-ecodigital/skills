@@ -48,6 +48,7 @@ from generate import DE_ENTITIES, COBALT, SLATE_800, SLATE_900, FONT, Party, add
 from signature_block import SigParty, render_signature_page  # noqa: E402
 import site_doc_base as sdb  # noqa: E402
 from site_doc_base import derive_role_labels as sdb_derive_role_labels  # noqa: E402
+from site_clause_library import load_clauses, render_bilingual_section  # noqa: E402
 from docx.shared import Mm, Pt  # noqa: E402
 
 
@@ -85,62 +86,35 @@ _derive_role_labels = sdb_derive_role_labels
 
 
 # ---------------------------------------------------------------------------
+# Clause library — rc3.3 Phase 3 step 1: §1 Parties externalised to YAML.
+# §2–§7 follow in subsequent sub-PRs (see plans/rc3-migration-remaining-sections.md).
+# Loaded once per process; YAML parsing is cheap but the cache avoids
+# re-parsing on every build_document() call.
+# ---------------------------------------------------------------------------
+
+_CLAUSES = load_clauses(
+    Path(__file__).parent / "templates" / "clauses" / "de-loi-site-v1.0.yaml"
+)
+
+
+# ---------------------------------------------------------------------------
 # Clause content — Van Gog verbatim for LOI v1.0.
 #
-# In later phases (B9 site_clause_library + Phase E), these strings migrate
-# out of this file into `sites/_shared/site_clause_library.md` so legal can
-# review clauses in one place. For v0.1 they're inlined so the engine is
-# testable end-to-end today.
+# rc3.3 (Phase 3) externalised §1 Parties to clauses/de-loi-site-v1.0.yaml.
+# §2–§7 still live inline; each one carries a TODO(rc3-migration) marker
+# below tracking the remaining migration. See:
+#   - sites/_shared/site_clause_library.py  (loader + renderer)
+#   - plans/rc3-migration-remaining-sections.md  (per-section checklist)
 # ---------------------------------------------------------------------------
 
 
-def _clause_1_parties(provider: dict, site_partners: List[dict]) -> tuple[List[str], List[str]]:
-    en = [
-        f"1.1 {provider['legal_name']}, a private limited company "
-        "(besloten vennootschap met beperkte aansprakelijkheid) incorporated "
-        "under Dutch law, registered with the Dutch Chamber of Commerce "
-        f"under number {provider['registration_number']}, with its registered "
-        f"office at {provider['address']}, including its permitted successors "
-        "and assigns (\u201cDigital Energy\u201d).",
-        "1.2 The counterparty or counterparties identified in the LOI Schedule "
-        "(Section R), with the registered particulars specified therein, "
-        "including its or their permitted successors and assigns (each a "
-        "\u201cSite Partner\u201d and, if more than one, collectively the "
-        "\u201cSite Partners\u201d).",
-        "1.3 Digital Energy and each Site Partner are each referred to as a "
-        "\u201cParty\u201d and together as the \u201cParties\u201d.",
-        "1.4 The LOI Schedule assigns each Site Partner one or more roles: "
-        "Grid Contributor (the party providing or applying for the electrical "
-        "grid connection), Landowner (the party providing land for the DEC), "
-        "and Heat Offtaker (the party receiving the waste heat). Where this "
-        "LOI refers to a specific role, the obligation applies only to the "
-        "Site Partner designated for that role in Section R.",
-    ]
-    nl = [
-        f"1.1 {provider['legal_name']}, een besloten vennootschap met beperkte "
-        "aansprakelijkheid opgericht naar Nederlands recht, geregistreerd bij "
-        f"de Kamer van Koophandel onder nummer {provider['registration_number']}, "
-        f"met statutaire zetel aan {provider['address']}, Nederland, met "
-        "inbegrip van haar toegestane rechtsopvolgers en rechtverkrijgenden "
-        "(\u201cDigital Energy\u201d).",
-        "1.2 De wederpartij of wederpartijen vermeld in de Bijlage (Sectie R), "
-        "met de statutaire gegevens daarin vermeld, met inbegrip van haar of "
-        "hun toegestane rechtsopvolgers en rechtverkrijgenden (elk een "
-        "\u201cLocatiepartner\u201d en, indien meer dan een, gezamenlijk de "
-        "\u201cLocatiepartners\u201d).",
-        "1.3 Digital Energy en elke Locatiepartner worden afzonderlijk "
-        "aangeduid als \u201cPartij\u201d en gezamenlijk als \u201cPartijen\u201d.",
-        "1.4 De Bijlage wijst aan elke Locatiepartner een of meer rollen toe: "
-        "Netbijdrager (de partij die de elektrische netaansluiting verschaft "
-        "of aanvraagt), Grondeigenaar (de partij die grond beschikbaar stelt "
-        "voor het DEC), en Warmteafnemer (de partij die de restwarmte "
-        "ontvangt). Waar deze LOI verwijst naar een specifieke rol, geldt de "
-        "verplichting uitsluitend voor de Locatiepartner die voor die rol is "
-        "aangewezen in Sectie R.",
-    ]
-    return en, nl
+# Section 1 Parties is now sourced from clauses/de-loi-site-v1.0.yaml via
+# the clause library; the inline ``_clause_1_parties()`` helper was deleted
+# in rc3.3.
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_2_background() -> tuple[List[str], List[str]]:
     en = [
         "2.1 Digital Energy has developed the Digital Energy Center "
@@ -170,6 +144,8 @@ def _clause_2_background() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_1_dec_development() -> tuple[List[str], List[str]]:
     en = [
         "3.1 DEC Development. Digital Energy intends to design, build, "
@@ -190,6 +166,8 @@ def _clause_3_1_dec_development() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_2_bess(details: dict) -> tuple[List[str], List[str]]:
     mw = details.get("mw", "[TBC]")
     mwh = details.get("mwh", "[TBC]")
@@ -254,6 +232,8 @@ def _clause_3_2_bess(details: dict) -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_3_heat_supply() -> tuple[List[str], List[str]]:
     en = [
         "3.3 Heat Supply. The Project's objective includes recovering and "
@@ -297,6 +277,8 @@ def _clause_3_3_heat_supply() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_4_grid() -> tuple[List[str], List[str]]:
     en = [
         "3.4 Grid Connection. The Parties anticipate that the Grid "
@@ -316,6 +298,8 @@ def _clause_3_4_grid() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_5_land() -> tuple[List[str], List[str]]:
     en = [
         "3.5 Land. Where a Site Partner provides land, the Parties "
@@ -338,6 +322,8 @@ def _clause_3_5_land() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_3_6_3_9() -> tuple[List[str], List[str]]:
     en = [
         "3.6 Multiple Locations. The Project may comprise one or more "
@@ -378,6 +364,8 @@ def _clause_3_6_3_9() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_4_prefeas_hot() -> tuple[List[str], List[str]]:
     en = [
         "4.1 Digital Energy intends to conduct a pre-feasibility assessment "
@@ -423,6 +411,8 @@ def _clause_4_prefeas_hot() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_5_term() -> tuple[List[str], List[str]]:
     en = [
         "5.1 This LOI enters into force on the date of signature by the "
@@ -447,6 +437,8 @@ def _clause_5_term() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_6_binding() -> tuple[List[str], List[str]]:
     """Binding Provisions — §6.1 confidentiality (with §6.1.6 self-
     supersession), §6.2 governing law, §6.3 information right, §6.4 misc."""
@@ -572,6 +564,8 @@ def _clause_6_binding() -> tuple[List[str], List[str]]:
     return en, nl
 
 
+# TODO(rc3-migration): migrate to clauses/de-loi-site-v1.0.yaml.
+# See sites/_shared/site_clause_library.py for the loader.
 def _clause_7_execution() -> tuple[List[str], List[str]]:
     en = [
         "Each signatory represents and warrants that they have full "
@@ -750,8 +744,12 @@ def build_document(deal: dict) -> Document:
     doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
     # §1 Parties
-    en, nl = _clause_1_parties(provider, site_partners)
-    render_bilingual_clause(doc, en, nl, heading="1. Parties", heading_nl="1. Partijen")
+    render_bilingual_section(
+        doc, _CLAUSES, ["1.1", "1.2", "1.3", "1.4"],
+        heading_en="1. Parties",
+        heading_nl="1. Partijen",
+        placeholder_subs={"provider": provider},
+    )
 
     # §2 Background
     en, nl = _clause_2_background()

@@ -1,0 +1,78 @@
+# DE-LOI-Site-v1.0 clause library — bilingual (EN + NL).
+#
+# Loaded by `sites/_shared/site_clause_library.py::load_clauses`.
+# Rendered by `sites/_shared/site_clause_library.py::render_bilingual_section`.
+#
+# rc3.3 (Phase 3) ships §1 Parties only as a proof-of-concept of the loader
+# infrastructure. §2–§7 migrations are tracked in
+# `plans/rc3-migration-remaining-sections.md` and ship in follow-up sub-PRs;
+# until each one lands, the corresponding clause stays inline in
+# `generate_site_loi.py` (see TODO(rc3-migration) markers there).
+#
+# Schema:
+#   schema_version: "1.0"
+#   template:       "DE-LOI-Site-v1.0"
+#   clauses:
+#     - section_id:   dotted section number (e.g. "1.1")
+#       heading_en:   EN heading — null when the parent section heading
+#                     covers this row (sub-clauses inherit the §-level
+#                     heading rendered by the engine)
+#       heading_nl:   NL heading — same convention
+#       en:           list of EN paragraphs
+#       nl:           list of NL paragraphs (must match len(en))
+#       asset_gate:   optional gate dict; ignored at load, used by engines
+#                     when composing section_id lists for a render call
+#       render_order: numeric sort key (engine convention; 11 = §1.1, etc.)
+#
+# Placeholder syntax: {{dotted.path}} resolved against placeholder_subs at
+# render time. Missing keys collapse to "[TBC]".
+
+schema_version: "1.0"
+template: "DE-LOI-Site-v1.0"
+
+clauses:
+  # ---------------------------------------------------------------------
+  # §1 Parties — heading rendered by the engine via heading_en/heading_nl
+  # arguments to render_bilingual_section. Sub-clause rows carry null
+  # headings.
+  # ---------------------------------------------------------------------
+
+  - section_id: "1.1"
+    heading_en: null
+    heading_nl: null
+    en:
+      - "1.1 {{provider.legal_name}}, a private limited company (besloten vennootschap met beperkte aansprakelijkheid) incorporated under Dutch law, registered with the Dutch Chamber of Commerce under number {{provider.registration_number}}, with its registered office at {{provider.address}}, including its permitted successors and assigns (“Digital Energy”)."
+    nl:
+      - "1.1 {{provider.legal_name}}, een besloten vennootschap met beperkte aansprakelijkheid opgericht naar Nederlands recht, geregistreerd bij de Kamer van Koophandel onder nummer {{provider.registration_number}}, met statutaire zetel aan {{provider.address}}, Nederland, met inbegrip van haar toegestane rechtsopvolgers en rechtverkrijgenden (“Digital Energy”)."
+    asset_gate: null
+    render_order: 11
+
+  - section_id: "1.2"
+    heading_en: null
+    heading_nl: null
+    en:
+      - "1.2 The counterparty or counterparties identified in the LOI Schedule (Section R), with the registered particulars specified therein, including its or their permitted successors and assigns (each a “Site Partner” and, if more than one, collectively the “Site Partners”)."
+    nl:
+      - "1.2 De wederpartij of wederpartijen vermeld in de Bijlage (Sectie R), met de statutaire gegevens daarin vermeld, met inbegrip van haar of hun toegestane rechtsopvolgers en rechtverkrijgenden (elk een “Locatiepartner” en, indien meer dan een, gezamenlijk de “Locatiepartners”)."
+    asset_gate: null
+    render_order: 12
+
+  - section_id: "1.3"
+    heading_en: null
+    heading_nl: null
+    en:
+      - "1.3 Digital Energy and each Site Partner are each referred to as a “Party” and together as the “Parties”."
+    nl:
+      - "1.3 Digital Energy en elke Locatiepartner worden afzonderlijk aangeduid als “Partij” en gezamenlijk als “Partijen”."
+    asset_gate: null
+    render_order: 13
+
+  - section_id: "1.4"
+    heading_en: null
+    heading_nl: null
+    en:
+      - "1.4 The LOI Schedule assigns each Site Partner one or more roles: Grid Contributor (the party providing or applying for the electrical grid connection), Landowner (the party providing land for the DEC), and Heat Offtaker (the party receiving the waste heat). Where this LOI refers to a specific role, the obligation applies only to the Site Partner designated for that role in Section R."
+    nl:
+      - "1.4 De Bijlage wijst aan elke Locatiepartner een of meer rollen toe: Netbijdrager (de partij die de elektrische netaansluiting verschaft of aanvraagt), Grondeigenaar (de partij die grond beschikbaar stelt voor het DEC), en Warmteafnemer (de partij die de restwarmte ontvangt). Waar deze LOI verwijst naar een specifieke rol, geldt de verplichting uitsluitend voor de Locatiepartner die voor die rol is aangewezen in Sectie R."
+    asset_gate: null
+    render_order: 14
