@@ -5,6 +5,81 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v4.0-rc3.1 — 2026-04-22 — Sites Stream: shared chassis + CI coverage
+
+**Phase 1 of the rc3 architectural refactor** (plan: `plans/warm-splashing-riddle.md`).
+Targets 8 audit findings from the rc2 review by relocating engine-local
+helpers onto their proper modules and gating future regressions in CI.
+
+### One source of truth — engine-local helpers absorbed by chassis
+
+- **`site_doc_base.normalise_placeholder(value, fallback="[TBC]")`** — the
+  canonical placeholder sanitiser. Explicit branches for None / empty /
+  whitespace / `TODO(*)` / `[TBD_*]` / bool / int / float / list / tuple /
+  dict — no `str()` fallthrough. Both engines route every rendered value
+  through it. Replaces rc2's engine-local `_sanitise()` in LOI and the
+  3-site cell-write paths in HoT's `populate_annex_a`.
+- **`site_doc_base.DEFAULT_PARSER_MAP`** — immutable `MappingProxyType`
+  covering the LOI-stage-broadest doc-type set (15 entries). LOI inherits
+  unmodified; HoT narrows against `SITE_LOI_ONLY_DOCS` (`sde_plus_plus`,
+  `co2_supply_contract`, `solar_pv_yield_report`).
+- **`SiteDocBase.parse_documents(deal, documents_dir)`** — real
+  implementation with per-partner field routing (`_merge_parser_field` +
+  `_resolve_target_partner`), enum normalisation pass, structured
+  `parser_log` audit. Replaces rc2's `TODO(Phase B5)` stub.
+- **`SiteDocBase.hydrate_from_hubspot(deal, client=None)`** — real
+  round-trip read + validate + resolve, non-fatal exception → audit on
+  `enrichment.sync_warnings`. Replaces rc2's `TODO(Phase B7)` stub.
+- **`SiteDocBase.run_cross_doc_gate(deal, prior_loi_deal=None)`** — real
+  invocation. Replaces rc2's `TODO(Phase B8)` stub. HoT inherits and
+  passes `prior_loi_deal` for Gap-4/Gap-5 continuity rules.
+
+### Engine subclassing
+
+- `class SiteLOI(SiteDocBase)` — `stage = "loi"`. Inherits the broad
+  `PARSER_MAP`. Module-level `build_document` / `hydrate_from_hubspot` /
+  `parse_documents` / `run_cross_doc_gate` retained as thin singleton
+  wrappers, preserving the rc1/rc2 CLI + test-API contract.
+- `class SiteHoT(SiteDocBase)` — `stage = "hot"`. `PARSER_MAP` narrowed
+  to exclude LOI-only doc types. Same singleton-wrapper pattern.
+- `_sanitise` in LOI is now `from site_doc_base import normalise_placeholder
+  as _sanitise` — alias preserves all call sites.
+- Net: ~330 lines of duplicated wiring deleted across the two engines.
+
+### CI
+
+- `.github/workflows/legal-assistant-tests.yml` expanded with 5 new
+  pytest jobs: `sites/_shared`, `sites/loi`, `sites/hot`, `sites/tests`,
+  `sites/_shared/document_parsers`. Sales (434) coverage retained.
+- New **scaffolding-marker gate**: `grep -En 'TODO\(Phase |TODO: delegate
+  to ' sites/**/*.py` exits non-zero on the engine production path.
+  Catches v0.1-style "this is a stub" comments before they reach prod.
+- The render-logic-requires-tests tripwire (was sales-only) extended to
+  cover `sites/loi/generate_site_loi.py` + `sites/hot/generate_site_hot.py`
+  + `sites/_shared/site_doc_base.py`.
+
+### Tests
+
+- 20 new tests for `normalise_placeholder` covering every branch.
+- 5 passthrough tests across LOI / HoT / chassis refactored from identity
+  checks (`assert engine.hydrate_from_hubspot(deal) is deal`) to
+  behavioural ones (key-preservation invariant) so they survive the
+  chassis refactor.
+- Drive-by: `test_van_gog_loi_has_7_bilingual_tables` was stale from rc1
+  (rc2 added Section L + Section R as bilingual tables → 9). Renamed +
+  count corrected.
+
+### Scope deferred (rc3.2 / rc3.3 / rc3.4)
+
+- rc3.2: `add_cover(bilingual=True)` + `render_schedule_table` +
+  `ensure_bilingual_layout` on document-factory primitives.
+- rc3.3: `site_clause_library` YAML loader + §1 Parties as proof of
+  concept. §2–§7 migrate incrementally post-rc3 without re-release.
+- rc3.4: HoT parity polish + advisory visual-regression CI (LibreOffice
+  + pdfminer goldens) + fontTools-measured `validate_cell_overflow`.
+
+---
+
 ## v4.0-rc1 — 2026-04-20 — Sites Stream
 
 **Major release.** First shipment of the Sites stream: Site LOI + Site HoT

@@ -67,22 +67,10 @@ import enum_normaliser as en  # noqa: E402
 import hubspot_sync as _hs  # noqa: E402  # used via type hint + wrappers
 import site_doc_base as sdb  # noqa: E402
 
-# Document parsers (Phase B5 wiring). Heavy imports are lazy-attempted —
-# every parser except GenericPDFParser requires PyMuPDF. If unavailable,
-# parse_documents() emits a structured warning and passes through.
-try:
-    from document_parsers.ato import ATOParser  # noqa: E402
-    from document_parsers.bestemmingsplan import BestemmingsplanParser  # noqa: E402
-    from document_parsers.equipment_oem import EquipmentOEMParser  # noqa: E402
-    from document_parsers.financier_consent import FinancierConsentParser  # noqa: E402
-    from document_parsers.generic_pdf import GenericPDFParser  # noqa: E402
-    from document_parsers.kadaster import KadasterParser  # noqa: E402
-    from document_parsers.kvk import KvKParser  # noqa: E402
-    from document_parsers.landowner_consent import LandownerConsentParser  # noqa: E402
-    from document_parsers.sde_plus import SDEPlusParser  # noqa: E402
-    _PARSERS_AVAILABLE = True
-except ImportError:  # pragma: no cover
-    _PARSERS_AVAILABLE = False
+# Document-parser imports + the ``_PARSERS_AVAILABLE`` gate live on the
+# chassis (``site_doc_base``) — rc3.1 absorbed them. The HoT engine no
+# longer references parser classes directly: ``SiteHoT.parse_documents``
+# inherits from ``SiteDocBase`` which dispatches via ``self.PARSER_MAP``.
 
 
 # Map between registry field_id (e.g. "A6_signing_authority") and the
