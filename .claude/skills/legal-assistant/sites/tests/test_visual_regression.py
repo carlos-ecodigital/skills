@@ -7,23 +7,15 @@ in the CI log but does not block merge.
 
 Pipeline per fixture:
 
-  deal.yaml → engine.main(...) → .docx
-            → office_bridge.OfficeBridge.to_pdf_libreoffice(...)
-            → pdfminer text extract → set-membership compare to
+  deal.yaml → engine.main(...) → .docx → soffice --convert-to pdf
+              → pdfminer text extract → set-membership compare to
               tests/goldens/<slug>.txt
-
-PDF conversion delegates to ``document-factory/office_bridge.py``
-(`OfficeBridge.to_pdf_libreoffice`) — that's the canonical bridge that
-wraps the bundled `anthropic-skills/docx/scripts/soffice.py`. It
-encapsulates LibreOffice binary discovery + headless invocation; we
-do not shell out to soffice here.
 
 Goldens are captured manually with ``GOLDEN_REGEN=1 pytest`` against
 the same engine + LibreOffice combo. CI never sets that env var.
 
 Skips gracefully when:
-  - ``libreoffice`` / ``soffice`` is missing (the bridge raises
-    ``OfficeBridgeError`` — we map that to ``pytest.skip``)
+  - ``libreoffice`` / ``soffice`` is missing (pdf conversion impossible)
   - ``pdfminer.six`` is not installed (cannot extract text)
   - the matching golden is missing AND ``GOLDEN_REGEN`` is not set
     (no baseline to compare against)
@@ -32,9 +24,11 @@ Skips gracefully when:
 from __future__ import annotations
 
 import os
+import shutil
+import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 import pytest
 
@@ -51,27 +45,26 @@ HOT_FIXTURE = SITES / "tests" / "fixtures" / "phase_g_moerman.yaml"
 # Capability gates
 # ---------------------------------------------------------------------------
 
+def _find_soffice() -> Optional[str]:
+    """Return the path to a usable LibreOffice binary, or None."""
+    for name in ("libreoffice", "soffice"):
+        p = shutil.which(name)
+        if p:
+            return p
+    # macOS bundle fallback
+    mac = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+    if Path(mac).exists():
+        return mac
+    return None
+
+
 pdfminer = pytest.importorskip("pdfminer.high_level", reason="pdfminer.six not installed")
-
-# Lazy bridge construction — defer the OfficeBridge import + instantiation
-# to first call, so an environment without the bridge importable still
-# produces a clean skip rather than an ImportError at collection.
-
-_BRIDGE = None
-_BRIDGE_ERROR_CLS = None
-
-
-def _get_bridge():
-    global _BRIDGE, _BRIDGE_ERROR_CLS
-    if _BRIDGE is not None:
-        return _BRIDGE
-    try:
-        from office_bridge import OfficeBridge, OfficeBridgeError  # type: ignore
-    except ImportError as exc:
-        pytest.skip(f"document-factory office_bridge not importable: {exc}")
-    _BRIDGE_ERROR_CLS = OfficeBridgeError
-    _BRIDGE = OfficeBridge()
-    return _BRIDGE
+SOFFICE = _find_soffice()
+pytestmark = pytest.mark.skipif(
+    SOFFICE is None,
+    reason="LibreOffice (libreoffice/soffice) not on PATH; "
+           "visual-regression cannot render PDFs",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -79,35 +72,27 @@ def _get_bridge():
 # ---------------------------------------------------------------------------
 
 def _docx_to_pdf(docx_path: Path, out_dir: Path) -> Path:
-    """Convert ``docx_path`` to a PDF in ``out_dir`` via the canonical
-    document-factory bridge (``OfficeBridge.to_pdf_libreoffice``). The
-    bridge wraps the bundled anthropic-skills soffice script — single
-    source of truth for headless docx→pdf conversion in this repo.
-
-    rc3.4 audit follow-up: rc1's direct ``shutil.which('soffice')`` +
-    ``subprocess.run([soffice, ...])`` shell-out duplicated the bridge.
-    Removed in favour of the canonical entry point.
-    """
+    """Convert ``docx_path`` to a PDF in ``out_dir`` via headless
+    LibreOffice. Returns the produced PDF path."""
     out_dir.mkdir(parents=True, exist_ok=True)
-    bridge = _get_bridge()
+    cmd = [
+        SOFFICE,
+        "--headless",
+        "--convert-to", "pdf",
+        "--outdir", str(out_dir),
+        str(docx_path),
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"LibreOffice convert failed: rc={proc.returncode}\n"
+            f"stdout: {proc.stdout}\nstderr: {proc.stderr}"
+        )
     pdf = out_dir / (docx_path.stem + ".pdf")
-    try:
-        bridge.to_pdf_libreoffice(str(docx_path), str(pdf))
-    except _BRIDGE_ERROR_CLS as exc:  # type: ignore[arg-type]
-        # bridge raises this when LibreOffice/soffice can't be found —
-        # treat as a skip, not a hard failure (matches the rc1 contract:
-        # "skip gracefully when libreoffice/soffice is missing").
-        pytest.skip(f"LibreOffice unavailable via office_bridge: {exc}")
-    if not pdf.exists():
-        # Some bridge implementations honour the requested out path;
-        # others leave the PDF next to the source. Reconcile.
-        candidate = docx_path.with_suffix(".pdf")
-        if candidate.exists():
-            candidate.replace(pdf)
     if not pdf.exists():
         raise RuntimeError(
-            f"office_bridge.to_pdf_libreoffice produced no PDF at {pdf} "
-            f"(or sibling fallback). docx_path: {docx_path}"
+            f"LibreOffice did not produce expected PDF at {pdf}; "
+            f"out_dir contents: {list(out_dir.iterdir())}"
         )
     return pdf
 
