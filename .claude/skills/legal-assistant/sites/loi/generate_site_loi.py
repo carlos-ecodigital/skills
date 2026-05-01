@@ -42,7 +42,7 @@ _SHARED_PATH = Path(__file__).resolve().parents[1] / "_shared"
 if str(_SHARED_PATH) not in sys.path:
     sys.path.insert(0, str(_SHARED_PATH))
 
-from bilingual_body import render_bilingual_clause  # noqa: E402
+from bilingual_body import render_bilingual_clause, render_schedule_table  # noqa: E402
 from format_validators import run_all as run_format_validators  # noqa: E402
 from generate import DE_ENTITIES, COBALT, SLATE_800, SLATE_900, FONT, Party, add_cover  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
@@ -65,18 +65,11 @@ from site_doc_base import normalise_placeholder as _sanitise  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
-# Page-layout helper — narrow margins so bilingual tables fit
+# Page-layout — narrow margins are now set transparently via
+# ``bilingual_body.ensure_bilingual_layout``, which is invoked from the
+# first ``render_bilingual_clause`` / ``render_schedule_table`` call per
+# doc. The local ``_set_narrow_margins`` helper retired in rc3.2.
 # ---------------------------------------------------------------------------
-
-def _set_narrow_margins(doc: Document) -> None:
-    """Set 20 mm L/R and 25 mm T/B on every section so bilingual tables
-    (USABLE_WIDTH_MM=165) render without overflow. Default python-docx
-    margins are 31.75 mm which leaves only 146.5 mm usable — too narrow."""
-    for section in doc.sections:
-        section.left_margin = Mm(20)
-        section.right_margin = Mm(20)
-        section.top_margin = Mm(25)
-        section.bottom_margin = Mm(20)
 
 # Phase B6 integration complete — imports from site_doc_base.
 # Back-compat alias so existing tests that reference ``engine._derive_role_labels``
@@ -688,16 +681,14 @@ def build_document(deal: dict) -> Document:
     }
 
     doc = Document()
-    _set_narrow_margins(doc)
 
     loi_date = deal.get("timeline", {}).get("loi_drafted_date") or date.today().isoformat()
 
-    # Cover page — delegate to document-factory.add_cover for the IB-standard
-    # title hierarchy (28pt bold title + 14pt subject + 11pt date + party
-    # blocks), then append a small bilingual subtitle line so the Dutch
-    # translation is visible on the cover. This replaces the inline
-    # `doc.add_paragraph()` runs that had no branding, no hierarchy, and
-    # bled into Section L on the first page.
+    # Cover page — delegated to document-factory.add_cover with the rc3.2
+    # bilingual extension. Stacked EN/NL title + subject, bilingual party
+    # labels, no Classification footer (Sites stream rule per
+    # ``feedback_cover_page_title.md``). Margins are set transparently by
+    # ``ensure_bilingual_layout`` on the first bilingual render call below.
     party_blocks = [
         Party(
             legal_name=provider_party.legal_name,
@@ -721,33 +712,13 @@ def build_document(deal: dict) -> Document:
         date_str=loi_date,
         parties=party_blocks,
         formality="non_binding",
-        classification="Confidential",
         cover_title="Letter of Intent",
+        bilingual=True,
+        title_nl="Intentieverklaring",
+        subject_nl="voor een Digital Energy Center-project",
+        party_labels="bilingual",
+        render_classification=False,
     )
-
-    # Bilingual subtitle: the Dutch translations of Title + Subject, set just
-    # below the English block so Dutch readers see the header at a glance.
-    nl_subtitle = doc.add_paragraph()
-    nl_subtitle.paragraph_format.space_before = Pt(0)
-    nl_subtitle.paragraph_format.space_after = Pt(2)
-    nl_r = nl_subtitle.add_run("Intentieverklaring")
-    nl_r.italic = True
-    nl_r.font.name = FONT
-    nl_r.font.size = Pt(16)
-    nl_r.font.color.rgb = SLATE_900
-
-    nl_sub2 = doc.add_paragraph()
-    nl_sub2.paragraph_format.space_before = Pt(0)
-    nl_sub2.paragraph_format.space_after = Pt(12)
-    nl_sub2_r = nl_sub2.add_run("voor een Digital Energy Center-project")
-    nl_sub2_r.italic = True
-    nl_sub2_r.font.name = FONT
-    nl_sub2_r.font.size = Pt(11)
-    nl_sub2_r.font.color.rgb = SLATE_800
-
-    # Page break so Section 1 starts on its own page
-    from docx.enum.text import WD_BREAK
-    doc.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
 
     # §1 Parties
     en, nl = _clause_1_parties(provider, site_partners)
@@ -812,41 +783,46 @@ def build_document(deal: dict) -> Document:
                             heading="7. Execution",
                             heading_nl="7. Ondertekening")
 
-    # Section L — Locations (bilingual two-column table)
+    # Section L — Locations (bilingual N-column schedule table)
     locations = deal.get("locations") or []
     if locations:
-        en_rows: List[str] = []
-        nl_rows: List[str] = []
-        for i, loc in enumerate(locations, 1):
-            parcel = _sanitise(loc.get("parcel_id"))
-            addr = _sanitise(loc.get("address"))
-            dso = _sanitise(loc.get("dso"))
-            muni = _sanitise(loc.get("municipality"))
-            postcode = _sanitise(loc.get("postcode"), fallback="")
-            zoning = _sanitise(loc.get("bestemmingsplan_designation"), fallback="")
-            en_rows.append(
-                f"Location {i}: parcel {parcel}; address {addr}"
-                + (f", {postcode}" if postcode else "")
-                + f"; municipality {muni}; DSO {dso}"
-                + (f"; zoning {zoning}" if zoning else "")
-                + "."
-            )
-            nl_rows.append(
-                f"Locatie {i}: kadaster {parcel}; adres {addr}"
-                + (f", {postcode}" if postcode else "")
-                + f"; gemeente {muni}; netbeheerder {dso}"
-                + (f"; bestemming {zoning}" if zoning else "")
-                + "."
-            )
+        # Heading row (bilingual clause-style, so the schedule has a label)
         render_bilingual_clause(
-            doc, en_rows, nl_rows,
+            doc, [], [],
             heading="Section L — Locations",
             heading_nl="Bijlage L — Locaties",
         )
+        loc_rows = []
+        for loc in locations:
+            parcel = _sanitise(loc.get("parcel_id"))
+            addr = _sanitise(loc.get("address"))
+            postcode = _sanitise(loc.get("postcode"), fallback="")
+            address_full = f"{addr}, {postcode}" if postcode else addr
+            dso = _sanitise(loc.get("dso"))
+            muni = _sanitise(loc.get("municipality"))
+            zoning = _sanitise(loc.get("bestemmingsplan_designation"), fallback=_TBC_TOKEN)
+            loc_rows.append([
+                parcel,
+                address_full,
+                dso,
+                muni,
+                zoning,
+            ])
+        render_schedule_table(
+            doc,
+            columns_en=["Location", "Address", "DSO", "Municipality", "Zoning"],
+            columns_nl=["Locatie", "Adres", "Netbeheerder", "Gemeente", "Bestemming"],
+            rows=loc_rows,
+        )
 
-    # Section R — Roles + Parties (bilingual two-column table)
-    en_rows: List[str] = []
-    nl_rows: List[str] = []
+    # Section R — Roles + Parties (bilingual N-column schedule table)
+    # Heading row (bilingual clause-style)
+    render_bilingual_clause(
+        doc, [], [],
+        heading="Section R — Roles and Parties",
+        heading_nl="Bijlage R — Rollen en Partijen",
+    )
+    r_rows = []
     for sp in site_partners:
         en_lbls, nl_lbls = sdb_derive_role_labels(sp)
         sp["_role_labels_en"] = en_lbls
@@ -854,17 +830,23 @@ def build_document(deal: dict) -> Document:
 
         legal_name = _sanitise(sp.get("legal_name"))
         kvk = _sanitise(sp.get("kvk"), fallback="")
-        kvk_en = f" (KvK {kvk})" if kvk else ""
-        kvk_nl = f" (KvK {kvk})" if kvk else ""
+        party_cell = f"{legal_name}\n(KvK {kvk})" if kvk else legal_name
+
         sig = sp.get("signatory") or {}
         sig_name = _sanitise(sig.get("name"))
         sig_title = _sanitise(sig.get("title"))
+        signatory_cell = f"{sig_name}\n({sig_title})"
 
-        en_roles = ", ".join(en_lbls) if en_lbls else _TBC_TOKEN
-        nl_roles = ", ".join(nl_lbls) if nl_lbls else _TBC_TOKEN
+        # Roles cell — bullet sublist (one bullet per role, EN+NL stacked)
+        roles_cell: list[str] = []
+        if en_lbls:
+            for en, nl in zip(en_lbls, nl_lbls or [_TBC_TOKEN] * len(en_lbls)):
+                roles_cell.append(f"{en} / {nl}")
+        else:
+            roles_cell = [_TBC_TOKEN]
 
-        contribs_en = []
-        contribs_nl = []
+        # Contributions cell — bullet sublist
+        contribs_cell: list[str] = []
         for contrib in sp.get("contributions") or []:
             asset = contrib.get("asset", _TBC_TOKEN)
             instrument = contrib.get("instrument", _TBC_TOKEN)
@@ -877,11 +859,12 @@ def build_document(deal: dict) -> Document:
                 if vs:
                     kvs.append(f"{k}={vs}")
             detail_str = ("; " + ", ".join(kvs)) if kvs else ""
-            contribs_en.append(f"contributes {asset} via {instrument}{detail_str}")
-            contribs_nl.append(f"levert {asset} via {instrument}{detail_str}")
+            contribs_cell.append(f"{asset} via {instrument}{detail_str}")
+        if not contribs_cell:
+            contribs_cell = [_TBC_TOKEN]
 
-        returns_en = []
-        returns_nl = []
+        # Returns cell — bullet sublist
+        returns_cell: list[str] = []
         for ret in sp.get("returns") or []:
             value = ret.get("value", _TBC_TOKEN)
             instrument = ret.get("instrument", _TBC_TOKEN)
@@ -892,23 +875,23 @@ def build_document(deal: dict) -> Document:
                 if vs and not k.endswith("_hash"):
                     kvs.append(f"{k}={vs}")
             detail_str = ("; " + ", ".join(kvs)) if kvs else ""
-            returns_en.append(f"receives {value} via {instrument}{detail_str}")
-            returns_nl.append(f"ontvangt {value} via {instrument}{detail_str}")
+            returns_cell.append(f"{value} via {instrument}{detail_str}")
+        if not returns_cell:
+            returns_cell = [_TBC_TOKEN]
 
-        en_rows.append(
-            f"{legal_name}{kvk_en}. Roles: {en_roles}. Signatory: {sig_name} ({sig_title}). "
-            + ("Contributions: " + "; ".join(contribs_en) + ". " if contribs_en else "")
-            + ("Returns: " + "; ".join(returns_en) + "." if returns_en else "")
-        )
-        nl_rows.append(
-            f"{legal_name}{kvk_nl}. Rollen: {nl_roles}. Ondertekenaar: {sig_name} ({sig_title}). "
-            + ("Bijdragen: " + "; ".join(contribs_nl) + ". " if contribs_nl else "")
-            + ("Vergoedingen: " + "; ".join(returns_nl) + "." if returns_nl else "")
-        )
-    render_bilingual_clause(
-        doc, en_rows, nl_rows,
-        heading="Section R — Roles and Parties",
-        heading_nl="Bijlage R — Rollen en Partijen",
+        r_rows.append([
+            party_cell,
+            roles_cell,
+            contribs_cell,
+            returns_cell,
+            signatory_cell,
+        ])
+
+    render_schedule_table(
+        doc,
+        columns_en=["Party", "Roles", "Contributions", "Returns", "Signatory"],
+        columns_nl=["Partij", "Rollen", "Bijdragen", "Vergoedingen", "Ondertekenaar"],
+        rows=r_rows,
     )
 
     # Signature page

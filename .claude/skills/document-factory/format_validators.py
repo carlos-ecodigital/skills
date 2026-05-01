@@ -105,12 +105,24 @@ def validate_cell_overflow(doc, min_col_width_mm: float = 30.0) -> List[str]:
     tolerance; flags true overflow risks (very long words in narrow
     columns), not normal text. Word wrapping handles the lighter edge
     cases; this catches only words Word cannot break without hyphenation.
+
+    Tables marked with the ``__bilingual_body__`` ``w:tblDescription``
+    are exempted (consistent with ``audit_document``'s T0 exemption):
+    bilingual clause bodies and schedule tables are layout-driven; the
+    word-overflow heuristic does not apply to them. Phase 4 calibrates
+    the heuristic itself.
     """
     issues: List[str] = []
     mm_per_char = 2.1        # calibrated to 10 pt Inter measured widths
     tolerance = 0.05         # 5 % — absorbs kerning + inter-word slack
 
     for t_idx, table in enumerate(doc.tables):
+        # Exempt bilingual_body-marker tables.
+        tblPr = table._tbl.find(qn("w:tblPr"))
+        if tblPr is not None:
+            _desc = tblPr.find(qn("w:tblDescription"))
+            if _desc is not None and _desc.get(qn("w:val")) == "__bilingual_body__":
+                continue
         for c_idx, col in enumerate(table.columns):
             if col.width is None:
                 continue
