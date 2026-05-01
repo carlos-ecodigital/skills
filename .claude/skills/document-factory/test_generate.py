@@ -651,3 +651,141 @@ class TestVisualRegression:
         golden = json.loads(vq.GOLDEN_JSON.read_text())
         changes = vq.compare_to_golden(results, golden, threshold=5)
         assert not changes, f"Visual regressions vs golden: {changes}"
+
+
+# ---------------------------------------------------------------------------
+# TestOfficeBridge — bridge wrapper unit tests (mocked subprocess)
+# ---------------------------------------------------------------------------
+
+class TestOfficeBridge:
+    """Unit tests for office_bridge.OfficeBridge — verifies wrapper plumbing
+    without actually invoking Word/LibreOffice/anthropic-skills scripts.
+    """
+
+    def _bridge(self):
+        from office_bridge import OfficeBridge
+        return OfficeBridge()
+
+    def test_bridge_discovers_anthropic_skills(self):
+        """Bridge auto-discovers all four anthropic skills at construction."""
+        b = self._bridge()
+        assert "docx" in b.available_skills
+        assert "pdf" in b.available_skills
+        assert "xlsx" in b.available_skills
+        assert "pptx" in b.available_skills
+
+    def test_bridge_no_circular_dep_on_generate(self):
+        """Bridge must not import generate (the dependency goes the other way)."""
+        # Simulate fresh import: clear any cached modules
+        import sys
+        for m in list(sys.modules):
+            if m in ("generate", "office_bridge"):
+                del sys.modules[m]
+        import office_bridge  # noqa: F401
+        assert "generate" not in sys.modules, \
+            "office_bridge must not import generate (would create circular dep)"
+
+    def test_to_pdf_libreoffice_args(self, tmp_path, monkeypatch):
+        """to_pdf_libreoffice constructs correct soffice arguments."""
+        b = self._bridge()
+        captured = {}
+
+        class FakeResult:
+            stdout = "/tmp/out.pdf"
+
+        def fake_run(script, *args, **kwargs):
+            captured["script"] = script
+            captured["args"] = args
+            return FakeResult()
+
+        monkeypatch.setattr(b, "_run", fake_run)
+        # Place a fake docx so paths resolve
+        fake_docx = tmp_path / "test.docx"
+        fake_docx.write_bytes(b"PK")  # minimal zip-like placeholder
+        out_pdf = tmp_path / "test.pdf"
+        b.to_pdf_libreoffice(str(fake_docx), str(out_pdf))
+        assert "soffice.py" in captured["script"]
+        assert "--headless" in captured["args"]
+        assert "--convert-to" in captured["args"]
+        assert "pdf" in captured["args"]
+        assert str(fake_docx) in captured["args"]
+
+    def test_to_pdf_falls_back_to_libreoffice(self, monkeypatch):
+        """to_pdf(prefer='word') falls back to LibreOffice when Word fails."""
+        b = self._bridge()
+        word_called = []
+        lo_called = []
+
+        def fake_word(path, out=None):
+            word_called.append((path, out))
+            raise RuntimeError("simulated Word failure")
+
+        def fake_lo(path, out=None):
+            lo_called.append((path, out))
+            return out or "/tmp/x.pdf"
+
+        monkeypatch.setattr(b, "to_pdf_word", fake_word)
+        monkeypatch.setattr(b, "to_pdf_libreoffice", fake_lo)
+        result = b.to_pdf("/tmp/in.docx", "/tmp/out.pdf", prefer="word")
+        assert len(word_called) == 1, "Word should have been tried first"
+        assert len(lo_called) == 1, "LibreOffice should have been the fallback"
+        assert result == "/tmp/out.pdf"
+
+    def test_to_pdf_libreoffice_direct_when_preferred(self, monkeypatch):
+        """to_pdf(prefer='libreoffice') skips Word entirely."""
+        b = self._bridge()
+        word_called = []
+        lo_called = []
+        monkeypatch.setattr(b, "to_pdf_word",
+                            lambda p, o=None: word_called.append(1) or "wrong")
+        monkeypatch.setattr(b, "to_pdf_libreoffice",
+                            lambda p, o=None: lo_called.append(1) or "/tmp/lo.pdf")
+        result = b.to_pdf("/tmp/in.docx", "/tmp/out.pdf", prefer="libreoffice")
+        assert word_called == [], "Word must NOT be tried when prefer=libreoffice"
+        assert len(lo_called) == 1
+        assert result == "/tmp/lo.pdf"
+
+    def test_accept_changes_default_output_path(self, tmp_path, monkeypatch):
+        """accept_changes default output is <input>_accepted.docx."""
+        b = self._bridge()
+        captured_args = []
+
+        def fake_run(script, *args, **kwargs):
+            captured_args.append((script, args))
+            class R: stdout = ""
+            return R()
+
+        monkeypatch.setattr(b, "_run", fake_run)
+        in_path = tmp_path / "doc.docx"
+        in_path.write_bytes(b"PK")
+        out = b.accept_changes(str(in_path))
+        assert out.endswith("doc_accepted.docx")
+        assert "accept_changes.py" in captured_args[0][0]
+
+    def test_accept_changes_explicit_output(self, tmp_path, monkeypatch):
+        """accept_changes uses caller-provided output path."""
+        b = self._bridge()
+        monkeypatch.setattr(b, "_run", lambda *a, **k: type("R", (), {"stdout": ""})())
+        in_path = tmp_path / "doc.docx"
+        in_path.write_bytes(b"PK")
+        out_path = tmp_path / "clean.docx"
+        out = b.accept_changes(str(in_path), str(out_path))
+        assert out == str(out_path)
+
+    def test_add_comment_args(self, tmp_path, monkeypatch):
+        """add_comment passes parent + author flags correctly."""
+        b = self._bridge()
+        captured = []
+        monkeypatch.setattr(b, "_run",
+                            lambda script, *args, **k: captured.append((script, args)) or
+                            type("R", (), {"stdout": ""})())
+        b.add_comment("/tmp/unpacked", 5, "Review this clause",
+                      parent=2, author="Carlos")
+        args = captured[0][1]
+        assert "/tmp/unpacked" in args
+        assert "5" in args
+        assert "Review this clause" in args
+        assert "--author" in args
+        assert "Carlos" in args
+        assert "--parent" in args
+        assert "2" in args

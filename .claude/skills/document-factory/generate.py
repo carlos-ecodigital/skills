@@ -2157,42 +2157,24 @@ def _add_inline(para, text, size=Pt(11), color=SLATE_800, bold=False):
 # PDF CONVERSION (Microsoft Word via docx2pdf)
 # ---------------------------------------------------------------------------
 
-def docx_to_pdf(docx_path, pdf_path=None):
-    """Convert .docx → .pdf via Microsoft Word (docx2pdf).
+def docx_to_pdf(docx_path, pdf_path=None, prefer="word"):
+    """Convert .docx → .pdf.
 
-    Word is the canonical .docx renderer on the team's machines.
-    On macOS this uses AppleScript automation; on Windows, COM.
-    No fallback — if Word is unavailable, raises RuntimeError with
-    install instructions.
+    Delegates to office_bridge.to_pdf() which handles both Word (canonical
+    fidelity) and LibreOffice (reliable headless) engines with automatic
+    fallback. Single source of truth — see office_bridge.OfficeBridge.to_pdf
+    for engine selection details.
+
+    Args:
+        docx_path: input .docx
+        pdf_path: output path (default: <docx_path>.pdf)
+        prefer: "word" (canonical, with LibreOffice fallback) or "libreoffice"
+                (faster, more reliable for batch/CI)
 
     Returns the output PDF path on success.
     """
-    docx_path = os.path.abspath(docx_path)
-    if not os.path.exists(docx_path):
-        raise FileNotFoundError(docx_path)
-    if pdf_path is None:
-        pdf_path = os.path.splitext(docx_path)[0] + ".pdf"
-    pdf_path = os.path.abspath(pdf_path)
-
-    try:
-        from docx2pdf import convert as _word_convert
-    except ImportError:
-        raise RuntimeError(
-            "docx2pdf not installed. Run: pip install docx2pdf\n"
-            "Also ensure Microsoft Word is installed (macOS: Office 365; Windows: Office)."
-        )
-
-    try:
-        _word_convert(docx_path, pdf_path)
-    except Exception as e:
-        raise RuntimeError(
-            f"Word conversion failed: {e}\n"
-            "Verify Microsoft Word is installed and, on macOS, that AppleScript is permitted."
-        )
-
-    if not os.path.exists(pdf_path):
-        raise RuntimeError("docx2pdf ran but produced no output file.")
-    return pdf_path
+    from office_bridge import OfficeBridge
+    return OfficeBridge().to_pdf(docx_path, pdf_path, prefer=prefer)
 
 
 # ---------------------------------------------------------------------------

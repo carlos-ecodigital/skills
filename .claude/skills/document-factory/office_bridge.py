@@ -170,29 +170,93 @@ class OfficeBridge:
         result = self._run(script, *args)
         return result.stdout
 
-    def to_pdf_word(self, docx_path: str, pdf_path: Optional[str] = None) -> str:
-        """Convert .docx to PDF via Microsoft Word (highest fidelity).
+    def accept_changes(self, docx_path: str, output_path: Optional[str] = None) -> str:
+        """Accept all tracked changes in a .docx via LibreOffice.
 
-        Uses generate.py's docx_to_pdf() which calls docx2pdf (Word automation).
-        Falls back to LibreOffice if Word is unavailable.
+        Wraps Anthropic's docx/scripts/accept_changes.py. LibreOffice is required.
+        For Word-based acceptance (canonical semantics, slower, less reliable on
+        macOS), use the standalone accept_changes.py CLI with --engine=word.
+
+        Returns the path of the cleaned output file.
         """
+        if output_path is None:
+            base, ext = os.path.splitext(os.path.abspath(docx_path))
+            output_path = f"{base}_accepted{ext}"
+        script = self._script("docx", "accept_changes.py")
+        result = self._run(script, os.path.abspath(docx_path), os.path.abspath(output_path))
+        # Anthropic's script writes to output_path; return that, not stdout
+        return output_path
+
+    def to_pdf_word(self, docx_path: str, pdf_path: Optional[str] = None) -> str:
+        """Convert .docx to PDF via Microsoft Word (canonical fidelity).
+
+        Uses docx2pdf (AppleScript on macOS, COM on Windows). Slower; may hang
+        if Word has open documents on macOS. Raises RuntimeError on failure;
+        does NOT auto-fallback. Callers wanting fallback should use to_pdf().
+        """
+        docx_path = os.path.abspath(docx_path)
+        if not os.path.exists(docx_path):
+            raise FileNotFoundError(docx_path)
+        if pdf_path is None:
+            pdf_path = os.path.splitext(docx_path)[0] + ".pdf"
+        pdf_path = os.path.abspath(pdf_path)
+
         try:
-            from generate import docx_to_pdf
-            result_path = docx_to_pdf(docx_path, pdf_path)
-            return result_path
-        except (ImportError, RuntimeError):
-            return self.to_pdf_libreoffice(docx_path, pdf_path)
+            from docx2pdf import convert as _word_convert
+        except ImportError:
+            raise RuntimeError(
+                "docx2pdf not installed. Run: pip install docx2pdf\n"
+                "Also requires Microsoft Word."
+            )
+        try:
+            _word_convert(docx_path, pdf_path)
+        except Exception as e:
+            raise RuntimeError(
+                f"Word conversion failed: {e}\n"
+                "On macOS: ensure Word is installed and AppleScript is permitted; "
+                "close other Word documents if it hangs."
+            )
+        if not os.path.exists(pdf_path):
+            raise RuntimeError("docx2pdf ran but produced no output file.")
+        return pdf_path
 
     def to_pdf_libreoffice(self, docx_path: str, pdf_path: Optional[str] = None) -> str:
-        """Convert .docx to PDF via LibreOffice (fallback when Word unavailable)."""
+        """Convert .docx to PDF via LibreOffice (reliable, headless).
+
+        Fast and session-independent. Used by visual_qa pipeline and as the
+        default fallback when Word automation fails.
+        """
         script = self._script("docx", "office", "soffice.py")
         args = ["--headless", "--convert-to", "pdf", docx_path]
+        if pdf_path:
+            outdir = os.path.dirname(os.path.abspath(pdf_path))
+            args.extend(["--outdir", outdir])
         result = self._run(script, *args)
-        return result.stdout
+        if pdf_path:
+            stem = os.path.splitext(os.path.basename(docx_path))[0]
+            produced = os.path.join(os.path.dirname(os.path.abspath(pdf_path)), f"{stem}.pdf")
+            if produced != os.path.abspath(pdf_path) and os.path.exists(produced):
+                os.replace(produced, pdf_path)
+            return pdf_path
+        return result.stdout.strip() or os.path.splitext(docx_path)[0] + ".pdf"
 
-    def to_pdf(self, docx_path: str, pdf_path: Optional[str] = None) -> str:
-        """Convert .docx to PDF — Word first, LibreOffice fallback."""
-        return self.to_pdf_word(docx_path, pdf_path)
+    def to_pdf(self, docx_path: str, pdf_path: Optional[str] = None,
+               prefer: str = "word") -> str:
+        """Convert .docx to PDF with automatic fallback.
+
+        prefer:
+            "word" (default) — tries Word first, falls back to LibreOffice on
+            failure. Best for user-facing output (canonical rendering).
+
+            "libreoffice" — uses LibreOffice directly (faster, more reliable
+            for pipeline / batch / CI work where Word session state is fragile).
+        """
+        if prefer == "libreoffice":
+            return self.to_pdf_libreoffice(docx_path, pdf_path)
+        try:
+            return self.to_pdf_word(docx_path, pdf_path)
+        except (ImportError, RuntimeError, FileNotFoundError):
+            return self.to_pdf_libreoffice(docx_path, pdf_path)
 
     def doc_to_docx(self, doc_path: str) -> str:
         """Convert legacy .doc to .docx via LibreOffice."""
