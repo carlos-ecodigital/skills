@@ -44,23 +44,27 @@ def test_van_gog_loi_file_produced(tmp_path, van_gog_yaml_path):
     assert qa.stat().st_size > 100               # non-empty QA
 
 
-def test_van_gog_loi_has_9_bilingual_tables(tmp_path, van_gog_yaml_path):
-    """Van Gog LOI renders nine bilingual two-column tables:
+def test_van_gog_loi_has_eleven_bilingual_tables(tmp_path, van_gog_yaml_path):
+    """Van Gog LOI renders eleven tables (rc3.2):
 
-    - §1..§7 → 7 clause-body tables
-    - Section L (Locations) → 1 table (rc2)
-    - Section R (Role Schedule) → 1 table (rc2)
+    - §1..§7 → 7 clause-body tables (2 cols, EN / NL)
+    - Section L heading band → 1 bilingual clause table (2 cols)
+    - Section L schedule → 1 schedule table (5 cols)
+    - Section R heading band → 1 bilingual clause table (2 cols)
+    - Section R schedule → 1 schedule table (5 cols)
 
-    Pre-rc2 this was 7 (§1..§7 only); L + R were prose paragraphs.
-    rc2 promoted both to bilingual two-column tables to match the
-    document-factory framework + the Van Gog paper LOI.
+    rc2: 9 tables (Section L + R were 2-column prose tables).
+    rc3.2: Section L + R promoted to true N-column schedule tables;
+    each gains a bilingual heading band so the schedule has a label.
     """
     docx, _ = _generate(tmp_path, van_gog_yaml_path)
     d = Document(str(docx))
-    assert len(d.tables) == 9
-    # Every table has exactly 2 columns (EN / NL)
-    for t in d.tables:
-        assert len(t.columns) == 2
+    assert len(d.tables) == 11
+    # 9 bilingual clause tables (2 cols) + 2 schedule tables (5 cols)
+    two_col = [t for t in d.tables if len(t.columns) == 2]
+    five_col = [t for t in d.tables if len(t.columns) == 5]
+    assert len(two_col) == 9
+    assert len(five_col) == 2
 
 
 def test_van_gog_loi_activates_bess_block(tmp_path, van_gog_yaml_path):

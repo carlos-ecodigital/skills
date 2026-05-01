@@ -798,16 +798,39 @@ def _cover_title(agreement_type):
 def add_cover(doc, agreement_type, subject=None, date_str=None,
               parties=None, party_labels=None, formality="non_binding",
               reference=None, version=None, classification="Confidential",
-              cover_title=None):
+              cover_title=None, bilingual=False, title_nl=None,
+              subject_nl=None, render_classification=True):
     """IB-standard cover page with structured hierarchy.
 
     Rendering order:
       1. Agreement type (28pt bold) — e.g. "Letter of Intent"
          (auto-shortened from compound names; override via cover_title)
+         When ``bilingual=True`` and ``title_nl`` is set, the NL title is
+         stacked italic in 16pt SLATE_900 directly under the EN title.
       2. Subject / deal description (14pt slate) — e.g. "for AI Infrastructure Distribution"
+         When ``bilingual=True`` and ``subject_nl`` is set, the NL subject
+         is stacked italic in 11pt SLATE_800 directly under the EN subject.
       3. Date (11pt, document-level)
       4. Party blocks — legal name, address, registration (binding only)
       5. Metadata — reference, version, classification
+         When ``render_classification=False`` the classification footer
+         row is omitted entirely (Sites stream callers per the
+         ``feedback_cover_page_title.md`` memory rule). Reference / version
+         metadata still render if supplied.
+
+    Args:
+        bilingual: If True, stack EN/NL titles + EN/NL subjects on the cover.
+        title_nl: Dutch translation of the agreement title (rendered when
+            ``bilingual=True``).
+        subject_nl: Dutch translation of the subject line (rendered when
+            ``bilingual=True``).
+        party_labels: Either a list of label strings (legacy form) or one
+            of ``"en"``, ``"nl"``, or ``"bilingual"``.
+            - ``"en"`` (or omitted): "Between:" / "And:" (or, if
+              ``formality="binding"``, "By and between:" / "And:").
+            - ``"nl"``: "Tussen:" / "En:" (or, if binding, "Tussen en:" / "En:").
+            - ``"bilingual"``: "Between / Tussen:" / "And / En:".
+        render_classification: If False, omit the Classification footer row.
     """
     # Push title down from logo
     spacer = doc.add_paragraph()
@@ -821,12 +844,26 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
     displayed_title = cover_title if cover_title else _cover_title(agreement_type)
     _run(tp, displayed_title, size=Pt(28), color=SLATE_900, bold=True)
 
+    # 1b. Bilingual NL title (stacked under EN title)
+    if bilingual and title_nl:
+        tnl = doc.add_paragraph()
+        tnl.paragraph_format.space_before = Pt(0)
+        tnl.paragraph_format.space_after = Pt(2)
+        _run(tnl, title_nl, size=Pt(16), color=SLATE_900, italic=True)
+
     # 2. Subject / deal description
     if subject:
         sp = doc.add_paragraph()
         sp.paragraph_format.space_before = Pt(2)
         sp.paragraph_format.space_after = Pt(0)
         _run(sp, subject, size=Pt(14), color=SLATE_800)
+
+    # 2b. Bilingual NL subject (stacked under EN subject)
+    if bilingual and subject_nl:
+        snl = doc.add_paragraph()
+        snl.paragraph_format.space_before = Pt(0)
+        snl.paragraph_format.space_after = Pt(0)
+        _run(snl, subject_nl, size=Pt(11), color=SLATE_800, italic=True)
 
     # 3. Date (document-level, below title block)
     if date_str:
@@ -837,12 +874,19 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
 
     # 4. Party blocks
     if parties:
-        # Determine labels
-        if party_labels is None:
-            if formality == "binding":
-                party_labels = ["By and between:"] + ["And:"] * (len(parties) - 1)
-            else:
-                party_labels = ["Between:"] + ["And:"] * (len(parties) - 1)
+        # Determine labels — accept list (legacy) or string spec ("en"/"nl"/"bilingual").
+        if party_labels is None or isinstance(party_labels, str):
+            mode = party_labels if isinstance(party_labels, str) else "en"
+            if mode == "bilingual":
+                first = "Between / Tussen:"
+                rest = "And / En:"
+            elif mode == "nl":
+                first = "Tussen:" if formality != "binding" else "Tussen en:"
+                rest = "En:"
+            else:  # "en" / default
+                first = "By and between:" if formality == "binding" else "Between:"
+                rest = "And:"
+            party_labels = [first] + [rest] * (len(parties) - 1)
         # Pad labels if fewer than parties
         while len(party_labels) < len(parties):
             party_labels.append("And:")
@@ -885,7 +929,7 @@ def add_cover(doc, agreement_type, subject=None, date_str=None,
         meta_items.append(("Reference", reference))
     if version is not None:
         meta_items.append(("Version", f"v{version}"))
-    if classification:
+    if classification and render_classification:
         meta_items.append(("Classification", classification))
 
     if meta_items:
