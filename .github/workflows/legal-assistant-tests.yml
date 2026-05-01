@@ -9,17 +9,24 @@ on:
     paths:
       - '.claude/skills/legal-assistant/**'
       - '.claude/skills/_shared/counterpart-description-framework.md'
+      - '.claude/skills/_shared/recital-b-reference.md'
       - '.claude/skills/_shared/loi-*.md'
+      - '.claude/skills/_shared/hubspot-pipeline-routing.md'
       - '.claude/skills/document-factory/generate.py'
       - '.github/workflows/legal-assistant-tests.yml'
   push:
     branches:
       - main
       - 'carlos/loi-v3.5*'
+      - 'carlos/loi-v3.6*'
+      - 'carlos/loi-v3.7*'
+      - 'carlos/loi-v3.8*'
     paths:
       - '.claude/skills/legal-assistant/**'
       - '.claude/skills/_shared/counterpart-description-framework.md'
+      - '.claude/skills/_shared/recital-b-reference.md'
       - '.claude/skills/_shared/loi-*.md'
+      - '.claude/skills/_shared/hubspot-pipeline-routing.md'
       - '.claude/skills/document-factory/generate.py'
 
 jobs:

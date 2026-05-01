@@ -361,44 +361,73 @@ Full table + worked example in `_shared/loi-sizing-framework.md`.
 4. Do NOT silently rewrite; require explicit confirmation.
 5. **Known failure mode — domain-surname homonyms:** If signatory surname shares letters with counterparty domain (e.g., "Marin Barrage" for domain `barrage.net`), always escalate verification regardless of Fireflies match, because the domain name may be mistaken for the surname.
 
-### Phase 5 — Recital B Draft
+### Phase 5 — Recital B (slot interrogation)
 
-**Skill action:** Apply 5-pillar framework, type-tuned per `_shared/counterpart-description-framework.md`. Produce 3–5 sentence paragraph, 80–150 words. Present draft + source map.
+**v3.8.0 — slot-only.** The freeform `counterparty.description` field is removed. Phase 5 walks the operator through 5 typed slots; engine renders a deterministic boring sentence. No prose composition, no redraft loop. Per `_shared/counterpart-description-framework.md` and Adams §4.7.
 
-**Prompt template:**
+**Skill action.** Using sources captured in Phase 3 (website / KvK / Handelsregister / Companies House / Fireflies / press / brochure), the LLM **proposes** a value for each slot with a verbatim or paraphrase quote from the source. Operator confirms or replaces each. The engine **never composes prose** — it only fills the slot template and concatenates.
+
+**Slot interrogation panel (operator sees this):**
 ```
-Recital B draft ([N] words):
+Recital B — slot interrogation (5 slots; engine renders, no prose generation)
 
-> [Counterparty] (the "Customer") is [Pillar 1 — identity & scale]. The
-> Customer [Pillar 2 — business & positioning]. [Pillar 3 — track record
-> & proof points]. [Pillar 4 — strategic fit with Provider]. [Pillar 5
-> — forward plans, if material]
+Slot 1 / Legal identity
+  Proposed legal_form:     B.V.
+  Proposed jurisdiction:   Netherlands
+  Proposed registration:   KvK 98580086
+  Source:                  https://kvk.nl/handelsregister/...   (tier 1)
+  Source quote:            "Acme Corp B.V., gevestigd te Amsterdam,
+                            ingeschreven bij de KvK onder nummer 98580086"
+  → Accept (Enter) / Replace [type new value] / Mark [TBC]
 
-Source map:
-- Pillar 1 (Identity): [source: website /about, Companies House]
-- Pillar 2 (Business): [source: website /products, LinkedIn]
-- Pillar 3 (Track record): [source: website /capacity, press: Reuters 2025-11]
-- Pillar 4 (Strategic fit): [inferred from Phase 1 context]
-- Pillar 5 (Forward plans): [N/A | source: press]
+Slot 2 / Operational verb-clause
+  Proposed verb:           providing
+  Proposed object:         GPU computing services
+  Source:                  https://news.acme.com/about            (tier 1)
+  Source quote:            "Acme provides GPU computing services to
+                            AI research labs across Europe."
+  → Accept / Replace / Mark [TBC]
+  ⚠ R-32 watch: do NOT accept `pioneering`, `leading`, `next-generation` —
+                 only OPERATIONAL_VERB_ENUM values pass.
 
-Choose one of the following:
+Slot 3 / Customer / use-case
+  Proposed category:       AI-research customers
+  Source:                  https://news.acme.com/customers         (tier 1)
+  Source quote:            "...serving AI-research customers..."
+  → Accept / Replace / Mark [TBC]
 
-  (a) Accept — proceed to Phase 6 confirmation gate with this Recital B as drafted
-  (b) Redraft with notes — describe what to change (framing, emphasis, tone,
-      tier-2 content to strip, named endorsers to add/remove, etc.) and I'll
-      regenerate following your notes; loop back to the 3-lender-question
-      self-check + Signal Test 3-gate
-  (c) Paste replacement text — provide verbatim replacement Recital B text;
-      I'll run R-24 (inline citation), R-25 (vanity financial), R-27
-      (sig-block TBC), and R-28 ([TBC] density) against your text, then
-      loop back to confirmation
+Slot 4 / Material asset / location
+  Proposed asset:          Amsterdam data centre
+  Source:                  https://news.acme.com/datacentre        (tier 1)
+  Source quote:            "...operates from its Amsterdam data centre..."
+  → Accept / Replace / Mark [TBC]
 
-Respond with (a), (b) [notes], or (c) followed by the replacement text.
+Slot 5 / Bargain-relevant fact (OPTIONAL)
+  Proposed: (none from sources — slot 5 stays empty by default)
+  Add a fact?
+    [ ] No — render without slot 5 (terse mode)
+    [ ] Yes — type claim, then proof block
+
+  IF slot 5 is populated AND claim references a NAMED THIRD-PARTY
+  (Microsoft, OpenAI, NVentures, Sequoia, etc.), R-32 will require
+  named_entities[] proof block (name + relationship_type +
+  materiality ≥30 chars + proof.url + proof.dated). See
+  `_shared/recital-b-reference.md` for the structured proof schema.
+
+Rendered output (preview):
+> (B) Acme (the "Customer") is a B.V. organised under the laws of
+> Netherlands (registered with the KvK under number 98580086),
+> engaged in providing GPU computing services for AI-research
+> customers, from its Amsterdam data centre.
+
+Confirm to proceed to Phase 6 / [B]ack to edit a slot.
 ```
 
-**Handoff to Phase 6** when user accepts Recital B (option a) or returns an R-24/R-25/R-27/R-28-clean replacement via option (c). Option (b) keeps the flow in Phase 5 until acceptance.
+**Handoff to Phase 6** when all 5 slots are confirmed (slot 5 may be empty). The QA linter runs R-32 + R-33 + R-23 (slot-5-claim only, no longer pillar-level) + R-24 / R-25 / R-27 / R-28 / R-29 / R-30 / R-31 against the rendered output. R-32 fail blocks; the operator gets a tight error pointing at the offending slot.
 
-**v3.5.3-cont scope J9**: prior Phase 5 prompt offered only "Accept, or request edits?" — user had to manually edit YAML and re-run the generator for each redraft. Three-option prompt above makes redraft and paste-replacement first-class actions inside the Phase 5 loop.
+**Slot 5 default (per user decision 2026-04-30):** OPTIONAL. When absent, QA emits `[INFO] R-density: terse mode — no bargain-relevant fact` (advisory only; not a fail). Density profile `choices.recital_b_density: terse | standard | verbose` controls whether slot 5 is recommended (terse = no slot 5, standard = one slot-5 fact, verbose = up to two).
+
+**Why this is no longer a redraft loop.** v3.7.x and earlier ran 5–8 iterations of "draft → operator says it's too marketing → redraft" because the LLM kept generating exactly what the linter couldn't fully catch. v3.8.0 makes those failure modes structurally impossible: closed verb enum prevents `pioneering`; banned-phrase regex blocks `cutting-edge`; named-entity proof requirement blocks unsupported `backed by Sequoia`. The redraft loop disappears because the recital is built from typed slots, not composed in prose.
 
 **v3.7.0 — Bespoke Recital A gate (scope C):** Bespoke Recital A is the exception, not a blending convenience. If bespoke is requested, the operator must confirm ONE of:
 - (a) Counterparty profile is genuinely non-commercial (sovereign regulator, academic institution), OR

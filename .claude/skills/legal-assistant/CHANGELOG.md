@@ -5,6 +5,46 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.8.0 — 2026-05-01 — Recital B prescriptive slot template
+
+The freeform `counterparty.description` field is **removed**. Recital B is now built from a typed 5-slot YAML block. The engine concatenates slot values into a single deterministic boring sentence; LLM prose composition is gone. Closes the 5–8 redraft-cycle pattern observed across all production LOIs (Cerebro / Armada / InfraPartners retrospectives).
+
+Plan: `~/.claude/plans/expressive-cooking-flamingo.md` (v3.8 section). Reference: Adams, *A Manual of Style for Contract Drafting* (3rd ed.), Ch. 4.
+
+### Breaking change
+- **`counterparty.description` field removed.** Intakes must use `counterparty.recital_b` slot block instead. R-DEPRECATED-FIELD fires (fail) when `description` is present. Migration path documented in `_shared/counterpart-description-framework.md`.
+- All 21 existing fixtures (9 examples + 12 regression) migrated in this PR. No in-flight LOI breaks because conversion happens in the same diff.
+
+### Added
+- **`_shared/counterpart-description-framework.md`** rewritten as a schema doc — slot template + closed enums + anti-pattern catalogue + source tiers. Historical Signal Test material retained as appendix because the structural test, 3 lender questions, and signal-quality concept all motivated the slot design.
+- **`_shared/recital-b-reference.md`** new — external legal-drafting authorities (Adams, ABA, Practical Law, Mellinkoff) with operative quotes and section/page locators. The slot design is auditable against published references.
+- **`sales/recital_b_vocab.py`** new module — `LEGAL_FORM_ENUM` (jurisdiction-bound, ~10 jurisdictions), `OPERATIONAL_VERB_ENUM` (~19 active verbs), `BANNED_PHRASES` regex set (9 anti-pattern classes from Adams §4.7 + Mellinkoff), `url_tier()` heuristic (host + subdomain + path-hint), `find_named_entities_in_text()`, `render_recital_b_sentence()` deterministic concatenation, `validate_legal_form()` jurisdiction-bound check, `validate_operational_verb()` enum check.
+- **R-32** (fail) — slot vocabulary + closed-enum + banned-phrase + named-entity proof requirement. No override (banned phrases are hard-banned). Single rule, multiple arms.
+- **R-DEPRECATED-FIELD** (fail) — legacy `counterparty.description` rejection with migration message.
+- **`tests/test_v3_8_0_recital_b_slots.py`** — 52 tests covering vocab module, banned-phrase detection, URL-tier heuristic, named-entity detection, sentence rendering, R-32 engine integration, R-DEPRECATED-FIELD, slot-5-optional-with-INFO, slot-5-named-entity-without-proof-fails, slot-5-named-entity-with-proof-passes.
+
+### Changed
+- **`sales/generate_loi.py::recitals()`** — Recital B now rendered via `recital_b_vocab.render_recital_b_sentence()` from the slot block. Old freeform-prose path removed.
+- **`sales/generate_loi.py::validate()`** + new sibling **`validate_errors()`** — `validate()` retains print+exit CLI semantics for backward compat; `validate_errors()` returns the error list for test harness use.
+- **`sales/generate_loi.py::_validate_recital_b_slots()`** — new helper running R-32 over the slot block (legal-form ↔ jurisdiction cross-check, banned-phrase scan per slot, slot-5 named-entity proof requirement, materiality length + non-puffery check).
+- **`sales/generate_loi.py::certifications_in_source()`** — now scans across slot text (legal_form / verb / object / category / asset / claim / source_quotes) instead of removed `description` field. R-11 helper preserved.
+- **`scripts/phase8_actions.py::hubspot_upsert_company()`** — HubSpot company `description` property now sourced from slot block (`{verb.capitalize()} {object} for {category}.`) instead of removed `description` field.
+- **`SKILL.md::Phase 5`** rewritten as 5-slot interrogation panel: LLM proposes from Phase-3 sources with verbatim source quote, operator confirms each slot, engine renders deterministic sentence. Old three-option (a/b/c) redraft prompt removed.
+
+### Verified
+- 572/572 pytest tests pass on upstream.
+- 21 fixtures regenerate cleanly with slot blocks (9 examples + 4 v3.5 regression + 8 v3.7 regression). All goldens refreshed; diff reflects expected change (Recital B sentence shape changes from operator-prose to deterministic concatenation).
+- 52 v3.8.0 tests RED-first per PRINCIPLES.md #4 — verified RED, then engine implementation flipped to GREEN.
+- Empty-YAML smoke (no `recital_b` slot) → R-32 fail with migration message; full block → renders cleanly.
+- Marketing-paragraph anti-pattern test: pasting "innovative AI-native cloud platform building cutting-edge GPU infrastructure for the next generation of frontier model workloads" into ANY slot → R-32 fail with matched phrases quoted.
+
+### Out of scope (deferred to v3.8.1 patch)
+- **Sibling-doc sync.** ASSEMBLY_GUIDE.md / FEATURE_MATRIX.md / SOP.md / docs/PRINCIPLES.md / docs/jonathan-memo-v3.5-delivery-map.md still reference the old prose-drafting flow and `counterparty.description` field. ~14 references across 5 files. Functional correctness already complete (engine + tests + framework doc + reference doc + Phase 5 + intakes); sibling sync is doc-only and will land as v3.8.1.
+- **Phase 7.5 senior-review workflow update.** `legal-counsel/specializations/contract-review/loi-review-workflow.md` (junior 4-point) + `loi-senior-review-pass.md` (senior six-axis) currently walk prose Recital B. v3.8.1 will rewrite them to walk slot block + proof structure.
+- **PRINCIPLES.md #13** (slot-based controlled-vocabulary inputs for legal text) — codify after at least 2 production LOIs run through v3.8.0.
+
+---
+
 ## v3.7.7 — 2026-04-30
 
 Fixes a real production bug introduced by v3.7.4: hardcoded

@@ -203,13 +203,25 @@ def hubspot_upsert_company(
                 "dedup_decision.force_create requires a reason ≥ 15 chars "
                 "documenting why the search produced no usable match"
             )
+        # v3.8.0: counterparty.description was removed; HubSpot description
+        # property now sourced from the slot block's operational_verb +
+        # customer_use_case fields (concrete activity + customer category).
+        rb = cp.get("recital_b") or {}
+        ov = rb.get("operational_verb") or {}
+        cu = rb.get("customer_use_case") or {}
+        if ov.get("verb") and ov.get("object") and cu.get("category"):
+            hub_description = (
+                f"{ov['verb'].capitalize()} {ov['object']} for {cu['category']}."
+            )
+        else:
+            hub_description = ""
         company_payload = {
             "objectType": "companies",
             "operation": "create",
             "properties": {
                 "name": name,
                 "domain": domain,
-                "description": cp.get("description", ""),
+                "description": hub_description,
                 "lifecyclestage": "opportunity",
                 "loi_status": "LOI Sent — Draft",
             },

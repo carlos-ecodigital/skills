@@ -42,7 +42,8 @@ def _minimal_bespoke() -> dict:
         "counterparty": {
             "name": "Acme Bespoke B.V.",
             "short": "Acme",
-            "description": "a test counterparty used by the bespoke suite",
+            # v3.8.0: `description` removed; Bespoke type doesn't require
+            # `recital_b` (validate skips the requirement for Bespoke).
             "signatory_name": "Test Signatory",
             "signatory_title": "Director",
         },
@@ -72,20 +73,12 @@ def _minimal_bespoke() -> dict:
 
 
 def _call_validate(d: dict) -> list[str]:
-    """Run validate() and capture the error list. validate() uses
-    sys.exit(1) + prints to stdout on failure; we capture stdout to
-    recover the errors."""
-    buf = io.StringIO()
-    try:
-        with redirect_stdout(buf):
-            generate_loi.validate(d)
-        return []  # validation passed
-    except SystemExit:
-        return [
-            line.strip().lstrip("- ").strip()
-            for line in buf.getvalue().splitlines()
-            if line.strip().startswith("-")
-        ]
+    """Run validation and return the error list directly.
+
+    v3.8.0: prefer `validate_errors()` (no side effects). Original
+    `validate()` retains print+exit CLI semantics.
+    """
+    return generate_loi.validate_errors(d)
 
 
 # ───────────────────────────── schema validation

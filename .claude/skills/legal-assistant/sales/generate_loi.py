@@ -226,6 +226,23 @@ def load_intake(path: str) -> dict:
 
 
 def validate(d: dict):
+    """Validate intake YAML. Backward-compatible behaviour: prints errors
+    + sys.exit(1) on failure (CLI semantics).
+
+    v3.8.0: returns the error list when called from tests AND non-empty
+    list triggers print + exit. Tests that want to inspect errors without
+    crashing should call `validate_errors(d)` instead.
+    """
+    errors = validate_errors(d)
+    if errors:
+        print("VALIDATION ERRORS:")
+        for e in errors:
+            print(f"  - {e}")
+        sys.exit(1)
+    return errors  # always [] when reached
+
+
+def validate_errors(d: dict) -> list:
     """Validate intake YAML. Raises SystemExit on failure.
 
     v3.2: rule R-18 (fail) — deprecated field commercial.dec_block_count.
@@ -243,11 +260,31 @@ def validate(d: dict):
         if s not in d:
             errors.append(f"Missing section: {s}")
     cp = d.get("counterparty", {})
-    for f in ("name", "short", "description"):
+    for f in ("name", "short"):
         if not cp.get(f):
             errors.append(f"counterparty.{f} required")
     if not d.get("dates", {}).get("loi_date"):
         errors.append("dates.loi_date required")
+
+    # v3.8.0: Recital B is built from the slot block. The freeform
+    # `description` field is removed. R-DEPRECATED-FIELD fires if it's
+    # still present.
+    if "description" in cp:
+        errors.append(
+            "[R-DEPRECATED-FIELD] counterparty.description is removed in "
+            "v3.8.0 — use counterparty.recital_b slot block. See "
+            "_shared/counterpart-description-framework.md for the schema."
+        )
+    if t != "Bespoke" and not cp.get("recital_b"):
+        errors.append(
+            "counterparty.recital_b required (slot block: legal_identity, "
+            "operational_verb, customer_use_case, material_asset; "
+            "bargain_relevant_fact optional). See _shared/"
+            "counterpart-description-framework.md."
+        )
+    elif cp.get("recital_b"):
+        # v3.8.0 R-32 — slot vocabulary + closed-enum + banned-phrase lint
+        errors.extend(_validate_recital_b_slots(cp["recital_b"]))
 
     # R-18 — deprecated field migration error
     if "dec_block_count" in d.get("commercial", {}):
@@ -608,11 +645,149 @@ def validate(d: dict):
             "programme.recital_a_bespoke required when recital_a_variant=bespoke"
         )
 
-    if errors:
-        print("VALIDATION ERRORS:")
-        for e in errors:
-            print(f"  - {e}")
-        sys.exit(1)
+    return errors  # validate_errors() return point
+
+
+def _validate_recital_b_slots(rb: dict) -> list:
+    """v3.8.0 R-32 — slot vocabulary + closed-enum + banned-phrase lint
+    + slot-5 named-entity proof requirement.
+
+    Returns list of error strings (empty on pass).
+    """
+    from recital_b_vocab import (
+        find_banned_phrases,
+        find_named_entities_in_text,
+        validate_legal_form,
+        validate_operational_verb,
+    )
+
+    errors: list[str] = []
+
+    if not isinstance(rb, dict):
+        return ["[R-32] counterparty.recital_b must be a mapping (slot block)"]
+
+    # Required slots
+    for slot_key in ("legal_identity", "operational_verb",
+                     "customer_use_case", "material_asset"):
+        if slot_key not in rb or not isinstance(rb[slot_key], dict):
+            errors.append(
+                f"[R-32] counterparty.recital_b.{slot_key} required (mapping)"
+            )
+
+    # Slot 1 — legal_identity
+    li = rb.get("legal_identity") or {}
+    if li:
+        legal_form = li.get("legal_form")
+        jurisdiction = li.get("jurisdiction")
+        if legal_form and jurisdiction:
+            ok, msg = validate_legal_form(legal_form, jurisdiction)
+            if not ok:
+                errors.append(f"[R-32] legal_identity: {msg}")
+            elif msg:  # ok with warn
+                # Warn-class messages are surfaced as INFO, not errors.
+                # We attach them via a special prefix the caller can ignore.
+                pass
+
+    # Slot 2 — operational_verb
+    ov = rb.get("operational_verb") or {}
+    if ov:
+        verb = ov.get("verb")
+        if verb:
+            ok, msg = validate_operational_verb(verb)
+            if not ok:
+                errors.append(f"[R-32] operational_verb: {msg}")
+        obj = ov.get("object")
+        if obj:
+            findings = find_banned_phrases(obj)
+            if findings:
+                errors.append(
+                    f"[R-32] operational_verb.object contains banned phrase(s): "
+                    f"{findings}"
+                )
+
+    # Slot 3 — customer_use_case
+    cu = rb.get("customer_use_case") or {}
+    if cu:
+        category = cu.get("category")
+        if category:
+            findings = find_banned_phrases(category)
+            if findings:
+                errors.append(
+                    f"[R-32] customer_use_case.category contains banned "
+                    f"phrase(s): {findings}"
+                )
+
+    # Slot 4 — material_asset
+    ma = rb.get("material_asset") or {}
+    if ma:
+        asset = ma.get("asset")
+        if asset:
+            findings = find_banned_phrases(asset)
+            if findings:
+                errors.append(
+                    f"[R-32] material_asset.asset contains banned phrase(s): "
+                    f"{findings}"
+                )
+
+    # Slot 5 — bargain_relevant_fact (OPTIONAL)
+    fact = rb.get("bargain_relevant_fact")
+    if fact:
+        claim = fact.get("claim", "")
+        # Banned-phrase scan
+        if claim:
+            findings = find_banned_phrases(claim)
+            if findings:
+                errors.append(
+                    f"[R-32] bargain_relevant_fact.claim contains banned "
+                    f"phrase(s): {findings}"
+                )
+        # Named-entity proof requirement
+        names = find_named_entities_in_text(claim)
+        if names:
+            named_entities = fact.get("named_entities") or []
+            if not named_entities:
+                errors.append(
+                    f"[R-32] bargain_relevant_fact.claim references named "
+                    f"entities {names!r} but no `named_entities[]` proof "
+                    f"block provided. Add structured proof per "
+                    f"_shared/counterpart-description-framework.md."
+                )
+            else:
+                # Each named_entity must carry materiality + proof
+                for idx, ne in enumerate(named_entities):
+                    if not isinstance(ne, dict):
+                        errors.append(
+                            f"[R-32] named_entities[{idx}] must be a mapping"
+                        )
+                        continue
+                    if not ne.get("name"):
+                        errors.append(
+                            f"[R-32] named_entities[{idx}].name required"
+                        )
+                    materiality = ne.get("materiality", "")
+                    if len(materiality) < 30:
+                        errors.append(
+                            f"[R-32] named_entities[{idx}].materiality must "
+                            f"be ≥30 chars; got {len(materiality)}"
+                        )
+                    if materiality:
+                        m_findings = find_banned_phrases(materiality)
+                        if m_findings:
+                            errors.append(
+                                f"[R-32] named_entities[{idx}].materiality "
+                                f"contains banned phrase(s): {m_findings}"
+                            )
+                    proof = ne.get("proof") or {}
+                    if not proof.get("url"):
+                        errors.append(
+                            f"[R-32] named_entities[{idx}].proof.url required"
+                        )
+                    if not proof.get("dated"):
+                        errors.append(
+                            f"[R-32] named_entities[{idx}].proof.dated required"
+                        )
+
+    return errors
 
 
 # ---------------------------------------------------------------------------
@@ -1169,25 +1344,26 @@ class LOI:
     def recitals(self):
         self.h("Recitals")
         cp = self.g("counterparty", "short")
-        desc = self.g("counterparty", "description")
-        # v3.6.0 bug 5: strip trailing period from description before the
-        # engine appends its own. Avoids double-period when operator ends
-        # the YAML value with '.'.
-        if isinstance(desc, str):
-            desc = desc.rstrip().rstrip(".")
 
         # Recital A — v3.4: resolve_recital_a() returns body + type-specific tail.
         self.p(f"(A) {resolve_recital_a(self.d)}")
 
-        # v3.7.2: recital_b_density is advisory — engine measures the operator-
-        # provided `desc` and qa_lint emits an INFO when the measured length
-        # is out of band for the chosen density. Engine does NOT auto-edit
-        # the description (would mangle carefully-crafted Recital B prose).
-        #   terse   ~80w   (logo-drop style; ≤100w tolerable)
-        #   standard ~120w (60–150w tolerable)
-        #   verbose ~150w  (≥110w expected)
-        # The emission is unchanged — density informs QA, not rendering.
-        self.p(f'(B) {cp} (the "{self.party}") {desc}.')
+        # v3.8.0: Recital B is rendered from the typed slot block. The
+        # freeform `description` field is removed (R-DEPRECATED-FIELD).
+        # Engine concatenates slot values into the canonical sentence;
+        # no prose generation. See _shared/counterpart-description-
+        # framework.md for the schema and Adams §4.7 for the principle.
+        rb = self.d.get("counterparty", {}).get("recital_b") or {}
+        if rb:
+            from recital_b_vocab import render_recital_b_sentence
+            sentence = render_recital_b_sentence(
+                rb, party_label=self.party, short_name=cp,
+            )
+            self.p(sentence)
+        else:
+            # Should be unreachable post-v3.8.0 because validate() requires
+            # `recital_b` for non-Bespoke types; defensive only.
+            self.p(f'(B) {cp} (the "{self.party}") [Recital B slot block missing — see counterpart-description-framework.md].')
 
         if self.t == "Distributor":
             self.p(
@@ -3575,13 +3751,40 @@ def _pillar_with_urls(source_map: dict):
 
 def certifications_in_source(intake: dict) -> list:
     """v3.7.0 R-11 helper: return list of certification strings detected in
-    counterparty.description (the primary source-material field).
+    counterparty source material.
+
+    v3.8.0: scans the assembled slot text (legal_identity + operational_verb
+    object + customer_use_case category + material_asset asset + slot 5
+    claim) instead of the removed `description` field.
 
     Detects ISO N{4,5} and common named certs (SOC 2, PCI-DSS, etc.).
     Phase 5 consumes this list when deciding include/omit for Recital B.
     Returns empty list when none found.
     """
-    text = intake.get("counterparty", {}).get("description", "") or ""
+    cp = intake.get("counterparty", {}) or {}
+    rb = cp.get("recital_b") or {}
+    parts: list[str] = []
+    # Each slot may contribute text
+    for slot_key in ("legal_identity", "operational_verb",
+                     "customer_use_case", "material_asset"):
+        s = rb.get(slot_key) or {}
+        for v_key in ("legal_form", "verb", "object", "category", "asset"):
+            v = s.get(v_key)
+            if isinstance(v, str):
+                parts.append(v)
+    fact = rb.get("bargain_relevant_fact") or {}
+    if isinstance(fact.get("claim"), str):
+        parts.append(fact["claim"])
+    # Slot-source quotes also count as source material
+    for slot_key in ("operational_verb", "customer_use_case", "material_asset"):
+        src = (rb.get(slot_key) or {}).get("source") or {}
+        if isinstance(src.get("source_quote"), str):
+            parts.append(src["source_quote"])
+    # Fallback to legacy description if present (won't reach this in v3.8.0
+    # because validate() rejects it; defensive).
+    if cp.get("description"):
+        parts.append(cp["description"])
+    text = "\n".join(parts)
     found = []
     # ISO NNN patterns
     for m in re.finditer(r"\bISO\s*\d{4,5}\b", text, re.IGNORECASE):

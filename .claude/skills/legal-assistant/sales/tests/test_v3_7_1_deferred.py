@@ -43,7 +43,28 @@ def base_ss_intake():
         "counterparty": {
             "name": "TestSupplier Ltd.",
             "short": "TestSupplier",
-            "description": "Modular data-centre infrastructure supplier.",
+            # v3.8.0: `description` removed.
+            "recital_b": {
+                "legal_identity": {
+                    "legal_form": "Ltd",
+                    "jurisdiction": "United Kingdom",
+                    "registration": {"type": "Companies House", "number": "[TBC]"},
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "operational_verb": {
+                    "verb": "manufacturing",
+                    "object": "modular data-centre infrastructure",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "customer_use_case": {
+                    "category": "data-centre operators",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "material_asset": {
+                    "asset": "Manchester manufacturing facility",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+            },
             "jurisdiction": "the United Kingdom",
             "reg_number": "[TBC]",
             "address": "[TBC]",
@@ -87,7 +108,28 @@ def base_ws_intake():
         "counterparty": {
             "name": "TestCustomer Ltd.",
             "short": "TestCustomer",
-            "description": "AI compute customer.",
+            # v3.8.0: `description` removed.
+            "recital_b": {
+                "legal_identity": {
+                    "legal_form": "Ltd",
+                    "jurisdiction": "United Kingdom",
+                    "registration": {"type": "Companies House", "number": "[TBC]"},
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "operational_verb": {
+                    "verb": "providing",
+                    "object": "AI compute services",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "customer_use_case": {
+                    "category": "AI workloads",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+                "material_asset": {
+                    "asset": "London office",
+                    "source": {"tier": 1, "url": "[TBC]", "retrieved": "2026-05-01"},
+                },
+            },
             "jurisdiction": "the United Kingdom",
             "reg_number": "[TBC]",
             "address": "[TBC]",

@@ -1,61 +1,76 @@
-# Dark-Web Counterparty — v3.7 regression intake
-#
-# Exercises v3.7.0 Phase 3.5 dark-web detection + elevated Phase 7.5 review.
-# All five pillars bottom out at [TBC] because root WebFetch returned <500
-# chars of usable content (e.g., stealth-mode landing page, JS-heavy SPA
-# without SSR). Recital B relies on operator-supplied artefacts.
-
 type: Wholesale
-
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  reg_number: "98580086"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  reg_number: '98580086'
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "StealthCo AI Ltd"
-  short: "StealthCo"
-  address: "[TBC]"
-  jurisdiction: "[TBC]"
-  reg_number: "[TBC]"
-  contact_name: "[TBC]"
-  signatory_name: "[TBC]"
-  signatory_title: "[TBC]"
-  description: >-
-    is an early-stage AI compute customer with limited public disclosure.
-    StealthCo's public website returns only a tagline (under 500 characters
-    of usable content), which triggered Phase 3.5 dark-web detection.
-    Recital B claims rely on Phase 7.5-elevated review and operator
-    attestation; [TBC] markers remain on identity, operational scale, and
-    named customer engagements pending private-evidence substantiation
-  # All pillars [TBC] — nothing verifiable on public web
+  name: StealthCo AI Ltd
+  short: StealthCo
+  address: '[TBC]'
+  jurisdiction: '[TBC]'
+  reg_number: '[TBC]'
+  contact_name: '[TBC]'
+  signatory_name: '[TBC]'
+  signatory_title: '[TBC]'
   source_map:
-    pillar_1: ["[TBC]"]
-    pillar_2: ["[TBC]"]
-    pillar_3: ["[TBC]"]
-    pillar_4: ["[TBC]"]
-    pillar_5: ["[TBC]"]
-
+    pillar_1:
+    - '[TBC]'
+    pillar_2:
+    - '[TBC]'
+    pillar_3:
+    - '[TBC]'
+    pillar_4:
+    - '[TBC]'
+    pillar_5:
+    - '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: '[TBC]'
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
-  recital_a_variant: "default"
-
+  recital_a_variant: default
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
-
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027
 commercial:
-  indicative_mw: "3 MW IT"
-  min_term: "5 years"
-
+  indicative_mw: 3 MW IT
+  min_term: 5 years
 choices:
   existing_nda: false
-  recital_b_density: "terse"
-  # Phase 3.5 expects downstream to flag this intake as dark_web_counterparty
-  # and elevate Phase 7.5 review (source-verification sample gate = 5 claims)
+  recital_b_density: terse

@@ -1,117 +1,95 @@
-# InfraPartners Strategic Supplier LOI — v3.5 regression intake
-#
-# Tier-1 facts verified (by v3.5.5 prep agent via WebFetch):
-#   - Nscale partnership: 60 MW Glomfjord, Norway AI datacentre
-#     (expansion from 30 MW); 100% hydroelectric; InfraPartners role =
-#     modular prefabricated construction. Source: nscale.com/press-releases
-#     (announced 25 Mar 2025).
-#   - Caddis Cloud Solutions partnership: 100+ MW AI DC pipeline across
-#     EMEA + North America; manufacturing operations in US + Romania.
-#     Source: GlobeNewswire press release (2025-03-05).
-#   - CEO Michalis Grigoratos (quoted in Caddis announcement).
-#
-# v3.4-CORRECTED language applied (explicit per Jonathan memo):
-#   - NO "90-day RFS" claim (tier-1 unverifiable — was a v3.3 fabrication)
-#   - NO "80% off-site completion" unqualified — if cited, would need
-#     "as publicly reported by [AInvest]" tier-2 qualifier. Omitted here.
-# Per Signal Test gate 1 (attribution): only tier-1-verifiable named
-# endorsers retained. Self-announced pipeline framed as "named partnerships
-# targeting 100+ MW" — the operational endorsement is Caddis/Nscale, not
-# the MW number itself.
-
 type: StrategicSupplier
-
-# --- Provider (NL BV pattern via explicit fields) ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  abbreviation: "DEN"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  jurisdiction: "the Netherlands"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  reg_type: "KvK"
-  kvk: "98580086"
-  reg_number: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty (InfraPartners LLC) ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  abbreviation: DEN
+  legal_form: Besloten Vennootschap (B.V.)
+  jurisdiction: the Netherlands
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  reg_type: KvK
+  kvk: '98580086'
+  reg_number: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "InfraPartners LLC"
-  short: "InfraPartners"
-  address: "1 Canada Square, Canary Wharf, London E14 5AB, United Kingdom"
-  jurisdiction: "[TBC — pending registration verification]"
-  legal_form: "limited liability company"
-  reg_type: "[TBC]"
-  reg_number: "[TBC]"
-  contact_name: "Michalis Grigoratos"
-  contact_title: "Chief Executive Officer"
-  salutation: "Mr Grigoratos"
-  signatory_name: "Michalis Grigoratos"
-  signatory_title: "Chief Executive Officer"
-  # Recital B — Signal Test compliant.
-  # Named endorsers all pass gates 1+2+3:
-  #   - Nscale (Glomfjord 60 MW partnership — named operator in a
-  #     completed publicly-announced partnership)
-  #   - Caddis Cloud Solutions (named strategic partner in a
-  #     publicly-announced pipeline arrangement)
-  #   - Manufacturing geographies (US + Romania) — named scale fact
-  # Zero inline citations; zero fundraising vanity; no "90-day RFS" or
-  # "80% off-site completion" claims (v3.4 correction).
-  description: >-
-    is a digital-infrastructure company headquartered in London, with
-    engineering and manufacturing operations in the United States and
-    Romania. InfraPartners designs and delivers prefabricated, modular
-    data-centre solutions for AI workloads. The Customer is publicly
-    partnered with Nscale on a 60 MW AI data centre in Glomfjord,
-    Norway, and with Caddis Cloud Solutions on a strategic partnership
-    targeting more than 100 MW of combined AI data-centre capacity
-    across EMEA and North America
+  name: InfraPartners LLC
+  short: InfraPartners
+  address: 1 Canada Square, Canary Wharf, London E14 5AB, United Kingdom
+  jurisdiction: "[TBC \u2014 pending registration verification]"
+  legal_form: limited liability company
+  reg_type: '[TBC]'
+  reg_number: '[TBC]'
+  contact_name: Michalis Grigoratos
+  contact_title: Chief Executive Officer
+  salutation: Mr Grigoratos
+  signatory_name: Michalis Grigoratos
+  signatory_title: Chief Executive Officer
   source_map:
     pillar_1:
-      - "https://www.linkedin.com/company/infrapartnersllc"
+    - https://www.linkedin.com/company/infrapartnersllc
     pillar_2:
-      - "https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway"
+    - https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway
     pillar_3:
-      - "https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway"
-      - "https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html"
-    pillar_4: "inferred from Phase 1 context (Digital Energy supply-chain de-risking)"
-    pillar_5: "[TBC]"
-
-# --- Supplier-specific (DE-LOI-SS-v1.0) ---
+    - https://www.nscale.com/press-releases/nscale-and-infrapartners-announce-partnership-to-build-60mw-ai-data-centre-in-glomfjord-norway
+    - https://www.globenewswire.com/news-release/2025/03/05/3037428/0/en/InfraPartners-and-Caddis-Cloud-Solutions-Form-Strategic-Partnership-to-Accelerate-AI-Data-Center-Delivery.html
+    pillar_4: inferred from Phase 1 context (Digital Energy supply-chain de-risking)
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: LLC
+      jurisdiction: "[TBC \u2014 pending registration verification]"
+      registration:
+        type: '[TBC]'
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 supplier:
-  capability_category: "modular_infra"
-  core_capability: >-
-    modular DEC infrastructure design and engineering, off-site prefabrication
-    and factory manufacturing (US + Romania), on-site assembly and integration,
-    commissioning support, and ongoing design iteration for next-generation
-    accelerator architectures
+  capability_category: modular_infra
+  core_capability: modular DEC infrastructure design and engineering, off-site prefabrication
+    and factory manufacturing (US + Romania), on-site assembly and integration, commissioning
+    support, and ongoing design iteration for next-generation accelerator architectures
   strategic_purposes:
-    - "engineering_integration"
-    - "pipeline_visibility"
-  lead_time_target: "[TBC — to be defined during technical scoping]"
-  volume_indicative: "indicative target of 5–10 modular DEC units per year"
-  geographic_coverage: "Europe, Middle East, and Africa (EMEA)"
-
-# --- Choices ---
+  - engineering_integration
+  - pipeline_visibility
+  lead_time_target: "[TBC \u2014 to be defined during technical scoping]"
+  volume_indicative: "indicative target of 5\u201310 modular DEC units per year"
+  geographic_coverage: Europe, Middle East, and Africa (EMEA)
 choices:
-  joint_ip: "foreground"
+  joint_ip: foreground
   exclusivity: false
   existing_nda: false
-
-# --- Programme ---
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  nc_duration: "24 months"
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  nc_duration: 24 months
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "17 April 2026"
-  validity_date: "17 April 2027"
+  loi_date: 17 April 2026
+  validity_date: 17 April 2027

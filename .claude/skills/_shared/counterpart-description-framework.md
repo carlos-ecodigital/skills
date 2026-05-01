@@ -1,8 +1,144 @@
 # Counterparty Description Framework — Recital B Methodology
 
-**Purpose:** Produce an institutional-grade, lender-readable counterparty description (Recital B) in every LOI produced by `legal-assistant`.
+**v3.8.0 — prescriptive slot template** (was: prose-drafting framework). The freeform `counterparty.description` field is removed. Recital B is now assembled from a 5-slot YAML block with closed enums per slot. The engine concatenates slot values into a deterministic boring sentence; no LLM prose generation.
+
+**Why the change.** Five iterations of operator-LLM redrafting per LOI proved that LLMs cannot reliably produce lawyerly anti-prose by composing in their own voice. Prescriptive slots with controlled vocabulary make marketing language **structurally impossible** at intake time, not merely flagged at lint time. See Adams, *A Manual of Style for Contract Drafting* (3rd ed.), Ch. 4.
+
+**Purpose:** Produce an institutional-grade, lender-readable counterparty description (Recital B) in every LOI produced by `legal-assistant`. Output is bankable on first render; no redraft cycle.
 
 **Shared across** all five LOI types: End User (EU), Distributor (DS), Wholesale (WS), Strategic Supplier (SS), Ecosystem Partnership (EP).
+
+---
+
+## Slot template — the v3.8.0 contract
+
+Recital B is built from this YAML block under `counterparty.recital_b`:
+
+```yaml
+counterparty:
+  short: "Acme"
+  recital_b:
+    legal_identity:
+      legal_form: "B.V."                    # closed enum per jurisdiction
+      jurisdiction: "Netherlands"
+      registration:
+        type: "KvK"
+        number: "98580086"
+      source: { tier: 1, url: "https://kvk.nl/...", retrieved: "2026-05-01" }
+    operational_verb:
+      verb: "providing"                      # closed enum (active verbs)
+      object: "GPU computing services"       # noun-phrase, no adjectives
+      source:
+        tier: 1
+        url: "https://news.acme.com/about"
+        retrieved: "2026-05-01"
+        source_quote: "Acme provides GPU computing services to AI research labs."
+    customer_use_case:
+      category: "AI-research customers"
+      source: { tier: 1, url: "https://news.acme.com/customers", retrieved: "2026-05-01", source_quote: "Acme serves AI-research customers across Europe." }
+    material_asset:
+      asset: "Amsterdam data centre"
+      source: { tier: 1, url: "https://news.acme.com/datacentre", retrieved: "2026-05-01", source_quote: "Acme operates from its Amsterdam data centre." }
+    bargain_relevant_fact:                   # OPTIONAL
+      claim: "with a 12 MW IT anchor contract with Microsoft"
+      named_entities:
+        - name: "Microsoft Corporation"
+          relationship_type: "named_customer"
+          materiality: "Largest disclosed revenue source affecting Cl. 4 capacity allocation."
+          proof:
+            url: "https://news.microsoft.com/source/2025/11/10/..."
+            dated: "2025-11-10"
+      source: { tier: 1, url: "https://news.microsoft.com/...", retrieved: "2026-05-01" }
+```
+
+The engine renders this as ONE deterministic sentence:
+
+> (B) Acme (the "Customer") is a B.V. organised under the laws of Netherlands (registered with the KvK under number 98580086), engaged in providing GPU computing services for AI-research customers, from its Amsterdam data centre, with a 12 MW IT anchor contract with Microsoft.
+
+Boring. Bankable. No redraft cycle.
+
+---
+
+## Closed enums — `recital_b_vocab.py`
+
+**`LEGAL_FORM_ENUM`** (jurisdiction-bound; freeform fallback with warn for unknown jurisdictions):
+- Netherlands → `B.V.` / `N.V.` / `C.V.` / `Stichting` / `Coöperatie`
+- United Kingdom / England and Wales → `Ltd` / `Limited` / `PLC` / `LLP`
+- United States / Delaware → `LLC` / `Inc` / `Corp` / `L.P.` / `LLP`
+- Germany → `GmbH` / `AG` / `GmbH & Co. KG` / `UG` / `e.V.`
+- Croatia → `d.o.o.` / `d.d.` / `j.d.o.o.`
+- France → `SAS` / `SARL` / `SA` / `SCI`
+- Spain → `S.A.` / `S.L.` / `S.L.U.`
+- Switzerland → `AG` / `GmbH` / `SA`
+- Ireland → `Ltd` / `Limited` / `DAC` / `PLC`
+- Luxembourg → `S.A.` / `S.à r.l.` / `SCS` / `SCSp`
+
+**`OPERATIONAL_VERB_ENUM`** (closed): `providing` / `manufacturing` / `developing` / `operating` / `distributing` / `consulting` / `licensing` / `designing` / `delivering` / `supplying` / `engineering` / `constructing` / `building` / `researching` / `publishing` / `advising` / `integrating` / `owning` / `leasing`. Anything outside (`pioneering` / `leading` / `revolutionising`) → R-32 fail.
+
+---
+
+## Anti-pattern catalogue
+
+### Layer 1 — banned phrases (always block, no override)
+
+R-32 fails when any slot value matches:
+
+| Class | Example match | Why |
+|---|---|---|
+| Marketing puffery | `leading` / `world-class` / `cutting-edge` / `next-generation` / `frontier` / `pioneering` / `disruptive` | Adams §4.7 — puffery; legally inert |
+| Adjective stacks | `dynamic` / `fast-growing` / `AI-native` / `AI-powered` / `cloud-native` | Each adjective is unsourceable |
+| Press-release voice | `reshaping` / `driving` / `unlocking` / `empowering` / `transforming` / `powering the workloads` | Wrong register |
+| Pump-frame phrases | `backed by tier-1 VCs` / `investors include [stack]` | Marketing wrapper |
+| Future-tense ambition | `plans to deploy` / `targeting` / `scaling to` | Adams §4.10 — recitals describe IS, not WILL |
+| Aspirational scale | `globally` / `worldwide` / `across multiple regions` (with one site) | Replace with named locations |
+| Quoted valuations | `$500M valuation` | Vanity; magnitude private |
+| Vendor adjectives | `vertically integrated` / `end-to-end` / `full-stack` / `turnkey` | Vendor-marketing register |
+| Founder biography | `founded by` / `co-founder of` / `ex-DeepMind/Google/Meta/...` | Pedigree irrelevant |
+
+### Layer 2 — named entities in slot 5 (legitimate when sourced)
+
+Named investors and customers ARE valid signals for project-finance LOIs **when sourced + material**. Slots 1–4 don't accept named entities (they take generic categories or facility names). Slot 5 (`bargain_relevant_fact`) accepts named entities **only with structured proof**.
+
+R-32 detects proper-noun company names in the slot 5 `claim` text. If any are found and `named_entities[]` is missing or under-specified (no proof URL, no dated, materiality < 30 chars, materiality matches puffery regex), R-32 fails.
+
+| Operator wants to write | Verdict |
+|---|---|
+| `claim: "with a 12 MW IT anchor contract with Microsoft"` + structured `named_entities` from Microsoft press release | ✅ Pass |
+| `claim: "backed by Sequoia, a16z, and NVentures"` (no proof) | ❌ Fail — Layer 1 stack-of-three + Layer 2 missing proof |
+| `claim: "with Series B equity led by Sequoia (October 2025 Reuters)"` + proof + materiality invoking `runway_signal` | ✅ Pass — investor reference material to lender review |
+| `claim: "powering the workloads at OpenAI"` | ❌ Fail — Layer 1 "powering" press-release voice |
+
+---
+
+## Source tiers (URL host heuristic — `recital_b_vocab.url_tier()`)
+
+- **Tier 1** — primary filings + press releases:
+  - SEC (`sec.gov`), KvK (`kvk.nl`), Companies House, Handelsregister, Sudski registar, regulator disclosures
+  - Press subdomains: `news.<co>` / `press.<co>` / `newsroom.<co>` / `investors.<co>` / `ir.<co>` / `media.<co>`
+  - Path hints: `/press/`, `/news/`, `/newsroom/`, `/investors/`, `/source/`, `/announcement/`
+- **Tier 2** — named-journalist outlets + named-analyst reports:
+  - Reuters / FT / Bloomberg / WSJ / Economist / NYT / TechCrunch / Spiegel / Handelsblatt
+  - Gartner / Forrester / IDC / DataCenterDynamics / GlobeNewswire / PRNewswire / BusinessWire
+- **Tier 3** — anything else (blog, social, marketing site). Any slot citing tier 3 → R-32 fail.
+
+DE legal accepts tier-2 for non-financial facts (operational evidence, customer naming). Financial claims prefer tier-1.
+
+---
+
+## References
+
+External legal-drafting authorities — see `_shared/recital-b-reference.md` for operative quotes:
+
+- **Adams, A Manual of Style for Contract Drafting (3rd ed.), Ch. 4** — controlled-vocabulary recital construction.
+- **ABA, Negotiated Acquisitions of Companies, Subsidiaries and Divisions, Ch. 6** — representation/recital alignment.
+- **Thomson Reuters Practical Law: Recitals** — template + commentary.
+- **Mellinkoff, Dictionary of American Legal Usage** — verb register.
+
+---
+
+## Historical context — pre-v3.8 prose-drafting methodology
+
+The sections below describe the prose-drafting framework that preceded v3.8.0's slot template. Retained as historical context because the **structural test**, **3 lender questions**, and **signal-quality concept** all motivated the slot design. The 3-gate Signal Test is now enforced structurally (Gate 1 by `named_entities[].proof`; Gate 2 by materiality requirement; Gate 3 by source-freshness via R-29).
 
 **Target output:** 3–5 sentences, 80–150 words, single paragraph, no bullet lists, no jargon without gloss, no salesy adjectives, every material claim source-attributable.
 

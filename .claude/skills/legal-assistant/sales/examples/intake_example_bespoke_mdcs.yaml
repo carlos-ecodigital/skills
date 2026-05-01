@@ -1,191 +1,149 @@
-# MDCS.AI B.V. — Bespoke LOI intake (M6 verification fixture)
-#
-# Models the real MDCS deal (joint AI infrastructure distribution)
-# as a Bespoke LOI. Used by M6 to verify Pipeline A end-to-end on a
-# deal whose clause structure doesn't fit the 5 templated types
-# (joint offering, consortium GTM, platform-wide expansion intent).
-#
-# This is a FIXTURE: clause wording is representative but not final.
-# The authoritative MDCS draft is reviewed by Carlos separately.
-
 type: Bespoke
-
-agreement_type: "Letter of Intent"
-subject: "for AI Infrastructure Services"
-party_label: "Customer"
-
+agreement_type: Letter of Intent
+subject: for AI Infrastructure Services
+party_label: Customer
 provider:
-  short_name: "Digital Energy"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Founder & CEO"
-
+  short_name: Digital Energy
+  signatory_name: Carlos Reuven
+  signatory_title: Founder & CEO
 counterparty:
-  name: "MDCS.AI B.V."
-  short: "MDCS"
-  description: >-
-    a Netherlands-based AI infrastructure solutions company focused on
-    accelerated compute, providing GPU procurement, deployment, lifecycle
-    management, financing, and managed services to enterprise, research,
-    and institutional clients. MDCS is an NVIDIA partner developing,
-    jointly with Cisco, Red Hat, Devoteam, and NVIDIA, a go-to-market
-    programme targeting approximately 600 enterprise, mid-market, and
-    government accounts in the Netherlands
-  signatory_name: "Niels van Rees"
-  signatory_title: "Co-Founder"
-
+  name: MDCS.AI B.V.
+  short: MDCS
+  signatory_name: Niels van Rees
+  signatory_title: Co-Founder
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: United Kingdom
+      registration:
+        type: Companies House
+        number: '[TBC]'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 programme:
   recital_a_variant: default
-
 dates:
-  loi_date: "2026-04-17"
-
+  loi_date: '2026-04-17'
 recitals:
-  - letter: "C"
-    text: >-
-      The Customer is the developer of the "Lorentz" initiative, a
-      programme establishing regional AI factories that provide
-      sovereign AI infrastructure to European enterprises, combining
-      shared high-performance compute resources with dedicated managed
-      services, and targeting sectors such as healthcare, research,
-      and financial services.
-  - letter: "D"
-    text: >-
-      The Parties recognise that the Provider's infrastructure
-      (secured grid capacity, liquid cooling, and NVIDIA reference
-      architecture design) and the Customer's managed-services
-      capabilities and enterprise client base are complementary, and
-      together position the Parties to address significant demand for
-      sovereign, high-density AI infrastructure in the Netherlands and
-      Europe.
-  - letter: "E"
-    text: >-
-      This letter of intent (the "LOI") records the Parties' mutual
-      interest in establishing the partnership on the indicative terms
-      set out below. It is intended to form the basis for further
-      technical scoping and commercial negotiation toward a Master
-      Services Agreement (the "MSA").
-
+- letter: C
+  text: The Customer is the developer of the "Lorentz" initiative, a programme establishing
+    regional AI factories that provide sovereign AI infrastructure to European enterprises,
+    combining shared high-performance compute resources with dedicated managed services,
+    and targeting sectors such as healthcare, research, and financial services.
+- letter: D
+  text: The Parties recognise that the Provider's infrastructure (secured grid capacity,
+    liquid cooling, and NVIDIA reference architecture design) and the Customer's managed-services
+    capabilities and enterprise client base are complementary, and together position
+    the Parties to address significant demand for sovereign, high-density AI infrastructure
+    in the Netherlands and Europe.
+- letter: E
+  text: This letter of intent (the "LOI") records the Parties' mutual interest in
+    establishing the partnership on the indicative terms set out below. It is intended
+    to form the basis for further technical scoping and commercial negotiation toward
+    a Master Services Agreement (the "MSA").
 clauses:
-  - number: "1"
-    heading: "Partnership Model and Joint Offering"
-    paragraphs:
-      - >-
-        1.1 Integrated solution. The Parties intend to develop and
-        market an integrated AI infrastructure and managed-services
-        offering, with the Provider delivering energy and colocation
-        infrastructure and the Customer delivering compute hardware
-        and managed services within the Provider's facilities.
-      - >-
-        1.2 Commercial Workshop. The Parties intend to conduct a joint
-        commercial workshop within thirty (30) calendar days of LOI
-        execution, with the goal of launching a joint go-to-market
-        programme by 30 June 2026.
-      - >-
-        1.3 Preferred platform. The Parties intend that the Provider's
-        colocation network will be the preferred infrastructure
-        platform for the Customer's deployments in the Netherlands.
-    subclauses:
-      - letter: "a"
-        text: >-
-          develop the joint colocation and managed-services offering;
-      - letter: "b"
-        text: >-
-          define the Lorentz deployment roadmap on the Provider's
-          infrastructure;
-      - letter: "c"
-        text: >-
-          build an initial enterprise target list from the Customer's
-          account base.
-
-  - number: "2"
-    heading: "Indicative Capacity and Site Allocation"
-    paragraphs:
-      - >-
-        2.1 Designated Sites. The Provider intends to designate one or
-        more sites within its Netherlands network as the intended
-        locations for the Customer's deployments.
-      - >-
-        2.2 Phase 1. The Customer's initial deployment is anticipated
-        to comprise up to a capacity to be confirmed during technical
-        scoping.
-      - >-
-        2.3 No reservation. This LOI does not reserve capacity. Capacity
-        allocation will only be confirmed upon execution of a Service
-        Order under the MSA.
-
-  - number: "3"
-    heading: "Indicative Pricing"
-    paragraphs:
-      - >-
-        3.1 Commercial model. The services will be priced on a
-        triple-net colocation model comprising a fixed monthly base
-        colocation fee per kW of contracted IT capacity, a variable
-        energy pass-through, and annual indexation.
-      - >-
-        3.2 Indicative proposal. The Provider will deliver an
-        indicative pricing proposal to the Customer within twenty
-        (20) calendar days of completion of the Commercial Workshop.
-      - >-
-        3.3 Term. The Parties anticipate an initial contract term of
-        approximately five (5) years from the Ready-for-Service date,
-        indicative only.
-
-  - number: "4"
-    heading: "Implementation Roadmap"
-    paragraphs:
-      - >-
-        4.1 Following execution of this LOI, the Parties intend to
-        proceed with technical scoping (target: 30 June 2026), a
-        commercial workshop (target: 31 May 2026), and negotiation of
-        the MSA.
-
-  - number: "5"
-    heading: "Non-Binding Status (BINDING AS TO THIS CLAUSE)"
-    paragraphs:
-      - >-
-        5.1 Save for Clauses 5 (Non-Binding Status), 6 (Confidentiality),
-        8 (Governing Law and Jurisdiction), and 9 (General), which are
-        binding, the provisions of this LOI express the Parties' current
-        intentions only and do not create any legally binding obligation
-        on either Party.
-
-  - number: "6"
-    heading: "Confidentiality (BINDING)"
-    paragraphs:
-      - >-
-        6.1 Each Party shall keep confidential all non-public information
-        disclosed by the other Party in connection with this LOI and
-        shall not disclose it to any third party without the disclosing
-        Party's prior written consent, save as required by law.
-
-  - number: "7"
-    heading: "Good Faith"
-    paragraphs:
-      - >-
-        7.1 The Parties will negotiate the MSA in good faith but
-        neither Party is obliged to enter into the MSA or any other
-        definitive agreement, and either Party may discontinue
-        negotiations at any time in good faith.
-
-  - number: "8"
-    heading: "Governing Law and Jurisdiction (BINDING)"
-    paragraphs:
-      - >-
-        8.1 This LOI is governed by and construed in accordance with
-        the laws of the Netherlands. The courts of Amsterdam have
-        exclusive jurisdiction over any dispute arising out of or in
-        connection with this LOI.
-
-  - number: "9"
-    heading: "General (BINDING)"
-    paragraphs:
-      - >-
-        9.1 Entire agreement. This LOI constitutes the entire agreement
-        between the Parties with respect to its subject matter.
-      - >-
-        9.2 Amendments. Any amendment to this LOI must be in writing
-        and signed by both Parties.
-      - >-
-        9.3 Counterparts. This LOI may be executed in counterparts,
-        each of which is an original and all of which together
-        constitute one instrument.
+- number: '1'
+  heading: Partnership Model and Joint Offering
+  paragraphs:
+  - 1.1 Integrated solution. The Parties intend to develop and market an integrated
+    AI infrastructure and managed-services offering, with the Provider delivering
+    energy and colocation infrastructure and the Customer delivering compute hardware
+    and managed services within the Provider's facilities.
+  - 1.2 Commercial Workshop. The Parties intend to conduct a joint commercial workshop
+    within thirty (30) calendar days of LOI execution, with the goal of launching
+    a joint go-to-market programme by 30 June 2026.
+  - 1.3 Preferred platform. The Parties intend that the Provider's colocation network
+    will be the preferred infrastructure platform for the Customer's deployments in
+    the Netherlands.
+  subclauses:
+  - letter: a
+    text: develop the joint colocation and managed-services offering;
+  - letter: b
+    text: define the Lorentz deployment roadmap on the Provider's infrastructure;
+  - letter: c
+    text: build an initial enterprise target list from the Customer's account base.
+- number: '2'
+  heading: Indicative Capacity and Site Allocation
+  paragraphs:
+  - 2.1 Designated Sites. The Provider intends to designate one or more sites within
+    its Netherlands network as the intended locations for the Customer's deployments.
+  - 2.2 Phase 1. The Customer's initial deployment is anticipated to comprise up to
+    a capacity to be confirmed during technical scoping.
+  - 2.3 No reservation. This LOI does not reserve capacity. Capacity allocation will
+    only be confirmed upon execution of a Service Order under the MSA.
+- number: '3'
+  heading: Indicative Pricing
+  paragraphs:
+  - 3.1 Commercial model. The services will be priced on a triple-net colocation model
+    comprising a fixed monthly base colocation fee per kW of contracted IT capacity,
+    a variable energy pass-through, and annual indexation.
+  - 3.2 Indicative proposal. The Provider will deliver an indicative pricing proposal
+    to the Customer within twenty (20) calendar days of completion of the Commercial
+    Workshop.
+  - 3.3 Term. The Parties anticipate an initial contract term of approximately five
+    (5) years from the Ready-for-Service date, indicative only.
+- number: '4'
+  heading: Implementation Roadmap
+  paragraphs:
+  - '4.1 Following execution of this LOI, the Parties intend to proceed with technical
+    scoping (target: 30 June 2026), a commercial workshop (target: 31 May 2026), and
+    negotiation of the MSA.'
+- number: '5'
+  heading: Non-Binding Status (BINDING AS TO THIS CLAUSE)
+  paragraphs:
+  - 5.1 Save for Clauses 5 (Non-Binding Status), 6 (Confidentiality), 8 (Governing
+    Law and Jurisdiction), and 9 (General), which are binding, the provisions of this
+    LOI express the Parties' current intentions only and do not create any legally
+    binding obligation on either Party.
+- number: '6'
+  heading: Confidentiality (BINDING)
+  paragraphs:
+  - 6.1 Each Party shall keep confidential all non-public information disclosed by
+    the other Party in connection with this LOI and shall not disclose it to any third
+    party without the disclosing Party's prior written consent, save as required by
+    law.
+- number: '7'
+  heading: Good Faith
+  paragraphs:
+  - 7.1 The Parties will negotiate the MSA in good faith but neither Party is obliged
+    to enter into the MSA or any other definitive agreement, and either Party may
+    discontinue negotiations at any time in good faith.
+- number: '8'
+  heading: Governing Law and Jurisdiction (BINDING)
+  paragraphs:
+  - 8.1 This LOI is governed by and construed in accordance with the laws of the Netherlands.
+    The courts of Amsterdam have exclusive jurisdiction over any dispute arising out
+    of or in connection with this LOI.
+- number: '9'
+  heading: General (BINDING)
+  paragraphs:
+  - 9.1 Entire agreement. This LOI constitutes the entire agreement between the Parties
+    with respect to its subject matter.
+  - 9.2 Amendments. Any amendment to this LOI must be in writing and signed by both
+    Parties.
+  - 9.3 Counterparts. This LOI may be executed in counterparts, each of which is an
+    original and all of which together constitute one instrument.

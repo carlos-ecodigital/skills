@@ -1,118 +1,97 @@
-# LOI Generation Intake — Wholesale Example
-# Fill all fields, then run: python generate_loi.py intake_ws.yaml
-
 type: Wholesale
-
-# --- Provider (pre-filled defaults) ---
-# v3.5.2 scope Q: the generator supports two equivalent provider patterns.
-#
-# PATTERN A — explicit fields (shown below, v3.5.1-compatible):
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  jurisdiction: "the Netherlands"
-  legal_form: "Besloten Vennootschap (B.V.)"
-  reg_type: "KvK"
-  kvk: "98580086"
-  reg_number: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-#
-# PATTERN B — entities-register lookup (new in v3.5.2; cleaner, single-source-of-truth):
-#   provider:
-#     entity: "de_nl"              # key in skills/legal-assistant/config/entities.yaml
-#     signatory_mode: "pre_msa"     # pre_msa | post_msa (NL BV) | ceo (AG)
-# The loader expands all other provider fields from the register. Explicit
-# intake values (e.g. signatory_name override) win over register defaults.
-
-# --- Counterparty ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  jurisdiction: the Netherlands
+  legal_form: Besloten Vennootschap (B.V.)
+  reg_type: KvK
+  kvk: '98580086'
+  reg_number: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "NeoScale Inc."
-  short: "NeoScale"
-  address: "100 Market Street, Suite 300, San Francisco, CA 94105, USA"
-  jurisdiction: "the State of Delaware, United States"
-  reg_type: "EIN"
-  reg_number: "XX-XXXXXXX"
-  contact_name: "Sarah Chen"
-  contact_title: "Vice President, Infrastructure"
-  salutation: "Ms Chen"
-  signatory_name: "Alex Park"
-  signatory_title: "Chief Executive Officer"
-    # v3.4: synthetic example — [TBC] marker passes R-23 fabrication gate.
-  description: "is a GPU cloud provider offering on-demand accelerated compute infrastructure to AI research teams and enterprise customers [TBC — synthetic example]"
-  # source_map: v3.4 R-23 fabrication gate requires each pillar value to be
-  # a list of https:// URLs OR the literal string "[TBC]". Plain strings
-  # (other than [TBC]) fail R-23. For real counterparties, populate with
-  # tier-1 URLs — counterparty's own website, official registry, direct-
-  # quoted press on counterparty's domain. See counterpart-description-
-  # framework.md for the signal test and tier hierarchy policy.
+  name: NeoScale Inc.
+  short: NeoScale
+  address: 100 Market Street, Suite 300, San Francisco, CA 94105, USA
+  jurisdiction: the State of Delaware, United States
+  reg_type: EIN
+  reg_number: XX-XXXXXXX
+  contact_name: Sarah Chen
+  contact_title: Vice President, Infrastructure
+  salutation: Ms Chen
+  signatory_name: Alex Park
+  signatory_title: Chief Executive Officer
   source_map:
-    pillar_1: "[TBC]"   # Identity & scale — own website, registry
-    pillar_2: "[TBC]"   # Core business — own website
-    pillar_3: "[TBC]"   # Track record / proof points — named customer press, credentialled partnership pages
-    pillar_4: "inferred from Phase 1 context"
-    pillar_5: "[TBC]"   # Forward plans — only if anchored to named third party
-
-# --- Commercial ---
-# v3.2: dec_block_count removed. Capacity expressed in MW IT.
-# v3.5 scope J1: rack_density_kw + cooling_topology optional overrides for
-# Cl. 3.2 (default: 130 kW + direct-to-chip liquid cooling matching
-# NVIDIA GB200/GB300 NVL72 reference architectures).
+    pillar_1: '[TBC]'
+    pillar_2: '[TBC]'
+    pillar_3: '[TBC]'
+    pillar_4: inferred from Phase 1 context
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Inc
+      jurisdiction: the State of Delaware, United States
+      registration:
+        type: EIN
+        number: XX-XXXXXXX
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
 commercial:
-  indicative_mw: "10.8"
-  expansion_mw: "21.6"
-  min_term: "5 years"
-  # rack_density_kw: "130"           # override default if non-GB workload
-  # cooling_topology: "..."           # override default cooling description
-
-# --- Schedule 1 technical parameters ---
-# v3.5 scope N (Jonathan memo): Schedule 1 reads these fields from YAML.
-# Prior behaviour hardcoded "[To be confirmed]" regardless of intake. If
-# email/intake establishes a GPU platform commitment, specify it here.
+  indicative_mw: '10.8'
+  expansion_mw: '21.6'
+  min_term: 5 years
 schedule_1:
   technical:
-    gpu_platform: "[TBC]"             # e.g., "NVIDIA GB200 NVL72" | "NVIDIA GB300 NVL72" | "NVIDIA H200 SXM" | "[TBC]"
-    rack_density_kw: "[TBC]"          # numeric kW/rack; empty or [TBC] renders placeholder
-    cooling: "Direct-to-chip liquid cooling"
-    designated_sites: "[TBC]"
-
-# --- Choices ---
+    gpu_platform: '[TBC]'
+    rack_density_kw: '[TBC]'
+    cooling: Direct-to-chip liquid cooling
+    designated_sites: '[TBC]'
 choices:
   pricing: true
   phasing: true
   existing_nda: false
-
-  # Phasing details
   phases:
-    - mw: "4.8"
-      timeline: "Q4 2026"
-    - mw: "6.0"
-      timeline: "Q2 2027"
-
-  # Pricing details (only if pricing: true)
-  base_price: "145"
-  term_years: "5"
-  target_rfs_date: "Q4 2026"
-  ramp_schedule: "50% at RFS, 100% within 90 days"
-
-# --- Programme ---
-# v3.7.0: Recital A is library-sourced (single canonical body + WS tail, v3.4).
-#   recital_a_variant: "default"  is the only production value.
-#   Legacy keys (sovereignty, integration) resolve to canonical body.
-#   Bespoke requires justification — see SKILL.md Phase 5 bespoke gate.
+  - mw: '4.8'
+    timeline: Q4 2026
+  - mw: '6.0'
+    timeline: Q2 2027
+  base_price: '145'
+  term_years: '5'
+  target_rfs_date: Q4 2026
+  ramp_schedule: 50% at RFS, 100% within 90 days
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  nc_duration: "24 months"
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  nc_duration: 24 months
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "15 April 2026"
-  validity_date: "15 April 2027"
+  loi_date: 15 April 2026
+  validity_date: 15 April 2027

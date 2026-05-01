@@ -1,74 +1,87 @@
-# LOI Generation Intake — Distributor Example (Mode B: Introduction/Referral)
-# Fill all fields, then run: python generate_loi.py intake_ds_referral.yaml
-
 type: Distributor
-
-# --- Provider (pre-filled defaults) ---
 provider:
-  legal_name: "Digital Energy Netherlands B.V."
-  short_name: "Digital Energy"
-  address: "Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands"
-  kvk: "98580086"
-  parent: "Digital Energy Group AG (CHE-408.639.320)"
-  signatory_name: "Carlos Reuven"
-  signatory_title: "Director"
-
-# --- Counterparty ---
+  legal_name: Digital Energy Netherlands B.V.
+  short_name: Digital Energy
+  address: Mijnsherenweg 33 A, 1433 AP Kudelstaart, the Netherlands
+  kvk: '98580086'
+  parent: Digital Energy Group AG (CHE-408.639.320)
+  signatory_name: Carlos Reuven
+  signatory_title: Director
 counterparty:
-  name: "Nordic Advisors Ltd"
-  short: "Nordic Advisors"
-  address: "25 Finsbury Square, London EC2A 1PQ, United Kingdom"
-  jurisdiction: "England and Wales"
-  reg_type: "Company No."
-  reg_number: "12345678"
-  contact_name: "Erik Lindqvist"
-  contact_title: "Managing Partner"
-  salutation: "Mr Lindqvist"
-  signatory_name: "Erik Lindqvist"
-  signatory_title: "Managing Partner"
-    # v3.4: synthetic example. No numeric material claims, but source_map shown for consistency.
-  description: "is a London-based advisory firm specialising in AI infrastructure market access for European enterprise and institutional clients, with established relationships across the Nordic and Benelux enterprise market"
+  name: Nordic Advisors Ltd
+  short: Nordic Advisors
+  address: 25 Finsbury Square, London EC2A 1PQ, United Kingdom
+  jurisdiction: England and Wales
+  reg_type: Company No.
+  reg_number: '12345678'
+  contact_name: Erik Lindqvist
+  contact_title: Managing Partner
+  salutation: Mr Lindqvist
+  signatory_name: Erik Lindqvist
+  signatory_title: Managing Partner
   source_map:
-    pillar_1: "[TBC]"
-    pillar_2: "[TBC]"
-    pillar_3: "[TBC]"
-    pillar_4: "inferred from Phase 1 context"
-    pillar_5: "[TBC]"
-
-# --- Distributor Mode ---
-partnership_mode: referral  # combined | referral
-
-# --- Commercial (bespoke text) ---
+    pillar_1: '[TBC]'
+    pillar_2: '[TBC]'
+    pillar_3: '[TBC]'
+    pillar_4: inferred from Phase 1 context
+    pillar_5: '[TBC]'
+  recital_b:
+    legal_identity:
+      legal_form: Ltd
+      jurisdiction: England and Wales
+      registration:
+        type: Company No.
+        number: '12345678'
+      source:
+        tier: 1
+        url: "[TBC \u2014 registry filing URL]"
+        retrieved: '2026-05-01'
+    operational_verb:
+      verb: providing
+      object: "[TBC \u2014 concrete noun-phrase]"
+      source:
+        tier: 1
+        url: "[TBC \u2014 counterparty press / 10-K]"
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    customer_use_case:
+      category: "[TBC \u2014 concrete customer category]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+    material_asset:
+      asset: "[TBC \u2014 primary facility / location]"
+      source:
+        tier: 1
+        url: '[TBC]'
+        retrieved: '2026-05-01'
+        source_quote: '[TBC]'
+partnership_mode: referral
 commercial:
-  partner_core_capability: "enterprise advisory and market access services for AI infrastructure buyers across Northern Europe"
-  partner_contribution: "established enterprise client relationships, market credibility, and domain expertise in the Nordic and Benelux enterprise AI market"
-  combined_offering: ""       # Not used in referral mode
-  target_end_users: ""        # Not used in referral mode
-  partner_service_scope: ""   # Not used in referral mode
-  territory: "United Kingdom, Netherlands, Belgium, and Nordic countries"
-  target_segments: "enterprise AI/ML, financial services, pharmaceutical R&D"
-  indicative_mw: "3.6"
-
-# --- Choices ---
+  partner_core_capability: enterprise advisory and market access services for AI infrastructure
+    buyers across Northern Europe
+  partner_contribution: established enterprise client relationships, market credibility,
+    and domain expertise in the Nordic and Benelux enterprise AI market
+  combined_offering: ''
+  target_end_users: ''
+  partner_service_scope: ''
+  territory: United Kingdom, Netherlands, Belgium, and Nordic countries
+  target_segments: enterprise AI/ML, financial services, pharmaceutical R&D
+  indicative_mw: '3.6'
 choices:
-  pricing: false    # Referral economics in separate Referral Agreement
+  pricing: false
   exclusivity: false
   existing_nda: false
-
-# --- Programme ---
-# v3.7.0: recital_a_variant: "default" (canonical body + DS tail, v3.4). Legacy variant keys resolve to canonical body. Bespoke by exception only — see SKILL.md Phase 5 gate.
 programme:
-  platform_mw: "100+"
-  site_count: "14"
-  recital_a_variant: "default"
-
-# --- Protection ---
+  platform_mw: 100+
+  site_count: '14'
+  recital_a_variant: default
 protection:
-  nc_duration: "24 months"
-  pbi_survival: "10 years"
-  confidentiality_survival: "3 years"
-
-# --- Dates ---
+  nc_duration: 24 months
+  pbi_survival: 10 years
+  confidentiality_survival: 3 years
 dates:
-  loi_date: "10 April 2026"
-  validity_date: "10 April 2027"
+  loi_date: 10 April 2026
+  validity_date: 10 April 2027

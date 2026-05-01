@@ -237,43 +237,42 @@ class TestR22Narrowed:
 # -----------------------------------------------------------------------------
 
 class TestSkillMdPhase5PromptJ9:
-    """Phase 5 prompt must present the three-option redraft choice."""
+    """v3.8.0: Phase 5 is now the slot-interrogation panel, not the
+    three-option redraft prompt. The historical three-option contract
+    (J9) is preserved as the path it superseded; we now assert the
+    slot-interrogation contract."""
 
     def _skill_md(self):
         path = os.path.join(_LEGAL_ASSISTANT, "SKILL.md")
         with open(path) as f:
             return f.read()
 
-    def test_phase_5_offers_accept(self):
+    def test_phase_5_offers_slot_interrogation(self):
+        """v3.8.0: Phase 5 walks the operator through 5 typed slots."""
         src = self._skill_md()
-        assert "(a) Accept" in src
+        assert "slot interrogation" in src.lower()
+        # Each of the 5 slots must be named in the operator-facing panel
+        for slot_name in ("Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5"):
+            assert slot_name in src, f"{slot_name} missing from Phase 5"
 
-    def test_phase_5_offers_redraft_with_notes(self):
+    def test_phase_5_no_freeform_description(self):
+        """v3.8.0 removed `description` field; Phase 5 should not
+        present the old two-option or three-option prose-redraft prompt
+        within the LIVE Phase 5 section."""
         src = self._skill_md()
-        assert "(b) Redraft with notes" in src
-
-    def test_phase_5_offers_paste_replacement(self):
-        src = self._skill_md()
-        assert "(c) Paste replacement text" in src
-
-    def test_phase_5_no_longer_just_accept_or_request(self):
-        """The v3.4 two-option prompt is removed from LIVE prompt templates.
-        (The string may still appear inside a v3.5.3-cont explanatory note
-        that quotes the removed form — that's fine; the live prompt is what
-        matters. Assert the live prompt template uses the new three-option
-        form by checking the triple-backtick code fence block.)"""
-        src = self._skill_md()
-        # Find the Phase 5 prompt template block
         m = re.search(r"### Phase 5 —.*?### Phase 6", src, re.DOTALL)
         assert m is not None, "Phase 5 section not found"
         phase_5_block = m.group(0)
-        # The live prompt (inside triple-backtick fence) must have (a)/(b)/(c)
+        # v3.8.0: live prompt is the slot-interrogation panel.
+        # Specifically must NOT carry "(a) Accept / (b) Redraft / (c) Paste"
+        # as the operator-facing redraft prompt — it's a slot panel now.
         fence_m = re.search(r"```\n(.*?)```", phase_5_block, re.DOTALL)
         assert fence_m is not None, "Phase 5 prompt fence not found"
         live_prompt = fence_m.group(1)
-        assert "(a) Accept" in live_prompt
-        assert "(b) Redraft" in live_prompt
-        assert "(c) Paste" in live_prompt
+        assert "Slot 1" in live_prompt and "Slot 2" in live_prompt
+        # No prose-redraft option labels in the live prompt:
+        assert "(b) Redraft with notes" not in live_prompt
+        assert "(c) Paste replacement text" not in live_prompt
 
 
 class TestSkillMdPhase6PromptJ8:

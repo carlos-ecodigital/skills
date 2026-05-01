@@ -70,7 +70,7 @@ REQUIRED_COUNTERPARTY = {
     "jurisdiction",
     "signatory_name",
     "signatory_title",
-    "description",
+    "recital_b",     # v3.8.0: replaces freeform `description` with typed slot block
     "source_map",
 }
 
