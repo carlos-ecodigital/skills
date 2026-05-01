@@ -5,6 +5,39 @@ Versioning: skill release version, not per-document template version (each templ
 
 ---
 
+## v3.7.7 — 2026-04-30
+
+Fixes a real production bug introduced by v3.7.4: hardcoded
+`pipeline: "Commercial"` and `dealstage: "loi_sent"` in
+`phase8_actions.hubspot_upsert_company`. Neither name exists in
+`_shared/hubspot-pipeline-routing.md` (Jonathan's canonical 8-pipeline
+list, merged 2026-04-30 as upstream-equivalent staging PR #83). Real
+impact: Phase 8 auto-create produced HubSpot deal payloads that would
+either reject on the API or silently land in a default catchall pipeline.
+
+### Fixed
+- **Stale pipeline name in `phase8_actions.py`** — replaced hardcoded `"Commercial"` / `"loi_sent"` with canonical type→pipeline mapping per `_shared/hubspot-pipeline-routing.md`.
+
+### Added
+- **`_shared/hubspot-pipeline-routing.md`** mirrored from staging (Jonathan's PR #83). Closes another PRINCIPLES.md #1 mirror-discipline gap caught during 2026-04-30 audit.
+- **Canonical mapping in `phase8_actions._LOI_TYPE_TO_PIPELINE`:**
+  - EndUser / Wholesale → `COMPUTE 1/2 - 2026 DC Colo Capacity Sale` @ stage `Lead`
+  - Distributor / StrategicSupplier / EcosystemPartnership → `COMPUTE 2/2 - 2026 DC Colo Channel Partners` @ stage `Identified`
+  - Unknown type → safe default to P2 Channel (never silently emits a non-canonical name)
+- **`_resolve_pipeline(loi_type)`** helper.
+- **`tests/test_v3_7_7_canonical_pipeline.py`** — 9 tests including a `test_pipeline_is_always_canonical` assertion that catches future regressions of this class (any non-canonical pipeline name fails CI).
+
+### Verified
+- 522/522 pytest tests pass on upstream.
+- Both `link_to_id` (UPDATE) and `force_create` (CREATE) paths emit canonical pipelines per type.
+- UPDATE path on link_to_id does NOT include `pipeline` or `lifecyclestage` in the company-update properties (prevents clobbering existing HubSpot data).
+- Unknown type does not emit `"Commercial"` or any other non-canonical name.
+
+### Audit lesson (PRINCIPLES.md candidate addition)
+- Defensive canonicality tests should be the default when consuming external taxonomies (HubSpot pipelines, ClickUp lists, etc.). v3.7.4's mistake — hardcoded `"Commercial"` — was caught only by a follow-up audit. A `test_pipeline_is_always_canonical` of the kind shipped here would have made the v3.7.4 PR fail CI before merge.
+
+---
+
 ## v3.7.5 — 2026-04-30 (back-mirror of staging PR #81 v3.7.3)
 
 Back-mirror of board-advisor (Santiago) feedback on the Polarise Wholesale LOI (2026-04-23 review, locked with Jelmer + Carlos 2026-04-28). Originally shipped to staging on 2026-04-28 as PR #81 v3.7.3; never mirrored upstream — caught during 2026-04-30 cross-repo audit (PRINCIPLES.md #1 mirror-discipline violation). Closing now. Template filename version stays `DE-LOI-{Type}-v3.2`.
