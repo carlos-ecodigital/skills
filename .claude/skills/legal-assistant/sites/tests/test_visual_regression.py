@@ -5,6 +5,18 @@ Phase 4 (rc3.4) — advisory CI gate per the plan's user-decision section
 job is marked ``continue-on-error: true`` so a golden mismatch reports
 in the CI log but does not block merge.
 
+**Goldens caveat — read before refreshing.** The goldens shipped with
+this branch were captured against rc3.1 LOI output (monolingual cover,
+Section L+R as prose). When rc3.2 lands, the LOI gains a bilingual
+stacked cover and renders Section L+R as schedule tables — that's a
+deliberate, plan-decided change. The captured goldens will diverge on
+those two surfaces. Because the job is advisory, CI keeps passing; but
+once the rc3.x chain settles you should regenerate goldens once::
+
+  cd sites/tests && GOLDEN_REGEN=1 python -m pytest test_visual_regression.py
+
+and commit the refreshed ``van_gog_loi.txt`` / ``moerman_hot.txt``.
+
 Pipeline per fixture:
 
   deal.yaml → engine.main(...) → .docx → soffice --convert-to pdf
