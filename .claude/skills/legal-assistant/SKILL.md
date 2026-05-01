@@ -556,7 +556,13 @@ Return: PASS / FLAG-FOR-REVISION (with line-level feedback) / REJECT (with reaso
 **Dry-run default (first shipping cycle):** Phase 8 defaults to `--dry-run` (show what would be written, don't write). Real writes are activated via `--phase-8-auto-execute` CLI flag (specialist A defines the flag). Document clearly in delivery output whether dry-run or live.
 
 **6 actions (select any subset):**
-1. **HubSpot company + deal create/update** — `manage_crm_objects`: create company record (`name`, `domain`, `description` = Recital B first sentence, `lifecyclestage: opportunity`, `loi_status: LOI Sent — Draft`) + associate deal (`dealname: LOI-{Type}-{Counterparty}`, `stage: LOI Sent`, `pipeline: Commercial`). Pre-authorized; executes on selection.
+1. **HubSpot company + deal create/link** (v3.7.4 — dedup-check enforced) — two-step:
+   - **Step 1 — `search_crm_objects` dedup-check:** the orchestrator first runs the search payload returned by `phase8_actions.hubspot_search_company(intake)` (parallel queries: domain-exact + name-fuzzy). Surface candidates to the operator, including `name`, `domain`, `lifecyclestage`, `createdate`. **No HubSpot writes happen in step 1.**
+   - **Step 2 — operator decides:**
+     - **If a match exists** (operator confirms same entity): call `phase8_actions.hubspot_upsert_company(intake, output, dedup_decision={"link_to_id": "<hubspot_id>", "match_confidence": "high|medium|low", "match_property": "domain_exact|name_fuzzy|..."})`. Emits an UPDATE on the existing record (refreshing only `loi_status` + `loi_last_sent`; never clobbers `name`/`domain`/`lifecyclestage`) plus a fresh deal associated to the company by id.
+     - **If no match** (truly new entity): call `phase8_actions.hubspot_upsert_company(intake, output, dedup_decision={"force_create": True, "reason": "<≥15 chars documenting why>", "search_run_at": "<ISO8601>"})`. Emits CREATE on the company + deal, with the dedup audit trail recorded in the payload.
+   - **Calling `hubspot_upsert_company` without `dedup_decision` is a safety guarantee**: the function returns the search payload, refusing to upsert. Silent duplicates are impossible.
+   - Pre-authorized; both steps execute on operator confirmation.
 2. **ClickUp task** — `clickup_create_task`: task "LOI sent — {Counterparty}" with LOI output path + [TBC] field list. Pre-authorized; executes on selection.
 3. **Upload .docx to Drive audit folder** — `artifact_storage.py::upload_artifact()` → `Fundraise DE/06_Shared_Collateral/_Drafts/{YYYYMMDD}_DEG_LOI-{Type}_{slug}/` (specialist C implements). Emits Drive URL on completion.
 4. **Create domain card** — create `/domains/counterparties/{slug}/overview.md` linking HubSpot company ID, deal ID, Drive folder, Fireflies meeting count, dual-role flag (if applicable), and next-step status.
