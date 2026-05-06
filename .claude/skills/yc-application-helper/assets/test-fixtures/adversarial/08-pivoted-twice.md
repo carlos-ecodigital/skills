@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 08 — Pivoted Twice"
+domain: SKILL
+status: active
+---
+
 # Test fixture 08 — Pivoted twice
 
 **Expected behavior:** Skill drafts pivot narrative honestly via PG-011/PG-011b (narrative control on rejection/pivots). Does NOT paper over instability. Acknowledges prior pivots but frames them as iteration evidence, not as instability.

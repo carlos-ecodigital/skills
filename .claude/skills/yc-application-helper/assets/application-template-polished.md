@@ -1,3 +1,9 @@
+---
+title: "YC Application Output Template — Polished"
+domain: SKILL
+status: active
+---
+
 # YC Application — Polished Drafts (v-polished, humanizer + executive-comms applied)
 
 **Company:** [Company Name]

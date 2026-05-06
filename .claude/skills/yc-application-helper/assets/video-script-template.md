@@ -1,3 +1,9 @@
+---
+title: "60-Second YC Video Script Template"
+domain: SKILL
+status: active
+---
+
 # YC Founder Video Script — [Company Name]
 
 **Format spec (per ARC-029, Andersen):**

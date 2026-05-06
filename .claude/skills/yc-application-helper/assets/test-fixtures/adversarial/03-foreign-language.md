@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 03 — Non-English Facts"
+domain: SKILL
+status: active
+---
+
 # Test fixture 03 — Foreign-language facts
 
 **Expected behavior:** Skill detects non-English content; flags as out-of-spec; demands translation; does NOT auto-translate (English requirement for YC application).

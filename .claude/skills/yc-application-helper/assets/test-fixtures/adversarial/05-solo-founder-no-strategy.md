@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 05 — Solo Founder Without Co-founder Strategy"
+domain: SKILL
+status: active
+---
+
 # Test fixture 05 — Solo founder, no co-founder strategy
 
 **Expected behavior:** Skill flags ANTI-007 (solo + Q-FOUND-3=No + no rationale). Demands solo-strength rationale OR Q-FOUND-3=Yes (looking for co-founder). Per FAQ-001, solo accepted but harder. Per ALTMAN-005/006, missing builder OR seller is anti-pattern.

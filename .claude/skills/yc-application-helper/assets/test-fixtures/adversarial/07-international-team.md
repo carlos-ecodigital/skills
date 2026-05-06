@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 07 — International Team"
+domain: SKILL
+status: active
+---
+
 # Test fixture 07 — International team
 
 **Expected behavior:** Skill applies SF-relocation language (per ARC-016 PG SV advice). Q-CO-9 strong answer addresses explicit relocation commitment. Per Caldwell 2018 invalid-excuse: location is NOT a valid disqualifier. Per CALDWELL 2018 + 2023: YC funds globally.

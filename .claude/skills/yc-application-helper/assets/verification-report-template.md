@@ -1,3 +1,9 @@
+---
+title: "Verification Report Output Template"
+domain: SKILL
+status: active
+---
+
 # Verification Report — [Company Name] YC Application
 
 **Generated:** [timestamp]

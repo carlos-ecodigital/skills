@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 06 — Hardware Pre-product"
+domain: SKILL
+status: active
+---
+
 # Test fixture 06 — Hardware / deep-tech, pre-shipped-product
 
 **Expected behavior:** Skill applies hardware/deep-tech atoms. Does NOT penalize for absence of demo (Q-CO-4 expectations softened for hardware). Invokes LOI-substitute logic per ALTMAN-007. Surfaces tech-stack and design-doc as primary evidence in lieu of working demo.

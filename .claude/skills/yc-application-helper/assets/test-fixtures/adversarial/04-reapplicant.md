@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 04 — Re-applicant"
+domain: SKILL
+status: active
+---
+
 # Test fixture 04 — Re-applicant
 
 **Expected behavior:** Skill activates Q-PROG-11 handler. Demands "what's changed since last application" with specific YC feedback addressed (per CALDWELL-011 — "internalizing this feedback... heavily weighted in your favor"). Flags absence of feedback-internalization as anti-pattern.
