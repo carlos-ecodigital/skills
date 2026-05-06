@@ -169,9 +169,47 @@ ARC-016 (PG SV advice) is referenced in `yc-questions.md` Q-CO-8/9 atom pointers
 
 ---
 
+---
+
+## SKILL-007 / HYBRID-001 — Category-Spanning Companies (software + hardware + infrastructure)
+
+```yaml
+atom_id: SKILL-007
+source: Phase 5 end-to-end DEC test 2026-05-05 (F agent observation: "DEC is hybrid (compute + energy + heat — partly hardware, partly software). HW-001 fires only partially.")
+applies_to_questions: [Q-IDEA-1, Q-IDEA-3 (monetization), Q-CO-4 (demo), Q-PROG-1 (how far along), Q-PROG-3 (tech stack)]
+rule_type: rule (category disambiguation)
+confidence: high
+when_applies: When the facts file's category description spans ≥2 of: software/SaaS, hardware/devices, infrastructure/asset-heavy, services. Companies like DEC (compute + energy + heat) or Crusoe (energy + compute) are canonical hybrids.
+when_does_not_apply: Pure-software or pure-hardware or pure-services companies (HW-001, ALTMAN-007, or standard software atoms apply directly).
+why_it_exists: Causal chain — (1) HW-001 (hardware demo softening) was designed for clean hardware-only companies, where CAD + prototype photo + LOIs substitute for working software. (2) Hybrid companies (DEC = software orchestration layer + hardware DCs + greenhouse contracts) only partially fit HW-001 because they need to demonstrate BOTH a software demo AND hardware prototype evidence. (3) ALTMAN-007 (LOIs for enterprise) helps the contract-side but not the product-side. (4) Therefore hybrid companies need a combined evidence stack: software demo OR session export (Q-PROG-4) + hardware/asset evidence (CAD, prototype, LOI) + named customer/partner conversation evidence. (5) Partners reading hybrid applications are looking for proof across ALL the company's category dimensions, not just one. Missing any one dimension = anti-pattern.
+underlying_model: Hybrid companies double the proof burden. They cannot lean on either pure-software or pure-hardware shortcuts. The skill must require evidence on EACH category dimension the company spans. For DEC: software orchestration demo + DC infrastructure CAD/photo + greenhouse partner LOI + grid-integration document — all four required, not just one.
+contradicts: HW-001 at apparent surface — actually complementary: HW-001 fires for the hardware dimension; HYBRID-001 says don't STOP there if other dimensions are also present.
+```
+
+**Detection rule:** Skill scans facts file's "Business model & monetization" + "What's been built" + "Anything unusual" sections for category spanning indicators:
+- Mentions BOTH "SaaS" / "subscription" / "software" AND "hardware" / "facility" / "asset" / "infrastructure"
+- Multiple revenue streams from different domains (e.g., DEC: colocation + heat + BESS — three different domains)
+- Self-describes as "hybrid" or "integrated platform"
+- ≥2 different revenue model types in Q-IDEA-3 (e.g., recurring SaaS fees + per-asset CAPEX returns + per-transaction service fees)
+
+**Output when triggered:**
+```
+[HYBRID-FLAG: facts file describes a category-spanning company. Drafting must cover ALL category dimensions, not just one. Required evidence:
+- Software/orchestration: working demo OR Q-PROG-4 coding-agent session
+- Hardware/asset: CAD render, prototype photo, OR named manufacturing partner LOI
+- Infrastructure/contract: named binding offtake / colocation / grid agreement
+- Services/operational: named customer with operational SLA acceptance
+
+Missing any dimension = anti-pattern (HYBRID-001 specifically). Skill flags missing dimensions before drafting Q-IDEA-1 / Q-IDEA-3 / Q-CO-4.]
+```
+
+**Application implication:** For DEC specifically: demands software orchestration evidence + DC modular CAD/photo + greenhouse partner LOI + grid cable-pooling MLOEA registration. Skill flags any single-dimension drafting attempt.
+
+---
+
 ## Summary of skill-rules atoms
 
-**Atoms added:** 5 (SKILL-001/LANG-001, SKILL-002/SAFETY-001, SKILL-003/EQUITY-001, SKILL-004/HW-001, SKILL-005/PIVOT-001) + 1 housekeeping note (ARC-016 verify).
+**Atoms added:** 6 (SKILL-001/LANG-001, SKILL-002/SAFETY-001, SKILL-003/EQUITY-001, SKILL-004/HW-001, SKILL-005/PIVOT-001, SKILL-007/HYBRID-001).
 
 **Coverage closes gaps:** Foreign-language enforcement (was 0% covered), prompt-injection defense (was relying on base Claude safety only), equity-arithmetic validation (was relying on free-form cross-check), hardware demo softening (was missing entirely), pivot-narrative framing (was rejection-framed only).
 

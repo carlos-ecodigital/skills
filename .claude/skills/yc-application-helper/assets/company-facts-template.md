@@ -2,6 +2,12 @@
 
 **Instructions:** Fill every section. If a section truly has no answer, write `[GAP: needs X from Y by date]`. Do not leave sections blank. Do not invent. Vagueness here propagates into the application.
 
+**Two markers:**
+- `[GAP: needs X from Y]` — fact is missing and required before submission. Skill will flag.
+- `[publicly unverified]` — fact is known/believed by founders but cannot be sourced publicly. Skill treats as soft-flag (not hard-blocker) but advises caution in extraordinary-claims contexts (CALDWELL-012). Use this for: founder-internal achievements without LinkedIn/press evidence, in-progress confidential deals, claims where verification would compromise customer confidentiality.
+
+Anti-fabrication discipline: NEVER replace `[publicly unverified]` with invented specifics. The marker is itself partner-readable evidence of honest discipline.
+
 ---
 
 ## One-liner
