@@ -1,3 +1,9 @@
+---
+title: "YC Application Output Template — Raw"
+domain: SKILL
+status: active
+---
+
 # YC Application — Raw Drafts (v-raw, no humanizer/voice tuning)
 
 **Company:** [Company Name]

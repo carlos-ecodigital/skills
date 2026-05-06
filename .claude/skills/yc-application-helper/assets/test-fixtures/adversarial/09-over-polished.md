@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 09 — Over-polished Facts"
+domain: SKILL
+status: active
+---
+
 # Test fixture 09 — Over-polished, performance-not-authenticity
 
 **Expected behavior:** Skill detects ANTI-013 (performance-over-authenticity) + multiple ANTI-014 banned-vocab hits (platform, ecosystem, leverage, transform, empower, seamless, robust, cutting-edge). Flags as anti-pattern; recommends rewrite in internal-language register per PG-009b.

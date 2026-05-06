@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 01 — Vague Facts (no evidence)"
+domain: SKILL
+status: active
+---
+
 # Test fixture 01 — Vague, no evidence
 
 **Expected behavior:** Skill flags ANTI-003 (lack of social proof + traction) + ANTI-010 (imaginary demand) + ANTI-009 (imprecise problem articulation). Refuses to fabricate. Surfaces rejection risk.

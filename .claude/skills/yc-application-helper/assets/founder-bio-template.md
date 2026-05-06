@@ -1,3 +1,9 @@
+---
+title: "Founder Bio Output Template"
+domain: SKILL
+status: active
+---
+
 # Founder Profile — [Founder Name]
 
 **Note:** Each founder fills their own profile independently in the live YC form. Submission is gated on every founder profile being complete.

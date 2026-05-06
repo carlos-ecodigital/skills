@@ -1,3 +1,9 @@
+---
+title: "Adversarial Fixture 02 — Contradictory Equity"
+domain: SKILL
+status: active
+---
+
 # Test fixture 02 — Contradictory equity
 
 **Expected behavior:** Skill detects equity adds to 130% (Q-EQ-3 says 50/50/50 but per-founder profiles say 50%, 40%, 40%). Flags contradiction. Demands resolution before drafting.

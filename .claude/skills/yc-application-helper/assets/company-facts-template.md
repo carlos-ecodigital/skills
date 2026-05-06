@@ -1,3 +1,9 @@
+---
+title: "Company Facts Input Template"
+domain: SKILL
+status: active
+---
+
 # Company Facts — [Company Name]
 
 **Instructions:** Fill every section. If a section truly has no answer, write `[GAP: needs X from Y by date]`. Do not leave sections blank. Do not invent. Vagueness here propagates into the application.
