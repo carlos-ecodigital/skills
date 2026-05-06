@@ -206,8 +206,34 @@ contradicts: CALDWELL-006 (networking-in is ineffective) at apparent surface —
 
 ---
 
+---
+
+## ARC-016 — Move to Silicon Valley (Paul Graham)
+
+```yaml
+atom_id: ARC-016
+source: archive/arc-31-application-tips.md (PG quote, tip 16)
+expert: Paul Graham
+applies_to_questions: [Q-CO-8, Q-CO-9 (location)]
+rule_type: rule (location preference)
+confidence: high
+when_applies: Founders living outside Silicon Valley AND no committed SF relocation plan in Q-CO-9.
+when_does_not_apply: Founders already SF-based, or geography genuinely structural to the business (on-site grid integration, regulated local market, etc.).
+why_it_exists: Causal chain — (1) YC's network density (alumni, partners, investors, talent) is concentrated in SF Bay Area. (2) Founders physically in SF capture this density via informal interactions partners cannot replicate from a distance. (3) Specifically: Series A investors prefer SF-based companies; senior engineering talent in AI/infra concentrates in SF; YC partner office hours are easier in person. (4) Therefore SF presence is a multiplier — not strictly required, but absence costs measurable signal in partner evaluation.
+underlying_model: SF residence is a network-density multiplier, not a hard requirement. Per CALDWELL-002 (2023 invalid-excuses), location is NOT a disqualifier — but the inverse holds: SF presence accelerates outcomes. The skill recommends explicit relocation commitment in Q-CO-9 unless geography is genuinely structural.
+contradicts: CALDWELL-002 (location-not-a-disqualifier) at apparent surface — actually complementary: CALDWELL-002 says non-SF doesn't kill; ARC-016 says SF accelerates. Both true.
+```
+
+> "Silicon Valley offers superior investor experience and specialized resources." (PG, via arc-31 tip 16)
+
+**Application implication:** Q-CO-9 strong answer for non-SF founders: explicit commitment to SF-relocation for ≥12 months post-batch. Skill flags hedged or "we'll evaluate later" language as weakening Q-CO-9. Anti-pattern: non-SF founder + no commitment statement.
+
+**Closes:** Phase 5B Fixture 07 (international team) which was PARTIAL because ARC-016 was referenced but body wasn't atomized. Fixture 07 should re-test as PASS.
+
+---
+
 ## Summary
 
-**Atoms:** 9 — all upgraded with explicit causal chains in `why_it_exists` and `underlying_model`.
-**Coverage:** Q-CO-7, Q-IDEA-1/2/3, Q-PROG-1, Q-PROG-5/6/7/8, Q-VIDEO-1, Q-FOUND-1, Q-CUR-1, P-ACC-2, P-ACC-3.
-**Cross-references:** ARC-005 vs. PG-009 (resolved: clarity ≠ polish-paralysis), ARC-030 vs. CALDWELL-006 (resolved: rec ≠ networking-strategy).
+**Atoms:** 10 — all upgraded with explicit causal chains. ARC-016 added 2026-05-05 to close Fixture 07.
+**Coverage:** Q-CO-7, Q-CO-8/9, Q-IDEA-1/2/3, Q-PROG-1, Q-PROG-5/6/7/8, Q-VIDEO-1, Q-FOUND-1, Q-CUR-1, P-ACC-2, P-ACC-3.
+**Cross-references:** ARC-005 vs. PG-009 (clarity ≠ polish-paralysis), ARC-030 vs. CALDWELL-006 (rec ≠ networking-strategy), ARC-016 vs. CALDWELL-002 (SF accelerates, non-SF doesn't kill).
