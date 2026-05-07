@@ -55,7 +55,7 @@ pip install python-docx docx2pdf pyyaml
 cd ~/skills/.claude/skills/document-factory
 
 # Test
-python3 generate.py --profile letter
+python3 document_factory.py --profile letter
 # Opens output/YYYYMMDD_DE_Letter_v1.docx
 ```
 
@@ -63,7 +63,7 @@ python3 generate.py --profile letter
 
 ```bash
 # Generate + PDF in one step
-python3 generate.py --profile agreement --agreement-type "Letter of Intent" \
+python3 document_factory.py --profile agreement --agreement-type "Letter of Intent" \
   --client "FrontierOne" --pdf
 
 # Convert an existing .docx (from any skill)
@@ -81,13 +81,13 @@ Both utilities are Word-only (no LibreOffice fallback).
 
 ```bash
 # Agreement cover pages (new structured flags)
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Letter of Intent" \
   --subject "for AI Infrastructure Distribution" \
   --client "FrontierOne Ltd"
 
 # Binding agreement (auto-detects formality, shows registration numbers)
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Master Service Agreement" \
   --subject "for Hosting Ethiopia Data Center" \
   --client "Acme Corp" \
@@ -95,39 +95,39 @@ python3 generate.py --profile agreement \
   --client-reg-type KvK --client-reg-number 12345678
 
 # Using NL entity instead of default AG
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Letter of Intent" \
   --client "Partner BV" --entity nl
 
 # Other profiles
-python3 generate.py --profile letter
-python3 generate.py --profile seed_memo --client "Acme Fund"
-python3 generate.py --profile investor_memo --client "Infrastructure Partners"
-python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
+python3 document_factory.py --profile letter
+python3 document_factory.py --profile seed_memo --client "Acme Fund"
+python3 document_factory.py --profile investor_memo --client "Infrastructure Partners"
+python3 document_factory.py --profile exec_summary --title "PowerGrow Project Update"
 
 # With specific date and version
-python3 generate.py --profile seed_memo --client "Fund X" --date 2026-04-10 --version 2
+python3 document_factory.py --profile seed_memo --client "Fund X" --date 2026-04-10 --version 2
 
 # Also produce a .dotx template
-python3 generate.py --profile agreement --agreement-type "NDA" --client "Partner" --dotx
+python3 document_factory.py --profile agreement --agreement-type "NDA" --client "Partner" --dotx
 
 # Custom output path
-python3 generate.py --profile exec_summary --title "Board Update" --output ~/Documents/board_update.docx
+python3 document_factory.py --profile exec_summary --title "Board Update" --output ~/Documents/board_update.docx
 ```
 
 ### Converting Markdown to Branded DOCX
 
 ```bash
 # Simple: just brand the markdown
-python3 generate.py --md content.md --title "Report Title" --output report.docx
+python3 document_factory.py --md content.md --title "Report Title" --output report.docx
 
 # With cover page
-python3 generate.py --md content.md --title "Q1 Update" --client "Board" --cover --output update.docx
+python3 document_factory.py --md content.md --title "Q1 Update" --client "Board" --cover --output update.docx
 ```
 
 ### Changing the Entity
 
-Edit the `ENTITY` dict at the top of `generate.py`:
+Edit the `ENTITY` dict at the top of `document_factory.py`:
 
 ```python
 ENTITY = {
@@ -171,4 +171,4 @@ PROFILES["my_doc"] = profile_my_doc
 PROFILE_CODES["my_doc"] = "My_Doc"
 ```
 
-4. Run: `python3 generate.py --profile my_doc --client "Test"`
+4. Run: `python3 document_factory.py --profile my_doc --client "Test"`

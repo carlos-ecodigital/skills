@@ -6,7 +6,7 @@ catch structural defects that are hard to catch at render time: table
 width overflow, cells that overflow on long words, excessive list nesting,
 unexpected diacritics, and font drift.
 
-Additive to ``document-factory/generate.py``; no existing signatures
+Additive to ``document-factory/document_factory.py``; no existing signatures
 changed.
 
 Usage:
@@ -28,7 +28,7 @@ from typing import List
 
 from docx.oxml.ns import qn
 
-from generate import FONT
+from document_factory import FONT
 
 # ---------------------------------------------------------------------------
 # Constants

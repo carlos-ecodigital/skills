@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from generate import audit_document, _fix_zoom
+from document_factory import audit_document, _fix_zoom
 
 if TYPE_CHECKING:  # avoid runtime import cycle
     from docx.document import Document

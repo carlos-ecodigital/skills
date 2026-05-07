@@ -116,7 +116,7 @@ def render_docx(md_path: Path, docx_path: Path) -> tuple[str, list[str]]:
     Uses save_doc without strict mode so we capture violations for the report
     rather than crashing.
     """
-    from generate import md_to_docx, save_doc, _fix_zoom, audit_document
+    from document_factory import md_to_docx, save_doc, _fix_zoom, audit_document
     md_text = md_path.read_text()
     doc = md_to_docx(md_text, cover=True)
     _fix_zoom(doc)
@@ -455,9 +455,9 @@ def cmd_doctor(args) -> int:
 
     # Generate module
     try:
-        from generate import md_to_docx, audit_document, save_doc  # noqa: F401
+        from document_factory import md_to_docx, audit_document, save_doc  # noqa: F401
     except Exception as e:
-        problems.append(f"Cannot import generate module: {e}")
+        problems.append(f"Cannot import document_factory module: {e}")
 
     # LibreOffice (soffice) — required for PDF rasterization pipeline
     if shutil.which("soffice") is None:

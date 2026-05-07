@@ -27,7 +27,7 @@ from validators import (  # noqa: E402
     validate_agreement_inputs,
 )
 from audit_profiles import audit_agreement  # noqa: E402
-from generate import profile_agreement  # noqa: E402
+from document_factory import profile_agreement  # noqa: E402
 
 
 # ───────────────────────────── validate_agreement_inputs — happy paths

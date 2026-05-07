@@ -18,7 +18,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate import docx_to_pdf
+from document_factory import docx_to_pdf
 
 
 def main():

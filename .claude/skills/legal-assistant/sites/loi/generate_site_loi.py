@@ -44,7 +44,7 @@ if str(_SHARED_PATH) not in sys.path:
 
 from bilingual_body import render_bilingual_clause  # noqa: E402
 from format_validators import run_all as run_format_validators  # noqa: E402
-from generate import DE_ENTITIES  # noqa: E402
+from document_factory import DE_ENTITIES  # noqa: E402
 from signature_block import SigParty, render_signature_page  # noqa: E402
 import cross_doc_gate as cdg  # noqa: E402
 import site_doc_base as sdb  # noqa: E402

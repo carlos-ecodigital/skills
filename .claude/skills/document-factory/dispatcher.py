@@ -242,7 +242,7 @@ def _raise_pipeline_a_not_implemented() -> None:
         "AgreementSpec builders move into document-factory/builders/, "
         "build() will route dict/AgreementSpec inputs here. For "
         "non-agreement structured builds today, use the individual "
-        "profile functions in generate.py directly. For docx→docx "
+        "profile functions in document_factory.py directly. For docx→docx "
         "rebrand, pass a .docx path + rebrand_spec (Pipeline B). For "
         "markdown non-legal documents, pass a markdown string "
         "(Pipeline C)."
@@ -301,7 +301,7 @@ def _invoke_pipeline_c(md_text: str, *, md_opts: dict | None, **kwargs: Any):
     supported; ``md_opts`` takes precedence on key collision because
     the caller set it explicitly.
     """
-    from generate import md_to_docx  # local import — avoid circularity
+    from document_factory import md_to_docx  # local import — avoid circularity
 
     merged: dict[str, Any] = {}
     merged.update(kwargs)

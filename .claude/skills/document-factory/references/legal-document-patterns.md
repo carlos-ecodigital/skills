@@ -1,7 +1,7 @@
 # Legal Document Patterns
 
 > Catalog of patterns the Document Factory parser recognizes in markdown source files.
-> Each pattern maps to a specific rendering strategy in `generate.py`.
+> Each pattern maps to a specific rendering strategy in `document_factory.py`.
 
 ## Clause Numbering (Hierarchical Decimal)
 

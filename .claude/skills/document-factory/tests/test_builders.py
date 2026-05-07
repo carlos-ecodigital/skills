@@ -29,7 +29,7 @@ from builders import (  # noqa: E402
     build_investor_memo,
     build_exec_summary,
 )
-import generate  # noqa: E402
+import document_factory as generate  # noqa: E402
 
 
 # ───────────────────────────── package-level imports

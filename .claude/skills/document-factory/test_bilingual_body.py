@@ -102,7 +102,7 @@ def test_heading_cells_shaded_cobalt():
         shd = tcPr.find(qn("w:shd"))
         assert shd is not None
         fill = (shd.get(qn("w:fill")) or "").upper()
-        from generate import COBALT_HEX
+        from document_factory import COBALT_HEX
         assert fill == COBALT_HEX.upper()
 
 

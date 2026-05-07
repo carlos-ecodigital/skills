@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from docx import Document
 
-from generate import DE_ENTITIES
+from document_factory import DE_ENTITIES
 from signature_block import (
     SIGNATURE_LINE,
     SigParty,

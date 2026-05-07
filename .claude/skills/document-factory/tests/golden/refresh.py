@@ -16,7 +16,7 @@ from pathlib import Path
 
 _THIS = Path(__file__).resolve().parent
 _FACTORY = _THIS.parent.parent  # document-factory/
-_GENERATE = _FACTORY / "generate.py"
+_GENERATE = _FACTORY / "document_factory.py"
 _NORMALIZE = _FACTORY / "tools" / "normalize_docx.py"
 _CURRENT = _THIS / "current"
 
@@ -44,7 +44,7 @@ def refresh(profile: str) -> None:
     )
     if result.returncode != 0:
         raise SystemExit(
-            f"generate.py failed for {profile}:\n"
+            f"document_factory.py failed for {profile}:\n"
             f"stdout: {result.stdout}\nstderr: {result.stderr}"
         )
 
