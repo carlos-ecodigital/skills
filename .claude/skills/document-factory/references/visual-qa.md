@@ -10,7 +10,7 @@ Three layers of quality, each catching what the others miss:
 
 | Layer | What it catches | Where it lives |
 |-------|-----------------|----------------|
-| `audit_document()` | OOXML structure: missing `w:numPr`, wrong colors, missing `keep_with_next`, bad page margins | `generate.py` |
+| `audit_document()` | OOXML structure: missing `w:numPr`, wrong colors, missing `keep_with_next`, bad page margins | `document_factory.py` |
 | Visual regression | Rendered layout: overflow, wrong fonts, clipped tables, bad spacing | `tools/visual_qa.py` |
 | Human review | Taste / IB-grade aesthetics | HTML report + Drive archive |
 
@@ -18,7 +18,7 @@ Three layers of quality, each catching what the others miss:
 
 | Trigger | Command |
 |---------|---------|
-| Before committing formatting changes in `generate.py` | `visual_qa.py diff` |
+| Before committing formatting changes in `document_factory.py` | `visual_qa.py diff` |
 | After any change to `_SP`, abstractNum definitions, `_format_table`, cover logic | `visual_qa.py all` + review |
 | Adding a new document type to the corpus | `visual_qa.py generate` → `approve` |
 | Debugging a layout issue on real files | `visual_qa.py generate --corpus my_one_doc.json` |

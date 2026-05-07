@@ -33,7 +33,7 @@ from dispatcher import (  # noqa: E402
     build,
 )
 from rebrand import RebrandSpec  # noqa: E402
-from generate import md_to_docx  # noqa: E402
+from document_factory import md_to_docx  # noqa: E402
 
 
 # ──────────────────────────────────────────────────────────────────────
@@ -288,13 +288,13 @@ def test_dispatcher_import_has_no_side_effects() -> None:
     The M0 golden corpus is regenerated per test run from fixed
     fixtures, so a successful import alone doesn't directly assert
     goldens are byte-equal — that's what tests/test_golden.py does.
-    But import-time side effects (monkey-patching generate.py's
+    But import-time side effects (monkey-patching document_factory.py's
     rendering, mutating _SP, etc.) would cause M0 goldens to drift
     in any test process that imports dispatcher. This test catches
     that class of bug cheaply by exercising the imports.
     """
     import dispatcher  # noqa: F401
-    import generate  # noqa: F401
+    import document_factory as generate  # noqa: F401
     import rebrand  # noqa: F401
     # No assertion needed — successful import means no import-time
     # monkey patching occurred.

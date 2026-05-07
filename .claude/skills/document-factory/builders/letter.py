@@ -17,7 +17,7 @@ _FACTORY = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _FACTORY not in sys.path:
     sys.path.insert(0, _FACTORY)
 
-from generate import profile_letter as _profile_letter  # noqa: E402
+from document_factory import profile_letter as _profile_letter  # noqa: E402
 
 if TYPE_CHECKING:
     from docx.document import Document

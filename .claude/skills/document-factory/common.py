@@ -1,7 +1,7 @@
 """Public API for document-factory.
 
 This module is the stable contract that other skills import against.
-Underlying implementation in `generate.py` may refactor; the surface
+Underlying implementation in `document_factory.py` may refactor; the surface
 re-exported here is preserved across reorganisations.
 
 Import from here, not from `generate`:
@@ -16,16 +16,16 @@ them as unstable and open an issue before adding new dependents.
 from __future__ import annotations
 
 # Party model + cover rendering
-from generate import Party, add_cover
+from document_factory import Party, add_cover
 
 # Brand color constants — single source of truth
-from generate import COBALT, SLATE, SLATE_800, SLATE_900, WHITE
+from document_factory import COBALT, SLATE, SLATE_800, SLATE_900, WHITE
 
 # Spacing + entity dicts (shared primitives)
-from generate import _SP, DE_ENTITIES, ENTITY_FOOTERS
+from document_factory import _SP, DE_ENTITIES, ENTITY_FOOTERS
 
 # Header/footer primitives used by legal-assistant for body-page branding
-from generate import (
+from document_factory import (
     setup_first_page_header,
     setup_cont_header,
     setup_first_footer,
@@ -33,16 +33,16 @@ from generate import (
 )
 
 # Rendering + audit + save
-from generate import md_to_docx, audit_document, save_doc
+from document_factory import md_to_docx, audit_document, save_doc
 
 # PDF conversion (primary: Word; fallback: LibreOffice handled inside)
-from generate import docx_to_pdf
+from document_factory import docx_to_pdf
 
 # Formality auto-detection (semi-private; used by legal-assistant)
-from generate import _detect_formality
+from document_factory import _detect_formality
 
 # Zoom element fix — semi-private, retained for tools/visual_qa.py
-from generate import _fix_zoom
+from document_factory import _fix_zoom
 
 # M2: build-time validators + per-profile structural audits
 from validators import (

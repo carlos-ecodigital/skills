@@ -128,6 +128,6 @@ Currently `{"agreement"}`. If new agreement-like profiles are added (e.g. `nda`,
 
 - `SKILL.md` — top-level overview, CLI reference, Quick Start.
 - `rebrand.py` — Pipeline B implementation.
-- `generate.py` — Pipeline C implementation (`md_to_docx`) and profile renderers.
+- `document_factory.py` — Pipeline C implementation (`md_to_docx`) and profile renderers.
 - `legal-assistant/colocation/generate_loi.py` — Pipeline A (today's entry point).
 - `validators.py` / `audit_profiles.py` — build-time gates (R-11, R-21, …).

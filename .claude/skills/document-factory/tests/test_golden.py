@@ -19,7 +19,7 @@ import pytest
 
 _THIS = Path(__file__).resolve().parent
 _FACTORY = _THIS.parent
-_GENERATE = _FACTORY / "generate.py"
+_GENERATE = _FACTORY / "document_factory.py"
 _NORMALIZE = _FACTORY / "tools" / "normalize_docx.py"
 _CURRENT = _THIS / "golden" / "current"
 
@@ -42,7 +42,7 @@ def test_golden(profile: str, tmp_out: Path) -> None:
     args += ["--output", str(docx_out)]
     gen = subprocess.run(args, cwd=_FACTORY, capture_output=True, text=True)
     assert gen.returncode == 0, (
-        f"generate.py failed for {profile}:\n"
+        f"document_factory.py failed for {profile}:\n"
         f"stdout: {gen.stdout}\nstderr: {gen.stderr}"
     )
 

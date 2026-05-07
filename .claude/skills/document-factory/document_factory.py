@@ -5,11 +5,11 @@ Digital Energy Document Generator
 Single-file generator. No XML manipulation. Only native python-docx API.
 
 Usage:
-    python3 generate.py --profile letter
-    python3 generate.py --profile agreement --title "Colocation Agreement" --client "Younggrow BV"
-    python3 generate.py --profile seed_memo --client "Acme Fund"
-    python3 generate.py --profile investor_memo --client "Infrastructure Partners"
-    python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
+    python3 document_factory.py --profile letter
+    python3 document_factory.py --profile agreement --title "Colocation Agreement" --client "Younggrow BV"
+    python3 document_factory.py --profile seed_memo --client "Acme Fund"
+    python3 document_factory.py --profile investor_memo --client "Infrastructure Partners"
+    python3 document_factory.py --profile exec_summary --title "PowerGrow Project Update"
 
 Add --dotx to also save a Word template file.
 """

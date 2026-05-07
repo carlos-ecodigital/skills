@@ -127,13 +127,13 @@ Agreement cover pages follow an IB-standard hierarchy:
 cd /path/to/skills/.claude/skills/document-factory
 
 # Non-binding LOI cover
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Letter of Intent" \
   --subject "for AI Infrastructure Distribution" \
   --client "FrontierOne Ltd"
 
 # Binding MSA cover (auto-detects binding from type)
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Master Service Agreement" \
   --subject "for Hosting Ethiopia Data Center" \
   --client "Acme Corp" \
@@ -141,23 +141,23 @@ python3 generate.py --profile agreement \
   --client-reg-type KvK --client-reg-number 12345678
 
 # With NL entity
-python3 generate.py --profile agreement \
+python3 document_factory.py --profile agreement \
   --agreement-type "Letter of Intent" \
   --subject "for AI Colocation Services" \
   --client "Partner BV" --entity nl
 
 # Other profiles (unchanged)
-python3 generate.py --profile letter
-python3 generate.py --profile seed_memo --client "Acme Fund"
-python3 generate.py --profile investor_memo --client "Infrastructure Partners"
-python3 generate.py --profile exec_summary --title "PowerGrow Project Update"
+python3 document_factory.py --profile letter
+python3 document_factory.py --profile seed_memo --client "Acme Fund"
+python3 document_factory.py --profile investor_memo --client "Infrastructure Partners"
+python3 document_factory.py --profile exec_summary --title "PowerGrow Project Update"
 
 # From markdown (any content skill's output)
-python3 generate.py --md content.md --title "Report Title" --output report.docx
-python3 generate.py --md content.md --title "Report" --client "Board" --cover --output report.docx
+python3 document_factory.py --md content.md --title "Report Title" --output report.docx
+python3 document_factory.py --md content.md --title "Report" --client "Board" --cover --output report.docx
 
 # Add --dotx for Word template
-python3 generate.py --profile seed_memo --client "Fund X" --dotx
+python3 document_factory.py --profile seed_memo --client "Fund X" --dotx
 ```
 
 ## CLI Reference
@@ -187,7 +187,7 @@ python3 generate.py --profile seed_memo --client "Fund X" --dotx
 
 ## Entity Configuration
 
-Edit `ENTITY` dict at top of `generate.py`.
+Edit `ENTITY` dict at top of `document_factory.py`.
 
 ## Adding New Profiles
 
@@ -205,7 +205,7 @@ Edit `ENTITY` dict at top of `generate.py`.
 
 | Script | Purpose |
 |--------|---------|
-| `generate.py` | Generate branded .docx for all profiles (primary entry point) |
+| `document_factory.py` | Generate branded .docx for all profiles (primary entry point) |
 | `docx_to_pdf.py` | Standalone CLI: convert any .docx → .pdf via Microsoft Word |
 | `accept_changes.py` | Accept all tracked changes in a .docx via Word |
 
@@ -219,7 +219,7 @@ python3 accept_changes.py redlined.docx
 python3 accept_changes.py redlined.docx -o clean.docx
 
 # Generate + immediately produce PDF
-python3 generate.py --profile agreement --agreement-type "Letter of Intent" --client "FrontierOne" --pdf
+python3 document_factory.py --profile agreement --agreement-type "Letter of Intent" --client "FrontierOne" --pdf
 ```
 
 **Word-only:** Both utilities drive Microsoft Word (AppleScript on macOS, COM on Windows). No LibreOffice fallback — Word's rendering of .docx is canonical; LibreOffice drift was deemed worse than a clean error.

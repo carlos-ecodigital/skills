@@ -75,7 +75,7 @@ The bridge discovers the latest session's scripts via glob, never copies them. W
 
 | Capability | Script | Notes |
 |---|---|---|
-| Branded .docx creation | `generate.py` | python-docx, DE brand, 5 profiles |
+| Branded .docx creation | `document_factory.py` | python-docx, DE brand, 5 profiles |
 | Accept tracked changes (Word path) | `accept_changes.py` | Now delegates: `--engine word\|libreoffice` (default LibreOffice on macOS) |
 | Visual regression QA | `tools/visual_qa.py` | docx → pdf → pHash → HTML report |
 
@@ -111,7 +111,7 @@ If those skills need bridge access, they should add a thin wrapper or use a shar
 
 ```bash
 # 1. Create branded .docx
-python3 generate.py --profile agreement --entity nl --client "Arco Vreugdenhil" ...
+python3 document_factory.py --profile agreement --entity nl --client "Arco Vreugdenhil" ...
 
 # 2. Validate before sending
 python3 office_bridge.py validate output.docx

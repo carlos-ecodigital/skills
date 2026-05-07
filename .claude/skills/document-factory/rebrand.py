@@ -122,7 +122,7 @@ class RebrandSpec:
     def __post_init__(self) -> None:
         # Reuse M2 validator. Resolve formality the same way
         # profile_agreement does so the validator sees the effective value.
-        from generate import _detect_formality
+        from document_factory import _detect_formality
         resolved = (
             self.formality
             if self.formality is not None
@@ -527,7 +527,7 @@ def rebrand(
     `stats_out`, if provided, is populated with a dict describing what
     was stripped/copied — useful for tests and CLI output.
     """
-    from generate import profile_agreement, save_doc, _fix_zoom
+    from document_factory import profile_agreement, save_doc, _fix_zoom
 
     input_path = Path(input_path)
     if not input_path.exists():

@@ -1,7 +1,7 @@
 """
 Bilingual multi-party signature-block rendering for Sites-stream documents.
 
-Additive to ``document-factory/generate.py``. Renders Van Gog-style
+Additive to ``document-factory/document_factory.py``. Renders Van Gog-style
 signature pages with:
 
 - A single "Signatures Page / Handtekeningen:" bilingual header
@@ -16,7 +16,7 @@ Import via:
 
     from signature_block import SigParty, render_signature_page
 
-No existing ``generate.py`` signatures are modified.
+No existing ``document_factory.py`` signatures are modified.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from typing import List, Optional
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 
-from generate import (
+from document_factory import (
     COBALT,
     FONT,
     Party,

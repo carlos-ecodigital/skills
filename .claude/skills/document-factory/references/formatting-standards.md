@@ -201,7 +201,7 @@ See `references/ooxml-numbering.md` for the underlying OOXML structure.
 
 ## Spacing Constants (`_SP` dict)
 
-All spacing values are centralized in the `_SP` module-level dict in `generate.py`. Both `add_section()` and `md_to_docx()` reference it. Never hardcode `Pt()` values for spacing — use `_SP['key']`.
+All spacing values are centralized in the `_SP` module-level dict in `document_factory.py`. Both `add_section()` and `md_to_docx()` reference it. Never hardcode `Pt()` values for spacing — use `_SP['key']`.
 
 | Key | Value | Used for |
 |-----|-------|----------|

@@ -44,7 +44,7 @@ Design principles:
       instructions (not silent failure, not crash).
     - Session path changes every time Claude Code starts. Discovery must
       be dynamic, not hardcoded.
-    - Document Factory's generate.py remains the SOLE creation engine.
+    - Document Factory's document_factory.py remains the SOLE creation engine.
       This bridge adds post-creation capabilities only.
 """
 

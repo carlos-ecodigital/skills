@@ -5,7 +5,7 @@ Two test classes:
   TestColumnWidths — pure function tests for _compute_col_widths()
   TestAudit — every generated document passes audit_document() with zero violations
 
-Run: pytest test_generate.py -v
+Run: pytest test_document_factory.py -v
 """
 
 import re
@@ -17,7 +17,7 @@ from docx.shared import Mm, Pt, Emu
 from docx.oxml.ns import qn
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from generate import (
+from document_factory import (
     _compute_col_widths, _display_len, _longest_word_len, _SP,
     _CHAR_WIDTH_EMU, _CELL_PAD_EMU, _MIN_COL_EMU,
     _ALPHA_ABSTRACT_ID, _ROMAN_ABSTRACT_ID, _DECIMAL_ABSTRACT_ID, _BULLET_ABSTRACT_ID,
@@ -674,16 +674,16 @@ class TestOfficeBridge:
         assert "xlsx" in b.available_skills
         assert "pptx" in b.available_skills
 
-    def test_bridge_no_circular_dep_on_generate(self):
-        """Bridge must not import generate (the dependency goes the other way)."""
+    def test_bridge_no_circular_dep_on_document_factory(self):
+        """Bridge must not import document_factory (dependency goes the other way)."""
         # Simulate fresh import: clear any cached modules
         import sys
         for m in list(sys.modules):
-            if m in ("generate", "office_bridge"):
+            if m in ("document_factory", "office_bridge"):
                 del sys.modules[m]
         import office_bridge  # noqa: F401
-        assert "generate" not in sys.modules, \
-            "office_bridge must not import generate (would create circular dep)"
+        assert "document_factory" not in sys.modules, \
+            "office_bridge must not import document_factory (would create circular dep)"
 
     def test_to_pdf_libreoffice_args(self, tmp_path, monkeypatch):
         """to_pdf_libreoffice constructs correct soffice arguments."""

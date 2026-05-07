@@ -1,6 +1,6 @@
 """Fixed inputs for golden tests.
 
-One entry per profile. `cli_args` is passed verbatim to generate.py.
+One entry per profile. `cli_args` is passed verbatim to document_factory.py.
 `date` is always fixed so output is reproducible; all other flags that
 could introduce volatility (version, reference, classification) are
 pinned.

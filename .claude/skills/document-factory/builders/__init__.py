@@ -2,7 +2,7 @@
 
 Each `build_*` function is the recommended programmatic API for building
 a profile-typed Document. They are thin aliases for the `profile_*`
-functions in `generate.py`; the aliasing establishes a stable surface so
+functions in `document_factory.py`; the aliasing establishes a stable surface so
 later refactors can move profile logic into dedicated builder modules
 without breaking callers.
 
@@ -23,7 +23,7 @@ Usage:
 
 Related:
   - `common.build_letter` etc. re-export these as the skill-wide API.
-  - Legacy callers using `from generate import profile_X` continue to
+  - Legacy callers using `from document_factory import profile_X` continue to
     work (aliases are bidirectional at call time).
 """
 from __future__ import annotations

@@ -93,7 +93,7 @@ else:
 
 **CRITICAL:** `w:numPr` must appear in correct position within `w:pPr` — after `widowControl`, before `suppressLineNumbers`. Use `_apply_numbering()` helper, never `SubElement`.
 
-## Key Functions in `generate.py`
+## Key Functions in `document_factory.py`
 
 | Function | Purpose |
 |----------|---------|

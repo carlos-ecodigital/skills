@@ -1,7 +1,7 @@
 """
 Bilingual EN/NL two-column clause rendering for Sites-stream documents.
 
-Additive to ``document-factory/generate.py``; does NOT modify existing
+Additive to ``document-factory/document_factory.py``; does NOT modify existing
 function signatures. Existing Sales/colocation and MIA callers are
 unaffected.
 
@@ -48,7 +48,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Mm, Pt
 
-from generate import (
+from document_factory import (
     COBALT_HEX,
     FONT,
     SLATE,
